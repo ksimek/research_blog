@@ -11,7 +11,7 @@ After fixing a problem with how index sets were estimated, the marginal likeliho
 
 Here are two marginal likelihood curves using the old approach with two different smoothing sigmas.
 
-![pre-bug ML curves](/img/2012-06-10_ML_old.png)
+![pre-bug ML curves]({{site.baseurl}}/img/2012-06-10_ML_old.png)
 
 Notice how lowering the smoothing sigma \\(\sigma_s\\) causes the maximum ML to continuously improve, and results in a *huge* improvement when noise sigma \\(\sigma_n\\) is low. There are two implications of this:
     
@@ -26,7 +26,7 @@ Obviously, this is the opposite of what we would want.  I rewrote the "cleanup" 
 
 Here are the ML curves after the change.
 
-![pre-bug ML curves](/img/2012-06-10_ML_new.png)
+![pre-bug ML curves]({{site.baseurl}}/img/2012-06-10_ML_new.png)
 
 Some observations:
     

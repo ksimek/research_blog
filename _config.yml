@@ -1,6 +1,9 @@
 # This is the default format. 
 # For more see: https://github.com/mojombo/jekyll/wiki/Permalinks
+
 permalink: /:categories/:year/:month/:day/:title 
+
+baseurl: /ksimek/research
 
 paginate: 5
 exclude: [".rvmrc", ".rbenv-version", "README.md", "Rakefile", "changelog.md"]
@@ -43,6 +46,8 @@ production_url : http://vision.sista.arizona.edu/ksimek/research
 #
 JB :
   version : 0.2.13
+  setup :
+    provider : custom
 
   # All links will be namespaced by BASE_PATH if defined.
   # Links in your website should always be prefixed with {{BASE_PATH}}
@@ -66,7 +71,7 @@ JB :
   #   - Only the following values are falsy: ["", null, false]
   #   - When setting BASE_PATH it must be a valid url.
   #     This means always setting the protocol (http|https) or prefixing with "/"
-  BASE_PATH : false
+# BASE_PATH : /ksimek/research
 
   # By default, the asset_path is automatically defined relative to BASE_PATH plus the enabled theme.
   # ex: [BASE_PATH]/assets/themes/[THEME-NAME]
