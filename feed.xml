@@ -14,7 +14,7 @@
 
 &lt;p&gt;Here are two marginal likelihood curves using the old approach with two different smoothing sigmas.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/img/2012-06-10_ML_old.png&quot; alt=&quot;pre-bug ML curves&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2012-06-10_ML_old.png&quot; alt=&quot;pre-bug ML curves&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Notice how lowering the smoothing sigma \(\sigma_s\) causes the maximum ML to continuously improve, and results in a &lt;em&gt;huge&lt;/em&gt; improvement when noise sigma \(\sigma_n\) is low. There are two implications of this:&lt;/p&gt;
 
@@ -32,7 +32,7 @@
 
 &lt;p&gt;Here are the ML curves after the change.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/img/2012-06-10_ML_new.png&quot; alt=&quot;pre-bug ML curves&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2012-06-10_ML_new.png&quot; alt=&quot;pre-bug ML curves&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Some observations:&lt;/p&gt;
 
