@@ -18,15 +18,16 @@ markdown: rdiscount
 # Themes are encouraged to use these universal variables 
 # so be sure to set them if your theme uses them.
 #
-title : Sightations
-description: A computer vision blog by Kyle Simek
+title : KLS Research Blog
+description: Nothing to see here...
+tagline: Nothing to see here...
 production: true
 author :
   name : Kyle Simek
   email : ksimek@email.arizona.edu
   github : ksimek
 #  twitter : username
-  feedburner : sightations
+#  feedburner : sightations
 
 # The production_url is only used when full-domain names are needed
 # such as sitemap.txt 
@@ -36,7 +37,7 @@ author :
 # Else if you are pushing to username.github.com, replace with your username.
 # Finally if you are pushing to a GitHub project page, include the project name at the end.
 #
-production_url : http://ksimek.github.io
+production_url : http://vision.sista.arizona.edu/ksimek/research
 
 # All Jekyll-Bootstrap specific configurations are namespaced into this hash
 #
@@ -91,7 +92,7 @@ JB :
   comments :
     provider : disqus
     disqus :
-      short_name : sightations
+      short_name : klsresearch
     livefyre :
       site_id : 123
     intensedebate :
@@ -109,7 +110,7 @@ JB :
   analytics :
     provider : google 
     google : 
-        tracking_id : 'UA-33692744-1'
+        tracking_id : 'UA-33692744-2'
     getclicky :
       site_id : 
     mixpanel :
