@@ -4,11 +4,11 @@
   {% include post.html %}
   
   <div class="prev-next">
-  {% if page.next %}
-    <a href="{{ page.next.url }}" class="next" title="{{ page.next.title }}">{{page.next.title}} &rarr;</a>
-  {% endif %}
   {% if page.previous %}
-    <a href="{{ page.previous.url }}" class="prev" title="{{ page.previous.title }}">&larr; {{ page.previous.title }}</a>
+    <a href="{{ site.baseurl}}{{ page.previous.url }}" class="prev" title="{{ page.previous.title }}">{{ page.previous.title }}&rarr;</a>
+  {% endif %}
+  {% if page.next %}
+    <a href="{{ site.baseurl }}{{ page.next.url }}" class="next" title="{{ page.next.title }}">&larr; {{page.next.title}} </a>
   {% endif %}
   </div>
   <div class="clearer"> </div>
