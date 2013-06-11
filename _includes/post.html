@@ -1,5 +1,5 @@
 {% if excerpt %}
-  <a class="title-link" href="{{ BASE_PATH }}{{post.url}}">
+  <a class="title-link" href="{{ site.baseurl }}{{post.url}}">
   <h1 class="title">{{ post.title }}</h1>
   </a>
 {% else %}
@@ -15,7 +15,7 @@
 
   {% if excerpt and post.excerpt %}
     {{ post.excerpt }}
-    <p> <a href="{{ BASE_PATH}}{{ post.url }}/#more" class="more-link"><span class="readmore">more...</span></a></p>
+    <p> <a href="{{ site.baseurl }}{{ post.url }}/#more" class="more-link"><span class="readmore">more...</span></a></p>
   {% else %}
     {{ content | mark_excerpt }}
       <address class="signature">

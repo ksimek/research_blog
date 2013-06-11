@@ -6,9 +6,9 @@ This is my custom version of JB setup, which allows non-null BASE_PATH and plugi
   <!--
   - Dynamically set liquid variables for working with URLs/paths
   -->
-    {% if site.baseurl and site.baseurl != '/' %}
+    {% if site.baseurl %}
       {% assign BASE_PATH = site.baseurl %}
-      {% assign HOME_PATH = site.baseurl %}
+      {% capture HOME_PATH %}{{BASE_PATH}}/{% endcapture %}
     {% else %}
       {% assign BASE_PATH = nil %}
       {% assign HOME_PATH = "/" %}
