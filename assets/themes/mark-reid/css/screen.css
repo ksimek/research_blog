@@ -603,7 +603,7 @@ img.maruku-png { }
 .prev-next {
 	position:relative;
 }
-.prev-next .next{ 
+.prev-next .prev{ 
 	float:right;
 }	
 
