@@ -11,4 +11,6 @@ http://vision.sista.arizona.edu/ksimek/research/pages.html
 http://vision.sista.arizona.edu/ksimek/research/sitemap.txt
 http://vision.sista.arizona.edu/ksimek/research/tags.html
 
-http://vision.sista.arizona.edu/ksimek/research/2012/06/10/index-set-bug
+http://vision.sista.arizona.edu/ksimek/research/2013/06/13/log
+http://vision.sista.arizona.edu/ksimek/research/2013/06/12/visualizingdebugging-bg-ml
+http://vision.sista.arizona.edu/ksimek/research/2013/06/10/index-set-bug

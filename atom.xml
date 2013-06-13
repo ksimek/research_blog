@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-06-10T17:35:03-07:00</updated>
+ <updated>2013-06-13T16:45:42-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -13,10 +13,119 @@
 
  
  <entry>
+   <title>Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/06/13/log"/>
+   <updated>2013-06-13T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/06/13/log</id>
+   <content type="html">&lt;p&gt;After investigating the false positives from the last entry, it seems clear that bad matches look good because missing data are not penalized.  For example&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-06-13-bad-match.png&quot; alt=&quot;Bad match&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;In the overlapping region of the blue and green curves, the distance between them is relatively low (less than 3 pixels, or 1.5px radius).  But the size of their overlap is so low that it would be hard to claim that they come from the same underlying curve with any confidence.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt; Params &lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;smoothing_variance_2d: 0.2500
+    noise_variance_2d: 10
+     position_mean_2d: [2x1 double]
+ position_variance_2d: 1.3629e+04
+     rate_variance_2d: 0.4962
+   smoothing_variance: 1.0000e-04
+       noise_variance: 10
+        position_mean: [3x1 double]
+    position_variance: 62500
+        rate_variance: 2.2500
+      smoothing_sigma: 0.2000
+    noise_variance_bg: 0.1038
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I would have expected that noise_variance_bg was low enough to discount this candidate, but the log ML ratio is 71.0.  The model must just look really bad...&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Visualizing/Debugging BG ML</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/06/12/visualizingdebugging-bg-ml"/>
+   <updated>2013-06-12T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/06/12/visualizingdebugging-bg-ml</id>
+   <content type="html">&lt;h2&gt;Experiment&lt;/h2&gt;
+
+&lt;p&gt;We now have a new algorithm for computing background curve Marginal Likelihood.  Lowering noise sigma \(sigma_n\) should rule out bad matches.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Task&lt;/strong&gt;: Re-run background candidate matching with new algorithm and roughly-trained \( \sigma_n \).&lt;/p&gt;
+
+&lt;h2&gt;Results&lt;/h2&gt;
+
+&lt;p&gt;If the threshold is set right, the results are improved, but we still have some false-positives and false negatives.&lt;/p&gt;
+
+&lt;p&gt;It's still unclear whether we can get good results without thresholding, since we haven't computed the noise ML using the new algorithm, so absolute numbers are meaningless.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Params&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;smoothing_variance_2d: 0.2500
+    noise_variance_2d: 10
+     position_mean_2d: [2x1 double]
+ position_variance_2d: 1.3629e+04
+     rate_variance_2d: 0.4962
+   smoothing_variance: 1.0000e-04
+       noise_variance: 10
+        position_mean: [3x1 double]
+    position_variance: 62500
+        rate_variance: 2.2500
+      smoothing_sigma: 0.2000
+       nlise_variance: 10
+    noise_variance_bg: 0.1038
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Calls&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;data = offline_pair_candidates(data, params, 0, 1, 1, 'bg');
+cands = tmp_get_cands(data);
+visualize_bg_cands(data, cands, 250)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt; Plots &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Matched curves appear in white, unmatched appear in gray&lt;/p&gt;
+
+&lt;p&gt;False negatives&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-06-12-bad-matches.png&quot; alt=&quot;bad matches&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;False positives:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-06-12-false-positive.png&quot; alt=&quot;bad matches&quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;Next Steps&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;apply new indexing and cleanup algorithm to 3d and noise curves&lt;/li&gt;
+&lt;li&gt;better training of foreground/background
+
+&lt;ul&gt;
+&lt;li&gt;ground truth curve fragments&lt;/li&gt;
+&lt;li&gt;automatic training of background&lt;/li&gt;
+&lt;li&gt;automatic training of noise&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;better foreground model
+
+&lt;ol&gt;
+&lt;li&gt;compute likelihood separately&lt;/li&gt;
+&lt;li&gt;add smooth GP to likelihood&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;re-run experiment with trained noise model parameters&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
    <title>Index set bug fixed, marginal likelihood curves improved</title>
-   <link href="http://vision.sista.arizona.edu/ksimek/research/2012/06/10/index-set-bug"/>
-   <updated>2012-06-10T00:00:00-07:00</updated>
-   <id>http://vision.sista.arizona.edu/ksimek/research/2012/06/10/index-set-bug</id>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/06/10/index-set-bug"/>
+   <updated>2013-06-10T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/06/10/index-set-bug</id>
    <content type="html">&lt;h2&gt;Index Set Bug fixed &lt;/h2&gt;
 
 &lt;p&gt;After fixing a problem with how index sets were estimated, the marginal likelihood (ML) curves are now much more sensible.&lt;/p&gt;
