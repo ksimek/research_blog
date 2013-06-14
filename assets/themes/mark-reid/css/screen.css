@@ -605,8 +605,8 @@ img.maruku-png { }
 .prev-next {
 	position:relative;
 }
-.prev-next .prev{ 
-	float:right;
+.prev-next .next{ 
+	float: right;
 }	
 
 /* tag_box ======================================================== */
