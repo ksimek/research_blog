@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Visualizing/Debugging BG ML &larr; </title>
+   <title>Log Entry &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -76,83 +76,42 @@
 	
   
   
-  <h1 class="title">Visualizing/Debugging BG ML</h1>
+  <h1 class="title">Log Entry</h1>
 
-  <div class="date emphnext">June 12, 2013</div>
+  <div class="date emphnext">June 14, 2013</div>
     
 
 
   
-    <h2>Experiment</h2>
+    
 
-<p>We now have a new algorithm for computing background curve Marginal Likelihood.  Lowering noise sigma \(\sigma_n\) should rule out bad matches.</p>
+<div class="project-preamble">
+<dl>
+    <dt>Project</dt>
+    <dd><a href="/ksimek/research/projects/tulips.html">Tulips</a></dd>
+    <dt>Subproject</dt>
+    <dd>Data Association v2</dd>
+    <dt>Working path</dt>
+    <dd>projects/tulips/trunk/src/matlab/data_association_2</dd>
+</dl>
 
-<p><strong>Task</strong>: Re-run background candidate matching with new algorithm and roughly-trained \( \sigma_n \).</p>
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
 
-<h2>Results</h2>
 
-<p>If the threshold is set right, the results are improved, but we still have some false-positives and false negatives.</p>
+<p>Working on foreground curve model.</p>
 
-<p>It's still unclear whether we can get good results without thresholding, since we haven't computed the noise ML using the new algorithm, so absolute numbers are meaningless.</p>
+<p>Begin of significant rework.</p>
 
-<p><strong>Params</strong>:</p>
+<p><strong>ROLLBACK SVN REVISION</strong>: 14528</p>
 
-<pre><code>smoothing_variance_2d: 0.2500
-    noise_variance_2d: 10
-     position_mean_2d: [2x1 double]
- position_variance_2d: 1.3629e+04
-     rate_variance_2d: 0.4962
-   smoothing_variance: 1.0000e-04
-       noise_variance: 10
-        position_mean: [3x1 double]
-    position_variance: 62500
-        rate_variance: 2.2500
-      smoothing_sigma: 0.2000
-       nlise_variance: 10
-    noise_variance_bg: 0.1038
-</code></pre>
+<p>Editing  <code>correspondence/clean_correspondence2.m</code> which will replace <code>correspondence/clean_corespondence.m</code>.  Drawing partially from <code>corr_to_bg_likelihood.m</code>, esp. for "best match" logic.</p>
 
-<p><strong>Calls</strong>:</p>
+<p>Probably will rename <code>correspondence/clean_correspondence2.m</code> to <code>correspondence/corr_to_likelihood.m</code> before I finish.</p>
 
-<pre><code>data = offline_pair_candidates(data, params, 0, 1, 1, 'bg');
-cands = tmp_get_cands(data);
-visualize_bg_cands(data, cands, 250)
-</code></pre>
+<p>Will use <code>tests/test_ml_end_to_end</code> to compare old and new implementations.</p>
 
-<p><strong> Plots </strong></p>
-
-<p>Matched curves appear in white, unmatched appear in gray</p>
-
-<p>False negatives</p>
-
-<p><img src="/ksimek/research/img/2013-06-12-bad-matches.png" alt="bad matches" /></p>
-
-<p>False positives:</p>
-
-<p><img src="/ksimek/research/img/2013-06-12-false-positive.png" alt="bad matches" /></p>
-
-<h2>Next Steps</h2>
-
-<ul>
-<li>apply new indexing and cleanup algorithm to 3d and noise curves</li>
-<li>better training of foreground/background
-
-<ul>
-<li>ground truth curve fragments</li>
-<li>automatic training of background</li>
-<li>automatic training of noise</li>
-</ul>
-</li>
-<li>better foreground model
-
-<ol>
-<li>compute likelihood separately</li>
-<li>add smooth GP to likelihood</li>
-</ol>
-</li>
-<li>re-run experiment with trained noise model parameters</li>
-</ul>
-
+<p>Work still in progress...</p>
 
       <address class="signature">
         Posted by
@@ -163,11 +122,8 @@ visualize_bg_cands(data, cands, 250)
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/06/13/log" class="next" title="Log Entry">Log Entry &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/06/10/index-set-bug" class="prev" title="Index set bug fixed, marginal likelihood curves improved">&larr; Index set bug fixed, marginal likelihood curves improved</a>
+    <a href="/ksimek/research/2013/06/13/log" class="prev" title="Log Entry">&larr; Log Entry</a>
   
   </div>
   <div class="clearer"> </div>
@@ -184,7 +140,7 @@ visualize_bg_cands(data, cands, 250)
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Visualizing/Debugging BG ML" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Log Entry" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -232,7 +188,7 @@ visualize_bg_cands(data, cands, 250)
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Visualizing/Debugging BG ML");
+                    + encodeURIComponent("Log Entry");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");
