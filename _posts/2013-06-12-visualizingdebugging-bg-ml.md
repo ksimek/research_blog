@@ -10,7 +10,7 @@ tags: []
 Experiment
 -----------
 
-We now have a new algorithm for computing background curve Marginal Likelihood.  Lowering noise sigma \\(sigma_n\\) should rule out bad matches.
+We now have a new algorithm for computing background curve Marginal Likelihood.  Lowering noise sigma \\(\sigma_n\\) should rule out bad matches.
 
 **Task**: Re-run background candidate matching with new algorithm and roughly-trained \\( \sigma_n \\).
 

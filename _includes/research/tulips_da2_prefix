@@ -1,0 +1,12 @@
+<div class="project-preamble">
+<dl>
+    <dt>Project</dt>
+    <dd><a href="{{site.baseurl}}/projects/tulips.html">Tulips</a></dd>
+    <dt>Subproject</dt>
+    <dd>Data Association v2</dd>
+    <dt>Working path</dt>
+    <dd>projects/tulips/trunk/src/matlab/data_association_2</dd>
+</dl>
+
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
