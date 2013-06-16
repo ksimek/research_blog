@@ -7,18 +7,31 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
-				<title>Log Entry</title>
+				<title>Work Log</title>
 				<description>
 
-&lt;div class=&quot;project-preamble&quot;&gt;
-&lt;dl&gt;
-    &lt;dt&gt;Project&lt;/dt&gt;
-    &lt;dd&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/dd&gt;
-    &lt;dt&gt;Subproject&lt;/dt&gt;
-    &lt;dd&gt;Data Association v2&lt;/dd&gt;
-    &lt;dt&gt;Working path&lt;/dt&gt;
-    &lt;dd&gt;projects/tulips/trunk/src/matlab/data_association_2&lt;/dd&gt;
-&lt;/dl&gt;
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;14528&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
 
     Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
 &lt;/div&gt;
@@ -26,9 +39,7 @@
 
 &lt;p&gt;Working on foreground curve model.&lt;/p&gt;
 
-&lt;p&gt;Begin of significant rework.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;ROLLBACK SVN REVISION&lt;/strong&gt;: 14528&lt;/p&gt;
+&lt;p&gt;Begin of significant rework; SVN revision noted in infobox.&lt;/p&gt;
 
 &lt;p&gt;Editing  &lt;code&gt;correspondence/clean_correspondence2.m&lt;/code&gt; which will replace &lt;code&gt;correspondence/clean_corespondence.m&lt;/code&gt;.  Drawing partially from &lt;code&gt;corr_to_bg_likelihood.m&lt;/code&gt;, esp. for &quot;best match&quot; logic.&lt;/p&gt;
 
@@ -44,8 +55,32 @@
 			</item>
 		
 			<item>
-				<title>Log Entry</title>
-				<description>&lt;p&gt;After investigating the false positives from the last entry, it seems clear that bad matches look good because missing data are not penalized.  For example&lt;/p&gt;
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;After investigating the false positives from the last entry, it seems clear that bad matches look good because missing data are not penalized.  For example&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-06-13-bad-match.png&quot; alt=&quot;Bad match&quot; /&gt;&lt;/p&gt;
 
@@ -76,7 +111,31 @@
 		
 			<item>
 				<title>Visualizing/Debugging BG ML</title>
-				<description>&lt;h2&gt;Experiment&lt;/h2&gt;
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Experiment&lt;/h2&gt;
 
 &lt;p&gt;We now have a new algorithm for computing background curve Marginal Likelihood.  Lowering noise sigma \(\sigma_n\) should rule out bad matches.&lt;/p&gt;
 
@@ -154,7 +213,29 @@ visualize_bg_cands(data, cands, 250)
 		
 			<item>
 				<title>Index set bug fixed, marginal likelihood curves improved</title>
-				<description>&lt;h2&gt;Index Set Bug fixed &lt;/h2&gt;
+				<description>&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Index Set Bug fixed &lt;/h2&gt;
 
 &lt;p&gt;After fixing a problem with how index sets were estimated, the marginal likelihood (ML) curves are now much more sensible.&lt;/p&gt;
 
