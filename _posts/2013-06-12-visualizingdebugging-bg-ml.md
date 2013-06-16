@@ -7,6 +7,8 @@ tags: []
 ---
 {% include JB/setup %}
 
+{% include research/tulips_da2_meta %}
+
 Experiment
 -----------
 

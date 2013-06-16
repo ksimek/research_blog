@@ -115,26 +115,23 @@ ul.ui-tabs-nav li
     font-style: italic;
 }
 
-.project-preamble {
-	font-size: small;
-    padding: 0.5em 1em;
+.meta-info {
+	font-size: x-small;
+    padding: 0.25em 0.5em;
     border: 1px solid black;
 	background-color: #f7f7ff;
 	line-height: 1.4em;
+    margin: 0.5em;
+    float: right;
+    width: 33%;
 }
 
-.project-preamble {
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
-}
-
-.project-preamble dd {
-    padding-left:50px;
-    background:none no-repeat left top;
-    margin: 0 0.25em;
-}
-.project-preamble dt {
+.meta-info th {
     font-weight: bold;
+    text-align: right;
+}
+.meta-info td {
+    padding: 2px 4px;
 }
 
 .context-img {

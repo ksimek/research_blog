@@ -4,6 +4,8 @@ title: "Index set bug fixed, marginal likelihood curves improved"
 description: ""
 ---
 
+{% include research/tulips_da2_meta %}
+
 Index Set Bug fixed 
 ----------------------
 
