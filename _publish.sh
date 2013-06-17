@@ -18,7 +18,7 @@ jekyll build -d /tmp/site --config _config.yml,_config_prod.yml \
 
 if [[ $? -ne 0 ]]; then
     exit;
-end
+fi
 
 if [[ $# == 0 ]]; then
     git commit 
@@ -28,7 +28,7 @@ fi
 
 if [[ $? -ne 0 ]]; then
     exit;
-end
+fi
 
 git push origin master \
 && git checkout source \
