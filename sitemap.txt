@@ -12,6 +12,7 @@ http://vision.sista.arizona.edu/ksimek/research/projects/tulips.html
 http://vision.sista.arizona.edu/ksimek/research/sitemap.txt
 http://vision.sista.arizona.edu/ksimek/research/tags.html
 
+http://vision.sista.arizona.edu/ksimek/research/2013/06/17/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/06/14/log-entry
 http://vision.sista.arizona.edu/ksimek/research/2013/06/13/log
 http://vision.sista.arizona.edu/ksimek/research/2013/06/12/visualizingdebugging-bg-ml

@@ -25,6 +25,90 @@
         &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
     &lt;/tr&gt;
 
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Continueing work on foreground curve model. Editing &lt;code&gt;correspondence/clean_correspondence2.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2&gt;Logic overview&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;smooth triangulated points &amp;amp; estimate their indices&lt;/li&gt;
+&lt;li&gt;fill-in untriangulatable points/indices&lt;/li&gt;
+&lt;li&gt;resolve many-to-one data-to-3d-curve correspondences by picking best match&lt;/li&gt;
+&lt;li&gt;triangulate each data point against 3d curve to get mean and covariance for point&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;h2&gt;Logic detail&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;1. estimate indices by chord-length parameterization
+2. repeat N times:
+    2.1 smooth triangulated points using current index estimate (posterior mean approx.)
+    2.2 re-estimate indices using chord-length parameterization
+3. for each untriangulatable point
+    3.1 triangulate against cubic interpolation of neighboring points (Newton's method)
+    3.2 store resulting point and index with smoothed points from 2.1
+4. for each 2D data curve
+    4.1 triangulate against corresponding 3d point in smoothed curve to get likelihood mean
+    4.2 compute curvature at this point to get likelihood precision
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;03:13:30 PM&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;First run, addressing syntax errors.&lt;/li&gt;
+&lt;li&gt;Plotting first test: triangulated curve w/ and wo/ gap-filling
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Issue&lt;/strong&gt;: gap-fill at beginning maps exactly to first non-gap point&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Issue&lt;/strong&gt;: interior gap point falls exactly on non-gap point&lt;/li&gt;
+&lt;li&gt;need to merge points?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;&lt;strong&gt;04:06:03 PM&lt;/strong&gt;
+wrapping up...&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;diagnose coincident-point issue -- bug or not?&lt;/li&gt;
+&lt;li&gt;Finish testing - plot per-view likelihood points&lt;/li&gt;
+&lt;li&gt;Add point-merging&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Mon, 17 Jun 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/06/17/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/06/17/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
     &lt;tr&gt;
         &lt;th&gt;SVN Revision&lt;/th&gt;
         &lt;td&gt;14528&lt;/td&gt;

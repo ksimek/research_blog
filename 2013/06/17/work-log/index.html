@@ -78,7 +78,7 @@
   
   <h1 class="title">Work Log</h1>
 
-  <div class="date emphnext">June 14, 2013</div>
+  <div class="date emphnext">June 17, 2013</div>
     
 
 
@@ -100,11 +100,6 @@
         <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_2</td>
     </tr>
 
-    <tr>
-        <th>SVN Revision</th>
-        <td>14528</td>
-    </tr>
-
 
 </table>
 
@@ -112,17 +107,58 @@
 </div>
 
 
-<p>Working on foreground curve model.</p>
+<p>Continueing work on foreground curve model. Editing <code>correspondence/clean_correspondence2.m</code>.</p>
 
-<p>Begin of significant rework; SVN revision noted in infobox.</p>
+<h2>Logic overview</h2>
 
-<p>Editing  <code>correspondence/clean_correspondence2.m</code> which will replace <code>correspondence/clean_corespondence.m</code>.  Drawing partially from <code>corr_to_bg_likelihood.m</code>, esp. for "best match" logic.</p>
+<ol>
+<li>smooth triangulated points &amp; estimate their indices</li>
+<li>fill-in untriangulatable points/indices</li>
+<li>resolve many-to-one data-to-3d-curve correspondences by picking best match</li>
+<li>triangulate each data point against 3d curve to get mean and covariance for point</li>
+</ol>
 
-<p>Probably will rename <code>correspondence/clean_correspondence2.m</code> to <code>correspondence/corr_to_likelihood.m</code> before I finish.</p>
 
-<p>Will use <code>tests/test_ml_end_to_end</code> to compare old and new implementations.</p>
+<h2>Logic detail</h2>
 
-<p>Work still in progress...</p>
+<pre><code>1. estimate indices by chord-length parameterization
+2. repeat N times:
+    2.1 smooth triangulated points using current index estimate (posterior mean approx.)
+    2.2 re-estimate indices using chord-length parameterization
+3. for each untriangulatable point
+    3.1 triangulate against cubic interpolation of neighboring points (Newton's method)
+    3.2 store resulting point and index with smoothed points from 2.1
+4. for each 2D data curve
+    4.1 triangulate against corresponding 3d point in smoothed curve to get likelihood mean
+    4.2 compute curvature at this point to get likelihood precision
+</code></pre>
+
+<p><strong>03:13:30 PM</strong></p>
+
+<ul>
+<li>First run, addressing syntax errors.</li>
+<li>Plotting first test: triangulated curve w/ and wo/ gap-filling
+
+<ul>
+<li><strong>Issue</strong>: gap-fill at beginning maps exactly to first non-gap point</li>
+<li><strong>Issue</strong>: interior gap point falls exactly on non-gap point</li>
+<li>need to merge points?</li>
+</ul>
+</li>
+</ul>
+
+
+<p><strong>04:06:03 PM</strong>
+wrapping up...</p>
+
+<h2>TODO</h2>
+
+<ul>
+<li>diagnose coincident-point issue -- bug or not?</li>
+<li>Finish testing - plot per-view likelihood points</li>
+<li>Add point-merging</li>
+</ul>
+
 
       <address class="signature">
         Posted by
@@ -133,11 +169,8 @@
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/06/17/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/06/13/log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/06/14/log-entry" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>
