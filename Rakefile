@@ -67,6 +67,7 @@ task :post do
     post.puts "tags: []"
     post.puts "---"
     post.puts "{% include JB/setup %}"
+    post.puts "{% include research/tulips_da2_meta %}"
   end
 end # task :post
 
