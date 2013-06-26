@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log &larr; </title>
+   <title>Work Log - clean_correspondence3.m &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -76,9 +76,9 @@
 	
   
   
-  <h1 class="title">Work Log</h1>
+  <h1 class="title">Work Log - clean_correspondence3.m</h1>
 
-  <div class="date emphnext">June 17, 2013</div>
+  <div class="date emphnext">June 20, 2013</div>
     
 
 
@@ -107,56 +107,60 @@
 </div>
 
 
-<p>Continueing work on foreground curve model. Editing <code>correspondence/clean_correspondence2.m</code>.</p>
+<p>Testing and debugging <code>clean_correspodnence2.m</code> has revealed some significant problems with the current approach to constructing the likelihood function.</p>
 
-<h2>Logic overview</h2>
+<p><strong> 5%-10% of fragements have correspondences that are nonsensical. </strong></p>
 
-<ol>
-<li>smooth triangulated points &amp; estimate their indices</li>
-<li>fill-in untriangulatable points/indices</li>
-<li>resolve many-to-one data-to-3d-curve correspondences by picking best match</li>
-<li>triangulate each data point against 3d curve to get mean and covariance for point</li>
-</ol>
+<p>I hypothesize that this is due to bad correspondences early on, when there is little evidence to drive a good correspodnence.  These bad correspodnences are propagated as new curves are added that could suggest a better correspodnence.</p>
 
+<p><strong> Large lateral gaps in triangulation result in large axial gaps in posterior curve.  </strong></p>
 
-<h2>Logic detail</h2>
+<p>The problem is that the index set is computed from the triangulation.  The current fix for this -- smooth, re-index, repeat -- is very limited in the severity it can overcome.  In practice, most gaps are only partially reduced.</p>
 
-<pre><code>1. estimate indices by chord-length parameterization
-2. repeat N times:
-    2.1 smooth triangulated points using current index estimate (posterior mean approx.)
-    2.2 re-estimate indices using chord-length parameterization
-3. for each untriangulatable point
-    3.1 triangulate against cubic interpolation of neighboring points (Newton's method)
-    3.2 store resulting point and index with smoothed points from 2.1
-4. for each 2D data curve
-    4.1 triangulate against corresponding 3d point in smoothed curve to get likelihood mean
-    4.2 compute curvature at this point to get likelihood precision
-</code></pre>
+<h2>Rethinking "Correspondence to Likelihood"</h2>
 
-<p><strong>03:13:30 PM</strong></p>
+<p>Corresondence is good for constructing a decent-quality 3d curve, but isn't good for computing fine-grained pointwise likelihood, due to sporradic terrible correspondences and gaps.</p>
 
-<ul>
-<li>First run, addressing syntax errors.</li>
-<li>Plotting first test: triangulated curve w/ and wo/ gap-filling
+<p>Instead of continuously Band-Aiding these issues that keep arising, its time to re-think how the likelhood is constructed.</p>
+
+<p><strong> 1. the mean of 3d gaussians should project to the 2D position of the corresponding data point </strong></p>
+
+<p><strong> 2. the depth should be based on the corresponding position in the unobserved curve </strong></p>
+
+<p>Two issues here.  First, how to localize the unobserved curve without having the likelihood already (chicken and egg).  Second, how to identify the corresponding point of the unobserved curve?</p>
+
+<p>In the old method, the answer to both was "use the correspondence matrix."</p>
+
+<p>In the new method, we still use the correspondence matrix to triangulate, but we smooth the result using the prior and then throw away correspondence information.</p>
+
+<h2>Killing the correspondence grid</h2>
+
+<p>The corresponence matrix artificially forces points from different views to correspond to the same point.  This is out of necessity -- we need correspondence to achieve triangulation.  But we don't need to adhere to this to compute the likelhood.  Indeed, observed points may fall anywhere in the continuous index set, not into a discrete set of predefined cells.</p>
 
 <ul>
-<li><strong>Issue</strong>: gap-fill at beginning maps exactly to first non-gap point</li>
-<li><strong>Issue</strong>: interior gap point falls exactly on non-gap point</li>
-<li>need to merge points?</li>
+<li>Observations can correspond to any index in \([0 t_{end}]\).</li>
+<li>Unobserved curve is modelled at a uniform grid.</li>
+<li>Previously, the dimensionality of the unobserved curve grew with the number of observations. Now it grows with the range of the index set (i.e. the length of the curve).`</li>
+</ul>
+
+
+<h2>Random thoughts</h2>
+
+<ul>
+<li>evaluate marginal likelihood directly?  then add extra normalization from triangulation (jacobian?)
+
+<ul>
+<li>evaluate linearly using markov conditional probabilities</li>
+<li>extend to poly model
+
+<ul>
+<li>grid-structured Bayes net</li>
+<li>topological sort for evaluation</li>
+<li>use scope variables to manage dependencies generally</li>
 </ul>
 </li>
 </ul>
-
-
-<p><strong>04:06:03 PM</strong>
-wrapping up...</p>
-
-<h2>TODO</h2>
-
-<ul>
-<li>diagnose coincident-point issue -- bug or not?</li>
-<li>Finish testing - plot per-view likelihood points</li>
-<li>Add point-merging</li>
+</li>
 </ul>
 
 
@@ -169,11 +173,8 @@ wrapping up...</p>
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/06/20/work-log---clean_correspondence3m" class="next" title="Work Log - clean_correspondence3.m">Work Log - clean_correspondence3.m &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/06/14/log-entry" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/06/17/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>
@@ -190,7 +191,7 @@ wrapping up...</p>
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - clean_correspondence3.m" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -238,7 +239,7 @@ wrapping up...</p>
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log");
+                    + encodeURIComponent("Work Log - clean_correspondence3.m");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

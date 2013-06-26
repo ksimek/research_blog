@@ -4,13 +4,101 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-06-17T16:50:32-07:00</updated>
+ <updated>2013-06-26T06:45:09-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log - clean_correspondence3.m</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/06/20/work-log---clean_correspondence3m"/>
+   <updated>2013-06-20T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/06/20/work-log---clean_correspondence3m</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Testing and debugging &lt;code&gt;clean_correspodnence2.m&lt;/code&gt; has revealed some significant problems with the current approach to constructing the likelihood function.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt; 5%-10% of fragements have correspondences that are nonsensical. &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;I hypothesize that this is due to bad correspondences early on, when there is little evidence to drive a good correspodnence.  These bad correspodnences are propagated as new curves are added that could suggest a better correspodnence.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt; Large lateral gaps in triangulation result in large axial gaps in posterior curve.  &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The problem is that the index set is computed from the triangulation.  The current fix for this -- smooth, re-index, repeat -- is very limited in the severity it can overcome.  In practice, most gaps are only partially reduced.&lt;/p&gt;
+
+&lt;h2&gt;Rethinking &quot;Correspondence to Likelihood&quot;&lt;/h2&gt;
+
+&lt;p&gt;Corresondence is good for constructing a decent-quality 3d curve, but isn't good for computing fine-grained pointwise likelihood, due to sporradic terrible correspondences and gaps.&lt;/p&gt;
+
+&lt;p&gt;Instead of continuously Band-Aiding these issues that keep arising, its time to re-think how the likelhood is constructed.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt; 1. the mean of 3d gaussians should project to the 2D position of the corresponding data point &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt; 2. the depth should be based on the corresponding position in the unobserved curve &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Two issues here.  First, how to localize the unobserved curve without having the likelihood already (chicken and egg).  Second, how to identify the corresponding point of the unobserved curve?&lt;/p&gt;
+
+&lt;p&gt;In the old method, the answer to both was &quot;use the correspondence matrix.&quot;&lt;/p&gt;
+
+&lt;p&gt;In the new method, we still use the correspondence matrix to triangulate, but we smooth the result using the prior and then throw away correspondence information.&lt;/p&gt;
+
+&lt;h2&gt;Killing the correspondence grid&lt;/h2&gt;
+
+&lt;p&gt;The corresponence matrix artificially forces points from different views to correspond to the same point.  This is out of necessity -- we need correspondence to achieve triangulation.  But we don't need to adhere to this to compute the likelhood.  Indeed, observed points may fall anywhere in the continuous index set, not into a discrete set of predefined cells.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Observations can correspond to any index in \([0 t_{end}]\).&lt;/li&gt;
+&lt;li&gt;Unobserved curve is modelled at a uniform grid.&lt;/li&gt;
+&lt;li&gt;Previously, the dimensionality of the unobserved curve grew with the number of observations. Now it grows with the range of the index set (i.e. the length of the curve).`&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Random thoughts&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;evaluate marginal likelihood directly?  then add extra normalization from triangulation (jacobian?)
+
+&lt;ul&gt;
+&lt;li&gt;evaluate linearly using markov conditional probabilities&lt;/li&gt;
+&lt;li&gt;extend to poly model
+
+&lt;ul&gt;
+&lt;li&gt;grid-structured Bayes net&lt;/li&gt;
+&lt;li&gt;topological sort for evaluation&lt;/li&gt;
+&lt;li&gt;use scope variables to manage dependencies generally&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Work Log</title>
