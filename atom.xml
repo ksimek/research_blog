@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-06-26T06:45:09-07:00</updated>
+ <updated>2013-06-26T07:24:52-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -13,10 +13,49 @@
 
  
  <entry>
-   <title>Work Log - clean_correspondence3.m</title>
-   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/06/20/work-log---clean_correspondence3m"/>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/06/26/work-log"/>
+   <updated>2013-06-26T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/06/26/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Tasks&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Likelihood construction, &lt;code&gt;clean_correspondence3.m&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;new tracking GP model&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Rethinking Likelihood</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/06/20/rethinking-likelihood"/>
    <updated>2013-06-20T00:00:00-07:00</updated>
-   <id>http://vision.sista.arizona.edu/ksimek/research/2013/06/20/work-log---clean_correspondence3m</id>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/06/20/rethinking-likelihood</id>
    <content type="html">
 
 &lt;div class=&quot;meta-info&quot;&gt;
@@ -129,7 +168,7 @@
 &lt;/div&gt;
 
 
-&lt;p&gt;Continueing work on foreground curve model. Editing &lt;code&gt;correspondence/clean_correspondence2.m&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Continuing work on foreground curve model. Editing &lt;code&gt;correspondence/clean_correspondence2.m&lt;/code&gt;.&lt;/p&gt;
 
 &lt;h2&gt;Logic overview&lt;/h2&gt;
 

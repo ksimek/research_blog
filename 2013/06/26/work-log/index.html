@@ -78,7 +78,7 @@
   
   <h1 class="title">Work Log</h1>
 
-  <div class="date emphnext">June 17, 2013</div>
+  <div class="date emphnext">June 26, 2013</div>
     
 
 
@@ -107,56 +107,11 @@
 </div>
 
 
-<p>Continuing work on foreground curve model. Editing <code>correspondence/clean_correspondence2.m</code>.</p>
-
-<h2>Logic overview</h2>
-
-<ol>
-<li>smooth triangulated points &amp; estimate their indices</li>
-<li>fill-in untriangulatable points/indices</li>
-<li>resolve many-to-one data-to-3d-curve correspondences by picking best match</li>
-<li>triangulate each data point against 3d curve to get mean and covariance for point</li>
-</ol>
-
-
-<h2>Logic detail</h2>
-
-<pre><code>1. estimate indices by chord-length parameterization
-2. repeat N times:
-    2.1 smooth triangulated points using current index estimate (posterior mean approx.)
-    2.2 re-estimate indices using chord-length parameterization
-3. for each untriangulatable point
-    3.1 triangulate against cubic interpolation of neighboring points (Newton's method)
-    3.2 store resulting point and index with smoothed points from 2.1
-4. for each 2D data curve
-    4.1 triangulate against corresponding 3d point in smoothed curve to get likelihood mean
-    4.2 compute curvature at this point to get likelihood precision
-</code></pre>
-
-<p><strong>03:13:30 PM</strong></p>
+<h2>Tasks</h2>
 
 <ul>
-<li>First run, addressing syntax errors.</li>
-<li>Plotting first test: triangulated curve w/ and wo/ gap-filling
-
-<ul>
-<li><strong>Issue</strong>: gap-fill at beginning maps exactly to first non-gap point</li>
-<li><strong>Issue</strong>: interior gap point falls exactly on non-gap point</li>
-<li>need to merge points?</li>
-</ul>
-</li>
-</ul>
-
-
-<p><strong>04:06:03 PM</strong>
-wrapping up...</p>
-
-<h2>TODO</h2>
-
-<ul>
-<li>diagnose coincident-point issue -- bug or not?</li>
-<li>Finish testing - plot per-view likelihood points</li>
-<li>Add point-merging</li>
+<li>Likelihood construction, <code>clean_correspondence3.m</code></li>
+<li>new tracking GP model</li>
 </ul>
 
 
@@ -169,11 +124,8 @@ wrapping up...</p>
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/06/20/rethinking-likelihood" class="next" title="Rethinking Likelihood">Rethinking Likelihood &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/06/14/log-entry" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/06/20/rethinking-likelihood" class="prev" title="Rethinking Likelihood">&larr; Rethinking Likelihood</a>
   
   </div>
   <div class="clearer"> </div>

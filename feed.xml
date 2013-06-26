@@ -7,7 +7,46 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
-				<title>Work Log - clean_correspondence3.m</title>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Tasks&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Likelihood construction, &lt;code&gt;clean_correspondence3.m&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;new tracking GP model&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Wed, 26 Jun 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/06/26/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/06/26/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Rethinking Likelihood</title>
 				<description>
 
 &lt;div class=&quot;meta-info&quot;&gt;
@@ -90,8 +129,8 @@
 
 </description>
 				<pubDate>Thu, 20 Jun 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/06/20/work-log---clean_correspondence3m</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/06/20/work-log---clean_correspondence3m</guid>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/06/20/rethinking-likelihood</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/06/20/rethinking-likelihood</guid>
 			</item>
 		
 			<item>
@@ -120,7 +159,7 @@
 &lt;/div&gt;
 
 
-&lt;p&gt;Continueing work on foreground curve model. Editing &lt;code&gt;correspondence/clean_correspondence2.m&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Continuing work on foreground curve model. Editing &lt;code&gt;correspondence/clean_correspondence2.m&lt;/code&gt;.&lt;/p&gt;
 
 &lt;h2&gt;Logic overview&lt;/h2&gt;
 
