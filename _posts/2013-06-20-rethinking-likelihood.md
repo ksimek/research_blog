@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Work Log - clean_correspondence3.m"
+title: "Rethinking Likelihood"
 description: ""
 category: 
 tags: []
