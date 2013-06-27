@@ -39,6 +39,18 @@
 &lt;li&gt;new tracking GP model&lt;/li&gt;
 &lt;/ul&gt;
 
+
+&lt;h2&gt;Likelihood construction&lt;/h2&gt;
+
+&lt;p&gt;Started and mostly finished implementation today, but the &quot;jagged tails&quot; edge case still needs to be handled, and then testing/debugging.&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Handle jagged tails&lt;/li&gt;
+&lt;li&gt;testing, debugging&lt;/li&gt;
+&lt;/ul&gt;
+
 </description>
 				<pubDate>Wed, 26 Jun 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/06/26/work-log</link>

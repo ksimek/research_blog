@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-06-26T07:24:52-07:00</updated>
+ <updated>2013-06-26T17:01:31-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -46,6 +46,18 @@
 &lt;ul&gt;
 &lt;li&gt;Likelihood construction, &lt;code&gt;clean_correspondence3.m&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;new tracking GP model&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Likelihood construction&lt;/h2&gt;
+
+&lt;p&gt;Started and mostly finished implementation today, but the &quot;jagged tails&quot; edge case still needs to be handled, and then testing/debugging.&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Handle jagged tails&lt;/li&gt;
+&lt;li&gt;testing, debugging&lt;/li&gt;
 &lt;/ul&gt;
 
 </content>
