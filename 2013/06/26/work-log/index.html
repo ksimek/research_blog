@@ -117,13 +117,56 @@
 
 <h2>Likelihood construction</h2>
 
-<p>Started and mostly finished implementation today, but the "jagged tails" edge case still needs to be handled, and then testing/debugging.</p>
+<p>Started and finished implementation today.  Need to design a test and then debug.</p>
+
+<p>~ 250 lines of code.</p>
+
+<ol>
+<li>smooth triangulated points</li>
+<li>resample smoothed 3D curve uniformly</li>
+<li>handle tails (see below)</li>
+<li>project curve into each view and resample uniformly</li>
+<li>DTW to correspond 2d data curve to projected smooth curve  (see below)</li>
+<li>map corresponding projected curve points back to 3D points and indices</li>
+<li>triangulate 2d data points against corresponding 3d point</li>
+<li>compute likelihood hessian around that point</li>
+</ol>
+
+
+<h2>New DTW</h2>
+
+<p>Re-implemented a specialized version of DTW with following changes:</p>
+
+<ul>
+<li>only horizontal steps accrue cost</li>
+<li>Hard-constraint on the number of vertical steps per horizontal step.</li>
+<li>keeps track of "best" match along vertical runs. no need for second pass
+
+<ul>
+<li>I think this is only possible because only horizontal steps accrue cost.</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Tail points</h2>
+
+<p>Still iffy on the "tail points" case. Implemented late at night and likely needs review in the morning.  Still need to handle negative index values.</p>
+
+<p>Alternative implementation: only inspect the tails to determine the length of the 3D curve.  Then proceeed as usual. no special cases</p>
 
 <h2>TODO</h2>
 
 <ul>
-<li>Handle jagged tails</li>
-<li>testing, debugging</li>
+<li>review tail points code
+
+<ul>
+<li>consider alternative implementation (see above)</li>
+</ul>
+</li>
+<li>handle negative index values</li>
+<li>think about hessian and transformation Jacobian</li>
+<li>testing, debugging, profiling</li>
 </ul>
 
 

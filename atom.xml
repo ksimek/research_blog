@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-06-26T17:01:31-07:00</updated>
+ <updated>2013-06-26T22:49:51-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -51,13 +51,56 @@
 
 &lt;h2&gt;Likelihood construction&lt;/h2&gt;
 
-&lt;p&gt;Started and mostly finished implementation today, but the &quot;jagged tails&quot; edge case still needs to be handled, and then testing/debugging.&lt;/p&gt;
+&lt;p&gt;Started and finished implementation today.  Need to design a test and then debug.&lt;/p&gt;
+
+&lt;p&gt;~ 250 lines of code.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;smooth triangulated points&lt;/li&gt;
+&lt;li&gt;resample smoothed 3D curve uniformly&lt;/li&gt;
+&lt;li&gt;handle tails (see below)&lt;/li&gt;
+&lt;li&gt;project curve into each view and resample uniformly&lt;/li&gt;
+&lt;li&gt;DTW to correspond 2d data curve to projected smooth curve  (see below)&lt;/li&gt;
+&lt;li&gt;map corresponding projected curve points back to 3D points and indices&lt;/li&gt;
+&lt;li&gt;triangulate 2d data points against corresponding 3d point&lt;/li&gt;
+&lt;li&gt;compute likelihood hessian around that point&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;h2&gt;New DTW&lt;/h2&gt;
+
+&lt;p&gt;Re-implemented a specialized version of DTW with following changes:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;only horizontal steps accrue cost&lt;/li&gt;
+&lt;li&gt;Hard-constraint on the number of vertical steps per horizontal step.&lt;/li&gt;
+&lt;li&gt;keeps track of &quot;best&quot; match along vertical runs. no need for second pass
+
+&lt;ul&gt;
+&lt;li&gt;I think this is only possible because only horizontal steps accrue cost.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Tail points&lt;/h2&gt;
+
+&lt;p&gt;Still iffy on the &quot;tail points&quot; case. Implemented late at night and likely needs review in the morning.  Still need to handle negative index values.&lt;/p&gt;
+
+&lt;p&gt;Alternative implementation: only inspect the tails to determine the length of the 3D curve.  Then proceeed as usual. no special cases&lt;/p&gt;
 
 &lt;h2&gt;TODO&lt;/h2&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Handle jagged tails&lt;/li&gt;
-&lt;li&gt;testing, debugging&lt;/li&gt;
+&lt;li&gt;review tail points code
+
+&lt;ul&gt;
+&lt;li&gt;consider alternative implementation (see above)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;handle negative index values&lt;/li&gt;
+&lt;li&gt;think about hessian and transformation Jacobian&lt;/li&gt;
+&lt;li&gt;testing, debugging, profiling&lt;/li&gt;
 &lt;/ul&gt;
 
 </content>
