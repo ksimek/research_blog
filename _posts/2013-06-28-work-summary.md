@@ -32,7 +32,7 @@ This is the old correspondence.  Blue points are points from the 2D data curve; 
 
 ![Correspondence bug ]({{site.baseurl}}/img/2013-06-28-ll-bug.png)
 
-Next is the fixed correspondence.  Notice how the red correspondence lines are much shorter, indicated a less costly correspondence.
+Next is the fixed correspondence.  Notice how the red correspondence lines are much shorter, indicating a less costly correspondence.
 
 ![Correspondence bug, fixed ]({{site.baseurl}}/img/2013-06-28-ll-bug-fixed.png)
 
