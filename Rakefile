@@ -69,6 +69,7 @@ task :post do
     post.puts "{% include JB/setup %}"
     post.puts "{% include research/tulips_da2_meta %}"
   end
+  system "vim #{filename}"
 end # task :post
 
 # Usage: rake page name="about.html"
