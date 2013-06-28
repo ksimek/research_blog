@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-06-28T12:01:23-07:00</updated>
+ <updated>2013-06-28T12:03:55-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -14,9 +14,9 @@
  
  <entry>
    <title>Work summary</title>
-   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/06/28/work-log"/>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/06/28/work-summary"/>
    <updated>2013-06-28T00:00:00-07:00</updated>
-   <id>http://vision.sista.arizona.edu/ksimek/research/2013/06/28/work-log</id>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/06/28/work-summary</id>
    <content type="html">
 
 &lt;div class=&quot;meta-info&quot;&gt;
@@ -64,7 +64,7 @@ The new approach uses the old approach as a starting point, but then recomputes 
 
 &lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-06-28-ll-bug.png&quot; alt=&quot;Correspondence bug &quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;Next is the fixed correspondence.  Notice how the red correspondence lines are much shorter, indicated a less costly correspondence.&lt;/p&gt;
+&lt;p&gt;Next is the fixed correspondence.  Notice how the red correspondence lines are much shorter, indicating a less costly correspondence.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-06-28-ll-bug-fixed.png&quot; alt=&quot;Correspondence bug, fixed &quot; /&gt;&lt;/p&gt;
 

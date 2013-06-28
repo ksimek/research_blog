@@ -12,7 +12,7 @@ http://vision.sista.arizona.edu/ksimek/research/projects/tulips.html
 http://vision.sista.arizona.edu/ksimek/research/sitemap.txt
 http://vision.sista.arizona.edu/ksimek/research/tags.html
 
-http://vision.sista.arizona.edu/ksimek/research/2013/06/28/work-log
+http://vision.sista.arizona.edu/ksimek/research/2013/06/28/work-summary
 http://vision.sista.arizona.edu/ksimek/research/2013/06/27/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/06/26/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/06/20/rethinking-likelihood
