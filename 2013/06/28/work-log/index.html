@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log &larr; </title>
+   <title>Work summary &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -76,33 +76,83 @@
 	
   
   
-  <h1 class="title">Work Log</h1>
+  <h1 class="title">Work summary</h1>
 
-  <div class="date emphnext">June 27, 2013</div>
+  <div class="date emphnext">June 28, 2013</div>
     
 
 
   
-    <p><strong> Thursday Overview </strong>
-* Continued refactoring of likelihood
-* C++ Bootcamp
-* VR lab tour and new user set-up</p>
+    
 
-<h2>Continued refactoring of likelihood</h2>
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Data Association v2</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_2</td>
+    </tr>
 
-<p>Implemented "alternative approach" to handling tail points mentioned in last entry.  The old way didn't benefit from re-indexing; this way does.  This way handles negative index points correctly, too.</p>
 
-<p>In process of testing and debugging.  Possibly more outcomes later tonight.</p>
+</table>
 
-<h2>C++ Bootcamp</h2>
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
 
-<p>today's session: inline and const-correctness</p>
 
-<h2>VR lab tour and new user set-up</h2>
+<p>Finished editing new likelihood function.  See <code>correspondence/clean_correspondence3.m</code> (filename likely to change soon).  Below is a summary of results and comparison to the old approach.</p>
 
-<p>By Angus's request, I showed showed the new postdoc Javier around the lab and set him up with an admin account.</p>
+<h2>Results</h2>
 
-<p>Lots of things still broken on VR01; biggest problem is video card #2 not displaying anything.  Game controller not set up yet.    Showed osgviewer demo, and by Angus's request, got his Processing demo running too.</p>
+<p>Below is a plot of the maximum likelihood curves:</p>
+
+<p><img src="/ksimek/research/img/2013-06-28-likelihood_1.gif" alt="Maximum likelihood reconstruction" /></p>
+
+<p>Each colored curve arises from a single 2D data curve.  The curve represents the mean of a gaussian process. Variance is not shown; it is infinite in the direction of backprojection.</p>
+
+<p>The dark-blue curve is an estimate of the posterior curve, which was used to backproject the 2D curves against.  It is estimated from the point-correspondences.</p>
+
+<h2>Improved correspondence</h2>
+
+<p>The old likelihood suffered from a small but non-negligible number of awful correspondences, which severely damaged both reconstruction and marginal likelihood values.  This was because the likelihood was derived from the point-to-point correspondences, which (a) is problematic at gaps, and (b) suffer bad correspondences which can't be fixed later.
+The new approach uses the old approach as a starting point, but then recomputes all 2D curve correspondences against a rough reconstruction.  This dramatically improves correspondences as we see below.</p>
+
+<p>This is the old correspondence.  Blue points are points from the 2D data curve;  the teal line is the posterior 3D curve (projected to 2D); red lines show correspondences.</p>
+
+<p><img src="/ksimek/research/img/2013-06-28-ll-bug.png" alt="Correspondence bug " /></p>
+
+<p>Next is the fixed correspondence.  Notice how the red correspondence lines are much shorter, indicated a less costly correspondence.</p>
+
+<p><img src="/ksimek/research/img/2013-06-28-ll-bug-fixed.png" alt="Correspondence bug, fixed " /></p>
+
+<h2>Per-data-curve likelihood</h2>
+
+<p>The old likelihood had a single GP curve that represented all of the different views.  Now we have a GP curve <strong>per data-curve</strong>, which will be related by a GP prior.</p>
+
+<p>This will allow us to simultaneously track and triangulate, a key novelty to this approach.  More importantly, it will give us higher marginal likelihood numbers for true 3D curve observations, because we can make the independent noise component very small.</p>
+
+<h2>TODO - short-term</h2>
+
+<ul>
+<li><strong>Optimization</strong> - This new function adds an extra pass of DTW per data-curve, per iteration where previously, only one pass was needed.  This has introduced a significant performance bottleneck on the order of 10-50x.  I need to profile and optimize this function if we want runtimes that aren't measured in weeks.  This may motivate a full re-thinking of <code>merge_correspondence.m</code>, to avoid a full DTW after every merge.</li>
+<li><strong> Marginal Likelhood </strong> - Need to build the new marginal likelihood for the foreground curve model.  This proposed version will take advantage of the new per-data-curve likelihood.</li>
+</ul>
+
+
+<h2>TODO - mid-term</h2>
+
+<ul>
+<li><strong>End-to-end</strong> - Incorporate new likelhood and ML into gibbs sampler.</li>
+<li><strong> Swendsen wang cuts </strong> - design SWC split/merge move</li>
+</ul>
+
 
       <address class="signature">
         Posted by
@@ -113,11 +163,8 @@
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/06/28/work-log" class="next" title="Work summary">Work summary &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/06/26/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/06/27/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>
@@ -134,7 +181,7 @@
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work summary" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -182,7 +229,7 @@
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log");
+                    + encodeURIComponent("Work summary");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

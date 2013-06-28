@@ -4,13 +4,91 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-06-27T18:25:13-07:00</updated>
+ <updated>2013-06-28T11:58:28-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work summary</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/06/28/work-log"/>
+   <updated>2013-06-28T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/06/28/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Finished editing new likelihood function.  See &lt;code&gt;correspondence/clean_correspondence3.m&lt;/code&gt; (filename likely to change soon).  Below is a summary of results and comparison to the old approach.&lt;/p&gt;
+
+&lt;h2&gt;Results&lt;/h2&gt;
+
+&lt;p&gt;Below is a plot of the maximum likelihood curves:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-06-28-likelihood_1.gif&quot; alt=&quot;Maximum likelihood reconstruction&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Each colored curve arises from a single 2D data curve.  The curve represents the mean of a gaussian process. Variance is not shown; it is infinite in the direction of backprojection.&lt;/p&gt;
+
+&lt;p&gt;The dark-blue curve is an estimate of the posterior curve, which was used to backproject the 2D curves against.  It is estimated from the point-correspondences.&lt;/p&gt;
+
+&lt;h2&gt;Improved correspondence&lt;/h2&gt;
+
+&lt;p&gt;The old likelihood suffered from a small but non-negligible number of awful correspondences, which severely damaged both reconstruction and marginal likelihood values.  This was because the likelihood was derived from the point-to-point correspondences, which (a) is problematic at gaps, and (b) suffer bad correspondences which can't be fixed later.
+The new approach uses the old approach as a starting point, but then recomputes all 2D curve correspondences against a rough reconstruction.  This dramatically improves correspondences as we see below.&lt;/p&gt;
+
+&lt;p&gt;This is the old correspondence.  Blue points are points from the 2D data curve;  the teal line is the posterior 3D curve (projected to 2D); red lines show correspondences.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-06-28-ll-bug.png&quot; alt=&quot;Correspondence bug &quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Next is the fixed correspondence.  Notice how the red correspondence lines are much shorter, indicated a less costly correspondence.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-06-28-ll-bug-fixed.png&quot; alt=&quot;Correspondence bug, fixed &quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;Per-data-curve likelihood&lt;/h2&gt;
+
+&lt;p&gt;The old likelihood had a single GP curve that represented all of the different views.  Now we have a GP curve &lt;strong&gt;per data-curve&lt;/strong&gt;, which will be related by a GP prior.&lt;/p&gt;
+
+&lt;p&gt;This will allow us to simultaneously track and triangulate, a key novelty to this approach.  More importantly, it will give us higher marginal likelihood numbers for true 3D curve observations, because we can make the independent noise component very small.&lt;/p&gt;
+
+&lt;h2&gt;TODO - short-term&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Optimization&lt;/strong&gt; - This new function adds an extra pass of DTW per data-curve, per iteration where previously, only one pass was needed.  This has introduced a significant performance bottleneck on the order of 10-50x.  I need to profile and optimize this function if we want runtimes that aren't measured in weeks.  This may motivate a full re-thinking of &lt;code&gt;merge_correspondence.m&lt;/code&gt;, to avoid a full DTW after every merge.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt; Marginal Likelhood &lt;/strong&gt; - Need to build the new marginal likelihood for the foreground curve model.  This proposed version will take advantage of the new per-data-curve likelihood.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;TODO - mid-term&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;End-to-end&lt;/strong&gt; - Incorporate new likelhood and ML into gibbs sampler.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt; Swendsen wang cuts &lt;/strong&gt; - design SWC split/merge move&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Work Log</title>
