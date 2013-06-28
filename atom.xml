@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-06-28T11:58:28-07:00</updated>
+ <updated>2013-06-28T12:01:23-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -52,6 +52,8 @@
 &lt;p&gt;Each colored curve arises from a single 2D data curve.  The curve represents the mean of a gaussian process. Variance is not shown; it is infinite in the direction of backprojection.&lt;/p&gt;
 
 &lt;p&gt;The dark-blue curve is an estimate of the posterior curve, which was used to backproject the 2D curves against.  It is estimated from the point-correspondences.&lt;/p&gt;
+
+&lt;p&gt;Note that for clarity, x/y scale is significantly smaller than z-scale (up-direction).  When axis are equally-scaled, max-likelihood curves lie very close the to blue curve.&lt;/p&gt;
 
 &lt;h2&gt;Improved correspondence&lt;/h2&gt;
 

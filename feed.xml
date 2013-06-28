@@ -44,6 +44,8 @@
 
 &lt;p&gt;The dark-blue curve is an estimate of the posterior curve, which was used to backproject the 2D curves against.  It is estimated from the point-correspondences.&lt;/p&gt;
 
+&lt;p&gt;Note that for clarity, x/y scale is significantly smaller than z-scale (up-direction).  When axis are equally-scaled, max-likelihood curves lie very close the to blue curve.&lt;/p&gt;
+
 &lt;h2&gt;Improved correspondence&lt;/h2&gt;
 
 &lt;p&gt;The old likelihood suffered from a small but non-negligible number of awful correspondences, which severely damaged both reconstruction and marginal likelihood values.  This was because the likelihood was derived from the point-to-point correspondences, which (a) is problematic at gaps, and (b) suffer bad correspondences which can't be fixed later.
