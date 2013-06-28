@@ -8,6 +8,34 @@
 		
 			<item>
 				<title>Work Log</title>
+				<description>&lt;p&gt;&lt;strong&gt; Thursday Overview &lt;/strong&gt;
+* Continued refactoring of likelihood
+* C++ Bootcamp
+* VR lab tour and new user set-up&lt;/p&gt;
+
+&lt;h2&gt;Continued refactoring of likelihood&lt;/h2&gt;
+
+&lt;p&gt;Implemented &quot;alternative approach&quot; to handling tail points mentioned in last entry.  The old way didn't benefit from re-indexing; this way does.  This way handles negative index points correctly, too.&lt;/p&gt;
+
+&lt;p&gt;In process of testing and debugging.  Possibly more outcomes later tonight.&lt;/p&gt;
+
+&lt;h2&gt;C++ Bootcamp&lt;/h2&gt;
+
+&lt;p&gt;today's session: inline and const-correctness&lt;/p&gt;
+
+&lt;h2&gt;VR lab tour and new user set-up&lt;/h2&gt;
+
+&lt;p&gt;By Angus's request, I showed showed the new postdoc Javier around the lab and set him up with an admin account.&lt;/p&gt;
+
+&lt;p&gt;Lots of things still broken on VR01; biggest problem is video card #2 not displaying anything.  Game controller not set up yet.    Showed osgviewer demo, and by Angus's request, got his Processing demo running too.&lt;/p&gt;
+</description>
+				<pubDate>Thu, 27 Jun 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/06/27/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/06/27/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
 				<description>
 
 &lt;div class=&quot;meta-info&quot;&gt;
