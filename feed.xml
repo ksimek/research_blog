@@ -88,6 +88,63 @@ The new approach uses the old approach as a starting point, but then recomputes 
 		
 			<item>
 				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;profiling and optimizing &lt;code&gt;clean_correspondence3.m&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Wrote MEX version of get_dtw_matches_(),  &lt;code&gt;get_dtw_matches_horiz.c&lt;/code&gt;.   ~8x speedup&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;New bottlenecks&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;projection_error_hessian&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;interp1&lt;/code&gt; - linear interpolation&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;csaps&lt;/code&gt; - spline smoothin&lt;/li&gt;
+&lt;li&gt;dtw&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Plan&lt;/h2&gt;
+
+&lt;p&gt;can possibly eliminate some calls to interp1.&lt;/p&gt;
+
+&lt;p&gt;could mex projecion_error_hessian.  should be a big win&lt;/p&gt;
+
+&lt;p&gt;DTW can be done in two passes, or mex'd&lt;/p&gt;
+
+&lt;h2&gt;Mexing &lt;code&gt;projection_error_hessian&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;Tried using Matlab's &quot;Coder&quot; feature to generate mex code automatically.  The result was totally bloated (14 files!) and no faster than the matlab version.  Next I tried hand-coding the mex, and its ~10x faster.&lt;/p&gt;
+</description>
+				<pubDate>Fri, 28 Jun 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/06/28/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/06/28/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
 				<description>&lt;p&gt;&lt;strong&gt; Thursday Overview &lt;/strong&gt;
 * Continued refactoring of likelihood
 * C++ Bootcamp

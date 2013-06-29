@@ -78,31 +78,60 @@
   
   <h1 class="title">Work Log</h1>
 
-  <div class="date emphnext">June 27, 2013</div>
+  <div class="date emphnext">June 28, 2013</div>
     
 
 
   
-    <p><strong> Thursday Overview </strong>
-* Continued refactoring of likelihood
-* C++ Bootcamp
-* VR lab tour and new user set-up</p>
+    
 
-<h2>Continued refactoring of likelihood</h2>
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Data Association v2</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_2</td>
+    </tr>
 
-<p>Implemented "alternative approach" to handling tail points mentioned in last entry.  The old way didn't benefit from re-indexing; this way does.  This way handles negative index points correctly, too.</p>
 
-<p>In process of testing and debugging.  Possibly more outcomes later tonight.</p>
+</table>
 
-<h2>C++ Bootcamp</h2>
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
 
-<p>today's session: inline and const-correctness</p>
 
-<h2>VR lab tour and new user set-up</h2>
+<p>profiling and optimizing <code>clean_correspondence3.m</code></p>
 
-<p>By Angus's request, I showed showed the new postdoc Javier around the lab and set him up with an admin account.</p>
+<p>Wrote MEX version of get_dtw_matches_(),  <code>get_dtw_matches_horiz.c</code>.   ~8x speedup</p>
 
-<p>Lots of things still broken on VR01; biggest problem is video card #2 not displaying anything.  Game controller not set up yet.    Showed osgviewer demo, and by Angus's request, got his Processing demo running too.</p>
+<p><strong>New bottlenecks</strong></p>
+
+<ul>
+<li>projection_error_hessian</li>
+<li><code>interp1</code> - linear interpolation</li>
+<li><code>csaps</code> - spline smoothin</li>
+<li>dtw</li>
+</ul>
+
+
+<h2>Plan</h2>
+
+<p>can possibly eliminate some calls to interp1.</p>
+
+<p>could mex projecion_error_hessian.  should be a big win</p>
+
+<p>DTW can be done in two passes, or mex'd</p>
+
+<h2>Mexing <code>projection_error_hessian</code></h2>
+
+<p>Tried using Matlab's "Coder" feature to generate mex code automatically.  The result was totally bloated (14 files!) and no faster than the matlab version.  Next I tried hand-coding the mex, and its ~10x faster.</p>
 
       <address class="signature">
         Posted by
@@ -114,10 +143,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/06/28/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+    <a href="/ksimek/research/2013/06/28/work-summary" class="next" title="Work summary">Work summary &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/06/26/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/06/27/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>
