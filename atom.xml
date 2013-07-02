@@ -4,13 +4,182 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-06-29T09:17:22-07:00</updated>
+ <updated>2013-07-01T18:45:56-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/07/01/work-log"/>
+   <updated>2013-07-01T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/07/01/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Background:  This weekend, I worked out the math for two new foreground models, which differ in how 3D perturbations between views are modelled.  The first assumes a single &quot;mean&quot; curve, and all observations are small 3D perturbations of it.  The second assumes the unobserved curve follows Brownian motion over time.&lt;/p&gt;
+
+&lt;p&gt;Also developed a new approach to evaluate marginal likelhoods thats much simpler, but need to confirm that it matches reference implementation.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Goals:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Implement both new foreground models, plus old one in new &quot;kernel function&quot; way.&lt;/li&gt;
+&lt;li&gt;Implement new evaluation method and test against reference.&lt;/li&gt;
+&lt;li&gt;Learn parameters for all three models (needs some ground truthing).&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Implementing new models&lt;/h2&gt;
+
+&lt;p&gt;Worked on general framework for evaluating ML under general new model framework.&lt;/p&gt;
+
+&lt;p&gt;After some struggling with covariance degeneracies inherent in backprojection, I realized that the 3D marginal likelihood is naturally degenerate, because it isn't the true likelihood function (which is in 2D).&lt;/p&gt;
+
+&lt;p&gt;I'm kicking myself for not remembering that I struggled with this exact problem 5 months ago.  At that time, I realized the better approach is to use Candidate's estimator, which is the ratio of the unnormalized posterior to the normalized posterior.  The unnormalized posterior comes from the prior and 2D likelIhood;  the normalized posterior is obtainable from the 3D likelihood and the prior.&lt;/p&gt;
+
+&lt;p&gt;This was already implemented in &lt;code&gt;curve_ml.m&lt;/code&gt;, but was  O(n&lt;sup&gt;3&lt;/sup&gt; ), so was all but abandoned in favor of the junction-tree method in &lt;code&gt;curve_ml2.m&lt;/code&gt;, which is O(n).&lt;/p&gt;
+
+&lt;p&gt;However, it's recently become clear that the candidate's estimator should be evaluated in \(O(n)\)  by exploiting the Markovian nature of the covariance matrix.&lt;/p&gt;
+
+&lt;p&gt;It should be easy to try both, by simply swapping out covariance matrices with ones arising from the new covariance functions.  Tomorrow...&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Foreground Curve Models as Gaussian Process Covariance Function</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/07/01/foreground-curve-models"/>
+   <updated>2013-07-01T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/07/01/foreground-curve-models</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Background&lt;/h2&gt;
+
+&lt;p&gt; This weekend, I worked out the math for two new foreground models, which differ in how 3D perturbations between views are modelled.  The first assumes a single &quot;mean&quot; curve, and all observations are small 3D perturbations of it.  The second assumes the unobserved curve follows Brownian motion over time.&lt;/p&gt;
+
+&lt;h2&gt;Covariance functions as models&lt;/h2&gt;
+
+&lt;p&gt;I realized this weekend that all of the models I've considered are achievable by using different covariance functions.&lt;/p&gt;
+
+&lt;p&gt;The original model is given by&lt;/p&gt;
+
+&lt;div&gt; \[
+k_1(i,j) = \sigma_s k_{\text{cubic}}(i,j) + \sigma_o  k_{\text{offset}}(i,j) + \sigma_r k_{\text{linear}}(i,j)
+\] &lt;/div&gt;
+
+
+&lt;p&gt;where&lt;/p&gt;
+
+&lt;div&gt; \[
+\begin{align}
+k_{\text{cubic}}(i,j) &amp;= \frac{|\tau_i - \tau_j| \min(\tau_i, \tau_j)^2}{2} + \frac{\min(\tau_i, \tau_j)^3}{3} \\
+k_{\text{linear}}(i,j) &amp;= \tau_i \tau_j  \\
+k_{\text{offset}}(i,j) &amp;= 1 \\ 
+\end{align}
+\] &lt;/div&gt;
+
+
+&lt;p&gt;The cubic model penalizes non-zero second derivative over the length of the curve.  The offset and linear model penalize zero and first derivative initial conditions.&lt;/p&gt;
+
+&lt;h2&gt;White noise perturbation model&lt;/h2&gt;
+
+&lt;p&gt;Both of the two new models expand on the original by modelling how the observed curve differs between views.  That is, the model for the curves are the same as before (they are cubic spline curves), but we additionally model &lt;strong&gt;how they are perturbed between views&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;The first new model I call the &quot;White Noise&quot; perturbation model, which treats each view of the curve as arising from a white noise process that perturbs a &quot;master curve&quot;, I.e. the unobserved mean curve.  Its covariance is:&lt;/p&gt;
+
+&lt;div&gt; \[
+k_{\text{white}}(i,j) = k_1(i,j) + \delta(v_i-v_j) k_{\text{w}}(i,j)
+\] &lt;/div&gt;
+
+
+&lt;p&gt;where \(v_i\) is the view that captured the \(i\)th point and \(k_w\) is&lt;/p&gt;
+
+&lt;div&gt; \[
+k_w(i,j) = \sigma_{o,w}  k_{\text{offset}}(i,j) + \sigma_{r,w} k_{\text{linear}}
+\] &lt;/div&gt;
+
+
+&lt;p&gt;This model adds extra covariance that is independent per-view.  This treats the perterbations from the mean curve as independent.&lt;/p&gt;
+
+&lt;p&gt;The perturbations themselves are assumed to be purely to the curve's initial conditions, i.e. its position and direction.&lt;/p&gt;
+
+&lt;p&gt;This model is motivated by the assumption that perturbations arise due to camera mis-calibrations, which result in mostly translation and small rotational changes.&lt;/p&gt;
+
+&lt;h2&gt;Brownian motion perturbation model&lt;/h2&gt;
+
+&lt;p&gt;The second model treats perturbations as arising from Brownian motion, i.e. each curve is independent, conditioned on the previous view's curve.  The covariance function is:&lt;/p&gt;
+
+&lt;div&gt; \[
+k_{\text{brown}}(i,j) = k_1(i,j) + \min(\tau_i, \tau_j) k_{\text{b}}(i,j)
+\] &lt;/div&gt;
+
+
+&lt;p&gt;where \(k_b\) is&lt;/p&gt;
+
+&lt;div&gt; \[
+k_b(i,j) = \sigma_{s,b} k_{\text{cubic}}(i,j) + \sigma_{o,b}  k_{\text{offset}}(i,j) + \sigma_{r,b} k_{\text{linear}}
+\] &lt;/div&gt;
+
+
+&lt;p&gt;This model assumes perturbations arise by motion of the plant during imaging, like moving closer to a light source, or responding to a temperature gradient in the room.  &quot;View index&quot; is a surrogate for a time variable, since time between captures is roughly constant.  The use of Brownian motion means the magnitude of perturbation increases by the square root of the distance between the views (time).  \(k_b\) models the nature of the perturbation; we use the cubic-spline kernel which says that point-wise perturbations are strongly correlated and increase in magnitude the further they get from the base of the curve.&lt;/p&gt;
+
+&lt;p&gt;This \(k_b\) is possibly overkill;  using the simpler \(k_w\) from the white-noise model might work just as well.  This simpler model implies curves drift in position and direction only, and these perturbations are correlated over time.&lt;/p&gt;
+
+&lt;h2&gt;End stuff&lt;/h2&gt;
+
+&lt;p&gt;After some consideration, I think implementing these models in the current system will will very simple.  Training them will be harder; some more ground truthing will be needed.&lt;/p&gt;
+
+&lt;p&gt;Of the two new models, I suspect that the white noise model will be sufficient to get the gains in marginal likelihood we seek.  It is a much better explanation for misaligned data-points compared to the old model models all point perturbations as independent.&lt;/p&gt;
+
+&lt;p&gt;The brownian motion model will give us something to compare against in evaluation.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Work summary</title>
@@ -121,7 +290,9 @@ The new approach uses the old approach as a starting point, but then recomputes 
 &lt;/div&gt;
 
 
-&lt;p&gt;profiling and optimizing &lt;code&gt;clean_correspondence3.m&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Profiling and optimizing &lt;code&gt;clean_correspondence3.m&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Huge bottleneck in &lt;code&gt;get_dtw_matches_()&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;Wrote MEX version of get_dtw_matches_(),  &lt;code&gt;get_dtw_matches_horiz.c&lt;/code&gt;.   ~8x speedup&lt;/p&gt;
 

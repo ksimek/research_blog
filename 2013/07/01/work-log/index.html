@@ -78,7 +78,7 @@
   
   <h1 class="title">Work Log</h1>
 
-  <div class="date emphnext">June 28, 2013</div>
+  <div class="date emphnext">July 01, 2013</div>
     
 
 
@@ -107,33 +107,32 @@
 </div>
 
 
-<p>Profiling and optimizing <code>clean_correspondence3.m</code></p>
+<p>Background:  This weekend, I worked out the math for two new foreground models, which differ in how 3D perturbations between views are modelled.  The first assumes a single "mean" curve, and all observations are small 3D perturbations of it.  The second assumes the unobserved curve follows Brownian motion over time.</p>
 
-<p>Huge bottleneck in <code>get_dtw_matches_()</code>.</p>
+<p>Also developed a new approach to evaluate marginal likelhoods thats much simpler, but need to confirm that it matches reference implementation.</p>
 
-<p>Wrote MEX version of get_dtw_matches_(),  <code>get_dtw_matches_horiz.c</code>.   ~8x speedup</p>
-
-<p><strong>New bottlenecks</strong></p>
+<p><strong>Goals:</strong></p>
 
 <ul>
-<li>projection_error_hessian</li>
-<li><code>interp1</code> - linear interpolation</li>
-<li><code>csaps</code> - spline smoothin</li>
-<li>dtw</li>
+<li>Implement both new foreground models, plus old one in new "kernel function" way.</li>
+<li>Implement new evaluation method and test against reference.</li>
+<li>Learn parameters for all three models (needs some ground truthing).</li>
 </ul>
 
 
-<h2>Plan</h2>
+<h2>Implementing new models</h2>
 
-<p>can possibly eliminate some calls to interp1.</p>
+<p>Worked on general framework for evaluating ML under general new model framework.</p>
 
-<p>could mex projecion_error_hessian.  should be a big win</p>
+<p>After some struggling with covariance degeneracies inherent in backprojection, I realized that the 3D marginal likelihood is naturally degenerate, because it isn't the true likelihood function (which is in 2D).</p>
 
-<p>DTW can be done in two passes, or mex'd</p>
+<p>I'm kicking myself for not remembering that I struggled with this exact problem 5 months ago.  At that time, I realized the better approach is to use Candidate's estimator, which is the ratio of the unnormalized posterior to the normalized posterior.  The unnormalized posterior comes from the prior and 2D likelIhood;  the normalized posterior is obtainable from the 3D likelihood and the prior.</p>
 
-<h2>Mexing <code>projection_error_hessian</code></h2>
+<p>This was already implemented in <code>curve_ml.m</code>, but was  O(n<sup>3</sup> ), so was all but abandoned in favor of the junction-tree method in <code>curve_ml2.m</code>, which is O(n).</p>
 
-<p>Tried using Matlab's "Coder" feature to generate mex code automatically.  The result was totally bloated (14 files!) and no faster than the matlab version.  Next I tried hand-coding the mex, and its ~10x faster.</p>
+<p>However, it's recently become clear that the candidate's estimator should be evaluated in \(O(n)\)  by exploiting the Markovian nature of the covariance matrix.</p>
+
+<p>It should be easy to try both, by simply swapping out covariance matrices with ones arising from the new covariance functions.  Tomorrow...</p>
 
       <address class="signature">
         Posted by
@@ -144,11 +143,8 @@
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/06/28/work-summary" class="next" title="Work summary">Work summary &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/06/27/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/07/01/foreground-curve-models" class="prev" title="Foreground Curve Models as Gaussian Process Covariance Function">&larr; Foreground Curve Models as Gaussian Process Covariance Function</a>
   
   </div>
   <div class="clearer"> </div>
