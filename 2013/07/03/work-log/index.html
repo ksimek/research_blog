@@ -78,7 +78,7 @@
   
   <h1 class="title">Work Log</h1>
 
-  <div class="date emphnext">July 01, 2013</div>
+  <div class="date emphnext">July 03, 2013</div>
     
 
 
@@ -107,32 +107,49 @@
 </div>
 
 
-<p>Background:  This weekend, I worked out the math for two new foreground models, which differ in how 3D perturbations between views are modelled.  The first assumes a single "mean" curve, and all observations are small 3D perturbations of it.  The second assumes the unobserved curve follows Brownian motion over time.</p>
-
-<p>Also developed a new approach to evaluate marginal likelhoods thats much simpler, but need to confirm that it matches reference implementation.</p>
-
-<p><strong>Goals:</strong></p>
-
 <ul>
-<li>Implement both new foreground models, plus old one in new "kernel function" way.</li>
-<li>Implement new evaluation method and test against reference.</li>
-<li>Learn parameters for all three models (needs some ground truthing).</li>
+<li>Implementing covariance functions</li>
+<li>Implement generalized marginal likelihood</li>
+<li>Implement fast generalized marginal likelihood</li>
 </ul>
 
 
-<h2>Implementing new models</h2>
+<h2>Implement generalized marginal likelihood</h2>
 
-<p>Worked on general framework for evaluating ML under general new model framework.</p>
+<p>Rewriting <code>curve_ml3.m</code></p>
 
-<p>After some struggling with covariance degeneracies inherent in backprojection, I realized that the 3D marginal likelihood is naturally degenerate, because it isn't the true likelihood function (which is in 2D).</p>
+<p>Based on <code>curve_ml.m</code></p>
 
-<p>I'm kicking myself for not remembering that I struggled with this exact problem 5 months ago.  At that time, I realized the better approach is to use Candidate's estimator, which is the ratio of the unnormalized posterior to the normalized posterior.  The unnormalized posterior comes from the prior and 2D likelIhood;  the normalized posterior is obtainable from the 3D likelihood and the prior.</p>
+<p>Kernel now takes two sets of indices, curve-index and view-index.</p>
 
-<p>This was already implemented in <code>curve_ml.m</code>, but was  O(n<sup>3</sup> ), so was all but abandoned in favor of the junction-tree method in <code>curve_ml2.m</code>, which is O(n).</p>
+<p>Kernel is now passed-in as a lambda.</p>
 
-<p>However, it's recently become clear that the candidate's estimator should be evaluated in \(O(n)\)  by exploiting the Markovian nature of the covariance matrix.</p>
+<p>Need to decide whether to use matrix inversion lemma for global offset and linear prior.  Currently being used;  not using would be simpler; try both and compare results.</p>
 
-<p>It should be easy to try both, by simply swapping out covariance matrices with ones arising from the new covariance functions.  Tomorrow...</p>
+<h2>Testing new marginal likelihood</h2>
+
+<p>Creating new version of <code>test/test_ml_end_to_end.m</code>, named <code>test/test_ml_end_to_end2.m</code>.  This version uses the new likelihood format, and compares against the old.</p>
+
+<h2>New curve_likelihood</h2>
+
+<p>Need to write new version of <code>curve_likelihood.m</code> to handle new likelihood format.</p>
+
+<p>It's going to be difficult to compare to older version, since we've changed the correspondence method...</p>
+
+<p>I'll have to add a flag that simulates the old correspondence method, but stores it in the new likelihood format...</p>
+
+<p><em>01:33:52 PM</em></p>
+
+<p>I decided to write a separate function for the old correspondence method, called <code>corr_to_likelihood_legacy.m</code>.  Moved <code>clean_correspondence3.m</code> to <code>corr_to_likelihood.m</code>.</p>
+
+<p>The legacy function isn't exactly identical to the old function.  In particular, the index values might be slightly different, since it depends on the old function's global mean curve, which we don't compute in the new function.  If it's important, we can call the old function, and then call the new one.  This is a debugging function, so speed doesn't matter. For the moment, we'll accept the small difference, and use this function simply to confirm that we're in the ballpark.</p>
+
+<p><em>03:06:24 PM</em>
+Test is implemented.  Troubleshooting syntax errors...</p>
+
+<p><em>04:11:17 PM</em></p>
+
+<p>Elusive NaN error in <code>corr_to_likelihood_legacy.m</code>.</p>
 
       <address class="signature">
         Posted by
@@ -144,10 +161,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/07/02/rethinking-covariance-functions" class="next" title="Rethinking covariance functions">Rethinking covariance functions &rarr;</a>
+    <a href="/ksimek/research/2013/07/04/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/07/01/foreground-curve-models" class="prev" title="Foreground Curve Models as Gaussian Process Covariance Function">&larr; Foreground Curve Models as Gaussian Process Covariance Function</a>
+    <a href="/ksimek/research/2013/07/02/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>

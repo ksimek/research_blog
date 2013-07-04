@@ -32,6 +32,265 @@
 &lt;/div&gt;
 
 
+&lt;h2&gt;Continuing debugging of new likelihood&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Test:&lt;/strong&gt; &lt;code&gt;test/test_ml_end_to_end_2.m&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Trouble with NaN error in &lt;code&gt;correspondence/corr_to_likelihood_legacy.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;08:22:43 AM&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Narrowed it down to gap-handling code-branch.&lt;/p&gt;
+</description>
+				<pubDate>Thu, 04 Jul 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/04/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/04/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;ul&gt;
+&lt;li&gt;Implementing covariance functions&lt;/li&gt;
+&lt;li&gt;Implement generalized marginal likelihood&lt;/li&gt;
+&lt;li&gt;Implement fast generalized marginal likelihood&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Implement generalized marginal likelihood&lt;/h2&gt;
+
+&lt;p&gt;Rewriting &lt;code&gt;curve_ml3.m&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Based on &lt;code&gt;curve_ml.m&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Kernel now takes two sets of indices, curve-index and view-index.&lt;/p&gt;
+
+&lt;p&gt;Kernel is now passed-in as a lambda.&lt;/p&gt;
+
+&lt;p&gt;Need to decide whether to use matrix inversion lemma for global offset and linear prior.  Currently being used;  not using would be simpler; try both and compare results.&lt;/p&gt;
+
+&lt;h2&gt;Testing new marginal likelihood&lt;/h2&gt;
+
+&lt;p&gt;Creating new version of &lt;code&gt;test/test_ml_end_to_end.m&lt;/code&gt;, named &lt;code&gt;test/test_ml_end_to_end2.m&lt;/code&gt;.  This version uses the new likelihood format, and compares against the old.&lt;/p&gt;
+
+&lt;h2&gt;New curve_likelihood&lt;/h2&gt;
+
+&lt;p&gt;Need to write new version of &lt;code&gt;curve_likelihood.m&lt;/code&gt; to handle new likelihood format.&lt;/p&gt;
+
+&lt;p&gt;It's going to be difficult to compare to older version, since we've changed the correspondence method...&lt;/p&gt;
+
+&lt;p&gt;I'll have to add a flag that simulates the old correspondence method, but stores it in the new likelihood format...&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;01:33:52 PM&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;I decided to write a separate function for the old correspondence method, called &lt;code&gt;corr_to_likelihood_legacy.m&lt;/code&gt;.  Moved &lt;code&gt;clean_correspondence3.m&lt;/code&gt; to &lt;code&gt;corr_to_likelihood.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The legacy function isn't exactly identical to the old function.  In particular, the index values might be slightly different, since it depends on the old function's global mean curve, which we don't compute in the new function.  If it's important, we can call the old function, and then call the new one.  This is a debugging function, so speed doesn't matter. For the moment, we'll accept the small difference, and use this function simply to confirm that we're in the ballpark.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;03:06:24 PM&lt;/em&gt;
+Test is implemented.  Troubleshooting syntax errors...&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;04:11:17 PM&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Elusive NaN error in &lt;code&gt;corr_to_likelihood_legacy.m&lt;/code&gt;.&lt;/p&gt;
+</description>
+				<pubDate>Wed, 03 Jul 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/03/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/03/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Implementing marginal likelihood &lt;/h2&gt;
+
+&lt;p&gt;Working on generalizing marginal likelihood for all three foreground models.&lt;/p&gt;
+
+&lt;p&gt;Considered briefly how to use the matrix inversion lemma to improve numerical stability of all models.  Decided it could be difficult to build in a general way;  will proceed with the direct method for now, until there is evidence of numerical instability.&lt;/p&gt;
+
+&lt;p&gt;Generalized how covariance is generated.  Wrote several new functions for generating differenct covariance matrices.  Will need to rework some due to the developments I describe later.&lt;/p&gt;
+
+&lt;h2&gt;Theoretical Developments&lt;/h2&gt;
+
+&lt;p&gt;Thought extensively about perturbation models I described yesterday.  I realized there is a serious problem with modeling motion using brownian motion -- the prior variance grows without bound as time approaches infinity.  Thus, the marginal prior for the curve in view 36 has much greater prior variance than the curve one in view 1.  This doesn't make sense -- ideally, they should all have the same marginal prior.&lt;/p&gt;
+
+&lt;p&gt;This led to a reading session in Williams and Rasmussen, which led me to develop two new motion models, which I describe extensively in today's accompanying post.&lt;/p&gt;
+
+&lt;h2&gt;Tomorrow&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Finish implementing new covariance functions.&lt;/li&gt;
+&lt;li&gt;Implement generalized marginal likelihood.&lt;/li&gt;
+&lt;li&gt;implement &lt;em&gt;fast&lt;/em&gt; generalized marginal likelihood (approximation)
+
+&lt;ul&gt;
+&lt;li&gt;Test against existing ML for old models.&lt;/li&gt;
+&lt;li&gt;Test with new models.  Are the ML's higher? (will probably need training).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Build training data set from hand-traced ground-truth.&lt;/li&gt;
+&lt;li&gt;Write training code.  Train all three candidate models.&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Tue, 02 Jul 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/02/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/02/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Rethinking covariance functions</title>
+				<description>&lt;p&gt;Noticed a problem with the cubic spline perturbation model.  As the view number increases, the variance marginal prior of the curve in that view approaches infinity.  This means that the &quot;smoothness&quot; prior is ignored more and more in later views.&lt;/p&gt;
+
+&lt;h2&gt;Squared Exponential perturbation model&lt;/h2&gt;
+
+&lt;p&gt;A better model would have the same marginal prior for all views, but with correlation between nearby views.  This allows curves to revert to the prior as temporally correlated evidence becomes less informative.  I believe the squared exponential covariance function has this property.  Instead of adding the sq-exp covariance to the existing covariance function, we should multiply it, so self-covariance is unchanged, but pairwise correlation is non-zero.&lt;/p&gt;
+
+&lt;p&gt;An added benefit of this is that it only has one tunable parameter.&lt;/p&gt;
+
+&lt;p&gt;It should be easy to incorporate into our test-bed, along with the other two newly proposed foreground models.&lt;/p&gt;
+
+&lt;h2&gt;Ornstein Uhlenbeck perturbation model&lt;/h2&gt;
+
+&lt;p&gt;Digging deeper into Williams and Rasmussen, I found precisely the GP I was looking for a few days ago:  the Ornstein–Uhlenbeck (OU) process.  This   process describes brownian motion under the influence of a regularizing force that pulls toward the mean.&lt;/p&gt;
+
+&lt;p&gt;In other words, I can model correlation between views without affecting the marginal prior of the curve any particular view.  This is also accomplished by the squared-exponential model, but the OU process is probably more realistic, because the plant's motion looks non-smooth.&lt;/p&gt;
+
+&lt;h2&gt;Modelling the mean or not?&lt;/h2&gt;
+
+&lt;p&gt;I'm struggling with whether or not to explicitly model a &quot;mean&quot; curve with the SE and the OU processes.&lt;/p&gt;
+
+&lt;p&gt;If I did model the mean, each curve's covariance function would be the sum of a standard covariance plus a perturbation covariance.  The standard covariance models the &quot;mean&quot; curve, and it would be the same for all views (100% correlated).  The perturbation covariance would be partially correlated between the views, using the SE or the OU process.  The bayes net has the following structure:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;        O   &amp;lt;-- mean curve
+     / /\ \
+   /  /  \  \
+ /   |    |   \
+O---&amp;gt;O---&amp;gt;O---&amp;gt;O   &amp;lt;- per-view curves
+|    |    |    |
+O    O    O    O   &amp;lt;- observations
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The alternative is to model the per-view curves directly:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;O---&amp;gt;O---&amp;gt;O---&amp;gt;O   &amp;lt;- per-view curves
+|    |    |    |
+O    O    O    O   &amp;lt;- observations
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Under this model, each view's curve has a cubic-spline marginal distribution, and the SE or UO process controls the correlation between them.&lt;/p&gt;
+
+&lt;p&gt;What isn't clear is whether the perturbations in the latter model will be independent between points.  We need to model within-view perturbations as correlated, otherwise the marginal likelihood will drop too low.  There is no explicit description of how perturbations of adjacent points correlate.&lt;/p&gt;
+
+&lt;h2&gt;What follows is me thinking out-loud...&lt;/h2&gt;
+
+&lt;p&gt;Intuitively, points nearby in curve-space (have similar \(\tau\)'s) can never be more correlated than they are when they appear in the same view.  Separating them in time (view) will decreases their correlation, until finally, there is no correlation; the only remaining correlation is between points in the same view.  The SE kernel modulates that correlation.  The SE kernel doesn't explicitly model correlation between perturbations, but this doesn't mean the correlation doesn't exist -- it is implicit in the original kernel.&lt;/p&gt;
+
+&lt;p&gt;There is an analogy here with the classic krigging example.  In there models, the squared exponential over a 2D landscape (i.e. joint function over \(\mathbb{R}\)&lt;sup&gt;2&lt;/sup&gt; space) is equal to the product of 1D squared exponentials (i.e. two functions over \(\mathbb{R}\)&lt;sup&gt;1&lt;/sup&gt; space).  In other words, the 2D kernel is constructed by the product of 1D kernels.  There is no worry that the delta between nearby &quot;slices&quot; of the surface are uncorrelated, because the marginal covariance within that slice will enforce that smoothness.&lt;/p&gt;
+
+&lt;p&gt;In our case, we also have a product of 1D covariance functions constructing a 2D covariance function.  The difference is that one of the kernels (the curve-space kernel) is a cubic-spline process, while the other (the time-dimension kernel) is squared exponential (or Ornstein-Uhlenbeck).  Despite this difference, my intuition is that the conclusions are the same - the deltas will be smooth (i.e. correlated), because they will be the difference between two smooth curves.&lt;/p&gt;
+
+&lt;p&gt;Considering the marginals in both directions further illustrates why this works.  Obviously, a slice in the curve-direction will always look curve-like, since the marginals are all the same cubic-covariance GP prior.  In the time-direction, a single point will follow a GP or OU process, with initial conditions dictated by the first curve.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;...BUT...&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;...in the absence of data, each individual point will drift over time to the prior mean, I.e. &lt;strong&gt;zero&lt;/strong&gt;.  In other words, the 3D curve observed in view infinity gains no information from curve observed at time zero.&lt;/p&gt;
+
+&lt;p&gt;This is &lt;strong&gt;not&lt;/strong&gt; realistic.  In reality, these points shouldn't drift far from some &quot;sensible&quot; center curve, implying that a mean curve exists.&lt;/p&gt;
+
+&lt;p&gt;The time-slice of any particular point &lt;em&gt;should&lt;/em&gt; look like either a OU or SE process, but the mean needs to be explicit.  This implies an additive model, with distinct models for the unobserved &quot;mean curve&quot; and the deviations from it, which are summed to get the 3D curve seen in each view.&lt;/p&gt;
+
+&lt;h2&gt;Modeling perturbation&lt;/h2&gt;
+
+&lt;p&gt;So if we must model perturbation, how should we model it?&lt;/p&gt;
+
+&lt;p&gt;One thing is clear: the marginal prior for the curve in any view &lt;strong&gt;must&lt;/strong&gt; still be a cubic-spline process.&lt;/p&gt;
+
+&lt;p&gt;This implies that the perturbation must be a cubic-spline process, too.&lt;/p&gt;
+
+&lt;p&gt;However, the variances for each component (offset, linear, and cubic) are likely to be different for the perturbation model, compared to the mean-curve model.  Most importantly, the magnitude of the offset variance must be large in the mean-curve model but will be &lt;em&gt;much&lt;/em&gt; lower (relative to linear and cubic variance) in the perturbation model.&lt;/p&gt;
+
+&lt;p&gt;I was hoping to avoid adding four extra parameters to our model (perturbation offset, linear and cubic variance, plus perturbation scale-length).  The mean-free model only adds one parameter - scale-length.  I guess this is the price we pay for a better model -- and for higher marginal likelihoods.  Ideally, the occam's razor quality of the marginal likelihood will allow us to avoid overfitting this many parameters (7 total).  Any parameters that are superfluous should become near-zero during training.&lt;/p&gt;
+
+&lt;p&gt;...I hope.&lt;/p&gt;
+</description>
+				<pubDate>Tue, 02 Jul 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/02/rethinking-covariance-functions</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/02/rethinking-covariance-functions</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
 &lt;p&gt;Background:  This weekend, I worked out the math for two new foreground models, which differ in how 3D perturbations between views are modelled.  The first assumes a single &quot;mean&quot; curve, and all observations are small 3D perturbations of it.  The second assumes the unobserved curve follows Brownian motion over time.&lt;/p&gt;
 
 &lt;p&gt;Also developed a new approach to evaluate marginal likelhoods thats much simpler, but need to confirm that it matches reference implementation.&lt;/p&gt;
@@ -434,281 +693,6 @@ The new approach uses the old approach as a starting point, but then recomputes 
 				<pubDate>Wed, 26 Jun 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/06/26/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/06/26/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Rethinking Likelihood</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Testing and debugging &lt;code&gt;clean_correspodnence2.m&lt;/code&gt; has revealed some significant problems with the current approach to constructing the likelihood function.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt; 5%-10% of fragements have correspondences that are nonsensical. &lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;I hypothesize that this is due to bad correspondences early on, when there is little evidence to drive a good correspodnence.  These bad correspodnences are propagated as new curves are added that could suggest a better correspodnence.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt; Large lateral gaps in triangulation result in large axial gaps in posterior curve.  &lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;The problem is that the index set is computed from the triangulation.  The current fix for this -- smooth, re-index, repeat -- is very limited in the severity it can overcome.  In practice, most gaps are only partially reduced.&lt;/p&gt;
-
-&lt;h2&gt;Rethinking &quot;Correspondence to Likelihood&quot;&lt;/h2&gt;
-
-&lt;p&gt;Corresondence is good for constructing a decent-quality 3d curve, but isn't good for computing fine-grained pointwise likelihood, due to sporradic terrible correspondences and gaps.&lt;/p&gt;
-
-&lt;p&gt;Instead of continuously Band-Aiding these issues that keep arising, its time to re-think how the likelhood is constructed.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt; 1. the mean of 3d gaussians should project to the 2D position of the corresponding data point &lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt; 2. the depth should be based on the corresponding position in the unobserved curve &lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Two issues here.  First, how to localize the unobserved curve without having the likelihood already (chicken and egg).  Second, how to identify the corresponding point of the unobserved curve?&lt;/p&gt;
-
-&lt;p&gt;In the old method, the answer to both was &quot;use the correspondence matrix.&quot;&lt;/p&gt;
-
-&lt;p&gt;In the new method, we still use the correspondence matrix to triangulate, but we smooth the result using the prior and then throw away correspondence information.&lt;/p&gt;
-
-&lt;h2&gt;Killing the correspondence grid&lt;/h2&gt;
-
-&lt;p&gt;The corresponence matrix artificially forces points from different views to correspond to the same point.  This is out of necessity -- we need correspondence to achieve triangulation.  But we don't need to adhere to this to compute the likelhood.  Indeed, observed points may fall anywhere in the continuous index set, not into a discrete set of predefined cells.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Observations can correspond to any index in \([0 t_{end}]\).&lt;/li&gt;
-&lt;li&gt;Unobserved curve is modelled at a uniform grid.&lt;/li&gt;
-&lt;li&gt;Previously, the dimensionality of the unobserved curve grew with the number of observations. Now it grows with the range of the index set (i.e. the length of the curve).`&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;h2&gt;Random thoughts&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;evaluate marginal likelihood directly?  then add extra normalization from triangulation (jacobian?)
-
-&lt;ul&gt;
-&lt;li&gt;evaluate linearly using markov conditional probabilities&lt;/li&gt;
-&lt;li&gt;extend to poly model
-
-&lt;ul&gt;
-&lt;li&gt;grid-structured Bayes net&lt;/li&gt;
-&lt;li&gt;topological sort for evaluation&lt;/li&gt;
-&lt;li&gt;use scope variables to manage dependencies generally&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Thu, 20 Jun 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/06/20/rethinking-likelihood</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/06/20/rethinking-likelihood</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Continuing work on foreground curve model. Editing &lt;code&gt;correspondence/clean_correspondence2.m&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h2&gt;Logic overview&lt;/h2&gt;
-
-&lt;ol&gt;
-&lt;li&gt;smooth triangulated points &amp;amp; estimate their indices&lt;/li&gt;
-&lt;li&gt;fill-in untriangulatable points/indices&lt;/li&gt;
-&lt;li&gt;resolve many-to-one data-to-3d-curve correspondences by picking best match&lt;/li&gt;
-&lt;li&gt;triangulate each data point against 3d curve to get mean and covariance for point&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;h2&gt;Logic detail&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code&gt;1. estimate indices by chord-length parameterization
-2. repeat N times:
-    2.1 smooth triangulated points using current index estimate (posterior mean approx.)
-    2.2 re-estimate indices using chord-length parameterization
-3. for each untriangulatable point
-    3.1 triangulate against cubic interpolation of neighboring points (Newton's method)
-    3.2 store resulting point and index with smoothed points from 2.1
-4. for each 2D data curve
-    4.1 triangulate against corresponding 3d point in smoothed curve to get likelihood mean
-    4.2 compute curvature at this point to get likelihood precision
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;03:13:30 PM&lt;/strong&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;First run, addressing syntax errors.&lt;/li&gt;
-&lt;li&gt;Plotting first test: triangulated curve w/ and wo/ gap-filling
-
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Issue&lt;/strong&gt;: gap-fill at beginning maps exactly to first non-gap point&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Issue&lt;/strong&gt;: interior gap point falls exactly on non-gap point&lt;/li&gt;
-&lt;li&gt;need to merge points?&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;&lt;strong&gt;04:06:03 PM&lt;/strong&gt;
-wrapping up...&lt;/p&gt;
-
-&lt;h2&gt;TODO&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;diagnose coincident-point issue -- bug or not?&lt;/li&gt;
-&lt;li&gt;Finish testing - plot per-view likelihood points&lt;/li&gt;
-&lt;li&gt;Add point-merging&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Mon, 17 Jun 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/06/17/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/06/17/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;14528&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Working on foreground curve model.&lt;/p&gt;
-
-&lt;p&gt;Begin of significant rework; SVN revision noted in infobox.&lt;/p&gt;
-
-&lt;p&gt;Editing  &lt;code&gt;correspondence/clean_correspondence2.m&lt;/code&gt; which will replace &lt;code&gt;correspondence/clean_corespondence.m&lt;/code&gt;.  Drawing partially from &lt;code&gt;corr_to_bg_likelihood.m&lt;/code&gt;, esp. for &quot;best match&quot; logic.&lt;/p&gt;
-
-&lt;p&gt;Probably will rename &lt;code&gt;correspondence/clean_correspondence2.m&lt;/code&gt; to &lt;code&gt;correspondence/corr_to_likelihood.m&lt;/code&gt; before I finish.&lt;/p&gt;
-
-&lt;p&gt;Will use &lt;code&gt;tests/test_ml_end_to_end&lt;/code&gt; to compare old and new implementations.&lt;/p&gt;
-
-&lt;p&gt;Work still in progress...&lt;/p&gt;
-</description>
-				<pubDate>Fri, 14 Jun 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/06/14/log-entry</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/06/14/log-entry</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;After investigating the false positives from the last entry, it seems clear that bad matches look good because missing data are not penalized.  For example&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-06-13-bad-match.png&quot; alt=&quot;Bad match&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;In the overlapping region of the blue and green curves, the distance between them is relatively low (less than 3 pixels, or 1.5px radius).  But the size of their overlap is so low that it would be hard to claim that they come from the same underlying curve with any confidence.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt; Params &lt;/strong&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;smoothing_variance_2d: 0.2500
-    noise_variance_2d: 10
-     position_mean_2d: [2x1 double]
- position_variance_2d: 1.3629e+04
-     rate_variance_2d: 0.4962
-   smoothing_variance: 1.0000e-04
-       noise_variance: 10
-        position_mean: [3x1 double]
-    position_variance: 62500
-        rate_variance: 2.2500
-      smoothing_sigma: 0.2000
-    noise_variance_bg: 0.1038
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I would have expected that noise_variance_bg was low enough to discount this candidate, but the log ML ratio is 71.0.  The noise model must just look really bad...&lt;/p&gt;
-</description>
-				<pubDate>Thu, 13 Jun 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/06/13/log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/06/13/log</guid>
 			</item>
 		
 	</channel>

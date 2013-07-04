@@ -78,7 +78,7 @@
   
   <h1 class="title">Work Log</h1>
 
-  <div class="date emphnext">July 01, 2013</div>
+  <div class="date emphnext">July 02, 2013</div>
     
 
 
@@ -107,32 +107,36 @@
 </div>
 
 
-<p>Background:  This weekend, I worked out the math for two new foreground models, which differ in how 3D perturbations between views are modelled.  The first assumes a single "mean" curve, and all observations are small 3D perturbations of it.  The second assumes the unobserved curve follows Brownian motion over time.</p>
+<h2>Implementing marginal likelihood </h2>
 
-<p>Also developed a new approach to evaluate marginal likelhoods thats much simpler, but need to confirm that it matches reference implementation.</p>
+<p>Working on generalizing marginal likelihood for all three foreground models.</p>
 
-<p><strong>Goals:</strong></p>
+<p>Considered briefly how to use the matrix inversion lemma to improve numerical stability of all models.  Decided it could be difficult to build in a general way;  will proceed with the direct method for now, until there is evidence of numerical instability.</p>
+
+<p>Generalized how covariance is generated.  Wrote several new functions for generating differenct covariance matrices.  Will need to rework some due to the developments I describe later.</p>
+
+<h2>Theoretical Developments</h2>
+
+<p>Thought extensively about perturbation models I described yesterday.  I realized there is a serious problem with modeling motion using brownian motion -- the prior variance grows without bound as time approaches infinity.  Thus, the marginal prior for the curve in view 36 has much greater prior variance than the curve one in view 1.  This doesn't make sense -- ideally, they should all have the same marginal prior.</p>
+
+<p>This led to a reading session in Williams and Rasmussen, which led me to develop two new motion models, which I describe extensively in today's accompanying post.</p>
+
+<h2>Tomorrow</h2>
 
 <ul>
-<li>Implement both new foreground models, plus old one in new "kernel function" way.</li>
-<li>Implement new evaluation method and test against reference.</li>
-<li>Learn parameters for all three models (needs some ground truthing).</li>
+<li>Finish implementing new covariance functions.</li>
+<li>Implement generalized marginal likelihood.</li>
+<li>implement <em>fast</em> generalized marginal likelihood (approximation)
+
+<ul>
+<li>Test against existing ML for old models.</li>
+<li>Test with new models.  Are the ML's higher? (will probably need training).</li>
+</ul>
+</li>
+<li>Build training data set from hand-traced ground-truth.</li>
+<li>Write training code.  Train all three candidate models.</li>
 </ul>
 
-
-<h2>Implementing new models</h2>
-
-<p>Worked on general framework for evaluating ML under general new model framework.</p>
-
-<p>After some struggling with covariance degeneracies inherent in backprojection, I realized that the 3D marginal likelihood is naturally degenerate, because it isn't the true likelihood function (which is in 2D).</p>
-
-<p>I'm kicking myself for not remembering that I struggled with this exact problem 5 months ago.  At that time, I realized the better approach is to use Candidate's estimator, which is the ratio of the unnormalized posterior to the normalized posterior.  The unnormalized posterior comes from the prior and 2D likelIhood;  the normalized posterior is obtainable from the 3D likelihood and the prior.</p>
-
-<p>This was already implemented in <code>curve_ml.m</code>, but was  O(n<sup>3</sup> ), so was all but abandoned in favor of the junction-tree method in <code>curve_ml2.m</code>, which is O(n).</p>
-
-<p>However, it's recently become clear that the candidate's estimator should be evaluated in \(O(n)\)  by exploiting the Markovian nature of the covariance matrix.</p>
-
-<p>It should be easy to try both, by simply swapping out covariance matrices with ones arising from the new covariance functions.  Tomorrow...</p>
 
       <address class="signature">
         Posted by
@@ -144,10 +148,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/07/02/rethinking-covariance-functions" class="next" title="Rethinking covariance functions">Rethinking covariance functions &rarr;</a>
+    <a href="/ksimek/research/2013/07/03/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/07/01/foreground-curve-models" class="prev" title="Foreground Curve Models as Gaussian Process Covariance Function">&larr; Foreground Curve Models as Gaussian Process Covariance Function</a>
+    <a href="/ksimek/research/2013/07/02/rethinking-covariance-functions" class="prev" title="Rethinking covariance functions">&larr; Rethinking covariance functions</a>
   
   </div>
   <div class="clearer"> </div>
