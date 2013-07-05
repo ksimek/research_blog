@@ -36,11 +36,121 @@
 
 &lt;p&gt;&lt;strong&gt;Test:&lt;/strong&gt; &lt;code&gt;test/test_ml_end_to_end_2.m&lt;/code&gt;&lt;/p&gt;
 
+&lt;p&gt;&lt;em&gt;07:11:52 AM&lt;/em&gt;&lt;/p&gt;
+
 &lt;p&gt;Trouble with NaN error in &lt;code&gt;correspondence/corr_to_likelihood_legacy.m&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;&lt;em&gt;08:22:43 AM&lt;/em&gt;&lt;/p&gt;
 
 &lt;p&gt;Narrowed it down to gap-handling code-branch.&lt;/p&gt;
+
+&lt;p&gt;08:53:34 AM&lt;/p&gt;
+
+&lt;p&gt;Fixed. Arose from a nasty indexing scheme in the original &lt;code&gt;clean_correspondence.m&lt;/code&gt;, which I didn't handle well when adapting for &lt;code&gt;corr_to_likelihood_legacy.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;09:29:35 AM&lt;/p&gt;
+
+&lt;p&gt;Nonsingular prior covariance matrix causing crash.  Apparently caused by same index appearing multiple times.&lt;/p&gt;
+
+&lt;p&gt;In the past, we always merged such points.&lt;/p&gt;
+
+&lt;p&gt;The new idea is different views of the same point would make the posterior covariance singular.  Either this isn't true, or there's a bug...&lt;/p&gt;
+
+&lt;p&gt;Debugging this will take some serious coding and math brainpower and I fell debugging fatigue coming on.  Taking a brief break to refresh, then will tackle...&lt;/p&gt;
+
+&lt;p&gt;11:56:21 AM&lt;/p&gt;
+
+&lt;p&gt;Using a simple toy example, I (partially) confirmed my intuition that a degenerate prior matrix is okay, as long as its nullspace is spanned by the likelihood matrix.&lt;/p&gt;
+
+&lt;p&gt;In the context of this bug, it means that two points sharing the same index value is fine as long as they arose from different views (assuming non-degenerate camera configuration, which is true in this case).&lt;/p&gt;
+
+&lt;p&gt;Possible causes&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Numerical instability -- near-singular matrix.&lt;/li&gt;
+&lt;li&gt;Error in Linear Algebra logic (seems unlikely, same code worked in old likelihood)&lt;/li&gt;
+&lt;li&gt;Some bug earlier in the pipeline, causing invalid matrices here.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;I'm guessing its 3; if not that, then maybe 2.&lt;/p&gt;
+
+&lt;p&gt;Next steps&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;inspect the shared indices -- same view?&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;12:48:49 PM&lt;/p&gt;
+
+&lt;p&gt;Reversing my previous stance:  Degenerate prior with shared index will always result in a degenerate posterior.  The prior has two variables that are 100% correlated, and the posterior will also be 100% correlated.  This implies a degenerate covariance matrix.&lt;/p&gt;
+
+&lt;p&gt;In such a case, the posterior's implied dimensionality is lower than it's apparent dimensionality.  The prior and posterior will be degenerate in the same way; this symmetry is aesthetically appealing, because the Candidates estimator for the marginal likelihood involves their ratio.  This suggests that eliminating the redundant dimensions for both pdfs is a sensible thing to do.&lt;/p&gt;
+
+&lt;p&gt;How to resolve this?  Possibilities:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Detect redundant indices early, eliminate them in the prior and posterior.  USe bookkeeping to remember which observations refer to the same model point.&lt;/li&gt;
+&lt;li&gt;Handle reduntancies later, after degenerate posterior is formed, before evaluating posterior or prior .  The mean will automatically contain redundancies, which will avoid bookkeeping when comparing the mean to the data points (when &lt;code&gt;mix&lt;/code&gt; is != 0).&lt;/li&gt;
+&lt;li&gt;Try to determine how identical indices arose in the first place.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Decided on 2 for now.  In retrospect, approach 1 may have had slightly less code and faster.&lt;/p&gt;
+
+&lt;p&gt;01:45:00 PM&lt;/p&gt;
+
+&lt;p&gt;ML is now running on legacy correspondence.  Results are significantly higher than the legacy ML algorithm (~ 2.25 times).  Not yet sure why yet.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Computing marginal likelihood (old way)...
+Done. (6665.8 ms)
+Old ML: 207.041742
+Computing marginal likelihood (new way, legacy correspondence)...
+Done. (8853.1 ms)
+New ML (Legacy corr): 439.273126
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Noticible slow-down, probably because of extra indices arising from not merging duplicate observations.&lt;/p&gt;
+
+&lt;p&gt;possible causes is discrepancy:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;In old code, re-triangulation used simple averaging, not accounting for differing precisions of the points&lt;/li&gt;
+&lt;li&gt;index sets differ between old and new code.  (update: checked, they are same)&lt;/li&gt;
+&lt;li&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Plotting means for both to view differences...&lt;/p&gt;
+
+&lt;p&gt;Investigation into ML discrepancy:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Posterior means are similar, but obviously differ.&lt;/li&gt;
+&lt;li&gt;both means are very non-smooth (need to re-address the smoothness issue)&lt;/li&gt;
+&lt;li&gt;new mean has signficantly more points (~7%, 80 pts).  Could this alone affect ML?&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;almost all difference is in posterior&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Maybe posterior kernel is different?  but prior is same
+It's just the data covariance thats different.
+but why??  There's more of them&lt;/p&gt;
+
+&lt;p&gt;New ml changes significantly when evaluation point changes.  This implies that the posterior curvature differs from the curvature of the joint distribution, which shouldn't happen.  A small amount of difference can arise naturally due to the approximation of the likelihood, but this is too large to be explained in that way.  Most noticibly, the new results look very similar to the old ones &lt;strong&gt;when evaluating at the likelihood mean&lt;/strong&gt;.  The largest difference occurs when evaluating at the posterior mean.  Not clear yet what conclusions to draw from this, or if this is just a coincidence.&lt;/p&gt;
+
+&lt;p&gt;Maybe likelihood curvatures are differing.&lt;/p&gt;
+
+&lt;p&gt;07:35:28 PM&lt;/p&gt;
+
+&lt;p&gt;Was able to get identical likelihood value using matrix-form as I did with the original 2D geometric error form.  Seems like the precision matrices are good.&lt;/p&gt;
+
+&lt;p&gt;Priors appear good too, since it's evaluates to the same value as the reference implementation.&lt;/p&gt;
+
+&lt;p&gt;Errors in ML running on new correspondence.  Investigating.  Will return to ML issue later.&lt;/p&gt;
+
+&lt;p&gt;Somewhat concerned that I don't have a reference implementation for new ML with new Corr.&lt;/p&gt;
 </description>
 				<pubDate>Thu, 04 Jul 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/04/work-log</link>
