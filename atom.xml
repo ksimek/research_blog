@@ -4,13 +4,278 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-07-04T19:38:23-07:00</updated>
+ <updated>2013-07-09T10:52:12-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/07/08/work-log"/>
+   <updated>2013-07-08T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/07/08/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Goal:&lt;/strong&gt; Cleanup and speedup of curve_ml.&lt;/p&gt;
+
+&lt;h2&gt;Task 1: Version without matrix-inversion lemma&lt;/h2&gt;
+
+&lt;p&gt;Making a simpler version that doesn't exploit the matrix inversion lemma (MIL).&lt;/p&gt;
+
+&lt;p&gt;The benefits of the MIL are likely mitigated by markov-decomposition (next task), and MIL
+complicates the code and API design.&lt;/p&gt;
+
+&lt;p&gt;Results (small test):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Computing marginal likelihood (old way)...
+Done. (108.2 ms)
+Old ML: 62.183969
+Computing marginal likelihood (new way, legacy correspondence)...
+Done. (120.8 ms)
+New ML (Legacy corr): 63.908784
+Computing marginal likelihood (new way)...
+Done. (88.9 ms)
+New ML (New corr): 72.304718           &amp;lt;----------  OLD RESULT
+Computing marginal likelihood (new way, no MIL)...
+Done. (97.3 ms)
+New ML (New corr, no MIL): 72.304666   &amp;lt;----------  NEW RESULT
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The difference is about 0.00007% -- seems good.  Slightly slower, possibly just noise.&lt;/p&gt;
+
+&lt;p&gt;Results (full test):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Computing marginal likelihood (old way)...
+Done. (6447.3 ms)
+Old ML: 207.324848
+Computing marginal likelihood (new way, legacy correspondence)...
+Done. (7665.1 ms)
+New ML (Legacy corr): 209.199676
+Computing marginal likelihood (new way)...
+Done. (6205.6 ms)
+New ML (New corr): 457529.406731  &amp;lt;---------- ?????
+Computing marginal likelihood (new way, no MIL)...
+Done. (5946.7 ms)
+New ML (New corr, no MIL): 778723.327102  &amp;lt;---------- ?????
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Both versions give CRAZY high results; significantly different from the &lt;a href=&quot;/ksimek/research/2013/07/05/work-log/&quot;&gt;same test on Friday&lt;/a&gt;.  Need to investigate...&lt;/p&gt;
+
+&lt;h2&gt;Investigating new results&lt;/h2&gt;
+
+&lt;p&gt;Observations&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;All results differ from friday, including old ML (slightly)&lt;/li&gt;
+&lt;li&gt;New ML using legacy correspondence is still reasonable.&lt;/li&gt;
+&lt;li&gt;Both crazy results are using new correspondence.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;TODO:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Look at pieces (log posterior, likelihood, prior)&lt;/li&gt;
+&lt;li&gt;Inspect new correspondence&lt;/li&gt;
+&lt;li&gt;Think about what changed since Friday?&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;12:10:19 PM&lt;/p&gt;
+
+&lt;p&gt;Ran old test, &lt;code&gt;test_ml_end_to_end.m&lt;/code&gt; and compared to old results in new test, &lt;code&gt;test_ml_end_to_end_2.m&lt;/code&gt;.  Old test still gives old results, so I'll compare the two tests to determine what has changed.&lt;/p&gt;
+
+&lt;p&gt;12:12:48 PM&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;mix&lt;/code&gt; parameter was set to 0.5 instead of 0.0.  I had forgotten I changed it at the end if Friday.&lt;/p&gt;
+
+&lt;p&gt;Now getting &quot;good&quot; results again.  It raises a question that needs to be answered: why is ML sooo sensitive to evalaution position when using new correspondence?&lt;/p&gt;
+
+&lt;h2&gt;Resuming&lt;/h2&gt;
+
+&lt;p&gt;New results (full test):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Computing marginal likelihood (old way)...
+Done. (6009.5 ms)
+Old ML: 207.041742
+Computing marginal likelihood (new way, legacy correspondence)...
+Done. (7286.3 ms)
+New ML (Legacy corr): 207.700616
+Computing marginal likelihood (new way)...
+Done. (6146.6 ms)
+New ML (New corr): 793.585038             &amp;lt;---------- OLD RESULT
+Computing marginal likelihood (new way, no MIL)...
+Done. (6008.3 ms)
+New ML (New corr, no MIL): 793.600835     &amp;lt;---------- NEW RESULT
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;0.002% error, slightly faster.  Good.&lt;/p&gt;
+
+&lt;h2&gt;Investigating Anomaly in new ML &lt;/h2&gt;
+
+&lt;p&gt;So why is new ML so sensitive to where it is evaluated?&lt;/p&gt;
+
+&lt;p&gt;Note that it's only extreme when using new correspondence.  Old correspondence is okay.&lt;/p&gt;
+
+&lt;p&gt;Inspect difference between max likelihood and max posterior.  Maybe it's just more extreme than with old correspondence.&lt;/p&gt;
+
+&lt;p&gt;12:20:59 PM&lt;/p&gt;
+
+&lt;p&gt;Idea: bug in non-0.0 case?  Nope.&lt;/p&gt;
+
+&lt;p&gt;Tried mixes: 0.0, 0.01, 0.1. Steady and dramatic increase in ML for new correspondence.  Old correspondence is nearly constant.  What is different between these correspodnences (other than the correspondences themselves).&lt;/p&gt;
+
+&lt;p&gt;12:57:08 PM&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Answer&lt;/strong&gt;: The max likelihood in the new correspondences is waaaaay into the tails of the prior.&lt;/p&gt;
+
+&lt;p&gt;Since no real triangulation is done to ensure agreement between views, the maximum likelihood triangulation is very rough  (infinite likelihood variance allows this to happen without penalty).  This places the curve far into the tails of the prior, where evaluation is highly unstable.  Both the prior and likelihood are then extremely low (-1e-8 in log space), which should cancel, but don't due to numerical instability.  Hence, marginal likelihoods with huge magnitude.&lt;/p&gt;
+
+&lt;p&gt;This is great news, since it means everything is working mostly as expected.  The numerical instability issue is easilly solved by always evaluating at the posterior, not the maximum likelihood.&lt;/p&gt;
+
+&lt;h2&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;The version of the new ML that doesn't use the matrix inversion lemma is accurate, so we can proceed to the markov-decomposed version next.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/07/05/work-log"/>
+   <updated>2013-07-05T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/07/05/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Still trying to troubleshoot the difference between old and new likelihood implementations.&lt;/p&gt;
+
+&lt;p&gt;Reviewing what is known&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Prior is same&lt;/li&gt;
+&lt;li&gt;Likelihood is same&lt;/li&gt;
+&lt;li&gt;Posterior evaluates same in two different ways.&lt;/li&gt;
+&lt;li&gt;mean curve is different&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Try using mean curve from old alg. in new alg.&lt;/p&gt;
+
+&lt;p&gt;10:13:35 AM&lt;/p&gt;
+
+&lt;p&gt;SOLVED.&lt;/p&gt;
+
+&lt;p&gt;Yesterday I noticed that setting mix to 1.0 give decent results, but 0.0 was terrible.  Now I know why: 0.0 is a special case, in which a simplified calculation is used.  There was a bug in that special case, where the normalization constant didn't take into account the redundant dimensions that we eliminated.&lt;/p&gt;
+
+&lt;h2&gt;ML Test&lt;/h2&gt;
+
+&lt;p&gt;11:02:29 AM&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;ml_test_end_to_end_2.m&lt;/code&gt; is now running&lt;/p&gt;
+
+&lt;p&gt;Running on subset of correspondence, results:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; test_ml_end_to_end_2([], [], [], false)
+
+Computing marginal likelihood (old way)...  
+Done. (96.9 ms)  
+Old ML: 62.176782
+
+Computing marginal likelihood (new way, legacy correspondence)...  
+Done. (112.3 ms)  
+New ML (Legacy corr): 63.859940
+
+Computing marginal likelihood (new way)...  
+Done. (83.5 ms)  
+New ML (New corr): 71.964026
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Surprised the magnitude of difference between &quot;Old ML&quot; and &quot;New ML (Legacy corr)&quot;.  I guess the posterior variance is larger in this case, which means the posterior means can differ more.&lt;/p&gt;
+
+&lt;p&gt;Running on full correspondence, results:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; test_ml_end_to_end_2([], [], [], false)
+
+Computing marginal likelihood (old way)...
+Done. (6400.1 ms)
+Old ML: 207.041742
+Computing marginal likelihood (new way, legacy correspondence)...
+Done. (8328.4 ms)
+New ML (Legacy corr): 207.700616
+Computing marginal likelihood (new way)...
+Done. (6349.2 ms)
+New ML (New corr): 793.585038
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Interesting that &quot;New ML (New Corr)&quot; is dramatiacally higher than the old and legacy ML's.  I suppose I should have been expected this, since this entire approach &lt;a href=&quot;/ksimek/research/2013/06/28/work-summary/&quot;&gt;was motivated by the terrible correspondences arising from the legacy correspondence&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;It's nice to see the ML for good correspondences getting even better.  Hopefully we'll see even more improvement as we try new curve models.&lt;/p&gt;
+
+&lt;p&gt;Taking a break for lunch...&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Next steps:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;fast ml_curve3
+
+&lt;ul&gt;
+&lt;li&gt;linear eval&lt;/li&gt;
+&lt;li&gt;try without matrix inversion lemma&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;try new models (check that they're nonsingular; don't crash)&lt;/li&gt;
+&lt;li&gt;set up training framework&lt;/li&gt;
+&lt;li&gt;consider version without inversion lemma&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Work Log</title>
@@ -122,7 +387,7 @@ New ML (Legacy corr): 439.273126
 
 &lt;p&gt;Noticible slow-down, probably because of extra indices arising from not merging duplicate observations.&lt;/p&gt;
 
-&lt;p&gt;possible causes is discrepancy:&lt;/p&gt;
+&lt;p&gt;possible causes of discrepancy:&lt;/p&gt;
 
 &lt;ol&gt;
 &lt;li&gt;In old code, re-triangulation used simple averaging, not accounting for differing precisions of the points&lt;/li&gt;
@@ -145,7 +410,7 @@ New ML (Legacy corr): 439.273126
 
 &lt;p&gt;Maybe posterior kernel is different?  but prior is same
 It's just the data covariance thats different.
-but why??  There's more of them&lt;/p&gt;
+but why??  There's more of them.&lt;/p&gt;
 
 &lt;p&gt;New ml changes significantly when evaluation point changes.  This implies that the posterior curvature differs from the curvature of the joint distribution, which shouldn't happen.  A small amount of difference can arise naturally due to the approximation of the likelihood, but this is too large to be explained in that way.  Most noticibly, the new results look very similar to the old ones &lt;strong&gt;when evaluating at the likelihood mean&lt;/strong&gt;.  The largest difference occurs when evaluating at the posterior mean.  Not clear yet what conclusions to draw from this, or if this is just a coincidence.&lt;/p&gt;
 
@@ -155,11 +420,19 @@ but why??  There's more of them&lt;/p&gt;
 
 &lt;p&gt;Was able to get identical likelihood value using matrix-form as I did with the original 2D geometric error form.  Seems like the precision matrices are good.&lt;/p&gt;
 
-&lt;p&gt;Priors appear good too, since it's evaluates to the same value as the reference implementation.&lt;/p&gt;
+&lt;p&gt;Priors appear good too, since it evaluates to the same value as the reference implementation.&lt;/p&gt;
 
-&lt;p&gt;Errors in ML running on new correspondence.  Investigating.  Will return to ML issue later.&lt;/p&gt;
+&lt;h2&gt;Reference implementation for new ML&lt;/h2&gt;
 
-&lt;p&gt;Somewhat concerned that I don't have a reference implementation for new ML with new Corr.&lt;/p&gt;
+&lt;p&gt;Idea: direct implementation for quadform, but with hacked nomralization constant&lt;/p&gt;
+
+&lt;h2&gt;In progress&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;diagnosing errors in new likelihood &lt;code&gt;curve_ml_3.m&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;getting &lt;code&gt;test_ml_end_to_end_2.m&lt;/code&gt; running.&lt;/li&gt;
+&lt;/ul&gt;
+
 </content>
  </entry>
  

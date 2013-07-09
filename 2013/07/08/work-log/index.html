@@ -78,7 +78,7 @@
   
   <h1 class="title">Work Log</h1>
 
-  <div class="date emphnext">July 04, 2013</div>
+  <div class="date emphnext">July 08, 2013</div>
     
 
 
@@ -107,133 +107,126 @@
 </div>
 
 
-<h2>Continuing debugging of new likelihood</h2>
+<p><strong>Goal:</strong> Cleanup and speedup of curve_ml.</p>
 
-<p><strong>Test:</strong> <code>test/test_ml_end_to_end_2.m</code></p>
+<h2>Task 1: Version without matrix-inversion lemma</h2>
 
-<p><em>07:11:52 AM</em></p>
+<p>Making a simpler version that doesn't exploit the matrix inversion lemma (MIL).</p>
 
-<p>Trouble with NaN error in <code>correspondence/corr_to_likelihood_legacy.m</code>.</p>
+<p>The benefits of the MIL are likely mitigated by markov-decomposition (next task), and MIL
+complicates the code and API design.</p>
 
-<p><em>08:22:43 AM</em></p>
-
-<p>Narrowed it down to gap-handling code-branch.</p>
-
-<p>08:53:34 AM</p>
-
-<p>Fixed. Arose from a nasty indexing scheme in the original <code>clean_correspondence.m</code>, which I didn't handle well when adapting for <code>corr_to_likelihood_legacy.m</code>.</p>
-
-<p>09:29:35 AM</p>
-
-<p>Nonsingular prior covariance matrix causing crash.  Apparently caused by same index appearing multiple times.</p>
-
-<p>In the past, we always merged such points.</p>
-
-<p>The new idea is different views of the same point would make the posterior covariance singular.  Either this isn't true, or there's a bug...</p>
-
-<p>Debugging this will take some serious coding and math brainpower and I fell debugging fatigue coming on.  Taking a brief break to refresh, then will tackle...</p>
-
-<p>11:56:21 AM</p>
-
-<p>Using a simple toy example, I (partially) confirmed my intuition that a degenerate prior matrix is okay, as long as its nullspace is spanned by the likelihood matrix.</p>
-
-<p>In the context of this bug, it means that two points sharing the same index value is fine as long as they arose from different views (assuming non-degenerate camera configuration, which is true in this case).</p>
-
-<p>Possible causes</p>
-
-<ol>
-<li>Numerical instability -- near-singular matrix.</li>
-<li>Error in Linear Algebra logic (seems unlikely, same code worked in old likelihood)</li>
-<li>Some bug earlier in the pipeline, causing invalid matrices here.</li>
-</ol>
-
-
-<p>I'm guessing its 3; if not that, then maybe 2.</p>
-
-<p>Next steps</p>
-
-<ul>
-<li>inspect the shared indices -- same view?</li>
-</ul>
-
-
-<p>12:48:49 PM</p>
-
-<p>Reversing my previous stance:  Degenerate prior with shared index will always result in a degenerate posterior.  The prior has two variables that are 100% correlated, and the posterior will also be 100% correlated.  This implies a degenerate covariance matrix.</p>
-
-<p>In such a case, the posterior's implied dimensionality is lower than it's apparent dimensionality.  The prior and posterior will be degenerate in the same way; this symmetry is aesthetically appealing, because the Candidates estimator for the marginal likelihood involves their ratio.  This suggests that eliminating the redundant dimensions for both pdfs is a sensible thing to do.</p>
-
-<p>How to resolve this?  Possibilities:</p>
-
-<ol>
-<li>Detect redundant indices early, eliminate them in the prior and posterior.  USe bookkeeping to remember which observations refer to the same model point.</li>
-<li>Handle reduntancies later, after degenerate posterior is formed, before evaluating posterior or prior .  The mean will automatically contain redundancies, which will avoid bookkeeping when comparing the mean to the data points (when <code>mix</code> is != 0).</li>
-<li>Try to determine how identical indices arose in the first place.</li>
-</ol>
-
-
-<p>Decided on 2 for now.  In retrospect, approach 1 may have had slightly less code and faster.</p>
-
-<p>01:45:00 PM</p>
-
-<p>ML is now running on legacy correspondence.  Results are significantly higher than the legacy ML algorithm (~ 2.25 times).  Not yet sure why yet.</p>
+<p>Results (small test):</p>
 
 <pre><code>Computing marginal likelihood (old way)...
-Done. (6665.8 ms)
-Old ML: 207.041742
+Done. (108.2 ms)
+Old ML: 62.183969
 Computing marginal likelihood (new way, legacy correspondence)...
-Done. (8853.1 ms)
-New ML (Legacy corr): 439.273126
+Done. (120.8 ms)
+New ML (Legacy corr): 63.908784
+Computing marginal likelihood (new way)...
+Done. (88.9 ms)
+New ML (New corr): 72.304718           &lt;----------  OLD RESULT
+Computing marginal likelihood (new way, no MIL)...
+Done. (97.3 ms)
+New ML (New corr, no MIL): 72.304666   &lt;----------  NEW RESULT
 </code></pre>
 
-<p>Noticible slow-down, probably because of extra indices arising from not merging duplicate observations.</p>
+<p>The difference is about 0.00007% -- seems good.  Slightly slower, possibly just noise.</p>
 
-<p>possible causes of discrepancy:</p>
+<p>Results (full test):</p>
 
-<ol>
-<li>In old code, re-triangulation used simple averaging, not accounting for differing precisions of the points</li>
-<li>index sets differ between old and new code.  (update: checked, they are same)</li>
-<li></li>
-</ol>
+<pre><code>Computing marginal likelihood (old way)...
+Done. (6447.3 ms)
+Old ML: 207.324848
+Computing marginal likelihood (new way, legacy correspondence)...
+Done. (7665.1 ms)
+New ML (Legacy corr): 209.199676
+Computing marginal likelihood (new way)...
+Done. (6205.6 ms)
+New ML (New corr): 457529.406731  &lt;---------- ?????
+Computing marginal likelihood (new way, no MIL)...
+Done. (5946.7 ms)
+New ML (New corr, no MIL): 778723.327102  &lt;---------- ?????
+</code></pre>
 
+<p>Both versions give CRAZY high results; significantly different from the <a href="/ksimek/research/2013/07/05/work-log/">same test on Friday</a>.  Need to investigate...</p>
 
-<p>Plotting means for both to view differences...</p>
+<h2>Investigating new results</h2>
 
-<p>Investigation into ML discrepancy:</p>
+<p>Observations</p>
 
 <ul>
-<li>Posterior means are similar, but obviously differ.</li>
-<li>both means are very non-smooth (need to re-address the smoothness issue)</li>
-<li>new mean has signficantly more points (~7%, 80 pts).  Could this alone affect ML?</li>
-<li><strong>almost all difference is in posterior</strong></li>
+<li>All results differ from friday, including old ML (slightly)</li>
+<li>New ML using legacy correspondence is still reasonable.</li>
+<li>Both crazy results are using new correspondence.</li>
 </ul>
 
 
-<p>Maybe posterior kernel is different?  but prior is same
-It's just the data covariance thats different.
-but why??  There's more of them.</p>
-
-<p>New ml changes significantly when evaluation point changes.  This implies that the posterior curvature differs from the curvature of the joint distribution, which shouldn't happen.  A small amount of difference can arise naturally due to the approximation of the likelihood, but this is too large to be explained in that way.  Most noticibly, the new results look very similar to the old ones <strong>when evaluating at the likelihood mean</strong>.  The largest difference occurs when evaluating at the posterior mean.  Not clear yet what conclusions to draw from this, or if this is just a coincidence.</p>
-
-<p>Maybe likelihood curvatures are differing.</p>
-
-<p>07:35:28 PM</p>
-
-<p>Was able to get identical likelihood value using matrix-form as I did with the original 2D geometric error form.  Seems like the precision matrices are good.</p>
-
-<p>Priors appear good too, since it evaluates to the same value as the reference implementation.</p>
-
-<h2>Reference implementation for new ML</h2>
-
-<p>Idea: direct implementation for quadform, but with hacked nomralization constant</p>
-
-<h2>In progress</h2>
+<p>TODO:</p>
 
 <ul>
-<li>diagnosing errors in new likelihood <code>curve_ml_3.m</code>.</li>
-<li>getting <code>test_ml_end_to_end_2.m</code> running.</li>
+<li>Look at pieces (log posterior, likelihood, prior)</li>
+<li>Inspect new correspondence</li>
+<li>Think about what changed since Friday?</li>
 </ul>
 
+
+<p>12:10:19 PM</p>
+
+<p>Ran old test, <code>test_ml_end_to_end.m</code> and compared to old results in new test, <code>test_ml_end_to_end_2.m</code>.  Old test still gives old results, so I'll compare the two tests to determine what has changed.</p>
+
+<p>12:12:48 PM</p>
+
+<p>The <code>mix</code> parameter was set to 0.5 instead of 0.0.  I had forgotten I changed it at the end if Friday.</p>
+
+<p>Now getting "good" results again.  It raises a question that needs to be answered: why is ML sooo sensitive to evalaution position when using new correspondence?</p>
+
+<h2>Resuming</h2>
+
+<p>New results (full test):</p>
+
+<pre><code>Computing marginal likelihood (old way)...
+Done. (6009.5 ms)
+Old ML: 207.041742
+Computing marginal likelihood (new way, legacy correspondence)...
+Done. (7286.3 ms)
+New ML (Legacy corr): 207.700616
+Computing marginal likelihood (new way)...
+Done. (6146.6 ms)
+New ML (New corr): 793.585038             &lt;---------- OLD RESULT
+Computing marginal likelihood (new way, no MIL)...
+Done. (6008.3 ms)
+New ML (New corr, no MIL): 793.600835     &lt;---------- NEW RESULT
+</code></pre>
+
+<p>0.002% error, slightly faster.  Good.</p>
+
+<h2>Investigating Anomaly in new ML </h2>
+
+<p>So why is new ML so sensitive to where it is evaluated?</p>
+
+<p>Note that it's only extreme when using new correspondence.  Old correspondence is okay.</p>
+
+<p>Inspect difference between max likelihood and max posterior.  Maybe it's just more extreme than with old correspondence.</p>
+
+<p>12:20:59 PM</p>
+
+<p>Idea: bug in non-0.0 case?  Nope.</p>
+
+<p>Tried mixes: 0.0, 0.01, 0.1. Steady and dramatic increase in ML for new correspondence.  Old correspondence is nearly constant.  What is different between these correspodnences (other than the correspondences themselves).</p>
+
+<p>12:57:08 PM</p>
+
+<p><strong>Answer</strong>: The max likelihood in the new correspondences is waaaaay into the tails of the prior.</p>
+
+<p>Since no real triangulation is done to ensure agreement between views, the maximum likelihood triangulation is very rough  (infinite likelihood variance allows this to happen without penalty).  This places the curve far into the tails of the prior, where evaluation is highly unstable.  Both the prior and likelihood are then extremely low (-1e-8 in log space), which should cancel, but don't due to numerical instability.  Hence, marginal likelihoods with huge magnitude.</p>
+
+<p>This is great news, since it means everything is working mostly as expected.  The numerical instability issue is easilly solved by always evaluating at the posterior, not the maximum likelihood.</p>
+
+<h2>Summary</h2>
+
+<p>The version of the new ML that doesn't use the matrix inversion lemma is accurate, so we can proceed to the markov-decomposed version next.</p>
 
       <address class="signature">
         Posted by
@@ -244,11 +237,8 @@ but why??  There's more of them.</p>
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/07/05/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/07/03/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/07/05/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>
