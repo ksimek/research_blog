@@ -13,6 +13,8 @@ http://vision.sista.arizona.edu/ksimek/research/sitemap.txt
 http://vision.sista.arizona.edu/ksimek/research/tags.html
 http://vision.sista.arizona.edu/ksimek/research/page2/index.html
 
+http://vision.sista.arizona.edu/ksimek/research/2013/07/12/marginal-likelihood
+http://vision.sista.arizona.edu/ksimek/research/2013/07/11/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/07/08/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/07/05/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/07/04/work-log

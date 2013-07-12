@@ -4,13 +4,173 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-07-09T10:52:12-07:00</updated>
+ <updated>2013-07-12T08:16:20-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Direct Evaluation of the Marginal Likelihood</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/07/12/marginal-likelihood"/>
+   <updated>2013-07-12T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/07/12/marginal-likelihood</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Previously, we've always used hacks to evaluate the marginal likelihood, because evaluating it directly was apparently impossible because of an infinite normalization constant.  I've discovered that this isn't actually true; the infinite normalization constant arose due to our approximation of the likelihood.  The trick in correctly computing the ML is to replace the usual normalization constant with a corrected one.&lt;/p&gt;
+
+&lt;p&gt;Our old method required knowledge of the maximum posterior solution, which was costly to compute.  The new approach is straightforward to describe, more accurate than our previous method, and can be evaluated in linear time by exploiting its Markovian structure.&lt;/p&gt;
+
+&lt;p&gt;Below is a rough-draft writeup of my derivation of the marginal likelihood function.&lt;/p&gt;
+
+&lt;h2&gt;Direct Evaluation of the Marginal likelihood&lt;/h2&gt;
+
+&lt;p&gt;The 3D marginal likelihood function arises as the sum of a 3D curve process and a 3D perturbation process.  Both are gaussian (the second is approximate), this the result is a Gaussian function, the convolution of two Gaussians.  However, the perturbation process has infinite variance in the direction of backprojection, which arises from the fact that perturbation actually occurs in 2D, we are just backprojecting it to 3D for tractibility.  In other words, the ML isn't a distribution in 3D, it's a distribution in 2D, and we need to determine the appropriate normalization constant for the 3D function to it generates 2D ML densities.&lt;/p&gt;
+
+&lt;p&gt;The likelihood function is given by&lt;/p&gt;
+
+&lt;div&gt;\[
+\begin{align}
+p(y | x) &amp;= \prod p(y_i | x_i) \\
+         &amp;= \prod \mathcal{N}(y_i; \rho_I(x_i), \sigma_n^2 I) \\
+         &amp;\approx \prod \frac{1}{\sqrt{2 \pi \sigma^2}^2} \mathcal{G}(Y_i; x_i, S_i^{-1}) \\
+         &amp;= \prod \frac{1}{\sqrt{2 \pi \sigma^2}^2} \exp\{(Y_i - x_i)^\top S_i (Y_i - x_i)\} \\
+         &amp;= \frac{1}{\sqrt{2 \pi \sigma^2}^{2n}} \exp\{(Y - x)^\top S (Y - x)\} \\
+         &amp;= \frac{1}{Z_l} \exp\{(Y - x)^\top S (Y - x)\}
+\end{align}
+\]&lt;/div&gt;
+
+
+&lt;p&gt;Where&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;\(\rho_i(x)\) is the projection of x into the I-th view,&lt;/li&gt;
+&lt;li&gt;\(Y_i\) is the estimated backprojected position of observation \(y_i\),&lt;/li&gt;
+&lt;li&gt;\(S_i\) is the curvature of the 3d likelihood function w.r.t. \(x_i\) evaluated at $Y_i$,&lt;/li&gt;
+&lt;li&gt;\(Y\), \(S\) and \(x\) are the concatenation of \(Y_i\), and \(x\)&lt;/li&gt;
+&lt;li&gt;\(S\) is the block-diagonal matrix of \(S_i\)'s&lt;/li&gt;
+&lt;li&gt;\(\mathcal{G}\) is a Gaussian function (an unnormalized normal distribution).&lt;/li&gt;
+&lt;li&gt;\(Z_l\) is a normalization constant.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;We have transformed the likelihood into a log-linear function of x, by rewriting the PDF in terms of only 3D entities.  Note that \(S_i\) has zero curvature in the backprojection direction, resulting in infinite variance in the Gaussian function.   Also note that the normalization constant isn't the standard one for a 3D gaussian distribution, because this isn't a distribution over x.  The normalization constant is chosen so the approximate likelihood in 3D agrees with the exact 2D likelihood when perturbation is zero (i.e. when \(Y_i\) lies anywhere on the backprojection line).&lt;/p&gt;
+
+&lt;p&gt;This approximation ignores the nonlinearity of projection; the likelihood function as a function of \(x_i\) would actually look like a cone whose axis-perpendicular slices are Gaussians, whereas our function is cylinder-shaped.  In practice, the approximation error has minimal effect on the marginal likelihood computation, assuming $Y_i$ is a good estimate of the posterior depth, and the posterior is reasonably peaked.  (A graphic to illustrate would be good here).&lt;/p&gt;
+
+&lt;p&gt;The prior is given by&lt;/p&gt;
+
+&lt;div&gt;\[
+\begin{align}
+p(x) &amp;= \mathcal{N}(x; \mathbf{0}, K) \\
+     &amp;= \frac{1}{Z_p} \exp\{x^\top K^{-1} x\}
+     \end{align}
+\]&lt;/div&gt;
+
+
+&lt;p&gt;where \(K\) is the covariance matrix arising from the Gaussian process kernel, and Z_p is the standard Gaussian normalization constant.&lt;/p&gt;
+
+&lt;p&gt;The marginal likelihood is defined as&lt;/p&gt;
+
+&lt;div&gt;\[
+\begin{align}
+p(y) &amp;= \int p(y|x) p(x) dx \\
+     &amp;= \int \left ( \frac{1}{Z_l} \exp\{(Y - x)^\top S (Y - x)\} \right ) \left ( \frac{1}{Z} \exp\{x^\top K^{-1} x\} \right ) \\
+     &amp;= \frac{1}{Z_l Z_p}\int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\top K^{-1} x\} \\
+     \end{align}
+\]&lt;/div&gt;
+
+
+&lt;p&gt;The expression within the integral is the convolution of two unnormalized zero-mean Gaussians, so the integral is a zero-mean Gaussian whose covariance is the sum of the inputs' covariances.  If the input Gaussians &lt;strong&gt;were&lt;/strong&gt; properly normalized, the normalization constant would be \(1/Z\);  since they are not, the normalization constant is \((Z_1 Z_2 / Z)\), where \(1/Z_1\) and \(1/Z_2\) are the would-be normalization constants for the first and second Gaussian, respectively.  Note that the second Gaussian's normalization constant is \(1/Z_p\), so this results in the cancellation we see below&lt;/p&gt;
+
+&lt;div&gt;\[
+\begin{align}
+p(y) &amp;= \frac{1}{Z_l Z_p} \int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\top K^{-1} x\} \\
+     &amp;= \frac{1}{Z_l Z_p} \left ( \frac{Z_{l,3d} Z_p}{Z} \exp\{x^\top (S^{-1} + K)^{-1} x \} \right ) \\
+     &amp;= \frac{Z_{l,3d} }{Z_l}\frac{1}{Z} \exp\{x^\top (S^{-1} + K)^{-1} x \}
+     \end{align}
+\]&lt;/div&gt;
+
+
+
+
+&lt;div&gt;
+    Where \( Z_{l,3d} \) is the would-be 3D normalization constant for our likelihood Gaussian.  Since \(S\) is rank-deficient, the normalization constants based on \(S^{-1}\) will be infinite (i.e. \(Z_{l,3d}\) and \(Z\)).  However, the terms involving determinants of \(S^{-1}\) should cancel in the ratio, resulting in a gaussian with infinite variance, but non-infinite normalization constant. **(Need to show this mathematically next time)** 
+    &lt;/div&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/07/11/work-log"/>
+   <updated>2013-07-11T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/07/11/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Markov-decomposed ML&lt;/h2&gt;
+
+&lt;p&gt;The original plan was to markov-decompose the prior and posterior, but soon remembered that I also need to compute the mean of the posterior, which isn't as straighforward to compute.&lt;/p&gt;
+
+&lt;p&gt;After some deliberation and whiteboarding, I decided to implement Bishop's forward/backward algorithm to simultaneously marginalize and compute the maximum.  Will test this against the clique-tree implementation to ensure correctness.&lt;/p&gt;
+
+&lt;p&gt;........&lt;/p&gt;
+
+&lt;p&gt;During testing I realized a fundamental problem with the current likelihood: there is no obvious way to consistently handle the &quot;redundant&quot; dimensions that arise from duplicated indices.  In some kernels, these are handled naturally, namely the kernels that treat different views as different indices.  The old kernel, however, does not, and the duplicated indices result in degenerate posterior distributions unless handled using hacks.&lt;/p&gt;
+
+&lt;p&gt;We could handle this on a kernel-by-kernel basis, but it would be unmaintainable, and could hinder further research into new kernels.  It also isn't clear that the hacks I have in mind would actually give correct results.&lt;/p&gt;
+
+&lt;p&gt;This problem is inherent to the &quot;candidates estimator&quot; of the marginal likelihood, because it involves a ratio of the posterior and prior, both of which are degenerate in these cases.&lt;/p&gt;
+
+&lt;p&gt;The actual marginal likelihood function has no such degeneracies, because each observation is independent, given the underlying curve.  However, until recently it was unclear how to evaluate the marginal likelihood using the approximated likelihood function.  The approximate likelihood has a rank-deficient precision matrix, and its normalization constant is non-standard due to the transformation from 2D to 3D.  However, I think I've developed a way to evaluate it, which I describe in the next article.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Work Log</title>
