@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Direct Evaluation of the Marginal Likelihood &larr; </title>
+   <title>Work Log &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -76,9 +76,9 @@
 	
   
   
-  <h1 class="title">Direct Evaluation of the Marginal Likelihood</h1>
+  <h1 class="title">Work Log</h1>
 
-  <div class="date emphnext">July 12, 2013</div>
+  <div class="date emphnext">July 17, 2013</div>
     
 
 
@@ -107,87 +107,68 @@
 </div>
 
 
-<p>Previously, we've always used hacks to evaluate the marginal likelihood, because evaluating it directly was apparently impossible because of an infinite normalization constant.  I've discovered that this isn't actually true; the infinite normalization constant arose due to our approximation of the likelihood.  The trick in correctly computing the ML is to replace the usual normalization constant with a corrected one.</p>
+<h2>Optimizing <code>curve_ml5.m</code></h2>
 
-<p>Our old method required knowledge of the maximum posterior solution, which was costly to compute.  The new approach is straightforward to describe, more accurate than our previous method, and can be evaluated in linear time by exploiting its Markovian structure.</p>
+<p>Attempting to use sparsity to speed up <code>curve_ml5.m</code>.</p>
 
-<p>Below is a rough-draft writeup of my derivation of the marginal likelihood function.</p>
+<p><strong>First attempt</strong>: try building only the relevant elements of the prior matrix, K.<br/>
+<strong>Resut</strong>: Gains in multiplication are lost in construction of K.  Insignificant speedup.  Rolling back.</p>
 
-<h2>Direct Evaluation of the Marginal likelihood</h2>
+<p><strong>Second attempt</strong>: convert block-diagonal matrix <em>S</em> to a sparse matrix.<br/>
+<strong>Result</strong>: Significant gains in multiplication; tolerable losses when constructing <em>S</em>.  ~8x speedup</p>
 
-<p>The 3D marginal likelihood function arises as the sum of a 3D curve process and a 3D perturbation process.  Both are gaussian (the second is approximate), this the result is a Gaussian function, the convolution of two Gaussians.  However, the perturbation process has infinite variance in the direction of backprojection, which arises from the fact that perturbation actually occurs in 2D, we are just backprojecting it to 3D for tractibility.  In other words, the ML isn't a distribution in 3D, it's a distribution in 2D, and we need to determine the appropriate normalization constant for the 3D function to it generates 2D ML densities.</p>
+<p><strong>Third Attempt</strong>: Convert the individual blocks <em>S_i</em> to sparse, <em>then</em> construct <em>S</em> from them.<br/>
+<strong>Result</strong>: Further speedup of ~2x</p>
 
-<p>The likelihood function is given by</p>
+<p><strong>Fourth Attempt</strong>:  Change <code>(eye(size(K)) + S * K * S')</code> to <code>(speye(size(K)) + S * K * S')</code> ; i.e. changing <code>eye</code> to <code>speye</code>.<br/>
+<strong>Result</strong>: moderate speedup, ~1.5x.</p>
 
-<div>\[
-\begin{align}
-p(y | x) &= \prod p(y_i | x_i) \\
-         &= \prod \mathcal{N}(y_i; \rho_I(x_i), \sigma_n^2 I) \\
-         &\approx \prod \frac{1}{\sqrt{2 \pi \sigma^2}^2} \mathcal{G}(Y_i; x_i, S_i^{-1}) \\
-         &= \prod \frac{1}{\sqrt{2 \pi \sigma^2}^2} \exp\{(Y_i - x_i)^\top S_i (Y_i - x_i)\} \\
-         &= \frac{1}{\sqrt{2 \pi \sigma^2}^{2n}} \exp\{(Y - x)^\top S (Y - x)\} \\
-         &= \frac{1}{Z_l} \exp\{(Y - x)^\top S (Y - x)\}
-\end{align}
-\]</div>
+<p>I think we've squeezed all we can from this function.  It's now 10x faster than the naive method on a problem with 4000-dimensions.</p>
 
+<h2>Results: </h2>
 
-<p>Where</p>
+<p>Running <code>test/test_ml_end_to_end_2.m</code></p>
 
-<ul>
-<li>\(\rho_i(x)\) is the projection of x into the I-th view,</li>
-<li>\(Y_i\) is the estimated backprojected position of observation \(y_i\),</li>
-<li>\(S_i\) is the curvature of the 3d likelihood function w.r.t. \(x_i\) evaluated at $Y_i$,</li>
-<li>\(Y\), \(S\) and \(x\) are the concatenation of \(Y_i\), and \(x\)</li>
-<li>\(S\) is the block-diagonal matrix of \(S_i\)'s</li>
-<li>\(\mathcal{G}\) is a Gaussian function (an unnormalized normal distribution).</li>
-<li>\(Z_l\) is a normalization constant.</li>
-</ul>
+<pre><code>Computing marginal likelihood (old way)...
+Done. (6362.9 ms)
+Old ML: 207.041742
 
+Computing marginal likelihood (new way, legacy correspondence)...
+Done. (7655.2 ms)
+New ML (Legacy corr): 207.700616
 
-<p>We have transformed the likelihood into a log-linear function of x, by rewriting the PDF in terms of only 3D entities.  Note that \(S_i\) has zero curvature in the backprojection direction, resulting in infinite variance in the Gaussian function.   Also note that the normalization constant isn't the standard one for a 3D gaussian distribution, because this isn't a distribution over x.  The normalization constant is chosen so the approximate likelihood in 3D agrees with the exact 2D likelihood when perturbation is zero (i.e. when \(Y_i\) lies anywhere on the backprojection line).</p>
+Computing marginal likelihood (new way)...
+Done. (6537.7 ms)
+New ML (New corr): 793.585038
 
-<p>This approximation ignores the nonlinearity of projection; the likelihood function as a function of \(x_i\) would actually look like a cone whose axis-perpendicular slices are Gaussians, whereas our function is cylinder-shaped.  In practice, the approximation error has minimal effect on the marginal likelihood computation, assuming $Y_i$ is a good estimate of the posterior depth, and the posterior is reasonably peaked.  (A graphic to illustrate would be good here).</p>
+Computing marginal likelihood (new way, no MIL)...
+Done. (6330.3 ms)
+New ML (New corr, no MIL): 793.600835
 
-<p>The prior is given by</p>
+Computing marginal likelihood (direct method)...
+Done. (667.9 ms)  &lt;-------------------  10x speedup over previous
+New ML (direct method): 793.300407 &lt;--  0.04% error!
+</code></pre>
 
-<div>\[
-\begin{align}
-p(x) &= \mathcal{N}(x; \mathbf{0}, K) \\
-     &= \frac{1}{Z_p} \exp\{x^\top K^{-1} x\}
-     \end{align}
-\]</div>
+<p>Note speedup and negligible error compared the previous method.</p>
 
+<h2>General Observations Regarding <code>curve_ml5.m</code></h2>
 
-<p>where \(K\) is the covariance matrix arising from the Gaussian process kernel, and Z_p is the standard Gaussian normalization constant.</p>
+<p>I've noticed that <code>markov_order</code> must be much larger than I expected to avoid approximation error.</p>
 
-<p>The marginal likelihood is defined as</p>
+<p>Recall in <code>curve_ml2.m</code>, we use the Markov assumption to break-down the prior covariance, and then combine them with the likelihood cliques.  In that case, we could use a Markov order between 2 and 5 without significant approximation error.</p>
 
-<div>\[
-\begin{align}
-p(y) &= \int p(y|x) p(x) dx \\
-     &= \int \left ( \frac{1}{Z_l} \exp\{(Y - x)^\top S (Y - x)\} \right ) \left ( \frac{1}{Z} \exp\{x^\top K^{-1} x\} \right ) \\
-     &= \frac{1}{Z_l Z_p}\int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\top K^{-1} x\} \\
-     \end{align}
-\]</div>
+<p>In <code>curve_ml5.m</code>, using a Markov order less than 100 results in unacceptable error.</p>
 
+<p>There are two reasons for this.  First, we're decomposing the marginal likelihood Gaussian, not the prior.  The prior is explicitly Markovian, whereas the marginal likelihood is not.  The ML Guassian adds extra uncertainty to every point, which means we need to consider more nearby points to avoid erroneous conclusions.</p>
 
-<p>The expression within the integral is the convolution of two unnormalized zero-mean Gaussians, so the integral is a zero-mean Gaussian whose covariance is the sum of the inputs' covariances.  If the input Gaussians <strong>were</strong> properly normalized, the normalization constant would be \(1/Z\);  since they are not, the normalization constant is \((Z_1 Z_2 / Z)\), where \(1/Z_1\) and \(1/Z_2\) are the would-be normalization constants for the first and second Gaussian, respectively.  Note that the second Gaussian's normalization constant is \(1/Z_p\), so this results in the cancellation we see below</p>
+<p>Second, because the new approach creates a distinct index set for each view, indices are often repeated (multiple views of the same point) and considering them doesn't tell you anything about what direction the curve is heading.</p>
 
-<div>\[
-\begin{align}
-p(y) &= \frac{1}{Z_l Z_p} \int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\top K^{-1} x\} \\
-     &= \frac{1}{Z_l Z_p} \left ( \frac{Z_{l,3d} Z_p}{Z} \exp\{x^\top (S^{-1} + K)^{-1} x \} \right ) \\
-     &= \frac{Z_{l,3d} }{Z_l}\frac{1}{Z} \exp\{x^\top (S^{-1} + K)^{-1} x \}
-     \end{align}
-\]</div>
+<p>The first point will likely be mitigated when we start using the new curve model, which will allow the likelihood variance to decrease dramatically.  However, the markov assumption in the prior is less likely to hold under these models, so some experimentation will be needed.</p>
 
+<h2>Summary</h2>
 
-
-
-<div>
-    Where \( Z_{l,3d} \) is the would-be 3D normalization constant for our likelihood Gaussian.  Since \(S\) is rank-deficient, the normalization constants based on \(S^{-1}\) will be infinite (i.e. \(Z_{l,3d}\) and \(Z\)).  However, the terms involving determinants of \(S^{-1}\) should cancel in the ratio, resulting in a gaussian with infinite variance, but non-infinite normalization constant. **(Need to show this mathematically next time)** 
-    </div>
-
+<p>The code for the new likelihood, <code>curve_ml5.m</code> is now stable.  It is fast and accurate in its current implementation, assuming a reasonable value for <code>markov_order</code>.</p>
 
       <address class="signature">
         Posted by
@@ -198,11 +179,8 @@ p(y) &= \frac{1}{Z_l Z_p} \int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\top K
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/07/16/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/07/11/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/07/16/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>
@@ -219,7 +197,7 @@ p(y) &= \frac{1}{Z_l Z_p} \int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\top K
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Direct Evaluation of the Marginal Likelihood" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -267,7 +245,7 @@ p(y) &= \frac{1}{Z_l Z_p} \int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\top K
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Direct Evaluation of the Marginal Likelihood");
+                    + encodeURIComponent("Work Log");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

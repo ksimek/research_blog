@@ -12,7 +12,10 @@ http://vision.sista.arizona.edu/ksimek/research/projects/tulips.html
 http://vision.sista.arizona.edu/ksimek/research/sitemap.txt
 http://vision.sista.arizona.edu/ksimek/research/tags.html
 http://vision.sista.arizona.edu/ksimek/research/page2/index.html
+http://vision.sista.arizona.edu/ksimek/research/page3/index.html
 
+http://vision.sista.arizona.edu/ksimek/research/2013/07/17/work-log
+http://vision.sista.arizona.edu/ksimek/research/2013/07/16/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/07/12/marginal-likelihood
 http://vision.sista.arizona.edu/ksimek/research/2013/07/11/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/07/08/work-log

@@ -4,13 +4,172 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-07-12T08:16:20-07:00</updated>
+ <updated>2013-07-17T15:10:51-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/07/17/work-log"/>
+   <updated>2013-07-17T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/07/17/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Optimizing &lt;code&gt;curve_ml5.m&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;Attempting to use sparsity to speed up &lt;code&gt;curve_ml5.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;First attempt&lt;/strong&gt;: try building only the relevant elements of the prior matrix, K.&lt;br/&gt;
+&lt;strong&gt;Resut&lt;/strong&gt;: Gains in multiplication are lost in construction of K.  Insignificant speedup.  Rolling back.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Second attempt&lt;/strong&gt;: convert block-diagonal matrix &lt;em&gt;S&lt;/em&gt; to a sparse matrix.&lt;br/&gt;
+&lt;strong&gt;Result&lt;/strong&gt;: Significant gains in multiplication; tolerable losses when constructing &lt;em&gt;S&lt;/em&gt;.  ~8x speedup&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Third Attempt&lt;/strong&gt;: Convert the individual blocks &lt;em&gt;S_i&lt;/em&gt; to sparse, &lt;em&gt;then&lt;/em&gt; construct &lt;em&gt;S&lt;/em&gt; from them.&lt;br/&gt;
+&lt;strong&gt;Result&lt;/strong&gt;: Further speedup of ~2x&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Fourth Attempt&lt;/strong&gt;:  Change &lt;code&gt;(eye(size(K)) + S * K * S')&lt;/code&gt; to &lt;code&gt;(speye(size(K)) + S * K * S')&lt;/code&gt; ; i.e. changing &lt;code&gt;eye&lt;/code&gt; to &lt;code&gt;speye&lt;/code&gt;.&lt;br/&gt;
+&lt;strong&gt;Result&lt;/strong&gt;: moderate speedup, ~1.5x.&lt;/p&gt;
+
+&lt;p&gt;I think we've squeezed all we can from this function.  It's now 10x faster than the naive method on a problem with 4000-dimensions.&lt;/p&gt;
+
+&lt;h2&gt;Results: &lt;/h2&gt;
+
+&lt;p&gt;Running &lt;code&gt;test/test_ml_end_to_end_2.m&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Computing marginal likelihood (old way)...
+Done. (6362.9 ms)
+Old ML: 207.041742
+
+Computing marginal likelihood (new way, legacy correspondence)...
+Done. (7655.2 ms)
+New ML (Legacy corr): 207.700616
+
+Computing marginal likelihood (new way)...
+Done. (6537.7 ms)
+New ML (New corr): 793.585038
+
+Computing marginal likelihood (new way, no MIL)...
+Done. (6330.3 ms)
+New ML (New corr, no MIL): 793.600835
+
+Computing marginal likelihood (direct method)...
+Done. (667.9 ms)  &amp;lt;-------------------  10x speedup over previous
+New ML (direct method): 793.300407 &amp;lt;--  0.04% error!
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note speedup and negligible error compared the previous method.&lt;/p&gt;
+
+&lt;h2&gt;General Observations Regarding &lt;code&gt;curve_ml5.m&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;I've noticed that &lt;code&gt;markov_order&lt;/code&gt; must be much larger than I expected to avoid approximation error.&lt;/p&gt;
+
+&lt;p&gt;Recall in &lt;code&gt;curve_ml2.m&lt;/code&gt;, we use the Markov assumption to break-down the prior covariance, and then combine them with the likelihood cliques.  In that case, we could use a Markov order between 2 and 5 without significant approximation error.&lt;/p&gt;
+
+&lt;p&gt;In &lt;code&gt;curve_ml5.m&lt;/code&gt;, using a Markov order less than 100 results in unacceptable error.&lt;/p&gt;
+
+&lt;p&gt;There are two reasons for this.  First, we're decomposing the marginal likelihood Gaussian, not the prior.  The prior is explicitly Markovian, whereas the marginal likelihood is not.  The ML Guassian adds extra uncertainty to every point, which means we need to consider more nearby points to avoid erroneous conclusions.&lt;/p&gt;
+
+&lt;p&gt;Second, because the new approach creates a distinct index set for each view, indices are often repeated (multiple views of the same point) and considering them doesn't tell you anything about what direction the curve is heading.&lt;/p&gt;
+
+&lt;p&gt;The first point will likely be mitigated when we start using the new curve model, which will allow the likelihood variance to decrease dramatically.  However, the markov assumption in the prior is less likely to hold under these models, so some experimentation will be needed.&lt;/p&gt;
+
+&lt;h2&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;The code for the new likelihood, &lt;code&gt;curve_ml5.m&lt;/code&gt; is now stable.  It is fast and accurate in its current implementation, assuming a reasonable value for &lt;code&gt;markov_order&lt;/code&gt;.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/07/16/work-log"/>
+   <updated>2013-07-16T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/07/16/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Implementing new direct method for marginal likelihood.&lt;/h2&gt;
+
+&lt;p&gt;Implemented in &lt;code&gt;curve_ml5.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;After initial attempt, the new method produced inconsistent results.&lt;/p&gt;
+
+&lt;p&gt;Re-derived the result two more ways and the math comes out the same.  The theory looks right.&lt;/p&gt;
+
+&lt;p&gt;Finally found the bug -- was computing&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;det = log(sum(chol(Sigma)))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;instead of&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;det = 2 * log(sum(chol(Sigma)))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Since the Cholesky decomposition is the square-root of the matrix Sigma, I was forgetting to double it's determinant to get the determinant of Sigma.&lt;/p&gt;
+
+&lt;p&gt;Now getting the correct results; now time to make it fast.&lt;/p&gt;
+
+&lt;h2&gt;Optimizing direct method for ML&lt;/h2&gt;
+
+&lt;p&gt;Need to get O(n) runtime instead of O(n&lt;sup&gt;3).&lt;/sup&gt;  Will use existing code for markov-decomposed PDF evaluation.&lt;/p&gt;
+
+&lt;p&gt;Bottleneck is 100% the Cholesky decomposition.  The direct method doesn't remove redundant dimensions, so it's slower than &lt;code&gt;curve_ml4.m&lt;/code&gt;, which does.  Recall that this fact makes &lt;code&gt;curvE_ml4.m&lt;/code&gt; not general enough to use the new foreground models with.&lt;/p&gt;
+
+&lt;p&gt;...........&lt;/p&gt;
+
+&lt;p&gt;After some investagation, the previous statement appears to be untrue.  The bottlenect is dense matrix multiplication, which is fixed by using sparse matrices.&lt;/p&gt;
+
+&lt;p&gt;Now, cholesky &lt;strong&gt;is&lt;/strong&gt; the bottlenect, but not as huge as before.  The markov decompose method only gives a ~30% speedup at best, while introducing ~2.5% error and significant extra complexity. Is it worth it?&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Direct Evaluation of the Marginal Likelihood</title>

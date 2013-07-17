@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Direct Evaluation of the Marginal Likelihood &larr; </title>
+   <title>Work Log &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -76,9 +76,9 @@
 	
   
   
-  <h1 class="title">Direct Evaluation of the Marginal Likelihood</h1>
+  <h1 class="title">Work Log</h1>
 
-  <div class="date emphnext">July 12, 2013</div>
+  <div class="date emphnext">July 16, 2013</div>
     
 
 
@@ -107,87 +107,39 @@
 </div>
 
 
-<p>Previously, we've always used hacks to evaluate the marginal likelihood, because evaluating it directly was apparently impossible because of an infinite normalization constant.  I've discovered that this isn't actually true; the infinite normalization constant arose due to our approximation of the likelihood.  The trick in correctly computing the ML is to replace the usual normalization constant with a corrected one.</p>
+<h2>Implementing new direct method for marginal likelihood.</h2>
 
-<p>Our old method required knowledge of the maximum posterior solution, which was costly to compute.  The new approach is straightforward to describe, more accurate than our previous method, and can be evaluated in linear time by exploiting its Markovian structure.</p>
+<p>Implemented in <code>curve_ml5.m</code>.</p>
 
-<p>Below is a rough-draft writeup of my derivation of the marginal likelihood function.</p>
+<p>After initial attempt, the new method produced inconsistent results.</p>
 
-<h2>Direct Evaluation of the Marginal likelihood</h2>
+<p>Re-derived the result two more ways and the math comes out the same.  The theory looks right.</p>
 
-<p>The 3D marginal likelihood function arises as the sum of a 3D curve process and a 3D perturbation process.  Both are gaussian (the second is approximate), this the result is a Gaussian function, the convolution of two Gaussians.  However, the perturbation process has infinite variance in the direction of backprojection, which arises from the fact that perturbation actually occurs in 2D, we are just backprojecting it to 3D for tractibility.  In other words, the ML isn't a distribution in 3D, it's a distribution in 2D, and we need to determine the appropriate normalization constant for the 3D function to it generates 2D ML densities.</p>
+<p>Finally found the bug -- was computing</p>
 
-<p>The likelihood function is given by</p>
+<pre><code>det = log(sum(chol(Sigma)))
+</code></pre>
 
-<div>\[
-\begin{align}
-p(y | x) &= \prod p(y_i | x_i) \\
-         &= \prod \mathcal{N}(y_i; \rho_I(x_i), \sigma_n^2 I) \\
-         &\approx \prod \frac{1}{\sqrt{2 \pi \sigma^2}^2} \mathcal{G}(Y_i; x_i, S_i^{-1}) \\
-         &= \prod \frac{1}{\sqrt{2 \pi \sigma^2}^2} \exp\{(Y_i - x_i)^\top S_i (Y_i - x_i)\} \\
-         &= \frac{1}{\sqrt{2 \pi \sigma^2}^{2n}} \exp\{(Y - x)^\top S (Y - x)\} \\
-         &= \frac{1}{Z_l} \exp\{(Y - x)^\top S (Y - x)\}
-\end{align}
-\]</div>
+<p>instead of</p>
 
+<pre><code>det = 2 * log(sum(chol(Sigma)))
+</code></pre>
 
-<p>Where</p>
+<p>Since the Cholesky decomposition is the square-root of the matrix Sigma, I was forgetting to double it's determinant to get the determinant of Sigma.</p>
 
-<ul>
-<li>\(\rho_i(x)\) is the projection of x into the I-th view,</li>
-<li>\(Y_i\) is the estimated backprojected position of observation \(y_i\),</li>
-<li>\(S_i\) is the curvature of the 3d likelihood function w.r.t. \(x_i\) evaluated at $Y_i$,</li>
-<li>\(Y\), \(S\) and \(x\) are the concatenation of \(Y_i\), and \(x\)</li>
-<li>\(S\) is the block-diagonal matrix of \(S_i\)'s</li>
-<li>\(\mathcal{G}\) is a Gaussian function (an unnormalized normal distribution).</li>
-<li>\(Z_l\) is a normalization constant.</li>
-</ul>
+<p>Now getting the correct results; now time to make it fast.</p>
 
+<h2>Optimizing direct method for ML</h2>
 
-<p>We have transformed the likelihood into a log-linear function of x, by rewriting the PDF in terms of only 3D entities.  Note that \(S_i\) has zero curvature in the backprojection direction, resulting in infinite variance in the Gaussian function.   Also note that the normalization constant isn't the standard one for a 3D gaussian distribution, because this isn't a distribution over x.  The normalization constant is chosen so the approximate likelihood in 3D agrees with the exact 2D likelihood when perturbation is zero (i.e. when \(Y_i\) lies anywhere on the backprojection line).</p>
+<p>Need to get O(n) runtime instead of O(n<sup>3).</sup>  Will use existing code for markov-decomposed PDF evaluation.</p>
 
-<p>This approximation ignores the nonlinearity of projection; the likelihood function as a function of \(x_i\) would actually look like a cone whose axis-perpendicular slices are Gaussians, whereas our function is cylinder-shaped.  In practice, the approximation error has minimal effect on the marginal likelihood computation, assuming $Y_i$ is a good estimate of the posterior depth, and the posterior is reasonably peaked.  (A graphic to illustrate would be good here).</p>
+<p>Bottleneck is 100% the Cholesky decomposition.  The direct method doesn't remove redundant dimensions, so it's slower than <code>curve_ml4.m</code>, which does.  Recall that this fact makes <code>curvE_ml4.m</code> not general enough to use the new foreground models with.</p>
 
-<p>The prior is given by</p>
+<p>...........</p>
 
-<div>\[
-\begin{align}
-p(x) &= \mathcal{N}(x; \mathbf{0}, K) \\
-     &= \frac{1}{Z_p} \exp\{x^\top K^{-1} x\}
-     \end{align}
-\]</div>
+<p>After some investagation, the previous statement appears to be untrue.  The bottlenect is dense matrix multiplication, which is fixed by using sparse matrices.</p>
 
-
-<p>where \(K\) is the covariance matrix arising from the Gaussian process kernel, and Z_p is the standard Gaussian normalization constant.</p>
-
-<p>The marginal likelihood is defined as</p>
-
-<div>\[
-\begin{align}
-p(y) &= \int p(y|x) p(x) dx \\
-     &= \int \left ( \frac{1}{Z_l} \exp\{(Y - x)^\top S (Y - x)\} \right ) \left ( \frac{1}{Z} \exp\{x^\top K^{-1} x\} \right ) \\
-     &= \frac{1}{Z_l Z_p}\int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\top K^{-1} x\} \\
-     \end{align}
-\]</div>
-
-
-<p>The expression within the integral is the convolution of two unnormalized zero-mean Gaussians, so the integral is a zero-mean Gaussian whose covariance is the sum of the inputs' covariances.  If the input Gaussians <strong>were</strong> properly normalized, the normalization constant would be \(1/Z\);  since they are not, the normalization constant is \((Z_1 Z_2 / Z)\), where \(1/Z_1\) and \(1/Z_2\) are the would-be normalization constants for the first and second Gaussian, respectively.  Note that the second Gaussian's normalization constant is \(1/Z_p\), so this results in the cancellation we see below</p>
-
-<div>\[
-\begin{align}
-p(y) &= \frac{1}{Z_l Z_p} \int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\top K^{-1} x\} \\
-     &= \frac{1}{Z_l Z_p} \left ( \frac{Z_{l,3d} Z_p}{Z} \exp\{x^\top (S^{-1} + K)^{-1} x \} \right ) \\
-     &= \frac{Z_{l,3d} }{Z_l}\frac{1}{Z} \exp\{x^\top (S^{-1} + K)^{-1} x \}
-     \end{align}
-\]</div>
-
-
-
-
-<div>
-    Where \( Z_{l,3d} \) is the would-be 3D normalization constant for our likelihood Gaussian.  Since \(S\) is rank-deficient, the normalization constants based on \(S^{-1}\) will be infinite (i.e. \(Z_{l,3d}\) and \(Z\)).  However, the terms involving determinants of \(S^{-1}\) should cancel in the ratio, resulting in a gaussian with infinite variance, but non-infinite normalization constant. **(Need to show this mathematically next time)** 
-    </div>
-
+<p>Now, cholesky <strong>is</strong> the bottlenect, but not as huge as before.  The markov decompose method only gives a ~30% speedup at best, while introducing ~2.5% error and significant extra complexity. Is it worth it?</p>
 
       <address class="signature">
         Posted by
@@ -199,10 +151,10 @@ p(y) &= \frac{1}{Z_l Z_p} \int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\top K
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/07/16/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+    <a href="/ksimek/research/2013/07/17/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/07/11/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/07/12/marginal-likelihood" class="prev" title="Direct Evaluation of the Marginal Likelihood">&larr; Direct Evaluation of the Marginal Likelihood</a>
   
   </div>
   <div class="clearer"> </div>
@@ -219,7 +171,7 @@ p(y) &= \frac{1}{Z_l Z_p} \int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\top K
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Direct Evaluation of the Marginal Likelihood" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -267,7 +219,7 @@ p(y) &= \frac{1}{Z_l Z_p} \int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\top K
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Direct Evaluation of the Marginal Likelihood");
+                    + encodeURIComponent("Work Log");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");
