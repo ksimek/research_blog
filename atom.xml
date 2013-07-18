@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-07-17T15:10:51-07:00</updated>
+ <updated>2013-07-17T17:12:49-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -13,10 +13,10 @@
 
  
  <entry>
-   <title>Work Log</title>
-   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/07/17/work-log"/>
+   <title>Work Log 2</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/07/17/work-log-2"/>
    <updated>2013-07-17T00:00:00-07:00</updated>
-   <id>http://vision.sista.arizona.edu/ksimek/research/2013/07/17/work-log</id>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/07/17/work-log-2</id>
    <content type="html">
 
 &lt;div class=&quot;meta-info&quot;&gt;
@@ -40,6 +40,58 @@
     Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
 &lt;/div&gt;
 
+
+&lt;p&gt;Experimenting with &lt;code&gt;ou_perturb_kernel.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Was getting weird results, where the ML approached infinity as &lt;code&gt;noise_variance&lt;/code&gt; approached zero.&lt;/p&gt;
+
+&lt;p&gt;Realized that the set of precision matrices needs to be updated &lt;strong&gt;every time the noise sigma changes&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;This is an oversight that has tripped me up before.  Need to try to avoid it in the future.&lt;/p&gt;
+
+&lt;p&gt;It is possible (likely?) that this transformation is as simple as multiplying the precision matrices by \(\sigma_n* / \sigma_n\).  This would avoid a semi-expensive Hessian calculation for each point, which could be a bottleneck during training.&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;p&gt;See previous entry&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/07/17/work-log"/>
+   <updated>2013-07-17T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/07/17/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;14866&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Note: This entry marks then end of significant work on the new likelihood function.  The SVN revision is noted in the meta-box to the right.&lt;/p&gt;
 
 &lt;h2&gt;Optimizing &lt;code&gt;curve_ml5.m&lt;/code&gt;&lt;/h2&gt;
 
@@ -103,6 +155,19 @@ New ML (direct method): 793.300407 &amp;lt;--  0.04% error!
 &lt;h2&gt;Summary&lt;/h2&gt;
 
 &lt;p&gt;The code for the new likelihood, &lt;code&gt;curve_ml5.m&lt;/code&gt; is now stable.  It is fast and accurate in its current implementation, assuming a reasonable value for &lt;code&gt;markov_order&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2&gt;Next Steps&lt;/h2&gt;
+
+&lt;p&gt;Medium-term goal: calibration/training for all curve models.&lt;/p&gt;
+
+&lt;p&gt;TODO&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Ground-truth labelling of bottom-curve curve data&lt;/li&gt;
+&lt;li&gt;set-up method for evaluating ground-truth using a given parameter-set, without re-computing indices each time.&lt;/li&gt;
+&lt;li&gt;Run multi-dimensional optimization to fit for all models&lt;/li&gt;
+&lt;/ul&gt;
+
 </content>
  </entry>
  

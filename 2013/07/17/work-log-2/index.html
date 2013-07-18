@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log &larr; </title>
+   <title>Work Log 2 &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -76,7 +76,7 @@
 	
   
   
-  <h1 class="title">Work Log</h1>
+  <h1 class="title">Work Log 2</h1>
 
   <div class="date emphnext">July 17, 2013</div>
     
@@ -100,11 +100,6 @@
         <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_2</td>
     </tr>
 
-    <tr>
-        <th>SVN Revision</th>
-        <td>14866</td>
-    </tr>
-
 
 </table>
 
@@ -112,83 +107,19 @@
 </div>
 
 
-<p>Note: This entry marks then end of significant work on the new likelihood function.  The SVN revision is noted in the meta-box to the right.</p>
+<p>Experimenting with <code>ou_perturb_kernel.m</code>.</p>
 
-<h2>Optimizing <code>curve_ml5.m</code></h2>
+<p>Was getting weird results, where the ML approached infinity as <code>noise_variance</code> approached zero.</p>
 
-<p>Attempting to use sparsity to speed up <code>curve_ml5.m</code>.</p>
+<p>Realized that the set of precision matrices needs to be updated <strong>every time the noise sigma changes</strong>.</p>
 
-<p><strong>First attempt</strong>: try building only the relevant elements of the prior matrix, K.<br/>
-<strong>Resut</strong>: Gains in multiplication are lost in construction of K.  Insignificant speedup.  Rolling back.</p>
+<p>This is an oversight that has tripped me up before.  Need to try to avoid it in the future.</p>
 
-<p><strong>Second attempt</strong>: convert block-diagonal matrix <em>S</em> to a sparse matrix.<br/>
-<strong>Result</strong>: Significant gains in multiplication; tolerable losses when constructing <em>S</em>.  ~8x speedup</p>
+<p>It is possible (likely?) that this transformation is as simple as multiplying the precision matrices by \(\sigma_n* / \sigma_n\).  This would avoid a semi-expensive Hessian calculation for each point, which could be a bottleneck during training.</p>
 
-<p><strong>Third Attempt</strong>: Convert the individual blocks <em>S_i</em> to sparse, <em>then</em> construct <em>S</em> from them.<br/>
-<strong>Result</strong>: Further speedup of ~2x</p>
+<h2>TODO</h2>
 
-<p><strong>Fourth Attempt</strong>:  Change <code>(eye(size(K)) + S * K * S')</code> to <code>(speye(size(K)) + S * K * S')</code> ; i.e. changing <code>eye</code> to <code>speye</code>.<br/>
-<strong>Result</strong>: moderate speedup, ~1.5x.</p>
-
-<p>I think we've squeezed all we can from this function.  It's now 10x faster than the naive method on a problem with 4000-dimensions.</p>
-
-<h2>Results: </h2>
-
-<p>Running <code>test/test_ml_end_to_end_2.m</code></p>
-
-<pre><code>Computing marginal likelihood (old way)...
-Done. (6362.9 ms)
-Old ML: 207.041742
-
-Computing marginal likelihood (new way, legacy correspondence)...
-Done. (7655.2 ms)
-New ML (Legacy corr): 207.700616
-
-Computing marginal likelihood (new way)...
-Done. (6537.7 ms)
-New ML (New corr): 793.585038
-
-Computing marginal likelihood (new way, no MIL)...
-Done. (6330.3 ms)
-New ML (New corr, no MIL): 793.600835
-
-Computing marginal likelihood (direct method)...
-Done. (667.9 ms)  &lt;-------------------  10x speedup over previous
-New ML (direct method): 793.300407 &lt;--  0.04% error!
-</code></pre>
-
-<p>Note speedup and negligible error compared the previous method.</p>
-
-<h2>General Observations Regarding <code>curve_ml5.m</code></h2>
-
-<p>I've noticed that <code>markov_order</code> must be much larger than I expected to avoid approximation error.</p>
-
-<p>Recall in <code>curve_ml2.m</code>, we use the Markov assumption to break-down the prior covariance, and then combine them with the likelihood cliques.  In that case, we could use a Markov order between 2 and 5 without significant approximation error.</p>
-
-<p>In <code>curve_ml5.m</code>, using a Markov order less than 100 results in unacceptable error.</p>
-
-<p>There are two reasons for this.  First, we're decomposing the marginal likelihood Gaussian, not the prior.  The prior is explicitly Markovian, whereas the marginal likelihood is not.  The ML Guassian adds extra uncertainty to every point, which means we need to consider more nearby points to avoid erroneous conclusions.</p>
-
-<p>Second, because the new approach creates a distinct index set for each view, indices are often repeated (multiple views of the same point) and considering them doesn't tell you anything about what direction the curve is heading.</p>
-
-<p>The first point will likely be mitigated when we start using the new curve model, which will allow the likelihood variance to decrease dramatically.  However, the markov assumption in the prior is less likely to hold under these models, so some experimentation will be needed.</p>
-
-<h2>Summary</h2>
-
-<p>The code for the new likelihood, <code>curve_ml5.m</code> is now stable.  It is fast and accurate in its current implementation, assuming a reasonable value for <code>markov_order</code>.</p>
-
-<h2>Next Steps</h2>
-
-<p>Medium-term goal: calibration/training for all curve models.</p>
-
-<p>TODO</p>
-
-<ul>
-<li>Ground-truth labelling of bottom-curve curve data</li>
-<li>set-up method for evaluating ground-truth using a given parameter-set, without re-computing indices each time.</li>
-<li>Run multi-dimensional optimization to fit for all models</li>
-</ul>
-
+<p>See previous entry</p>
 
       <address class="signature">
         Posted by
@@ -199,11 +130,8 @@ New ML (direct method): 793.300407 &lt;--  0.04% error!
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/07/17/work-log-2" class="next" title="Work Log 2">Work Log 2 &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/07/16/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/07/17/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>
@@ -220,7 +148,7 @@ New ML (direct method): 793.300407 &lt;--  0.04% error!
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log 2" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -268,7 +196,7 @@ New ML (direct method): 793.300407 &lt;--  0.04% error!
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log");
+                    + encodeURIComponent("Work Log 2");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");
