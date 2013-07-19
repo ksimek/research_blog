@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log 2 &larr; </title>
+   <title>Work Log &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -76,9 +76,9 @@
 	
   
   
-  <h1 class="title">Work Log 2</h1>
+  <h1 class="title">Work Log</h1>
 
-  <div class="date emphnext">July 17, 2013</div>
+  <div class="date emphnext">July 18, 2013</div>
     
 
 
@@ -107,19 +107,60 @@
 </div>
 
 
-<p>Experimenting with <code>ou_perturb_kernel.m</code>.</p>
+<p>Today:</p>
 
-<p>Was getting weird results, where the ML approached infinity as <code>noise_variance</code> approached zero.</p>
+<ul>
+<li>Bootcamp demo session</li>
+<li>Ground truth labeling of curve fragments.</li>
+</ul>
 
-<p>Realized that the set of precision matrices needs to be updated <strong>every time the noise sigma changes</strong>.</p>
 
-<p>This is an oversight that has tripped me up before.  Need to try to avoid it in the future.</p>
+<h2>Bootcamp demo session</h2>
 
-<p>It is possible (likely?) that this transformation is as simple as multiplying the precision matrices by \(\sigma_n* / \sigma_n\).  This would avoid a semi-expensive Hessian calculation for each point, which could be a bottleneck during training.</p>
+<p>Ran bootcamp demo session.  Final code available at</p>
 
-<h2>TODO</h2>
+<pre><code>svn+ssh://v01/misc/svn/src/bootcamp/kjb_demos/3d_demo
+</code></pre>
 
-<p>See previous entry</p>
+<h1>Ground truth labeling of curve fragments</h1>
+
+<p>Goal: use 2D ground truth to automatically label bottom-up curve fragments.</p>
+
+<h2>Overview</h2>
+
+<ol>
+<li>Draw ground truth curves using curve index</li>
+<li>dilate slightly</li>
+<li>For each rendered data curve, gather all GT indices</li>
+<li>keep most-occurring GT index.</li>
+<li>add to assoc list for that curve</li>
+</ol>
+
+
+<h2>Issues:</h2>
+
+<p><strong>Q:</strong> Remember how to read and process ground truth.<br/>
+<strong>A:</strong> See <code>../ground_truth/read_gt2.m</code></p>
+
+<p>Symlinked to <code>train/read_gt2.m</code>.</p>
+
+<p><strong>Q:</strong> Which dataset does our example data come from?<br/>
+<strong>A:</strong> <code>~/data/arabidopsis/2010-06-03/ler_5_36/ler_5_36_0.jpg</code></p>
+
+<p><strong>Q:</strong> Where is ground truth data?<br/>
+<strong>A:</strong> <code>~/data/arabidopsis/2010-06-03/ler_5_36/resized_50%/ground_truth_2d.gt2</code></p>
+
+<h2>Blah Blah</h2>
+
+<p>Refactored some code into new function <code>build_curve_maps.m</code>, which renders each of the curves in a cell-array into a map containing their indices.</p>
+
+<p>Forgot that GT is stored as Bezier curves.  Symlinked the all bezier-related code into data_association_2.  Relevant function is <code>bezier/polybez_to_polyline.m</code>.</p>
+
+<p>Forgot that GT is stored in OpenGL-style coordinates (bottom-left origin).  Converting to top-right using <code>tools/flip_y.m</code>.</p>
+
+<h2>Summary </h2>
+
+<p>Got through item 2 in "Overview" above.  Will finish next time, and start building training framework.</p>
 
       <address class="signature">
         Posted by
@@ -130,11 +171,8 @@
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/07/18/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/07/17/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/07/17/work-log-2" class="prev" title="Work Log 2">&larr; Work Log 2</a>
   
   </div>
   <div class="clearer"> </div>
@@ -151,7 +189,7 @@
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log 2" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -199,7 +237,7 @@
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log 2");
+                    + encodeURIComponent("Work Log");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

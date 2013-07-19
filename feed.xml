@@ -7,6 +7,92 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Today:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Bootcamp demo session&lt;/li&gt;
+&lt;li&gt;Ground truth labeling of curve fragments.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Bootcamp demo session&lt;/h2&gt;
+
+&lt;p&gt;Ran bootcamp demo session.  Final code available at&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;svn+ssh://v01/misc/svn/src/bootcamp/kjb_demos/3d_demo
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1&gt;Ground truth labeling of curve fragments&lt;/h1&gt;
+
+&lt;p&gt;Goal: use 2D ground truth to automatically label bottom-up curve fragments.&lt;/p&gt;
+
+&lt;h2&gt;Overview&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Draw ground truth curves using curve index&lt;/li&gt;
+&lt;li&gt;dilate slightly&lt;/li&gt;
+&lt;li&gt;For each rendered data curve, gather all GT indices&lt;/li&gt;
+&lt;li&gt;keep most-occurring GT index.&lt;/li&gt;
+&lt;li&gt;add to assoc list for that curve&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;h2&gt;Issues:&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Q:&lt;/strong&gt; Remember how to read and process ground truth.&lt;br/&gt;
+&lt;strong&gt;A:&lt;/strong&gt; See &lt;code&gt;../ground_truth/read_gt2.m&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Symlinked to &lt;code&gt;train/read_gt2.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Q:&lt;/strong&gt; Which dataset does our example data come from?&lt;br/&gt;
+&lt;strong&gt;A:&lt;/strong&gt; &lt;code&gt;~/data/arabidopsis/2010-06-03/ler_5_36/ler_5_36_0.jpg&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Q:&lt;/strong&gt; Where is ground truth data?&lt;br/&gt;
+&lt;strong&gt;A:&lt;/strong&gt; &lt;code&gt;~/data/arabidopsis/2010-06-03/ler_5_36/resized_50%/ground_truth_2d.gt2&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2&gt;Blah Blah&lt;/h2&gt;
+
+&lt;p&gt;Refactored some code into new function &lt;code&gt;build_curve_maps.m&lt;/code&gt;, which renders each of the curves in a cell-array into a map containing their indices.&lt;/p&gt;
+
+&lt;p&gt;Forgot that GT is stored as Bezier curves.  Symlinked the all bezier-related code into data_association_2.  Relevant function is &lt;code&gt;bezier/polybez_to_polyline.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Forgot that GT is stored in OpenGL-style coordinates (bottom-left origin).  Converting to top-right using &lt;code&gt;tools/flip_y.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2&gt;Summary &lt;/h2&gt;
+
+&lt;p&gt;Got through item 2 in &quot;Overview&quot; above.  Will finish next time, and start building training framework.&lt;/p&gt;
+</description>
+				<pubDate>Thu, 18 Jul 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/18/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/18/work-log</guid>
+			</item>
+		
+			<item>
 				<title>Work Log 2</title>
 				<description>
 
@@ -887,68 +973,6 @@ Test is implemented.  Troubleshooting syntax errors...&lt;/p&gt;
 				<pubDate>Wed, 03 Jul 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/03/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/03/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;h2&gt;Implementing marginal likelihood &lt;/h2&gt;
-
-&lt;p&gt;Working on generalizing marginal likelihood for all three foreground models.&lt;/p&gt;
-
-&lt;p&gt;Considered briefly how to use the matrix inversion lemma to improve numerical stability of all models.  Decided it could be difficult to build in a general way;  will proceed with the direct method for now, until there is evidence of numerical instability.&lt;/p&gt;
-
-&lt;p&gt;Generalized how covariance is generated.  Wrote several new functions for generating differenct covariance matrices.  Will need to rework some due to the developments I describe later.&lt;/p&gt;
-
-&lt;h2&gt;Theoretical Developments&lt;/h2&gt;
-
-&lt;p&gt;Thought extensively about perturbation models I described yesterday.  I realized there is a serious problem with modeling motion using brownian motion -- the prior variance grows without bound as time approaches infinity.  Thus, the marginal prior for the curve in view 36 has much greater prior variance than the curve one in view 1.  This doesn't make sense -- ideally, they should all have the same marginal prior.&lt;/p&gt;
-
-&lt;p&gt;This led to a reading session in Williams and Rasmussen, which led me to develop two new motion models, which I describe extensively in today's accompanying post.&lt;/p&gt;
-
-&lt;h2&gt;Tomorrow&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Finish implementing new covariance functions.&lt;/li&gt;
-&lt;li&gt;Implement generalized marginal likelihood.&lt;/li&gt;
-&lt;li&gt;implement &lt;em&gt;fast&lt;/em&gt; generalized marginal likelihood (approximation)
-
-&lt;ul&gt;
-&lt;li&gt;Test against existing ML for old models.&lt;/li&gt;
-&lt;li&gt;Test with new models.  Are the ML's higher? (will probably need training).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Build training data set from hand-traced ground-truth.&lt;/li&gt;
-&lt;li&gt;Write training code.  Train all three candidate models.&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Tue, 02 Jul 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/02/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/02/work-log</guid>
 			</item>
 		
 	</channel>
