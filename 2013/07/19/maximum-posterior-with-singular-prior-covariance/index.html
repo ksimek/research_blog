@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log &larr; </title>
+   <title>Maximum posterior with singular prior covariance &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -76,9 +76,9 @@
 	
   
   
-  <h1 class="title">Work Log</h1>
+  <h1 class="title">Maximum posterior with singular prior covariance</h1>
 
-  <div class="date emphnext">July 18, 2013</div>
+  <div class="date emphnext">July 19, 2013</div>
     
 
 
@@ -107,60 +107,52 @@
 </div>
 
 
-<p>Today:</p>
+<p>Consider the scenerio of Bayesian inference with a linear-Gaussian prior and likelihood.</p>
 
-<ul>
-<li>Bootcamp demo session</li>
-<li>Ground truth labeling of curve fragments.</li>
-</ul>
+<p>It is sometimes the case that our prior has a singular covariance matrix, indicating that our variables are embedded in a lower-dimensional hyberplane, i.e. some dimensions are redundant.  In our 3D curve triangulation application, this situation arises when  the same 3D point is observed in from multiple views.</p>
 
+<p>We can still find the maximum posterior arising from such a prior, as long as the likelihood is non-singular.   We can interpret this as multiple observations of the rendant dimensions, and if we are careful with our math, we can handle it the same way as the case with a non-singular prior.</p>
 
-<h2>Bootcamp demo session</h2>
+<p>Given a likelihood \( \mathcal{N}(\mu_l, \Sigma_l) \) and prior \( \mathcal{N}(\mu_0, \Sigma_0) \), recall that the posterior is given by  \( \mathcal{N(\mu_P, \Sigma_P)} \), where</p>
 
-<p>Ran bootcamp demo session.  Final code available at</p>
+<div>\[
+\begin{align}
+\Sigma_P &= (\Sigma_l^{-1} + \Sigma_0^{-1})^{-1} \\
+\mu_P &= (\Sigma_l^{-1} + \Sigma_0^{-1})^{-1} (\Sigma_l^{-1} \mu_l + \Sigma_0^{-1} \mu_0)
+\end{align}
 
-<pre><code>svn+ssh://v01/misc/svn/src/bootcamp/kjb_demos/3d_demo
-</code></pre>
-
-<h1>Ground truth labeling of curve fragments</h1>
-
-<p>Goal: use 2D ground truth to automatically label bottom-up curve fragments.</p>
-
-<h2>Overview</h2>
-
-<ol>
-<li>Draw ground truth curves using curve index</li>
-<li>dilate slightly</li>
-<li>For each rendered data curve, gather all GT indices</li>
-<li>keep most-occurring GT index.</li>
-<li>add to assoc list for that curve</li>
-</ol>
+\]
+</div>
 
 
-<h2>Issues:</h2>
+<p>However, if \(\Sigma_0 \) is singular, we must avoid inverting it when computing \( \mu_P  \).  An equivalent equation for \(\mu_P\) that satisfies this condition is:</p>
 
-<p><strong>Q:</strong> Remember how to read and process ground truth.<br/>
-<strong>A:</strong> See <code>../ground_truth/read_gt2.m</code></p>
+<div> \[
+\mu_P = (\Sigma_0 \Sigma_l^{-1} + I)^{-1} (\Sigma_0 \Sigma_l^{-1} \mu_l + \mu_0)
+\]
+</div>
 
-<p>Symlinked to <code>train/read_gt2.m</code>.</p>
 
-<p><strong>Q:</strong> Which dataset does our example data come from?<br/>
-<strong>A:</strong> <code>~/data/arabidopsis/2010-06-03/ler_5_36/ler_5_36_0.jpg</code></p>
 
-<p><strong>Q:</strong> Where is ground truth data?<br/>
-<strong>A:</strong> <code>~/data/arabidopsis/2010-06-03/ler_5_36/resized_50%/ground_truth_2d.gt2</code></p>
 
-<h2>Blah Blah</h2>
+<div>This should be computable as long as the likelihood precision matrix \(\Sigma_l^{-1}\) has no infinite eigenvalues.  </div>
 
-<p>Refactored some code into new function <code>build_curve_maps.m</code>, which renders each of the curves in a cell-array into a map containing their indices.</p>
 
-<p>Forgot that GT is stored as Bezier curves.  Symlinked the all bezier-related code into data_association_2.  Relevant function is <code>bezier/polybez_to_polyline.m</code>.</p>
+<p>To see an example result, see <a href="/ksimek/research/2013/07/19/work-log/">today's Work Log</a> entry.</p>
 
-<p>Forgot that GT is stored in OpenGL-style coordinates (bottom-left origin).  Converting to top-right using <code>tools/flip_y.m</code>.</p>
+<h2>Implementation Notes</h2>
 
-<h2>Summary </h2>
+<p>I tried implementing a version of this that uses Cholesky decomposition and backsubstitution instead of generic matrix inversion.  I needed a symmetric matrix, so I modified the equation for \(\mu_P\):</p>
 
-<p>Got through item 2 in "Overview" above.  Will finish next time, and start building training framework.</p>
+<div> \[
+\mu_P = \Sigma_0 (\Sigma_0 \Sigma_l^{-1} \Sigma_0 + \Sigma_0)^{-1} (\Sigma_0 \Sigma_l^{-1} \mu_l + \mu_0)
+\]
+</div>
+
+
+<p>This was not noticibly faster than general matrix inversion, because it involves two additional large matrix multiplications.</p>
+
+<p>Surprisingly, I <em>was</em> able to get a significant speedup (~7x) be using backsubstitution (Matlab's '\' operator) <em>without</em> Cholesky decomposition.  I always assumed that the lower-triangular form was what made backsubstitution so fast, but it is apparently also fast with dense matrices.  So we can avoid the extra expensive dens-matrix multiplications, and also avoid expensive matrix inversion.</p>
 
       <address class="signature">
         Posted by
@@ -172,10 +164,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/07/19/maximum-posterior-with-singular-prior-covariance" class="next" title="Maximum posterior with singular prior covariance">Maximum posterior with singular prior covariance &rarr;</a>
+    <a href="/ksimek/research/2013/07/19/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/07/17/work-log-2" class="prev" title="Work Log 2">&larr; Work Log 2</a>
+    <a href="/ksimek/research/2013/07/18/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>
@@ -192,7 +184,7 @@
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Maximum posterior with singular prior covariance" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -240,7 +232,7 @@
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log");
+                    + encodeURIComponent("Maximum posterior with singular prior covariance");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

@@ -4,13 +4,149 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-07-18T17:07:55-07:00</updated>
+ <updated>2013-07-21T13:07:57-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/07/19/work-log"/>
+   <updated>2013-07-19T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/07/19/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Continuing: ground-truth-to-data-labels.  See file &lt;code&gt;train/label_from_ground_truth.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Finished.&lt;/p&gt;
+
+&lt;p&gt;Next:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Data labels to likelihood means/covariances&lt;/li&gt;
+&lt;li&gt;Likelihood means/covariances to marginal likelihood&lt;/li&gt;
+&lt;li&gt;training framework&lt;/li&gt;
+&lt;li&gt;training&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Visualizing &lt;code&gt;labels_from_ground_truth()&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;Wrote &lt;code&gt;tmp_get_max_posterior.m&lt;/code&gt;, a temporary script that computes the posterior mean from a possibly-overconstrained prior.  In this case, the posterior covariance is singular, but the mean can still be obtained.  The math behind it &lt;a href=&quot;/ksimek/research/2013/07/19/maximum-posterior-with-singular-prior-covariance/&quot;&gt;is available here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Below is a plot using the test dataset and the ground truth labels:&lt;/p&gt;
+
+&lt;iframe width=&quot;420&quot; height=&quot;315&quot; src=&quot;//www.youtube.com/embed/foL28SUn1JM?rel=0&quot; frameborder=&quot;0&quot; allowfullscreen&gt;&lt;/iframe&gt;
+
+
+&lt;p&gt;This shows that given a good labeling, a quality 3D reconstruction can be obtained using only the fragmented curves output by the curve-detector.&lt;/p&gt;
+
+&lt;p&gt;Notice that the curves at the base have missing parts.  There isn't sufficient edge data here, but this could probably be fixed by connecting them to the base of the main stem and using the Branching Gaussian Process prior to enforce connectivity.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Maximum posterior with singular prior covariance</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/07/19/maximum-posterior-with-singular-prior-covariance"/>
+   <updated>2013-07-19T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/07/19/maximum-posterior-with-singular-prior-covariance</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Consider the scenerio of Bayesian inference with a linear-Gaussian prior and likelihood.&lt;/p&gt;
+
+&lt;p&gt;It is sometimes the case that our prior has a singular covariance matrix, indicating that our variables are embedded in a lower-dimensional hyberplane, i.e. some dimensions are redundant.  In our 3D curve triangulation application, this situation arises when  the same 3D point is observed in from multiple views.&lt;/p&gt;
+
+&lt;p&gt;We can still find the maximum posterior arising from such a prior, as long as the likelihood is non-singular.   We can interpret this as multiple observations of the rendant dimensions, and if we are careful with our math, we can handle it the same way as the case with a non-singular prior.&lt;/p&gt;
+
+&lt;p&gt;Given a likelihood \( \mathcal{N}(\mu_l, \Sigma_l) \) and prior \( \mathcal{N}(\mu_0, \Sigma_0) \), recall that the posterior is given by  \( \mathcal{N(\mu_P, \Sigma_P)} \), where&lt;/p&gt;
+
+&lt;div&gt;\[
+\begin{align}
+\Sigma_P &amp;= (\Sigma_l^{-1} + \Sigma_0^{-1})^{-1} \\
+\mu_P &amp;= (\Sigma_l^{-1} + \Sigma_0^{-1})^{-1} (\Sigma_l^{-1} \mu_l + \Sigma_0^{-1} \mu_0)
+\end{align}
+
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;However, if \(\Sigma_0 \) is singular, we must avoid inverting it when computing \( \mu_P  \).  An equivalent equation for \(\mu_P\) that satisfies this condition is:&lt;/p&gt;
+
+&lt;div&gt; \[
+\mu_P = (\Sigma_0 \Sigma_l^{-1} + I)^{-1} (\Sigma_0 \Sigma_l^{-1} \mu_l + \mu_0)
+\]
+&lt;/div&gt;
+
+
+
+
+&lt;div&gt;This should be computable as long as the likelihood precision matrix \(\Sigma_l^{-1}\) has no infinite eigenvalues.  &lt;/div&gt;
+
+
+&lt;p&gt;To see an example result, see &lt;a href=&quot;/ksimek/research/2013/07/19/work-log/&quot;&gt;today's Work Log&lt;/a&gt; entry.&lt;/p&gt;
+
+&lt;h2&gt;Implementation Notes&lt;/h2&gt;
+
+&lt;p&gt;I tried implementing a version of this that uses Cholesky decomposition and backsubstitution instead of generic matrix inversion.  I needed a symmetric matrix, so I modified the equation for \(\mu_P\):&lt;/p&gt;
+
+&lt;div&gt; \[
+\mu_P = \Sigma_0 (\Sigma_0 \Sigma_l^{-1} \Sigma_0 + \Sigma_0)^{-1} (\Sigma_0 \Sigma_l^{-1} \mu_l + \mu_0)
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;This was not noticibly faster than general matrix inversion, because it involves two additional large matrix multiplications.&lt;/p&gt;
+
+&lt;p&gt;Surprisingly, I &lt;em&gt;was&lt;/em&gt; able to get a significant speedup (~7x) be using backsubstitution (Matlab's '\' operator) &lt;em&gt;without&lt;/em&gt; Cholesky decomposition.  I always assumed that the lower-triangular form was what made backsubstitution so fast, but it is apparently also fast with dense matrices.  So we can avoid the extra expensive dens-matrix multiplications, and also avoid expensive matrix inversion.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Work Log</title>

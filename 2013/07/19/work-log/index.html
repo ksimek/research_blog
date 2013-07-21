@@ -78,7 +78,7 @@
   
   <h1 class="title">Work Log</h1>
 
-  <div class="date emphnext">July 18, 2013</div>
+  <div class="date emphnext">July 19, 2013</div>
     
 
 
@@ -107,60 +107,32 @@
 </div>
 
 
-<p>Today:</p>
+<p>Continuing: ground-truth-to-data-labels.  See file <code>train/label_from_ground_truth.m</code>.</p>
+
+<p>Finished.</p>
+
+<p>Next:</p>
 
 <ul>
-<li>Bootcamp demo session</li>
-<li>Ground truth labeling of curve fragments.</li>
+<li>Data labels to likelihood means/covariances</li>
+<li>Likelihood means/covariances to marginal likelihood</li>
+<li>training framework</li>
+<li>training</li>
 </ul>
 
 
-<h2>Bootcamp demo session</h2>
+<h2>Visualizing <code>labels_from_ground_truth()</code></h2>
 
-<p>Ran bootcamp demo session.  Final code available at</p>
+<p>Wrote <code>tmp_get_max_posterior.m</code>, a temporary script that computes the posterior mean from a possibly-overconstrained prior.  In this case, the posterior covariance is singular, but the mean can still be obtained.  The math behind it <a href="/ksimek/research/2013/07/19/maximum-posterior-with-singular-prior-covariance/">is available here</a>.</p>
 
-<pre><code>svn+ssh://v01/misc/svn/src/bootcamp/kjb_demos/3d_demo
-</code></pre>
+<p>Below is a plot using the test dataset and the ground truth labels:</p>
 
-<h1>Ground truth labeling of curve fragments</h1>
-
-<p>Goal: use 2D ground truth to automatically label bottom-up curve fragments.</p>
-
-<h2>Overview</h2>
-
-<ol>
-<li>Draw ground truth curves using curve index</li>
-<li>dilate slightly</li>
-<li>For each rendered data curve, gather all GT indices</li>
-<li>keep most-occurring GT index.</li>
-<li>add to assoc list for that curve</li>
-</ol>
+<iframe width="420" height="315" src="//www.youtube.com/embed/foL28SUn1JM?rel=0" frameborder="0" allowfullscreen></iframe>
 
 
-<h2>Issues:</h2>
+<p>This shows that given a good labeling, a quality 3D reconstruction can be obtained using only the fragmented curves output by the curve-detector.</p>
 
-<p><strong>Q:</strong> Remember how to read and process ground truth.<br/>
-<strong>A:</strong> See <code>../ground_truth/read_gt2.m</code></p>
-
-<p>Symlinked to <code>train/read_gt2.m</code>.</p>
-
-<p><strong>Q:</strong> Which dataset does our example data come from?<br/>
-<strong>A:</strong> <code>~/data/arabidopsis/2010-06-03/ler_5_36/ler_5_36_0.jpg</code></p>
-
-<p><strong>Q:</strong> Where is ground truth data?<br/>
-<strong>A:</strong> <code>~/data/arabidopsis/2010-06-03/ler_5_36/resized_50%/ground_truth_2d.gt2</code></p>
-
-<h2>Blah Blah</h2>
-
-<p>Refactored some code into new function <code>build_curve_maps.m</code>, which renders each of the curves in a cell-array into a map containing their indices.</p>
-
-<p>Forgot that GT is stored as Bezier curves.  Symlinked the all bezier-related code into data_association_2.  Relevant function is <code>bezier/polybez_to_polyline.m</code>.</p>
-
-<p>Forgot that GT is stored in OpenGL-style coordinates (bottom-left origin).  Converting to top-right using <code>tools/flip_y.m</code>.</p>
-
-<h2>Summary </h2>
-
-<p>Got through item 2 in "Overview" above.  Will finish next time, and start building training framework.</p>
+<p>Notice that the curves at the base have missing parts.  There isn't sufficient edge data here, but this could probably be fixed by connecting them to the base of the main stem and using the Branching Gaussian Process prior to enforce connectivity.</p>
 
       <address class="signature">
         Posted by
@@ -171,11 +143,8 @@
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/07/19/maximum-posterior-with-singular-prior-covariance" class="next" title="Maximum posterior with singular prior covariance">Maximum posterior with singular prior covariance &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/07/17/work-log-2" class="prev" title="Work Log 2">&larr; Work Log 2</a>
+    <a href="/ksimek/research/2013/07/19/maximum-posterior-with-singular-prior-covariance" class="prev" title="Maximum posterior with singular prior covariance">&larr; Maximum posterior with singular prior covariance</a>
   
   </div>
   <div class="clearer"> </div>

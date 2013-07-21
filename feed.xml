@@ -32,6 +32,142 @@
 &lt;/div&gt;
 
 
+&lt;p&gt;Continuing: ground-truth-to-data-labels.  See file &lt;code&gt;train/label_from_ground_truth.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Finished.&lt;/p&gt;
+
+&lt;p&gt;Next:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Data labels to likelihood means/covariances&lt;/li&gt;
+&lt;li&gt;Likelihood means/covariances to marginal likelihood&lt;/li&gt;
+&lt;li&gt;training framework&lt;/li&gt;
+&lt;li&gt;training&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Visualizing &lt;code&gt;labels_from_ground_truth()&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;Wrote &lt;code&gt;tmp_get_max_posterior.m&lt;/code&gt;, a temporary script that computes the posterior mean from a possibly-overconstrained prior.  In this case, the posterior covariance is singular, but the mean can still be obtained.  The math behind it &lt;a href=&quot;/ksimek/research/2013/07/19/maximum-posterior-with-singular-prior-covariance/&quot;&gt;is available here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Below is a plot using the test dataset and the ground truth labels:&lt;/p&gt;
+
+&lt;iframe width=&quot;420&quot; height=&quot;315&quot; src=&quot;//www.youtube.com/embed/foL28SUn1JM?rel=0&quot; frameborder=&quot;0&quot; allowfullscreen&gt;&lt;/iframe&gt;
+
+
+&lt;p&gt;This shows that given a good labeling, a quality 3D reconstruction can be obtained using only the fragmented curves output by the curve-detector.&lt;/p&gt;
+
+&lt;p&gt;Notice that the curves at the base have missing parts.  There isn't sufficient edge data here, but this could probably be fixed by connecting them to the base of the main stem and using the Branching Gaussian Process prior to enforce connectivity.&lt;/p&gt;
+</description>
+				<pubDate>Fri, 19 Jul 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/19/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/19/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Maximum posterior with singular prior covariance</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Consider the scenerio of Bayesian inference with a linear-Gaussian prior and likelihood.&lt;/p&gt;
+
+&lt;p&gt;It is sometimes the case that our prior has a singular covariance matrix, indicating that our variables are embedded in a lower-dimensional hyberplane, i.e. some dimensions are redundant.  In our 3D curve triangulation application, this situation arises when  the same 3D point is observed in from multiple views.&lt;/p&gt;
+
+&lt;p&gt;We can still find the maximum posterior arising from such a prior, as long as the likelihood is non-singular.   We can interpret this as multiple observations of the rendant dimensions, and if we are careful with our math, we can handle it the same way as the case with a non-singular prior.&lt;/p&gt;
+
+&lt;p&gt;Given a likelihood \( \mathcal{N}(\mu_l, \Sigma_l) \) and prior \( \mathcal{N}(\mu_0, \Sigma_0) \), recall that the posterior is given by  \( \mathcal{N(\mu_P, \Sigma_P)} \), where&lt;/p&gt;
+
+&lt;div&gt;\[
+\begin{align}
+\Sigma_P &amp;= (\Sigma_l^{-1} + \Sigma_0^{-1})^{-1} \\
+\mu_P &amp;= (\Sigma_l^{-1} + \Sigma_0^{-1})^{-1} (\Sigma_l^{-1} \mu_l + \Sigma_0^{-1} \mu_0)
+\end{align}
+
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;However, if \(\Sigma_0 \) is singular, we must avoid inverting it when computing \( \mu_P  \).  An equivalent equation for \(\mu_P\) that satisfies this condition is:&lt;/p&gt;
+
+&lt;div&gt; \[
+\mu_P = (\Sigma_0 \Sigma_l^{-1} + I)^{-1} (\Sigma_0 \Sigma_l^{-1} \mu_l + \mu_0)
+\]
+&lt;/div&gt;
+
+
+
+
+&lt;div&gt;This should be computable as long as the likelihood precision matrix \(\Sigma_l^{-1}\) has no infinite eigenvalues.  &lt;/div&gt;
+
+
+&lt;p&gt;To see an example result, see &lt;a href=&quot;/ksimek/research/2013/07/19/work-log/&quot;&gt;today's Work Log&lt;/a&gt; entry.&lt;/p&gt;
+
+&lt;h2&gt;Implementation Notes&lt;/h2&gt;
+
+&lt;p&gt;I tried implementing a version of this that uses Cholesky decomposition and backsubstitution instead of generic matrix inversion.  I needed a symmetric matrix, so I modified the equation for \(\mu_P\):&lt;/p&gt;
+
+&lt;div&gt; \[
+\mu_P = \Sigma_0 (\Sigma_0 \Sigma_l^{-1} \Sigma_0 + \Sigma_0)^{-1} (\Sigma_0 \Sigma_l^{-1} \mu_l + \mu_0)
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;This was not noticibly faster than general matrix inversion, because it involves two additional large matrix multiplications.&lt;/p&gt;
+
+&lt;p&gt;Surprisingly, I &lt;em&gt;was&lt;/em&gt; able to get a significant speedup (~7x) be using backsubstitution (Matlab's '\' operator) &lt;em&gt;without&lt;/em&gt; Cholesky decomposition.  I always assumed that the lower-triangular form was what made backsubstitution so fast, but it is apparently also fast with dense matrices.  So we can avoid the extra expensive dens-matrix multiplications, and also avoid expensive matrix inversion.&lt;/p&gt;
+</description>
+				<pubDate>Fri, 19 Jul 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/19/maximum-posterior-with-singular-prior-covariance</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/19/maximum-posterior-with-singular-prior-covariance</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
 &lt;p&gt;Today:&lt;/p&gt;
 
 &lt;ul&gt;
@@ -739,240 +875,6 @@ New ML (New corr): 793.585038
 				<pubDate>Fri, 05 Jul 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/05/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/05/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;h2&gt;Continuing debugging of new likelihood&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;Test:&lt;/strong&gt; &lt;code&gt;test/test_ml_end_to_end_2.m&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;07:11:52 AM&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;Trouble with NaN error in &lt;code&gt;correspondence/corr_to_likelihood_legacy.m&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;08:22:43 AM&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;Narrowed it down to gap-handling code-branch.&lt;/p&gt;
-
-&lt;p&gt;08:53:34 AM&lt;/p&gt;
-
-&lt;p&gt;Fixed. Arose from a nasty indexing scheme in the original &lt;code&gt;clean_correspondence.m&lt;/code&gt;, which I didn't handle well when adapting for &lt;code&gt;corr_to_likelihood_legacy.m&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;09:29:35 AM&lt;/p&gt;
-
-&lt;p&gt;Nonsingular prior covariance matrix causing crash.  Apparently caused by same index appearing multiple times.&lt;/p&gt;
-
-&lt;p&gt;In the past, we always merged such points.&lt;/p&gt;
-
-&lt;p&gt;The new idea is different views of the same point would make the posterior covariance singular.  Either this isn't true, or there's a bug...&lt;/p&gt;
-
-&lt;p&gt;Debugging this will take some serious coding and math brainpower and I fell debugging fatigue coming on.  Taking a brief break to refresh, then will tackle...&lt;/p&gt;
-
-&lt;p&gt;11:56:21 AM&lt;/p&gt;
-
-&lt;p&gt;Using a simple toy example, I (partially) confirmed my intuition that a degenerate prior matrix is okay, as long as its nullspace is spanned by the likelihood matrix.&lt;/p&gt;
-
-&lt;p&gt;In the context of this bug, it means that two points sharing the same index value is fine as long as they arose from different views (assuming non-degenerate camera configuration, which is true in this case).&lt;/p&gt;
-
-&lt;p&gt;Possible causes&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Numerical instability -- near-singular matrix.&lt;/li&gt;
-&lt;li&gt;Error in Linear Algebra logic (seems unlikely, same code worked in old likelihood)&lt;/li&gt;
-&lt;li&gt;Some bug earlier in the pipeline, causing invalid matrices here.&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;p&gt;I'm guessing its 3; if not that, then maybe 2.&lt;/p&gt;
-
-&lt;p&gt;Next steps&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;inspect the shared indices -- same view?&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;12:48:49 PM&lt;/p&gt;
-
-&lt;p&gt;Reversing my previous stance:  Degenerate prior with shared index will always result in a degenerate posterior.  The prior has two variables that are 100% correlated, and the posterior will also be 100% correlated.  This implies a degenerate covariance matrix.&lt;/p&gt;
-
-&lt;p&gt;In such a case, the posterior's implied dimensionality is lower than it's apparent dimensionality.  The prior and posterior will be degenerate in the same way; this symmetry is aesthetically appealing, because the Candidates estimator for the marginal likelihood involves their ratio.  This suggests that eliminating the redundant dimensions for both pdfs is a sensible thing to do.&lt;/p&gt;
-
-&lt;p&gt;How to resolve this?  Possibilities:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Detect redundant indices early, eliminate them in the prior and posterior.  USe bookkeeping to remember which observations refer to the same model point.&lt;/li&gt;
-&lt;li&gt;Handle reduntancies later, after degenerate posterior is formed, before evaluating posterior or prior .  The mean will automatically contain redundancies, which will avoid bookkeeping when comparing the mean to the data points (when &lt;code&gt;mix&lt;/code&gt; is != 0).&lt;/li&gt;
-&lt;li&gt;Try to determine how identical indices arose in the first place.&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;p&gt;Decided on 2 for now.  In retrospect, approach 1 may have had slightly less code and faster.&lt;/p&gt;
-
-&lt;p&gt;01:45:00 PM&lt;/p&gt;
-
-&lt;p&gt;ML is now running on legacy correspondence.  Results are significantly higher than the legacy ML algorithm (~ 2.25 times).  Not yet sure why yet.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Computing marginal likelihood (old way)...
-Done. (6665.8 ms)
-Old ML: 207.041742
-Computing marginal likelihood (new way, legacy correspondence)...
-Done. (8853.1 ms)
-New ML (Legacy corr): 439.273126
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Noticible slow-down, probably because of extra indices arising from not merging duplicate observations.&lt;/p&gt;
-
-&lt;p&gt;possible causes of discrepancy:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;In old code, re-triangulation used simple averaging, not accounting for differing precisions of the points&lt;/li&gt;
-&lt;li&gt;index sets differ between old and new code.  (update: checked, they are same)&lt;/li&gt;
-&lt;li&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;p&gt;Plotting means for both to view differences...&lt;/p&gt;
-
-&lt;p&gt;Investigation into ML discrepancy:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Posterior means are similar, but obviously differ.&lt;/li&gt;
-&lt;li&gt;both means are very non-smooth (need to re-address the smoothness issue)&lt;/li&gt;
-&lt;li&gt;new mean has signficantly more points (~7%, 80 pts).  Could this alone affect ML?&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;almost all difference is in posterior&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Maybe posterior kernel is different?  but prior is same
-It's just the data covariance thats different.
-but why??  There's more of them.&lt;/p&gt;
-
-&lt;p&gt;New ml changes significantly when evaluation point changes.  This implies that the posterior curvature differs from the curvature of the joint distribution, which shouldn't happen.  A small amount of difference can arise naturally due to the approximation of the likelihood, but this is too large to be explained in that way.  Most noticibly, the new results look very similar to the old ones &lt;strong&gt;when evaluating at the likelihood mean&lt;/strong&gt;.  The largest difference occurs when evaluating at the posterior mean.  Not clear yet what conclusions to draw from this, or if this is just a coincidence.&lt;/p&gt;
-
-&lt;p&gt;Maybe likelihood curvatures are differing.&lt;/p&gt;
-
-&lt;p&gt;07:35:28 PM&lt;/p&gt;
-
-&lt;p&gt;Was able to get identical likelihood value using matrix-form as I did with the original 2D geometric error form.  Seems like the precision matrices are good.&lt;/p&gt;
-
-&lt;p&gt;Priors appear good too, since it evaluates to the same value as the reference implementation.&lt;/p&gt;
-
-&lt;h2&gt;Reference implementation for new ML&lt;/h2&gt;
-
-&lt;p&gt;Idea: direct implementation for quadform, but with hacked nomralization constant&lt;/p&gt;
-
-&lt;h2&gt;In progress&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;diagnosing errors in new likelihood &lt;code&gt;curve_ml_3.m&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;getting &lt;code&gt;test_ml_end_to_end_2.m&lt;/code&gt; running.&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Thu, 04 Jul 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/04/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/04/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;ul&gt;
-&lt;li&gt;Implementing covariance functions&lt;/li&gt;
-&lt;li&gt;Implement generalized marginal likelihood&lt;/li&gt;
-&lt;li&gt;Implement fast generalized marginal likelihood&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;h2&gt;Implement generalized marginal likelihood&lt;/h2&gt;
-
-&lt;p&gt;Rewriting &lt;code&gt;curve_ml3.m&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Based on &lt;code&gt;curve_ml.m&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Kernel now takes two sets of indices, curve-index and view-index.&lt;/p&gt;
-
-&lt;p&gt;Kernel is now passed-in as a lambda.&lt;/p&gt;
-
-&lt;p&gt;Need to decide whether to use matrix inversion lemma for global offset and linear prior.  Currently being used;  not using would be simpler; try both and compare results.&lt;/p&gt;
-
-&lt;h2&gt;Testing new marginal likelihood&lt;/h2&gt;
-
-&lt;p&gt;Creating new version of &lt;code&gt;test/test_ml_end_to_end.m&lt;/code&gt;, named &lt;code&gt;test/test_ml_end_to_end2.m&lt;/code&gt;.  This version uses the new likelihood format, and compares against the old.&lt;/p&gt;
-
-&lt;h2&gt;New curve_likelihood&lt;/h2&gt;
-
-&lt;p&gt;Need to write new version of &lt;code&gt;curve_likelihood.m&lt;/code&gt; to handle new likelihood format.&lt;/p&gt;
-
-&lt;p&gt;It's going to be difficult to compare to older version, since we've changed the correspondence method...&lt;/p&gt;
-
-&lt;p&gt;I'll have to add a flag that simulates the old correspondence method, but stores it in the new likelihood format...&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;01:33:52 PM&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;I decided to write a separate function for the old correspondence method, called &lt;code&gt;corr_to_likelihood_legacy.m&lt;/code&gt;.  Moved &lt;code&gt;clean_correspondence3.m&lt;/code&gt; to &lt;code&gt;corr_to_likelihood.m&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;The legacy function isn't exactly identical to the old function.  In particular, the index values might be slightly different, since it depends on the old function's global mean curve, which we don't compute in the new function.  If it's important, we can call the old function, and then call the new one.  This is a debugging function, so speed doesn't matter. For the moment, we'll accept the small difference, and use this function simply to confirm that we're in the ballpark.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;03:06:24 PM&lt;/em&gt;
-Test is implemented.  Troubleshooting syntax errors...&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;04:11:17 PM&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;Elusive NaN error in &lt;code&gt;corr_to_likelihood_legacy.m&lt;/code&gt;.&lt;/p&gt;
-</description>
-				<pubDate>Wed, 03 Jul 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/03/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/03/work-log</guid>
 			</item>
 		
 	</channel>
