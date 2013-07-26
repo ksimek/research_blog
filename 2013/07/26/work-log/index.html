@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log &larr; </title>
+   <title>Work Log, Week summary &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -76,9 +76,9 @@
 	
   
   
-  <h1 class="title">Work Log</h1>
+  <h1 class="title">Work Log, Week summary</h1>
 
-  <div class="date emphnext">July 19, 2013</div>
+  <div class="date emphnext">July 26, 2013</div>
     
 
 
@@ -107,32 +107,46 @@
 </div>
 
 
-<p>Continuing: ground-truth-to-data-labels.  See file <code>train/label_from_ground_truth.m</code>.</p>
+<p>No work logs this week.  All week I've been splitting time between research and packing for the move to Phoenix on Monday.  I've made some progress on the training framework.</p>
 
-<p>Finished.</p>
+<h2>Miscellaneous</h2>
 
-<p>Next:</p>
+<p>Due to periodic crashing of Matlab (user error!), I added a script <code>tmp_setup_workspace.m</code>, which is intended to restore all the needed variables for whatever task I'm currently working on.</p>
+
+<h2>Optimized likelihood for training</h2>
+
+<p>Spend some time thinking about how to design a version of the marginal likelihood computation that is optimized for training.</p>
+
+<p>Some time was spent deriving the analytical ML gradient w.r.t. the training parameters.  I believe the result won't be too complicated, but deriving it was taking up too much time.  We'll use a numerical gradient for now; will return to analytical gradient if the numerical proves to be lacking.</p>
+
+<p>To save some computation during training, I precomputed the component matrices for the prior and likelihood.  Constructing the prior and likelihood covariance matrices will involve scaling and summing the component parts.  These cached matrices consume about <strong>740 MB</strong> with the current training set.</p>
+
+<p>However, one unavoidable bottleneck continues to be the cholesky decomposition, which isn't improved by this precomutation.  I was hoping there would be some matrix inversion tricks involving linear combinations of matrices, but my research on this came up empty.  My last hope is to run Cholesky on the GPU (Matlab makes this trivial), but if that doesn't speed things up, I'll resign myself to waiting 10 hours for training.</p>
+
+<p>Nevertheless, the component caching still gives a 1.5x end-to-end speedup on the no_purturb_kernel  case, compared the to direct implementation.</p>
+
+<p>...</p>
+
+<div>After optimizing, the bottlenecks are split evenly three ways: (1) constructing Prior kernel; (2) constructing ML covariance matrix; and (3) evaluating ML pdf.   The latter two are dominated mostly by \(O(n^3)\) matrix multiplication.  Surprisingly, Cholesky is significant, but not dominating.</div>
+
+
+<h2>Summary:</h2>
+
+<p>Training-optimized Marginal Likelihood is finished; in <code>train/tr_curves_ml.m</code>.  Results confirmed against reference implementation: <code>train/tr_curves_ml_ref.m</code>.</p>
+
+<h2>TODO</h2>
 
 <ul>
-<li>Data labels to likelihood means/covariances</li>
-<li>Likelihood means/covariances to marginal likelihood</li>
-<li>training framework</li>
-<li>training</li>
+<li>finish Training framework:
+
+<ul>
+<li>setup local minimizer with <code>train/tr_curves_ml.m</code></li>
+<li>determine if numerical gradient is okay</li>
+</ul>
+</li>
+<li>Sanity check: compare the ML's of each trained model on training data.</li>
 </ul>
 
-
-<h2>Visualizing <code>labels_from_ground_truth()</code></h2>
-
-<p>Wrote <code>tmp_get_max_posterior.m</code>, a temporary script that computes the posterior mean from a possibly-overconstrained prior.  In this case, the posterior covariance is singular, but the mean can still be obtained.  The math behind it <a href="/ksimek/research/2013/07/19/maximum-posterior-with-singular-prior-covariance/">is available here</a>.</p>
-
-<p>Below is a plot using the test dataset and the ground truth labels:</p>
-
-<iframe width="420" height="315" src="//www.youtube.com/embed/foL28SUn1JM?rel=0" frameborder="0" allowfullscreen></iframe>
-
-
-<p>This shows that given a good labeling, a quality 3D reconstruction can be obtained using only the fragmented curves output by the curve-detector.</p>
-
-<p>Notice that the curves at the base have missing parts.  There isn't sufficient edge data here, but this could probably be fixed by connecting them to the base of the main stem and using the Branching Gaussian Process prior to enforce connectivity.</p>
 
       <address class="signature">
         Posted by
@@ -143,11 +157,8 @@
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/07/21/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/07/19/maximum-posterior-with-singular-prior-covariance" class="prev" title="Maximum posterior with singular prior covariance">&larr; Maximum posterior with singular prior covariance</a>
+    <a href="/ksimek/research/2013/07/21/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>
@@ -164,7 +175,7 @@
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log, Week summary" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -212,7 +223,7 @@
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log");
+                    + encodeURIComponent("Work Log, Week summary");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

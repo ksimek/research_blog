@@ -78,7 +78,7 @@
   
   <h1 class="title">Work Log</h1>
 
-  <div class="date emphnext">July 19, 2013</div>
+  <div class="date emphnext">July 21, 2013</div>
     
 
 
@@ -107,32 +107,44 @@
 </div>
 
 
-<p>Continuing: ground-truth-to-data-labels.  See file <code>train/label_from_ground_truth.m</code>.</p>
+<p><strong>Hypothesis</strong>: The likelihood covariance for the "virtual observations" scales linearly with the 2D likelihood variance.</p>
 
-<p>Finished.</p>
+<p><strong>Experiment</strong>: see <code>experiments/exp_2013_07_21_likelihood_covariance.m</code>.  Constructs a likelihood using noise_variance of one and then scaling precisions afterward.  Compares to directly-constructed likelihood precisions.</p>
 
-<p>Next:</p>
+<p><strong>Results</strong>: Negligible difference</p>
+
+<p><strong>Conclusion</strong>: Practice matches theory--scaling likelihood precisions is equivalent to constructing likelihood with the scaled precision.</p>
+
+<p><strong>Discussion</strong>: This conclusion means that we can construct the likelihood precisions exactly once during training, and simply scale them as we modify the likelihood precision.  It would make sense to always use 1.0 when computing precisions, and refactor all existing code to scale the matrix by the reciprocal of the noise variance before using it.</p>
+
+<h2>TODO</h2>
 
 <ul>
-<li>Data labels to likelihood means/covariances</li>
-<li>Likelihood means/covariances to marginal likelihood</li>
-<li>training framework</li>
-<li>training</li>
+<li>Build training framework
+
+<ul>
+<li>fast likelihood evalautor
+
+<ul>
+<li>custom function for evaluating ML without recomputing stuff</li>
+<li>cache the three prior component matrices (smooth, linear, and offset)</li>
+<li>cache unscaled likelihood precision.</li>
+</ul>
+</li>
+<li>wrap in a lambda
+
+<ul>
+<li>scales and combines all components</li>
+<li>depending on motion model, use different expression for purturbation coefficient</li>
+</ul>
+</li>
+<li>pass to quasi-newton minimizer</li>
+</ul>
+</li>
+<li>Repeat for background curves</li>
+<li>Heuristic pruning using background-subtraction.</li>
 </ul>
 
-
-<h2>Visualizing <code>labels_from_ground_truth()</code></h2>
-
-<p>Wrote <code>tmp_get_max_posterior.m</code>, a temporary script that computes the posterior mean from a possibly-overconstrained prior.  In this case, the posterior covariance is singular, but the mean can still be obtained.  The math behind it <a href="/ksimek/research/2013/07/19/maximum-posterior-with-singular-prior-covariance/">is available here</a>.</p>
-
-<p>Below is a plot using the test dataset and the ground truth labels:</p>
-
-<iframe width="420" height="315" src="//www.youtube.com/embed/foL28SUn1JM?rel=0" frameborder="0" allowfullscreen></iframe>
-
-
-<p>This shows that given a good labeling, a quality 3D reconstruction can be obtained using only the fragmented curves output by the curve-detector.</p>
-
-<p>Notice that the curves at the base have missing parts.  There isn't sufficient edge data here, but this could probably be fixed by connecting them to the base of the main stem and using the Branching Gaussian Process prior to enforce connectivity.</p>
 
       <address class="signature">
         Posted by
@@ -144,10 +156,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/07/21/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+    <a href="/ksimek/research/2013/07/26/work-log" class="next" title="Work Log, Week summary">Work Log, Week summary &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/07/19/maximum-posterior-with-singular-prior-covariance" class="prev" title="Maximum posterior with singular prior covariance">&larr; Maximum posterior with singular prior covariance</a>
+    <a href="/ksimek/research/2013/07/19/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>

@@ -4,13 +4,155 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-07-21T13:07:57-07:00</updated>
+ <updated>2013-07-26T12:04:25-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log, Week summary</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/07/26/work-log"/>
+   <updated>2013-07-26T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/07/26/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;No work logs this week.  All week I've been splitting time between research and packing for the move to Phoenix on Monday.  I've made some progress on the training framework.&lt;/p&gt;
+
+&lt;h2&gt;Miscellaneous&lt;/h2&gt;
+
+&lt;p&gt;Due to periodic crashing of Matlab (user error!), I added a script &lt;code&gt;tmp_setup_workspace.m&lt;/code&gt;, which is intended to restore all the needed variables for whatever task I'm currently working on.&lt;/p&gt;
+
+&lt;h2&gt;Optimized likelihood for training&lt;/h2&gt;
+
+&lt;p&gt;Spend some time thinking about how to design a version of the marginal likelihood computation that is optimized for training.&lt;/p&gt;
+
+&lt;p&gt;Some time was spent deriving the analytical ML gradient w.r.t. the training parameters.  I believe the result won't be too complicated, but deriving it was taking up too much time.  We'll use a numerical gradient for now; will return to analytical gradient if the numerical proves to be lacking.&lt;/p&gt;
+
+&lt;p&gt;To save some computation during training, I precomputed the component matrices for the prior and likelihood.  Constructing the prior and likelihood covariance matrices will involve scaling and summing the component parts.  These cached matrices consume about &lt;strong&gt;740 MB&lt;/strong&gt; with the current training set.&lt;/p&gt;
+
+&lt;p&gt;However, one unavoidable bottleneck continues to be the cholesky decomposition, which isn't improved by this precomutation.  I was hoping there would be some matrix inversion tricks involving linear combinations of matrices, but my research on this came up empty.  My last hope is to run Cholesky on the GPU (Matlab makes this trivial), but if that doesn't speed things up, I'll resign myself to waiting 10 hours for training.&lt;/p&gt;
+
+&lt;p&gt;Nevertheless, the component caching still gives a 1.5x end-to-end speedup on the no_purturb_kernel  case, compared the to direct implementation.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;div&gt;After optimizing, the bottlenecks are split evenly three ways: (1) constructing Prior kernel; (2) constructing ML covariance matrix; and (3) evaluating ML pdf.   The latter two are dominated mostly by \(O(n^3)\) matrix multiplication.  Surprisingly, Cholesky is significant, but not dominating.&lt;/div&gt;
+
+
+&lt;h2&gt;Summary:&lt;/h2&gt;
+
+&lt;p&gt;Training-optimized Marginal Likelihood is finished; in &lt;code&gt;train/tr_curves_ml.m&lt;/code&gt;.  Results confirmed against reference implementation: &lt;code&gt;train/tr_curves_ml_ref.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;finish Training framework:
+
+&lt;ul&gt;
+&lt;li&gt;setup local minimizer with &lt;code&gt;train/tr_curves_ml.m&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;determine if numerical gradient is okay&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Sanity check: compare the ML's of each trained model on training data.&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/07/21/work-log"/>
+   <updated>2013-07-21T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/07/21/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Hypothesis&lt;/strong&gt;: The likelihood covariance for the &quot;virtual observations&quot; scales linearly with the 2D likelihood variance.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Experiment&lt;/strong&gt;: see &lt;code&gt;experiments/exp_2013_07_21_likelihood_covariance.m&lt;/code&gt;.  Constructs a likelihood using noise_variance of one and then scaling precisions afterward.  Compares to directly-constructed likelihood precisions.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;: Negligible difference&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Conclusion&lt;/strong&gt;: Practice matches theory--scaling likelihood precisions is equivalent to constructing likelihood with the scaled precision.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;: This conclusion means that we can construct the likelihood precisions exactly once during training, and simply scale them as we modify the likelihood precision.  It would make sense to always use 1.0 when computing precisions, and refactor all existing code to scale the matrix by the reciprocal of the noise variance before using it.&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Build training framework
+
+&lt;ul&gt;
+&lt;li&gt;fast likelihood evalautor
+
+&lt;ul&gt;
+&lt;li&gt;custom function for evaluating ML without recomputing stuff&lt;/li&gt;
+&lt;li&gt;cache the three prior component matrices (smooth, linear, and offset)&lt;/li&gt;
+&lt;li&gt;cache unscaled likelihood precision.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;wrap in a lambda
+
+&lt;ul&gt;
+&lt;li&gt;scales and combines all components&lt;/li&gt;
+&lt;li&gt;depending on motion model, use different expression for purturbation coefficient&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;pass to quasi-newton minimizer&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Repeat for background curves&lt;/li&gt;
+&lt;li&gt;Heuristic pruning using background-subtraction.&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Work Log</title>
@@ -557,7 +699,8 @@ p(y) &amp;= \int p(y|x) p(x) dx \\
 \begin{align}
 p(y) &amp;= \frac{1}{Z_l Z_p} \int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\top K^{-1} x\} \\
      &amp;= \frac{1}{Z_l Z_p} \left ( \frac{Z_{l,3d} Z_p}{Z} \exp\{x^\top (S^{-1} + K)^{-1} x \} \right ) \\
-     &amp;= \frac{Z_{l,3d} }{Z_l}\frac{1}{Z} \exp\{x^\top (S^{-1} + K)^{-1} x \}
+     &amp;= \frac{Z_{l,3d} }{Z_l}\frac{1}{Z} \exp\{x^\top (S^{-1} + K)^{-1} x \} \\
+     &amp;= \frac{Z_{l,3d} }{Z_l}\frac{1}{Z}  \exp\{x^\top S(S + S K S)^{-1} S x \}
      \end{align}
 \]&lt;/div&gt;
 
@@ -565,7 +708,7 @@ p(y) &amp;= \frac{1}{Z_l Z_p} \int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\t
 
 
 &lt;div&gt;
-    Where \( Z_{l,3d} \) is the would-be 3D normalization constant for our likelihood Gaussian.  Since \(S\) is rank-deficient, the normalization constants based on \(S^{-1}\) will be infinite (i.e. \(Z_{l,3d}\) and \(Z\)).  However, the terms involving determinants of \(S^{-1}\) should cancel in the ratio, resulting in a gaussian with infinite variance, but non-infinite normalization constant. **(Need to show this mathematically next time)** 
+    Where \( Z_{l,3d} \) is the would-be 3D normalization constant for our likelihood Gaussian.  The last line avoids inverting the singular matrix \(S\) when it's singular.  Since \(S\) is rank-deficient, the normalization constants based on \(S^{-1}\) will be infinite (i.e. \(Z_{l,3d}\) and \(Z\)).  However, the terms involving determinants of \(S^{-1}\) should cancel in the ratio, resulting in a gaussian with infinite variance, but non-infinite normalization constant. **(Need to show this mathematically next time)** 
     &lt;/div&gt;
 
 </content>

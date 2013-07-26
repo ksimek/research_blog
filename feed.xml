@@ -7,6 +7,148 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Work Log, Week summary</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;No work logs this week.  All week I've been splitting time between research and packing for the move to Phoenix on Monday.  I've made some progress on the training framework.&lt;/p&gt;
+
+&lt;h2&gt;Miscellaneous&lt;/h2&gt;
+
+&lt;p&gt;Due to periodic crashing of Matlab (user error!), I added a script &lt;code&gt;tmp_setup_workspace.m&lt;/code&gt;, which is intended to restore all the needed variables for whatever task I'm currently working on.&lt;/p&gt;
+
+&lt;h2&gt;Optimized likelihood for training&lt;/h2&gt;
+
+&lt;p&gt;Spend some time thinking about how to design a version of the marginal likelihood computation that is optimized for training.&lt;/p&gt;
+
+&lt;p&gt;Some time was spent deriving the analytical ML gradient w.r.t. the training parameters.  I believe the result won't be too complicated, but deriving it was taking up too much time.  We'll use a numerical gradient for now; will return to analytical gradient if the numerical proves to be lacking.&lt;/p&gt;
+
+&lt;p&gt;To save some computation during training, I precomputed the component matrices for the prior and likelihood.  Constructing the prior and likelihood covariance matrices will involve scaling and summing the component parts.  These cached matrices consume about &lt;strong&gt;740 MB&lt;/strong&gt; with the current training set.&lt;/p&gt;
+
+&lt;p&gt;However, one unavoidable bottleneck continues to be the cholesky decomposition, which isn't improved by this precomutation.  I was hoping there would be some matrix inversion tricks involving linear combinations of matrices, but my research on this came up empty.  My last hope is to run Cholesky on the GPU (Matlab makes this trivial), but if that doesn't speed things up, I'll resign myself to waiting 10 hours for training.&lt;/p&gt;
+
+&lt;p&gt;Nevertheless, the component caching still gives a 1.5x end-to-end speedup on the no_purturb_kernel  case, compared the to direct implementation.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;div&gt;After optimizing, the bottlenecks are split evenly three ways: (1) constructing Prior kernel; (2) constructing ML covariance matrix; and (3) evaluating ML pdf.   The latter two are dominated mostly by \(O(n^3)\) matrix multiplication.  Surprisingly, Cholesky is significant, but not dominating.&lt;/div&gt;
+
+
+&lt;h2&gt;Summary:&lt;/h2&gt;
+
+&lt;p&gt;Training-optimized Marginal Likelihood is finished; in &lt;code&gt;train/tr_curves_ml.m&lt;/code&gt;.  Results confirmed against reference implementation: &lt;code&gt;train/tr_curves_ml_ref.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;finish Training framework:
+
+&lt;ul&gt;
+&lt;li&gt;setup local minimizer with &lt;code&gt;train/tr_curves_ml.m&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;determine if numerical gradient is okay&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Sanity check: compare the ML's of each trained model on training data.&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Fri, 26 Jul 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/26/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/26/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Hypothesis&lt;/strong&gt;: The likelihood covariance for the &quot;virtual observations&quot; scales linearly with the 2D likelihood variance.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Experiment&lt;/strong&gt;: see &lt;code&gt;experiments/exp_2013_07_21_likelihood_covariance.m&lt;/code&gt;.  Constructs a likelihood using noise_variance of one and then scaling precisions afterward.  Compares to directly-constructed likelihood precisions.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;: Negligible difference&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Conclusion&lt;/strong&gt;: Practice matches theory--scaling likelihood precisions is equivalent to constructing likelihood with the scaled precision.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;: This conclusion means that we can construct the likelihood precisions exactly once during training, and simply scale them as we modify the likelihood precision.  It would make sense to always use 1.0 when computing precisions, and refactor all existing code to scale the matrix by the reciprocal of the noise variance before using it.&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Build training framework
+
+&lt;ul&gt;
+&lt;li&gt;fast likelihood evalautor
+
+&lt;ul&gt;
+&lt;li&gt;custom function for evaluating ML without recomputing stuff&lt;/li&gt;
+&lt;li&gt;cache the three prior component matrices (smooth, linear, and offset)&lt;/li&gt;
+&lt;li&gt;cache unscaled likelihood precision.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;wrap in a lambda
+
+&lt;ul&gt;
+&lt;li&gt;scales and combines all components&lt;/li&gt;
+&lt;li&gt;depending on motion model, use different expression for purturbation coefficient&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;pass to quasi-newton minimizer&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Repeat for background curves&lt;/li&gt;
+&lt;li&gt;Heuristic pruning using background-subtraction.&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Sun, 21 Jul 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/21/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/21/work-log</guid>
+			</item>
+		
+			<item>
 				<title>Work Log</title>
 				<description>
 
@@ -548,7 +690,8 @@ p(y) &amp;= \int p(y|x) p(x) dx \\
 \begin{align}
 p(y) &amp;= \frac{1}{Z_l Z_p} \int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\top K^{-1} x\} \\
      &amp;= \frac{1}{Z_l Z_p} \left ( \frac{Z_{l,3d} Z_p}{Z} \exp\{x^\top (S^{-1} + K)^{-1} x \} \right ) \\
-     &amp;= \frac{Z_{l,3d} }{Z_l}\frac{1}{Z} \exp\{x^\top (S^{-1} + K)^{-1} x \}
+     &amp;= \frac{Z_{l,3d} }{Z_l}\frac{1}{Z} \exp\{x^\top (S^{-1} + K)^{-1} x \} \\
+     &amp;= \frac{Z_{l,3d} }{Z_l}\frac{1}{Z}  \exp\{x^\top S(S + S K S)^{-1} S x \}
      \end{align}
 \]&lt;/div&gt;
 
@@ -556,7 +699,7 @@ p(y) &amp;= \frac{1}{Z_l Z_p} \int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\t
 
 
 &lt;div&gt;
-    Where \( Z_{l,3d} \) is the would-be 3D normalization constant for our likelihood Gaussian.  Since \(S\) is rank-deficient, the normalization constants based on \(S^{-1}\) will be infinite (i.e. \(Z_{l,3d}\) and \(Z\)).  However, the terms involving determinants of \(S^{-1}\) should cancel in the ratio, resulting in a gaussian with infinite variance, but non-infinite normalization constant. **(Need to show this mathematically next time)** 
+    Where \( Z_{l,3d} \) is the would-be 3D normalization constant for our likelihood Gaussian.  The last line avoids inverting the singular matrix \(S\) when it's singular.  Since \(S\) is rank-deficient, the normalization constants based on \(S^{-1}\) will be infinite (i.e. \(Z_{l,3d}\) and \(Z\)).  However, the terms involving determinants of \(S^{-1}\) should cancel in the ratio, resulting in a gaussian with infinite variance, but non-infinite normalization constant. **(Need to show this mathematically next time)** 
     &lt;/div&gt;
 
 </description>
@@ -610,271 +753,6 @@ p(y) &amp;= \frac{1}{Z_l Z_p} \int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\t
 				<pubDate>Thu, 11 Jul 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/11/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/11/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;&lt;strong&gt;Goal:&lt;/strong&gt; Cleanup and speedup of curve_ml.&lt;/p&gt;
-
-&lt;h2&gt;Task 1: Version without matrix-inversion lemma&lt;/h2&gt;
-
-&lt;p&gt;Making a simpler version that doesn't exploit the matrix inversion lemma (MIL).&lt;/p&gt;
-
-&lt;p&gt;The benefits of the MIL are likely mitigated by markov-decomposition (next task), and MIL
-complicates the code and API design.&lt;/p&gt;
-
-&lt;p&gt;Results (small test):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Computing marginal likelihood (old way)...
-Done. (108.2 ms)
-Old ML: 62.183969
-Computing marginal likelihood (new way, legacy correspondence)...
-Done. (120.8 ms)
-New ML (Legacy corr): 63.908784
-Computing marginal likelihood (new way)...
-Done. (88.9 ms)
-New ML (New corr): 72.304718           &amp;lt;----------  OLD RESULT
-Computing marginal likelihood (new way, no MIL)...
-Done. (97.3 ms)
-New ML (New corr, no MIL): 72.304666   &amp;lt;----------  NEW RESULT
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The difference is about 0.00007% -- seems good.  Slightly slower, possibly just noise.&lt;/p&gt;
-
-&lt;p&gt;Results (full test):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Computing marginal likelihood (old way)...
-Done. (6447.3 ms)
-Old ML: 207.324848
-Computing marginal likelihood (new way, legacy correspondence)...
-Done. (7665.1 ms)
-New ML (Legacy corr): 209.199676
-Computing marginal likelihood (new way)...
-Done. (6205.6 ms)
-New ML (New corr): 457529.406731  &amp;lt;---------- ?????
-Computing marginal likelihood (new way, no MIL)...
-Done. (5946.7 ms)
-New ML (New corr, no MIL): 778723.327102  &amp;lt;---------- ?????
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Both versions give CRAZY high results; significantly different from the &lt;a href=&quot;/ksimek/research/2013/07/05/work-log/&quot;&gt;same test on Friday&lt;/a&gt;.  Need to investigate...&lt;/p&gt;
-
-&lt;h2&gt;Investigating new results&lt;/h2&gt;
-
-&lt;p&gt;Observations&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;All results differ from friday, including old ML (slightly)&lt;/li&gt;
-&lt;li&gt;New ML using legacy correspondence is still reasonable.&lt;/li&gt;
-&lt;li&gt;Both crazy results are using new correspondence.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;TODO:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Look at pieces (log posterior, likelihood, prior)&lt;/li&gt;
-&lt;li&gt;Inspect new correspondence&lt;/li&gt;
-&lt;li&gt;Think about what changed since Friday?&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;12:10:19 PM&lt;/p&gt;
-
-&lt;p&gt;Ran old test, &lt;code&gt;test_ml_end_to_end.m&lt;/code&gt; and compared to old results in new test, &lt;code&gt;test_ml_end_to_end_2.m&lt;/code&gt;.  Old test still gives old results, so I'll compare the two tests to determine what has changed.&lt;/p&gt;
-
-&lt;p&gt;12:12:48 PM&lt;/p&gt;
-
-&lt;p&gt;The &lt;code&gt;mix&lt;/code&gt; parameter was set to 0.5 instead of 0.0.  I had forgotten I changed it at the end if Friday.&lt;/p&gt;
-
-&lt;p&gt;Now getting &quot;good&quot; results again.  It raises a question that needs to be answered: why is ML sooo sensitive to evalaution position when using new correspondence?&lt;/p&gt;
-
-&lt;h2&gt;Resuming&lt;/h2&gt;
-
-&lt;p&gt;New results (full test):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Computing marginal likelihood (old way)...
-Done. (6009.5 ms)
-Old ML: 207.041742
-Computing marginal likelihood (new way, legacy correspondence)...
-Done. (7286.3 ms)
-New ML (Legacy corr): 207.700616
-Computing marginal likelihood (new way)...
-Done. (6146.6 ms)
-New ML (New corr): 793.585038             &amp;lt;---------- OLD RESULT
-Computing marginal likelihood (new way, no MIL)...
-Done. (6008.3 ms)
-New ML (New corr, no MIL): 793.600835     &amp;lt;---------- NEW RESULT
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;0.002% error, slightly faster.  Good.&lt;/p&gt;
-
-&lt;h2&gt;Investigating Anomaly in new ML &lt;/h2&gt;
-
-&lt;p&gt;So why is new ML so sensitive to where it is evaluated?&lt;/p&gt;
-
-&lt;p&gt;Note that it's only extreme when using new correspondence.  Old correspondence is okay.&lt;/p&gt;
-
-&lt;p&gt;Inspect difference between max likelihood and max posterior.  Maybe it's just more extreme than with old correspondence.&lt;/p&gt;
-
-&lt;p&gt;12:20:59 PM&lt;/p&gt;
-
-&lt;p&gt;Idea: bug in non-0.0 case?  Nope.&lt;/p&gt;
-
-&lt;p&gt;Tried mixes: 0.0, 0.01, 0.1. Steady and dramatic increase in ML for new correspondence.  Old correspondence is nearly constant.  What is different between these correspodnences (other than the correspondences themselves).&lt;/p&gt;
-
-&lt;p&gt;12:57:08 PM&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Answer&lt;/strong&gt;: The max likelihood in the new correspondences is waaaaay into the tails of the prior.&lt;/p&gt;
-
-&lt;p&gt;Since no real triangulation is done to ensure agreement between views, the maximum likelihood triangulation is very rough  (infinite likelihood variance allows this to happen without penalty).  This places the curve far into the tails of the prior, where evaluation is highly unstable.  Both the prior and likelihood are then extremely low (-1e-8 in log space), which should cancel, but don't due to numerical instability.  Hence, marginal likelihoods with huge magnitude.&lt;/p&gt;
-
-&lt;p&gt;This is great news, since it means everything is working mostly as expected.  The numerical instability issue is easilly solved by always evaluating at the posterior, not the maximum likelihood.&lt;/p&gt;
-
-&lt;h2&gt;Summary&lt;/h2&gt;
-
-&lt;p&gt;The version of the new ML that doesn't use the matrix inversion lemma is accurate, so we can proceed to the markov-decomposed version next.&lt;/p&gt;
-</description>
-				<pubDate>Mon, 08 Jul 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/08/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/08/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Still trying to troubleshoot the difference between old and new likelihood implementations.&lt;/p&gt;
-
-&lt;p&gt;Reviewing what is known&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Prior is same&lt;/li&gt;
-&lt;li&gt;Likelihood is same&lt;/li&gt;
-&lt;li&gt;Posterior evaluates same in two different ways.&lt;/li&gt;
-&lt;li&gt;mean curve is different&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Try using mean curve from old alg. in new alg.&lt;/p&gt;
-
-&lt;p&gt;10:13:35 AM&lt;/p&gt;
-
-&lt;p&gt;SOLVED.&lt;/p&gt;
-
-&lt;p&gt;Yesterday I noticed that setting mix to 1.0 give decent results, but 0.0 was terrible.  Now I know why: 0.0 is a special case, in which a simplified calculation is used.  There was a bug in that special case, where the normalization constant didn't take into account the redundant dimensions that we eliminated.&lt;/p&gt;
-
-&lt;h2&gt;ML Test&lt;/h2&gt;
-
-&lt;p&gt;11:02:29 AM&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;ml_test_end_to_end_2.m&lt;/code&gt; is now running&lt;/p&gt;
-
-&lt;p&gt;Running on subset of correspondence, results:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; test_ml_end_to_end_2([], [], [], false)
-
-Computing marginal likelihood (old way)...  
-Done. (96.9 ms)  
-Old ML: 62.176782
-
-Computing marginal likelihood (new way, legacy correspondence)...  
-Done. (112.3 ms)  
-New ML (Legacy corr): 63.859940
-
-Computing marginal likelihood (new way)...  
-Done. (83.5 ms)  
-New ML (New corr): 71.964026
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Surprised the magnitude of difference between &quot;Old ML&quot; and &quot;New ML (Legacy corr)&quot;.  I guess the posterior variance is larger in this case, which means the posterior means can differ more.&lt;/p&gt;
-
-&lt;p&gt;Running on full correspondence, results:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; test_ml_end_to_end_2([], [], [], false)
-
-Computing marginal likelihood (old way)...
-Done. (6400.1 ms)
-Old ML: 207.041742
-Computing marginal likelihood (new way, legacy correspondence)...
-Done. (8328.4 ms)
-New ML (Legacy corr): 207.700616
-Computing marginal likelihood (new way)...
-Done. (6349.2 ms)
-New ML (New corr): 793.585038
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Interesting that &quot;New ML (New Corr)&quot; is dramatiacally higher than the old and legacy ML's.  I suppose I should have been expected this, since this entire approach &lt;a href=&quot;/ksimek/research/2013/06/28/work-summary/&quot;&gt;was motivated by the terrible correspondences arising from the legacy correspondence&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;It's nice to see the ML for good correspondences getting even better.  Hopefully we'll see even more improvement as we try new curve models.&lt;/p&gt;
-
-&lt;p&gt;Taking a break for lunch...&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Next steps:&lt;/strong&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;fast ml_curve3
-
-&lt;ul&gt;
-&lt;li&gt;linear eval&lt;/li&gt;
-&lt;li&gt;try without matrix inversion lemma&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;try new models (check that they're nonsingular; don't crash)&lt;/li&gt;
-&lt;li&gt;set up training framework&lt;/li&gt;
-&lt;li&gt;consider version without inversion lemma&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Fri, 05 Jul 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/05/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/05/work-log</guid>
 			</item>
 		
 	</channel>
