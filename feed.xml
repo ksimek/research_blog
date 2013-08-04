@@ -7,6 +7,268 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Running optimizer...&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Issue&lt;/strong&gt;: Likelihood variance is collapsing to zero.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Guess&lt;/strong&gt;: Training ML is different from naive ML and isn't penalizing noise correctly.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Test 1&lt;/strong&gt;: save params, compare training ml and naive ml&lt;/p&gt;
+
+&lt;p&gt;Same result.&lt;/p&gt;
+
+&lt;h2&gt;Discussion&lt;/h2&gt;
+
+&lt;div&gt; The marginal likelihood is monotonically increasing as the noise variance \(\sigma_n^2\) approaches zero.  This shouldn't be happening, because as the likelihood variance collapses to a delta, the marginal likelihood should become equal to the prior evaluated at the (virtual) observed locations.&lt;/div&gt;
+
+
+
+
+&lt;div&gt;
+\begin{align}
+    \lim_{\sigma_n \to 0} p(D) &amp;= \lim_{\sigma_n \to 0} \int p_0(x) \; p_l(D \mid x) dx &amp; \text{(Marginalization)}\\
+         &amp;= \lim_{\sigma_n \to 0} \int p_0(x) \; f(D - x) dx &amp;   \text{(Convolution)} \\
+         &amp;= \int p_0(x) \delta(D - x) dx \\
+         &amp;= p_0(D) 
+\end{align}
+&lt;/div&gt;
+
+
+&lt;p&gt;This implies there's a bug in the code causing this phenomenon; the mathematical model is not the cause.&lt;/p&gt;
+
+&lt;h2&gt;Solved&lt;/h2&gt;
+
+&lt;div&gt;Found the bug.  When computing the likelihood precision \(S\) from the unscaled precision \(S_0\), the noise variance \(\sigma_n^2\) was multiplied instead of divided:&lt;/div&gt;
+
+
+&lt;pre&gt;&lt;code&gt;S = S0 * sigma_n; // incorrect
+S = S0 * (1/sigma_n); // corrected version
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Resuming Training&lt;/h2&gt;
+
+&lt;p&gt;Had some trouble with noise sigmas being too low.  Solved by in two ways:&lt;/p&gt;
+
+&lt;h1&gt;Attempts 1-3: clamping to a minimum value and then adding a penalty depending on the amount that was clamped.&lt;/h1&gt;
+
+&lt;h1&gt;Attempt 4:  offset by minimum value before transforming&lt;/h1&gt;
+
+&lt;p&gt;Command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;train_params_done = tr_train(test_Corrs_ll, train_params, data_, 400);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Attempt #1&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;Handle extreme values by incuring a penalty for variances smaller than 1e-5.  Result stored in &lt;code&gt;train_params_done_1&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;train_params_done_1 = 
+
+            smoothing_variance: 0.0025
+                noise_variance: 0.1231
+             position_variance: 1.6676e+04
+                 rate_variance: 0.2212
+    perturb_smoothing_variance: 1
+         perturb_rate_variance: 1
+     perturb_position_variance: 1
+                 perturb_scale: 1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Surprisingly small smoothness sigma.  Surprisingly low rate variance.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Attempt #2&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Testing sensitivity to the magnitude of the penalty term.  Scaled up penalty by 1000.  Results in &lt;code&gt;train_params_done_2&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;train_params_done_2 = 
+
+            smoothing_variance: 0.0025
+                noise_variance: 0.1231
+             position_variance: 1.6676e+04
+                 rate_variance: 0.2212
+    perturb_smoothing_variance: 1
+         perturb_rate_variance: 1
+     perturb_position_variance: 1
+                 perturb_scale: 1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Summary: no change.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Attempt #3&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Testing sensitivity to the threshold where the penalty term starts to be incurred.  Set MIN_NOISE_VARIANCE to 1e-3 and MIN_SMOOTHING_VARIANCE to 1e-7 (previously both 1e-5).  Results in &lt;code&gt;train_params_done_3&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;train_params_done_3 = 
+
+            smoothing_variance: 0.0025
+                noise_variance: 0.1231
+             position_variance: 1.6676e+04
+                 rate_variance: 0.2212
+    perturb_smoothing_variance: 1
+         perturb_rate_variance: 1
+     perturb_position_variance: 1
+                 perturb_scale: 1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Summary: no change.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt; Attempt #4 &lt;/strong&gt;
+Handled small variances by offsetting before transforming:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;% converting param to state variable
+x(1) = log(smoothing_variance - MIN_SMOOTING_VARIANCE);
+
+% converting state variable to param
+x(1) = exp(smoothing_variance) + MIN_SMOOTING_VARIANCE;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is more elegant than the penalty hack used in the last three attempts.   Results:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;train_params_done = 
+
+            smoothing_variance: 0.0025
+                noise_variance: 0.1231
+             position_variance: 1.6676e+04
+                 rate_variance: 0.2212
+    perturb_smoothing_variance: 1
+         perturb_rate_variance: 1
+     perturb_position_variance: 1
+                 perturb_scale: 1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Summary: no change.&lt;/p&gt;
+
+&lt;h2&gt;No-Perturb model summary:&lt;/h2&gt;
+
+&lt;p&gt;Successfully trained model.&lt;br/&gt;
+Required &lt;strong&gt;115 function evaluations&lt;/strong&gt;, taking &lt;strong&gt;112 s&lt;/strong&gt;.&lt;br/&gt;
+Optimal marginal likelihood:  &lt;strong&gt;23714.937760&lt;/strong&gt;.&lt;br/&gt;
+Optimal parameters:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;            smoothing_variance: 0.0025
+                noise_variance: 0.1231
+             position_variance: 1.6676e+04
+                 rate_variance: 0.2212
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Surprised at how small noise_variance was, considering the calibration noise.  However, I guess the maximum-likelihood reconstruction looked pretty good, if unity-apect-ratio axis scaling is used.&lt;/p&gt;
+
+&lt;h2&gt;Training OU-Perturb model&lt;/h2&gt;
+
+&lt;p&gt;Getting weird results.  Halted after second iteration; second iteration took 250 function evaluations; perturb_smoothing_variance gradient is zero.  Results:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;train_params_done = 
+
+            smoothing_variance: 1.5003e-05
+                noise_variance: 1.0087e-04
+             position_variance: 7.9393e+04
+                 rate_variance: 0.7879
+    perturb_smoothing_variance: 0.2500
+         perturb_rate_variance: 1.5183
+     perturb_position_variance: 2.5159e+04
+                 perturb_scale: 48.6163
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Recall that new model ML's aren't deeply tested; probably a bug in there (in the kernel implementation?  in the kernel theory? in the conversion from mats to kernel?).  Will continue tomorrow.&lt;/p&gt;
+</description>
+				<pubDate>Sat, 03 Aug 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/03/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/03/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Morning&lt;/h2&gt;
+
+&lt;p&gt;Researched telecommuting strategies.&lt;/p&gt;
+
+&lt;p&gt;Set up Google hangout: &lt;a href=&quot;https://plus.google.com/hangouts/_/89759369dd280ff225c298a7a4291745134e1d6f&quot;&gt;link&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Set up IRC chat room: &lt;a href=&quot;http://webchat.freenode.net/?channels=ivilab&amp;amp;uio=d4&quot;&gt;link&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Probably IRC will be best for general chat, Google Hangouts for screen sharing or group video chat.&lt;/p&gt;
+
+&lt;h2&gt;Afternoon&lt;/h2&gt;
+
+&lt;p&gt;Setting up training minimizer using Matlab's &lt;code&gt;fminunc&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Got all params in-place, but Matlab version is too old.&lt;/p&gt;
+
+&lt;p&gt;Trying to upgrade matlab, but Java is out of date.&lt;/p&gt;
+
+&lt;p&gt;Taking a break to move furniture...&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Downloaded and installed Java 7.&lt;/p&gt;
+
+&lt;p&gt;Now Matlab installer isn't able to communicate with server.  Arg...&lt;/p&gt;
+
+&lt;p&gt;Working now... downloading...  Should be done in 45 minutes.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Done.&lt;/p&gt;
+
+&lt;p&gt;Migrating settings from old Matlab...&lt;/p&gt;
+
+&lt;p&gt;Done.&lt;/p&gt;
+</description>
+				<pubDate>Fri, 02 Aug 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/02/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/02/work-log</guid>
+			</item>
+		
+			<item>
 				<title>Work Log, Week summary</title>
 				<description>
 
@@ -592,167 +854,6 @@ New ML (direct method): 793.300407 &amp;lt;--  0.04% error!
 				<pubDate>Tue, 16 Jul 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/16/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/16/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Direct Evaluation of the Marginal Likelihood</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Previously, we've always used hacks to evaluate the marginal likelihood, because evaluating it directly was apparently impossible because of an infinite normalization constant.  I've discovered that this isn't actually true; the infinite normalization constant arose due to our approximation of the likelihood.  The trick in correctly computing the ML is to replace the usual normalization constant with a corrected one.&lt;/p&gt;
-
-&lt;p&gt;Our old method required knowledge of the maximum posterior solution, which was costly to compute.  The new approach is straightforward to describe, more accurate than our previous method, and can be evaluated in linear time by exploiting its Markovian structure.&lt;/p&gt;
-
-&lt;p&gt;Below is a rough-draft writeup of my derivation of the marginal likelihood function.&lt;/p&gt;
-
-&lt;h2&gt;Direct Evaluation of the Marginal likelihood&lt;/h2&gt;
-
-&lt;p&gt;The 3D marginal likelihood function arises as the sum of a 3D curve process and a 3D perturbation process.  Both are gaussian (the second is approximate), this the result is a Gaussian function, the convolution of two Gaussians.  However, the perturbation process has infinite variance in the direction of backprojection, which arises from the fact that perturbation actually occurs in 2D, we are just backprojecting it to 3D for tractibility.  In other words, the ML isn't a distribution in 3D, it's a distribution in 2D, and we need to determine the appropriate normalization constant for the 3D function to it generates 2D ML densities.&lt;/p&gt;
-
-&lt;p&gt;The likelihood function is given by&lt;/p&gt;
-
-&lt;div&gt;\[
-\begin{align}
-p(y | x) &amp;= \prod p(y_i | x_i) \\
-         &amp;= \prod \mathcal{N}(y_i; \rho_I(x_i), \sigma_n^2 I) \\
-         &amp;\approx \prod \frac{1}{\sqrt{2 \pi \sigma^2}^2} \mathcal{G}(Y_i; x_i, S_i^{-1}) \\
-         &amp;= \prod \frac{1}{\sqrt{2 \pi \sigma^2}^2} \exp\{(Y_i - x_i)^\top S_i (Y_i - x_i)\} \\
-         &amp;= \frac{1}{\sqrt{2 \pi \sigma^2}^{2n}} \exp\{(Y - x)^\top S (Y - x)\} \\
-         &amp;= \frac{1}{Z_l} \exp\{(Y - x)^\top S (Y - x)\}
-\end{align}
-\]&lt;/div&gt;
-
-
-&lt;p&gt;Where&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;\(\rho_i(x)\) is the projection of x into the I-th view,&lt;/li&gt;
-&lt;li&gt;\(Y_i\) is the estimated backprojected position of observation \(y_i\),&lt;/li&gt;
-&lt;li&gt;\(S_i\) is the curvature of the 3d likelihood function w.r.t. \(x_i\) evaluated at $Y_i$,&lt;/li&gt;
-&lt;li&gt;\(Y\), \(S\) and \(x\) are the concatenation of \(Y_i\), and \(x\)&lt;/li&gt;
-&lt;li&gt;\(S\) is the block-diagonal matrix of \(S_i\)'s&lt;/li&gt;
-&lt;li&gt;\(\mathcal{G}\) is a Gaussian function (an unnormalized normal distribution).&lt;/li&gt;
-&lt;li&gt;\(Z_l\) is a normalization constant.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;We have transformed the likelihood into a log-linear function of x, by rewriting the PDF in terms of only 3D entities.  Note that \(S_i\) has zero curvature in the backprojection direction, resulting in infinite variance in the Gaussian function.   Also note that the normalization constant isn't the standard one for a 3D gaussian distribution, because this isn't a distribution over x.  The normalization constant is chosen so the approximate likelihood in 3D agrees with the exact 2D likelihood when perturbation is zero (i.e. when \(Y_i\) lies anywhere on the backprojection line).&lt;/p&gt;
-
-&lt;p&gt;This approximation ignores the nonlinearity of projection; the likelihood function as a function of \(x_i\) would actually look like a cone whose axis-perpendicular slices are Gaussians, whereas our function is cylinder-shaped.  In practice, the approximation error has minimal effect on the marginal likelihood computation, assuming $Y_i$ is a good estimate of the posterior depth, and the posterior is reasonably peaked.  (A graphic to illustrate would be good here).&lt;/p&gt;
-
-&lt;p&gt;The prior is given by&lt;/p&gt;
-
-&lt;div&gt;\[
-\begin{align}
-p(x) &amp;= \mathcal{N}(x; \mathbf{0}, K) \\
-     &amp;= \frac{1}{Z_p} \exp\{x^\top K^{-1} x\}
-     \end{align}
-\]&lt;/div&gt;
-
-
-&lt;p&gt;where \(K\) is the covariance matrix arising from the Gaussian process kernel, and Z_p is the standard Gaussian normalization constant.&lt;/p&gt;
-
-&lt;p&gt;The marginal likelihood is defined as&lt;/p&gt;
-
-&lt;div&gt;\[
-\begin{align}
-p(y) &amp;= \int p(y|x) p(x) dx \\
-     &amp;= \int \left ( \frac{1}{Z_l} \exp\{(Y - x)^\top S (Y - x)\} \right ) \left ( \frac{1}{Z} \exp\{x^\top K^{-1} x\} \right ) \\
-     &amp;= \frac{1}{Z_l Z_p}\int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\top K^{-1} x\} \\
-     \end{align}
-\]&lt;/div&gt;
-
-
-&lt;p&gt;The expression within the integral is the convolution of two unnormalized zero-mean Gaussians, so the integral is a zero-mean Gaussian whose covariance is the sum of the inputs' covariances.  If the input Gaussians &lt;strong&gt;were&lt;/strong&gt; properly normalized, the normalization constant would be \(1/Z\);  since they are not, the normalization constant is \((Z_1 Z_2 / Z)\), where \(1/Z_1\) and \(1/Z_2\) are the would-be normalization constants for the first and second Gaussian, respectively.  Note that the second Gaussian's normalization constant is \(1/Z_p\), so this results in the cancellation we see below&lt;/p&gt;
-
-&lt;div&gt;\[
-\begin{align}
-p(y) &amp;= \frac{1}{Z_l Z_p} \int   \exp\{(Y - x)^\top S (Y - x)\}   \exp\{x^\top K^{-1} x\} \\
-     &amp;= \frac{1}{Z_l Z_p} \left ( \frac{Z_{l,3d} Z_p}{Z} \exp\{x^\top (S^{-1} + K)^{-1} x \} \right ) \\
-     &amp;= \frac{Z_{l,3d} }{Z_l}\frac{1}{Z} \exp\{x^\top (S^{-1} + K)^{-1} x \} \\
-     &amp;= \frac{Z_{l,3d} }{Z_l}\frac{1}{Z}  \exp\{x^\top S(S + S K S)^{-1} S x \}
-     \end{align}
-\]&lt;/div&gt;
-
-
-
-
-&lt;div&gt;
-    Where \( Z_{l,3d} \) is the would-be 3D normalization constant for our likelihood Gaussian.  The last line avoids inverting the singular matrix \(S\) when it's singular.  Since \(S\) is rank-deficient, the normalization constants based on \(S^{-1}\) will be infinite (i.e. \(Z_{l,3d}\) and \(Z\)).  However, the terms involving determinants of \(S^{-1}\) should cancel in the ratio, resulting in a gaussian with infinite variance, but non-infinite normalization constant. **(Need to show this mathematically next time)** 
-    &lt;/div&gt;
-
-</description>
-				<pubDate>Fri, 12 Jul 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/12/marginal-likelihood</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/12/marginal-likelihood</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;h2&gt;Markov-decomposed ML&lt;/h2&gt;
-
-&lt;p&gt;The original plan was to markov-decompose the prior and posterior, but soon remembered that I also need to compute the mean of the posterior, which isn't as straighforward to compute.&lt;/p&gt;
-
-&lt;p&gt;After some deliberation and whiteboarding, I decided to implement Bishop's forward/backward algorithm to simultaneously marginalize and compute the maximum.  Will test this against the clique-tree implementation to ensure correctness.&lt;/p&gt;
-
-&lt;p&gt;........&lt;/p&gt;
-
-&lt;p&gt;During testing I realized a fundamental problem with the current likelihood: there is no obvious way to consistently handle the &quot;redundant&quot; dimensions that arise from duplicated indices.  In some kernels, these are handled naturally, namely the kernels that treat different views as different indices.  The old kernel, however, does not, and the duplicated indices result in degenerate posterior distributions unless handled using hacks.&lt;/p&gt;
-
-&lt;p&gt;We could handle this on a kernel-by-kernel basis, but it would be unmaintainable, and could hinder further research into new kernels.  It also isn't clear that the hacks I have in mind would actually give correct results.&lt;/p&gt;
-
-&lt;p&gt;This problem is inherent to the &quot;candidates estimator&quot; of the marginal likelihood, because it involves a ratio of the posterior and prior, both of which are degenerate in these cases.&lt;/p&gt;
-
-&lt;p&gt;The actual marginal likelihood function has no such degeneracies, because each observation is independent, given the underlying curve.  However, until recently it was unclear how to evaluate the marginal likelihood using the approximated likelihood function.  The approximate likelihood has a rank-deficient precision matrix, and its normalization constant is non-standard due to the transformation from 2D to 3D.  However, I think I've developed a way to evaluate it, which I describe in the next article.&lt;/p&gt;
-</description>
-				<pubDate>Thu, 11 Jul 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/11/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/11/work-log</guid>
 			</item>
 		
 	</channel>

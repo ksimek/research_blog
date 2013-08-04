@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log, Week summary &larr; </title>
+   <title>Work Log &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -76,9 +76,9 @@
 	
   
   
-  <h1 class="title">Work Log, Week summary</h1>
+  <h1 class="title">Work Log</h1>
 
-  <div class="date emphnext">July 26, 2013</div>
+  <div class="date emphnext">August 02, 2013</div>
     
 
 
@@ -107,46 +107,41 @@
 </div>
 
 
-<p>No work logs this week.  All week I've been splitting time between research and packing for the move to Phoenix on Monday.  I've made some progress on the training framework.</p>
+<h2>Morning</h2>
 
-<h2>Miscellaneous</h2>
+<p>Researched telecommuting strategies.</p>
 
-<p>Due to periodic crashing of Matlab (user error!), I added a script <code>tmp_setup_workspace.m</code>, which is intended to restore all the needed variables for whatever task I'm currently working on.</p>
+<p>Set up Google hangout: <a href="https://plus.google.com/hangouts/_/89759369dd280ff225c298a7a4291745134e1d6f">link</a></p>
 
-<h2>Optimized likelihood for training</h2>
+<p>Set up IRC chat room: <a href="http://webchat.freenode.net/?channels=ivilab&amp;uio=d4">link</a></p>
 
-<p>Spend some time thinking about how to design a version of the marginal likelihood computation that is optimized for training.</p>
+<p>Probably IRC will be best for general chat, Google Hangouts for screen sharing or group video chat.</p>
 
-<p>Some time was spent deriving the analytical ML gradient w.r.t. the training parameters.  I believe the result won't be too complicated, but deriving it was taking up too much time.  We'll use a numerical gradient for now; will return to analytical gradient if the numerical proves to be lacking.</p>
+<h2>Afternoon</h2>
 
-<p>To save some computation during training, I precomputed the component matrices for the prior and likelihood.  Constructing the prior and likelihood covariance matrices will involve scaling and summing the component parts.  These cached matrices consume about <strong>740 MB</strong> with the current training set.</p>
+<p>Setting up training minimizer using Matlab's <code>fminunc</code>.</p>
 
-<p>However, one unavoidable bottleneck continues to be the cholesky decomposition, which isn't improved by this precomutation.  I was hoping there would be some matrix inversion tricks involving linear combinations of matrices, but my research on this came up empty.  My last hope is to run Cholesky on the GPU (Matlab makes this trivial), but if that doesn't speed things up, I'll resign myself to waiting 10 hours for training.</p>
+<p>Got all params in-place, but Matlab version is too old.</p>
 
-<p>Nevertheless, the component caching still gives a 1.5x end-to-end speedup on the no_purturb_kernel  case, compared the to direct implementation.</p>
+<p>Trying to upgrade matlab, but Java is out of date.</p>
+
+<p>Taking a break to move furniture...</p>
 
 <p>...</p>
 
-<div>After optimizing, the bottlenecks are split evenly three ways: (1) constructing Prior kernel; (2) constructing ML covariance matrix; and (3) evaluating ML pdf.   The latter two are dominated mostly by \(O(n^3)\) matrix multiplication.  Surprisingly, Cholesky is significant, but not dominating.</div>
+<p>Downloaded and installed Java 7.</p>
 
+<p>Now Matlab installer isn't able to communicate with server.  Arg...</p>
 
-<h2>Summary:</h2>
+<p>Working now... downloading...  Should be done in 45 minutes.</p>
 
-<p>Training-optimized Marginal Likelihood is finished; in <code>train/tr_curves_ml.m</code>.  Results confirmed against reference implementation: <code>train/tr_curves_ml_ref.m</code>.</p>
+<p>...</p>
 
-<h2>TODO</h2>
+<p>Done.</p>
 
-<ul>
-<li>finish Training framework:
+<p>Migrating settings from old Matlab...</p>
 
-<ul>
-<li>setup local minimizer with <code>train/tr_curves_ml.m</code></li>
-<li>determine if numerical gradient is okay</li>
-</ul>
-</li>
-<li>Sanity check: compare the ML's of each trained model on training data.</li>
-</ul>
-
+<p>Done.</p>
 
       <address class="signature">
         Posted by
@@ -158,10 +153,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/08/02/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+    <a href="/ksimek/research/2013/08/03/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/07/21/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/07/26/work-log" class="prev" title="Work Log, Week summary">&larr; Work Log, Week summary</a>
   
   </div>
   <div class="clearer"> </div>
@@ -178,7 +173,7 @@
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log, Week summary" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -226,7 +221,7 @@
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log, Week summary");
+                    + encodeURIComponent("Work Log");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

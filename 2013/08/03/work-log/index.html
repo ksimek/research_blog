@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log, Week summary &larr; </title>
+   <title>Work Log &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -76,9 +76,9 @@
 	
   
   
-  <h1 class="title">Work Log, Week summary</h1>
+  <h1 class="title">Work Log</h1>
 
-  <div class="date emphnext">July 26, 2013</div>
+  <div class="date emphnext">August 03, 2013</div>
     
 
 
@@ -107,46 +107,169 @@
 </div>
 
 
-<p>No work logs this week.  All week I've been splitting time between research and packing for the move to Phoenix on Monday.  I've made some progress on the training framework.</p>
+<p>Running optimizer...</p>
 
-<h2>Miscellaneous</h2>
+<p><strong>Issue</strong>: Likelihood variance is collapsing to zero.</p>
 
-<p>Due to periodic crashing of Matlab (user error!), I added a script <code>tmp_setup_workspace.m</code>, which is intended to restore all the needed variables for whatever task I'm currently working on.</p>
+<p><strong>Guess</strong>: Training ML is different from naive ML and isn't penalizing noise correctly.</p>
 
-<h2>Optimized likelihood for training</h2>
+<p><strong>Test 1</strong>: save params, compare training ml and naive ml</p>
 
-<p>Spend some time thinking about how to design a version of the marginal likelihood computation that is optimized for training.</p>
+<p>Same result.</p>
 
-<p>Some time was spent deriving the analytical ML gradient w.r.t. the training parameters.  I believe the result won't be too complicated, but deriving it was taking up too much time.  We'll use a numerical gradient for now; will return to analytical gradient if the numerical proves to be lacking.</p>
+<h2>Discussion</h2>
 
-<p>To save some computation during training, I precomputed the component matrices for the prior and likelihood.  Constructing the prior and likelihood covariance matrices will involve scaling and summing the component parts.  These cached matrices consume about <strong>740 MB</strong> with the current training set.</p>
-
-<p>However, one unavoidable bottleneck continues to be the cholesky decomposition, which isn't improved by this precomutation.  I was hoping there would be some matrix inversion tricks involving linear combinations of matrices, but my research on this came up empty.  My last hope is to run Cholesky on the GPU (Matlab makes this trivial), but if that doesn't speed things up, I'll resign myself to waiting 10 hours for training.</p>
-
-<p>Nevertheless, the component caching still gives a 1.5x end-to-end speedup on the no_purturb_kernel  case, compared the to direct implementation.</p>
-
-<p>...</p>
-
-<div>After optimizing, the bottlenecks are split evenly three ways: (1) constructing Prior kernel; (2) constructing ML covariance matrix; and (3) evaluating ML pdf.   The latter two are dominated mostly by \(O(n^3)\) matrix multiplication.  Surprisingly, Cholesky is significant, but not dominating.</div>
+<div> The marginal likelihood is monotonically increasing as the noise variance \(\sigma_n^2\) approaches zero.  This shouldn't be happening, because as the likelihood variance collapses to a delta, the marginal likelihood should become equal to the prior evaluated at the (virtual) observed locations.</div>
 
 
-<h2>Summary:</h2>
 
-<p>Training-optimized Marginal Likelihood is finished; in <code>train/tr_curves_ml.m</code>.  Results confirmed against reference implementation: <code>train/tr_curves_ml_ref.m</code>.</p>
 
-<h2>TODO</h2>
+<div>
+\begin{align}
+    \lim_{\sigma_n \to 0} p(D) &= \lim_{\sigma_n \to 0} \int p_0(x) \; p_l(D \mid x) dx & \text{(Marginalization)}\\
+         &= \lim_{\sigma_n \to 0} \int p_0(x) \; f(D - x) dx &   \text{(Convolution)} \\
+         &= \int p_0(x) \delta(D - x) dx \\
+         &= p_0(D) 
+\end{align}
+</div>
 
-<ul>
-<li>finish Training framework:
 
-<ul>
-<li>setup local minimizer with <code>train/tr_curves_ml.m</code></li>
-<li>determine if numerical gradient is okay</li>
-</ul>
-</li>
-<li>Sanity check: compare the ML's of each trained model on training data.</li>
-</ul>
+<p>This implies there's a bug in the code causing this phenomenon; the mathematical model is not the cause.</p>
 
+<h2>Solved</h2>
+
+<div>Found the bug.  When computing the likelihood precision \(S\) from the unscaled precision \(S_0\), the noise variance \(\sigma_n^2\) was multiplied instead of divided:</div>
+
+
+<pre><code>S = S0 * sigma_n; // incorrect
+S = S0 * (1/sigma_n); // corrected version
+</code></pre>
+
+<h2>Resuming Training</h2>
+
+<p>Had some trouble with noise sigmas being too low.  Solved by in two ways:</p>
+
+<h1>Attempts 1-3: clamping to a minimum value and then adding a penalty depending on the amount that was clamped.</h1>
+
+<h1>Attempt 4:  offset by minimum value before transforming</h1>
+
+<p>Command:</p>
+
+<pre><code>train_params_done = tr_train(test_Corrs_ll, train_params, data_, 400);
+</code></pre>
+
+<p><strong>Attempt #1</strong>:</p>
+
+<p>Handle extreme values by incuring a penalty for variances smaller than 1e-5.  Result stored in <code>train_params_done_1</code>.</p>
+
+<pre><code>train_params_done_1 = 
+
+            smoothing_variance: 0.0025
+                noise_variance: 0.1231
+             position_variance: 1.6676e+04
+                 rate_variance: 0.2212
+    perturb_smoothing_variance: 1
+         perturb_rate_variance: 1
+     perturb_position_variance: 1
+                 perturb_scale: 1
+</code></pre>
+
+<p>Surprisingly small smoothness sigma.  Surprisingly low rate variance.</p>
+
+<p><strong>Attempt #2</strong></p>
+
+<p>Testing sensitivity to the magnitude of the penalty term.  Scaled up penalty by 1000.  Results in <code>train_params_done_2</code>:</p>
+
+<pre><code>train_params_done_2 = 
+
+            smoothing_variance: 0.0025
+                noise_variance: 0.1231
+             position_variance: 1.6676e+04
+                 rate_variance: 0.2212
+    perturb_smoothing_variance: 1
+         perturb_rate_variance: 1
+     perturb_position_variance: 1
+                 perturb_scale: 1
+</code></pre>
+
+<p>Summary: no change.</p>
+
+<p><strong>Attempt #3</strong></p>
+
+<p>Testing sensitivity to the threshold where the penalty term starts to be incurred.  Set MIN_NOISE_VARIANCE to 1e-3 and MIN_SMOOTHING_VARIANCE to 1e-7 (previously both 1e-5).  Results in <code>train_params_done_3</code>:</p>
+
+<pre><code>train_params_done_3 = 
+
+            smoothing_variance: 0.0025
+                noise_variance: 0.1231
+             position_variance: 1.6676e+04
+                 rate_variance: 0.2212
+    perturb_smoothing_variance: 1
+         perturb_rate_variance: 1
+     perturb_position_variance: 1
+                 perturb_scale: 1
+</code></pre>
+
+<p>Summary: no change.</p>
+
+<p><strong> Attempt #4 </strong>
+Handled small variances by offsetting before transforming:</p>
+
+<pre><code>% converting param to state variable
+x(1) = log(smoothing_variance - MIN_SMOOTING_VARIANCE);
+
+% converting state variable to param
+x(1) = exp(smoothing_variance) + MIN_SMOOTING_VARIANCE;
+</code></pre>
+
+<p>This is more elegant than the penalty hack used in the last three attempts.   Results:</p>
+
+<pre><code>train_params_done = 
+
+            smoothing_variance: 0.0025
+                noise_variance: 0.1231
+             position_variance: 1.6676e+04
+                 rate_variance: 0.2212
+    perturb_smoothing_variance: 1
+         perturb_rate_variance: 1
+     perturb_position_variance: 1
+                 perturb_scale: 1
+</code></pre>
+
+<p>Summary: no change.</p>
+
+<h2>No-Perturb model summary:</h2>
+
+<p>Successfully trained model.<br/>
+Required <strong>115 function evaluations</strong>, taking <strong>112 s</strong>.<br/>
+Optimal marginal likelihood:  <strong>23714.937760</strong>.<br/>
+Optimal parameters:</p>
+
+<pre><code>            smoothing_variance: 0.0025
+                noise_variance: 0.1231
+             position_variance: 1.6676e+04
+                 rate_variance: 0.2212
+</code></pre>
+
+<p>Surprised at how small noise_variance was, considering the calibration noise.  However, I guess the maximum-likelihood reconstruction looked pretty good, if unity-apect-ratio axis scaling is used.</p>
+
+<h2>Training OU-Perturb model</h2>
+
+<p>Getting weird results.  Halted after second iteration; second iteration took 250 function evaluations; perturb_smoothing_variance gradient is zero.  Results:</p>
+
+<pre><code>train_params_done = 
+
+            smoothing_variance: 1.5003e-05
+                noise_variance: 1.0087e-04
+             position_variance: 7.9393e+04
+                 rate_variance: 0.7879
+    perturb_smoothing_variance: 0.2500
+         perturb_rate_variance: 1.5183
+     perturb_position_variance: 2.5159e+04
+                 perturb_scale: 48.6163
+</code></pre>
+
+<p>Recall that new model ML's aren't deeply tested; probably a bug in there (in the kernel implementation?  in the kernel theory? in the conversion from mats to kernel?).  Will continue tomorrow.</p>
 
       <address class="signature">
         Posted by
@@ -157,11 +280,8 @@
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/08/02/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/07/21/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/08/02/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>
@@ -178,7 +298,7 @@
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log, Week summary" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -226,7 +346,7 @@
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log, Week summary");
+                    + encodeURIComponent("Work Log");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");
