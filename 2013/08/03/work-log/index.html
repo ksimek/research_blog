@@ -149,9 +149,11 @@ S = S0 * (1/sigma_n); // corrected version
 
 <p>Had some trouble with noise sigmas being too low.  Solved by in two ways:</p>
 
-<h1>Attempts 1-3: clamping to a minimum value and then adding a penalty depending on the amount that was clamped.</h1>
+<ol>
+<li>Attempts 1-3: clamping to a minimum value and then adding a penalty depending on the amount that was clamped.</li>
+<li>Attempt 4:  offset by minimum value before transforming</li>
+</ol>
 
-<h1>Attempt 4:  offset by minimum value before transforming</h1>
 
 <p>Command:</p>
 

@@ -74,9 +74,11 @@ S = S0 * (1/sigma_n); // corrected version
 
 &lt;p&gt;Had some trouble with noise sigmas being too low.  Solved by in two ways:&lt;/p&gt;
 
-&lt;h1&gt;Attempts 1-3: clamping to a minimum value and then adding a penalty depending on the amount that was clamped.&lt;/h1&gt;
+&lt;ol&gt;
+&lt;li&gt;Attempts 1-3: clamping to a minimum value and then adding a penalty depending on the amount that was clamped.&lt;/li&gt;
+&lt;li&gt;Attempt 4:  offset by minimum value before transforming&lt;/li&gt;
+&lt;/ol&gt;
 
-&lt;h1&gt;Attempt 4:  offset by minimum value before transforming&lt;/h1&gt;
 
 &lt;p&gt;Command:&lt;/p&gt;
 
