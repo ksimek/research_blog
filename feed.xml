@@ -7,6 +7,193 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Investigating the &quot;Spreading&quot; issue with increases to perturb_rate_variance.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Confirmed the same phenomenon with increase to perturb_position_variance.&lt;/p&gt;
+
+&lt;p&gt;Setting perturb_position_variance to 1000:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-06-visualize-training-1.png&quot; alt=&quot;perturb_position_variance = 1000&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Setting perturb_position_variance to 1000000:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-06-visualize-training-2.png&quot; alt=&quot;perturb_position_variance = 1000000&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Spreading appears to increase monotonically with perturb_position_variance.&lt;/p&gt;
+
+&lt;p&gt;Again, this is surprising, because you'd expect them to revert to the maximum likelihood solution.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;However, recall that the per-view likelihood has infinite variance in the back-projection direction.  The spreading appears to be occuring in this direction.  The infinite variance means that any influence from the prior will overcome the likelihood.&lt;/p&gt;
+
+&lt;p&gt;But isn't the prior centered at zero?  Why is the result drifting so far from zero?&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;One thing is clear: with high perturb&lt;em&gt;* values, the correlation between nearby views becomes negligible compared to the within-view variance.  And since the likelihood variance has an infinite component, the posterior variance grows with perturb&lt;/em&gt;*.  While we can inspect the maximum posterior curve, it is relatively meaningless because the variance is so great.&lt;/p&gt;
+
+&lt;p&gt;Even so, why doesn't it just revert to the mean?&lt;/p&gt;
+
+&lt;p&gt;Mean rate is zero, but it can't be exactly zero, because the likelihood requires that the curve be near the data.  But the data's position is only known in two dimensions, so the posterior is free to manipulate the third dimension so that the rate is minimized.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Model is trying to use a linear-perturbation model to explain per-view deviations from the mean model.  Since the deviations don't arise from pure scaling, it has to contort into bizarre shapes to explain it.&lt;/p&gt;
+
+&lt;p&gt;But the bizarre shapes fit the data better, so it's worth it.&lt;/p&gt;
+
+&lt;h1&gt;&quot;Singular Regions&quot;&lt;/h1&gt;
+
+&lt;p&gt;GOT IT!  Recall that the likelihood variance is measured in world units, even though they are really image-based values.  As the curve moves toward the camera, the likelihood variance &lt;em&gt;should&lt;/em&gt; ideally reduce, since the same size of world perturbations result in larger image perturbations.  But in our model they don't, and so curves can stray farther from the data in the image, but still look nearby the data according to the Gaussian.&lt;/p&gt;
+
+&lt;p&gt;In the extreme case, all the points end up near the camera pinhole, and they will be in the center of the data Gaussian.  In practice, any point within \(\sigma&lt;sup&gt;2\)&lt;/sup&gt; of the camera will be well supported, where \(\sigma&lt;sup&gt;2\)&lt;/sup&gt; is the average noise variance in 3D.  I'll call this the &quot;Singular Region&quot;, where all the of likelihood's Gaussian &quot;cylinders&quot; (degenerate cones) intersect and overlap.&lt;/p&gt;
+
+&lt;p&gt;In terms of the marginal likelihood, this can cause counterintuitive behavior.  For example, large perturb_rate_variance might be good, because it allows the curve to wander into the &quot;singular zone&quot; near the camera.  Thinking of in spherical coordinates, there is a wedge of the sphere that points toward the camera, and as the perturb_rate_variance increases, this wedge remains relatively constant in angular size, but gets longer and longer.  The longer it gets, the more of singular zone it overlaps. Even though greater variance means there are more possible model configurations, there is a period during which the proportion of these configurations that are well-supported by the likelihood doesn't necessarily decrease, so the ML doesn't necessarily decrease, either.&lt;/p&gt;
+
+&lt;p&gt;This explains the phenomenon we saw during training, where the plot of ML vs. perturb_rate_variance (reproduced below).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-06-training-plot.png&quot; alt=&quot;ML vs. perturb_rate_variance&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The lump to the left is the result of the singular region giving false support near the camera.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Need to somehow place penalty for any point that strays too far from the mean curve.  Can this be done without radically distorting the model?&lt;/p&gt;
+
+&lt;p&gt;What if I placed a limit on the likelihood variance, instead of letting it be infinite?  It will prevent the prior of taking credit for lousy configurations during the ML marginalization.&lt;/p&gt;
+
+&lt;h1&gt;Experiments&lt;/h1&gt;
+
+&lt;p&gt;Modified &lt;code&gt;train/tr_construct_matrices.m&lt;/code&gt; to clamp the likelihood's maximum variance to some multiple of the largest finite eigenvalue (see local function &quot;fix_precisions&quot;).  ML shouldn't change much when using reasonable values.&lt;/p&gt;
+
+&lt;p&gt;Results:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Reference (no cap): 2.2675e+04  (inf)
+100x cap:           2.2109e+04  (1.2 mm)
+1000x cap:          2.2360e+04  (3.8 mm)
+10000x cap:         2.2510e+04  (12 mm)
+100000x cap:        2.2596e+04  (38 mm)
+1000000x cap:       2.2654e+04  (12 cm) 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Capping the variance to 10000x the triangulation variance results in a standard deviation of about 12mm in practice, which seems very reasonable.&lt;/p&gt;
+
+&lt;p&gt;We have to raise standard deviation to 12 cm for it to be accurate to three significant digits, which seems somewhat high.  Possibly, even with reasonable model parameters, we're still seeing some influence from the &quot;singular zone,&quot; so it may be a good thing that we aren't seeing the full reference value.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Running training using clamped likelihoods.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;No Perturb Model&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Model:
+        smoothing_variance: 0.0025
+            noise_variance: 0.1231
+         position_variance: 1.6658e+04
+             rate_variance: 0.2207
+
+Final ML: 2.371 x 10^4
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Exactly the same result as the non-clamped version.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Ind Perturb Model&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Model:
+        smoothing_variance: 0.0019
+            noise_variance: 0.0719
+         position_variance: 1.6729e+04
+             rate_variance: 0.2422
+perturb_smoothing_variance: 3.3860e-41
+     perturb_rate_variance: 1.4918e-06
+ perturb_position_variance: 0.4801
+
+Final ML:  2.512 x 10^4
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Old non-clamped training resulted in perturb_rate_variance exploding.  The new perturb_rate_variance looks very reasonable.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;OU Perturb Model&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Model:
+        smoothing_variance: 0.0019
+            noise_variance: 0.0721
+         position_variance: 1.6681e+04
+             rate_variance: 0.2146
+perturb_smoothing_variance: 3.3860e-41
+     perturb_rate_variance: 1.4711e-06
+ perturb_position_variance: 0.7793
+             perturb_scale: 3.7353
+
+Final ML:  2.516 x 10^4
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;em&gt;SQEXP Perturb Model&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Model:
+Final ML:
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Some of the global variance is can be pushed into the perturb_variance, since they are now correlated.&lt;/p&gt;
+
+&lt;h2&gt;General observations&lt;/h2&gt;
+
+&lt;p&gt;It's still somewhat weird that perturb_smoothing_variance is so low.  I'm pretty sure there are non-negligible deformations occurring during the imaging process.  Maybe it's just the Ind-perturb model?  More likely it's because the curves that deform are reversed...&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Which of the perturb-components are really correlated?  Seems like position variance is probably independent, but rate variance might not be.  Definitely smoothing_variance (i.e. nonrigid deformations) should be correlated.&lt;/p&gt;
+
+&lt;p&gt;====&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;try visualization with truncated likelihoods
+
+&lt;ul&gt;
+&lt;li&gt;does increasing rate variance eventually have no effect?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;remove perturb_scale from ind model (better inference)&lt;/li&gt;
+&lt;li&gt;hand-pick&lt;/li&gt;
+&lt;li&gt;Handle &quot;flipped&quot; curves.  Try to infer direction&lt;/li&gt;
+&lt;li&gt;Does the visualized max posterior look good for the trained values (I'm guessing not -- to strict of variances, overfitting)&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Tue, 06 Aug 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/06/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/06/work-log</guid>
+			</item>
+		
+			<item>
 				<title>Work Log - Training Bugs</title>
 				<description>
 
@@ -98,11 +285,11 @@
 
 &lt;p&gt;Weird.  As perturb_rate_variance increases, the per-view curves spread out radially like flower petals.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-06-visualize-training-1.png&quot; alt=&quot;high perturb_rate_variance causes radial spreading of curves&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-05-visualize-training-1.png&quot; alt=&quot;high perturb_rate_variance causes radial spreading of curves&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;I would have expected that the likelihood would take over, but this is clearly not happening.  Lets look at the likelihood...&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-06-visualize-training-2.png&quot; alt=&quot;Maximum-likelihood solution.  Posterior should revert to this as variance increases asymtotically.&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-05-visualize-training-2.png&quot; alt=&quot;Maximum-likelihood solution.  Posterior should revert to this as variance increases asymtotically.&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;We must be running up against numerical precision errors.  Let's look at the equation for maximum posterior:&lt;/p&gt;
 
@@ -137,11 +324,27 @@
 
 &lt;p&gt;Even when perturb_rate_variance is reasonable (1.0), we still get drifting:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-06-visualize-training-3.png&quot; alt=&quot;perturb_rate_variance == 1.0&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-05-visualize-training-3.png&quot; alt=&quot;perturb_rate_variance == 1.0&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;The degree of this phenomenon seems to be a smooth function of perturb_rate_variance.  If it was a numerical instability issue, we'd see it arise abruptly, indicating we had entered the unstable regime.&lt;/p&gt;
 
-&lt;p&gt;I'm now thinking this is a real issue with the model, not simply an artifact of computation.  Need to think more about it.&lt;/p&gt;
+&lt;p&gt;I'm now thinking this is a real issue with the model, not simply an artifact of computation (maybe it's both?).  Need to think more about it.&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Determine why spreading happens when &lt;code&gt;perturb_rate_variance&lt;/code&gt; increases.&lt;/li&gt;
+&lt;li&gt;Determine why huge &lt;code&gt;perturb_rate_variance&lt;/code&gt; values are promoted by the ML.&lt;/li&gt;
+&lt;li&gt;Handle &quot;reversed curves&quot; issue, where perturbation is applied to the wrong end.&lt;/li&gt;
+&lt;li&gt;Training
+
+&lt;ul&gt;
+&lt;li&gt;Finish &quot;ind&quot; model&lt;/li&gt;
+&lt;li&gt;Traing &quot;ou&quot; and &quot;sqexp&quot; models&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
 </description>
 				<pubDate>Mon, 05 Aug 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/05/work-log</link>
@@ -927,51 +1130,6 @@ Optimal parameters:&lt;/p&gt;
 				<pubDate>Thu, 18 Jul 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/18/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/18/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log 2</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Experimenting with &lt;code&gt;ou_perturb_kernel.m&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;Was getting weird results, where the ML approached infinity as &lt;code&gt;noise_variance&lt;/code&gt; approached zero.&lt;/p&gt;
-
-&lt;p&gt;Realized that the set of precision matrices needs to be updated &lt;strong&gt;every time the noise sigma changes&lt;/strong&gt;.&lt;/p&gt;
-
-&lt;p&gt;This is an oversight that has tripped me up before.  Need to try to avoid it in the future.&lt;/p&gt;
-
-&lt;p&gt;It is possible (likely?) that this transformation is as simple as multiplying the precision matrices by \(\sigma_n* / \sigma_n\).  This would avoid a semi-expensive Hessian calculation for each point, which could be a bottleneck during training.&lt;/p&gt;
-
-&lt;h2&gt;TODO&lt;/h2&gt;
-
-&lt;p&gt;See previous entry&lt;/p&gt;
-</description>
-				<pubDate>Wed, 17 Jul 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/07/17/work-log-2</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/07/17/work-log-2</guid>
 			</item>
 		
 	</channel>

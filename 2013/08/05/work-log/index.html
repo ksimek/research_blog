@@ -173,11 +173,11 @@
 
 <p>Weird.  As perturb_rate_variance increases, the per-view curves spread out radially like flower petals.</p>
 
-<p><img src="/ksimek/research/img/2013-08-06-visualize-training-1.png" alt="high perturb_rate_variance causes radial spreading of curves" /></p>
+<p><img src="/ksimek/research/img/2013-08-05-visualize-training-1.png" alt="high perturb_rate_variance causes radial spreading of curves" /></p>
 
 <p>I would have expected that the likelihood would take over, but this is clearly not happening.  Lets look at the likelihood...</p>
 
-<p><img src="/ksimek/research/img/2013-08-06-visualize-training-2.png" alt="Maximum-likelihood solution.  Posterior should revert to this as variance increases asymtotically." /></p>
+<p><img src="/ksimek/research/img/2013-08-05-visualize-training-2.png" alt="Maximum-likelihood solution.  Posterior should revert to this as variance increases asymtotically." /></p>
 
 <p>We must be running up against numerical precision errors.  Let's look at the equation for maximum posterior:</p>
 
@@ -212,11 +212,27 @@
 
 <p>Even when perturb_rate_variance is reasonable (1.0), we still get drifting:</p>
 
-<p><img src="/ksimek/research/img/2013-08-06-visualize-training-3.png" alt="perturb_rate_variance == 1.0" /></p>
+<p><img src="/ksimek/research/img/2013-08-05-visualize-training-3.png" alt="perturb_rate_variance == 1.0" /></p>
 
 <p>The degree of this phenomenon seems to be a smooth function of perturb_rate_variance.  If it was a numerical instability issue, we'd see it arise abruptly, indicating we had entered the unstable regime.</p>
 
-<p>I'm now thinking this is a real issue with the model, not simply an artifact of computation.  Need to think more about it.</p>
+<p>I'm now thinking this is a real issue with the model, not simply an artifact of computation (maybe it's both?).  Need to think more about it.</p>
+
+<h2>TODO</h2>
+
+<ul>
+<li>Determine why spreading happens when <code>perturb_rate_variance</code> increases.</li>
+<li>Determine why huge <code>perturb_rate_variance</code> values are promoted by the ML.</li>
+<li>Handle "reversed curves" issue, where perturbation is applied to the wrong end.</li>
+<li>Training
+
+<ul>
+<li>Finish "ind" model</li>
+<li>Traing "ou" and "sqexp" models</li>
+</ul>
+</li>
+</ul>
+
 
       <address class="signature">
         Posted by
@@ -226,6 +242,9 @@
 
 
   
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/08/06/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
   
     <a href="/ksimek/research/2013/08/04/work-log" class="prev" title="Work Log">&larr; Work Log</a>
