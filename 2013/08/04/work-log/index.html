@@ -78,7 +78,7 @@
   
   <h1 class="title">Work Log</h1>
 
-  <div class="date emphnext">August 03, 2013</div>
+  <div class="date emphnext">August 04, 2013</div>
     
 
 
@@ -107,171 +107,127 @@
 </div>
 
 
-<p>Running optimizer...</p>
+<p>Troubleshooting training of OU perturbation model (<code>train/tr_curves_ml.m</code>).</p>
 
-<p><strong>Issue</strong>: Likelihood variance is collapsing to zero.</p>
+<p>Found bug in <code>tr_curves_ml.m::ou_kernel</code> -- <code>smoothing_variance</code> was used where <code>perturb_smoothing_variance</code> should have been (copy-paste bug).  Also fixed in <code>sqexp_kernel</code>.</p>
 
-<p><strong>Guess</strong>: Training ML is different from naive ML and isn't penalizing noise correctly.</p>
+<p>Optimizer appears to be running much more smoothly now.  Probably because there previously was a strong correlation, due to <code>smoothing_variance</code> appearing in two different parts of the equation.  The resulting ridge could have caused slow progress.</p>
 
-<p><strong>Test 1</strong>: save params, compare training ml and naive ml</p>
+<p>...</p>
 
-<p>Same result.</p>
+<p><strong>Attempt #1</strong></p>
 
-<h2>Discussion</h2>
+<p>Initial params:</p>
 
-<div> The marginal likelihood is monotonically increasing as the noise variance \(\sigma_n^2\) approaches zero.  This shouldn't be happening, because as the likelihood variance collapses to a delta, the marginal likelihood should become equal to the prior evaluated at the (virtual) observed locations.</div>
+<p>train_params =</p>
 
-
-
-
-<div>
-\begin{align}
-    \lim_{\sigma_n \to 0} p(D) &= \lim_{\sigma_n \to 0} \int p_0(x) \; p_l(D \mid x) dx & \text{(Marginalization)}\\
-         &= \lim_{\sigma_n \to 0} \int p_0(x) \; f(D - x) dx &   \text{(Convolution)} \\
-         &= \int p_0(x) \delta(D - x) dx \\
-         &= p_0(D) 
-\end{align}
-</div>
-
-
-<p>This implies there's a bug in the code causing this phenomenon; the mathematical model is not the cause.</p>
-
-<h2>Solved</h2>
-
-<div>Found the bug.  When computing the likelihood precision \(S\) from the unscaled precision \(S_0\), the noise variance \(\sigma_n^2\) was multiplied instead of divided:</div>
-
-
-<pre><code>S = S0 * sigma_n; // incorrect
-S = S0 * (1/sigma_n); // corrected version
+<pre><code>            smoothing_variance: 0.2500
+                noise_variance: 100
+             position_variance: 90000
+                 rate_variance: 2.2500
+    perturb_smoothing_variance: 0.2500
+         perturb_rate_variance: 2.2500
+     perturb_position_variance: 90000
+                 perturb_scale: 1
 </code></pre>
 
-<h2>Resuming Training</h2>
-
-<p>Had some trouble with noise sigmas being too low.  Solved by in two ways:</p>
-
-<ol>
-<li>Attempts 1-3: clamping to a minimum value and then adding a penalty depending on the amount that was clamped.</li>
-<li>Attempt 4:  offset by minimum value before transforming</li>
-</ol>
-
-
-<p>Command:</p>
-
-<pre><code>train_params_done = tr_train(test_Corrs_ll, train_params, data_, 400);
-</code></pre>
-
-<p><strong>Attempt #1</strong>:</p>
-
-<p>Handle extreme values by incuring a penalty for variances smaller than 1e-5.  Result stored in <code>train_params_done_1</code>.</p>
+<p>Stopped after 3 iterations.  Results:</p>
 
 <pre><code>train_params_done_1 = 
 
-            smoothing_variance: 0.0025
-                noise_variance: 0.1231
-             position_variance: 1.6676e+04
-                 rate_variance: 0.2212
-    perturb_smoothing_variance: 1
-         perturb_rate_variance: 1
-     perturb_position_variance: 1
-                 perturb_scale: 1
+            smoothing_variance: 0.4501
+                noise_variance: 2.5982e-04
+             position_variance: 6.5359e+04
+                 rate_variance: 3.9645
+    perturb_smoothing_variance: 3.3437e-06
+         perturb_rate_variance: 0.7268
+     perturb_position_variance: 3.0785e+04
+                 perturb_scale: 0.5867
+
+Final ML: 28423.438936
 </code></pre>
 
-<p>Surprisingly small smoothness sigma.  Surprisingly low rate variance.</p>
+<p>The final ML (2.84e4) is greater than the no-pertrub model (2.37e4).  This is expected, since this model has more parameters, so we can get a tighter fit (maybe overfitting).</p>
+
+<p>I like that noise variance is much smaller (close to the minimum--do I need to lower the floor?).  This is expected, because the only source of IID noise is the rasterization process.</p>
+
+<p>Position standard deviation is much higher than before (255 vs. 126), as is rate standard deviation (2.0 vs. 0.47).</p>
+
+<p>Perturb variances are harder to explain.</p>
+
+<p>Perturb smoothing variance is low, which is nice to see, because the worst of the perturbations are arising from miscalibrations (rate and position perturbations), not deformations.  But it's still far smaller than I expected.  hOnestly, I was expecting it to be almost the same as <code>smoothing_variance</code>, but I realize now it makes sense for it to be smaller.</p>
+
+<p><strong>Perturb position variance is much, much larger than I expected.</strong>  Standard deviation is 175.4, which is basically saying each plant has 17 cm of IID perturbations from the unobserved mean plant.   I have no good explanation for this, expect maybe that the initial value was ridiculously large.</p>
+
+<p>Pertub scale seems reasonable.</p>
 
 <p><strong>Attempt #2</strong></p>
 
-<p>Testing sensitivity to the magnitude of the penalty term.  Scaled up penalty by 1000.  Results in <code>train_params_done_2</code>:</p>
+<p>Test sensitivity to initialization.  Initial values:</p>
+
+<pre><code>train_params_2 = 
+
+            smoothing_variance: 0.0025
+                noise_variance: 0.1231
+             position_variance: 1.6676e+04
+                 rate_variance: 0.2212
+    perturb_smoothing_variance: 0.0500
+         perturb_rate_variance: 0.1000
+     perturb_position_variance: 1
+                 perturb_scale: 2
+</code></pre>
+
+<p>First four were initialized from the trained no-perturb model.</p>
+
+<p>Note the biggest change: perturb_position_variance changed from 9000 to 1.</p>
+
+<p>Terminated after 46 iterations; much better than the 3 iterations from last attempt.</p>
 
 <pre><code>train_params_done_2 = 
 
-            smoothing_variance: 0.0025
-                noise_variance: 0.1231
-             position_variance: 1.6676e+04
-                 rate_variance: 0.2212
-    perturb_smoothing_variance: 1
-         perturb_rate_variance: 1
-     perturb_position_variance: 1
-                 perturb_scale: 1
+            smoothing_variance: 0.0019
+                noise_variance: 0.0721
+             position_variance: 1.6267e+04
+                 rate_variance: 0.2050
+    perturb_smoothing_variance: 6.7471e-10
+         perturb_rate_variance: 1.3201e-04
+     perturb_position_variance: 403.7082
+                 perturb_scale: 2.4888e+03
+
+Final ML: 25163.231449
 </code></pre>
 
-<p>Summary: no change.</p>
+<p>Weird that this is lower than that poorly-initialized model.  Consider initializing using a combination of Attempt #1 and Attempt #2's initial values.</p>
 
-<p><strong>Attempt #3</strong></p>
+<p>Smoothing variance is much smaller than before, noise variance is larger.</p>
 
-<p>Testing sensitivity to the threshold where the penalty term starts to be incurred.  Set MIN_NOISE_VARIANCE to 1e-3 and MIN_SMOOTHING_VARIANCE to 1e-7 (previously both 1e-5).  Results in <code>train_params_done_3</code>:</p>
+<p>Position variance is in the same order-of-magnitude, but about 1/5 the magnitude.</p>
 
-<pre><code>train_params_done_3 = 
+<p>Rate variance is an OoM smaller.</p>
 
-            smoothing_variance: 0.0025
-                noise_variance: 0.1231
-             position_variance: 1.6676e+04
-                 rate_variance: 0.2212
-    perturb_smoothing_variance: 1
-         perturb_rate_variance: 1
-     perturb_position_variance: 1
-                 perturb_scale: 1
-</code></pre>
+<p>Perturb smoothing variance is still near-zero.</p>
 
-<p>Summary: no change.</p>
+<p>Perturb rate variance is 3 OoM smaller.</p>
 
-<p><strong> Attempt #4 </strong>
-Handled small variances by offsetting before transforming:</p>
+<p>Perturb position variance is 2 OoM smaller.</p>
 
-<pre><code>% converting param to state variable
-x(1) = log(smoothing_variance - MIN_SMOOTING_VARIANCE);
+<p>Perturb scale is sooooooo high.  Basically flat, so the regular and perturb variances sum.</p>
 
-% converting state variable to param
-x(1) = exp(smoothing_variance) + MIN_SMOOTING_VARIANCE;
-</code></pre>
+<p><strong>Conclusions</strong>: Result is very sensitive to initialization.</p>
 
-<p>This is more elegant than the penalty hack used in the last three attempts.   Results:</p>
+<p><strong>Discussion</strong>: When perturb scale is this high, there exists a ridge, due to perturb variances playing the same role as normal variances.  Note that when perturb scale is infinity, this model degenerates to the no-perturb model.  Notice that Final ML isn't much better than the no-perturb.  Possibly when perturb scale exploded, the model could no longer improve, so constraining perturb scale to some small set of values may be a good idea (sigmoid transform).</p>
 
-<pre><code>train_params_done = 
+<h2>Next Steps</h2>
 
-            smoothing_variance: 0.0025
-                noise_variance: 0.1231
-             position_variance: 1.6676e+04
-                 rate_variance: 0.2212
-    perturb_smoothing_variance: 1
-         perturb_rate_variance: 1
-     perturb_position_variance: 1
-                 perturb_scale: 1
-</code></pre>
+<ul>
+<li>Try smaller changes to initialization.</li>
+<li>Try sigmoid transform on perturb scale.</li>
+<li>Try training using standard deviations instead of variances.</li>
+<li>Try changing one or more trained values to sensible defaults and retrain.</li>
+<li>Work with standard deviations, not variances</li>
+<li>Fix some 'known' values and optimize others.</li>
+</ul>
 
-<p>Summary: no change.</p>
-
-<h2>No-Perturb model summary:</h2>
-
-<p>Successfully trained model.<br/>
-Required <strong>115 function evaluations</strong>, taking <strong>112 s</strong>.<br/>
-Optimal marginal likelihood:  <strong>23714.937760</strong>.<br/>
-Optimal parameters:</p>
-
-<pre><code>            smoothing_variance: 0.0025
-                noise_variance: 0.1231
-             position_variance: 1.6676e+04
-                 rate_variance: 0.2212
-</code></pre>
-
-<p>Surprised at how small noise_variance was, considering the calibration noise.  However, I guess the maximum-likelihood reconstruction looked pretty good, if unity-apect-ratio axis scaling is used.</p>
-
-<h2>Training OU-Perturb model</h2>
-
-<p>Getting weird results.  Halted after second iteration; second iteration took 250 function evaluations; perturb_smoothing_variance gradient is zero.  Results:</p>
-
-<pre><code>train_params_done = 
-
-            smoothing_variance: 1.5003e-05
-                noise_variance: 1.0087e-04
-             position_variance: 7.9393e+04
-                 rate_variance: 0.7879
-    perturb_smoothing_variance: 0.2500
-         perturb_rate_variance: 1.5183
-     perturb_position_variance: 2.5159e+04
-                 perturb_scale: 48.6163
-</code></pre>
-
-<p>Recall that new model ML's aren't deeply tested; probably a bug in there (in the kernel implementation?  in the kernel theory? in the conversion from mats to kernel?).  Will continue tomorrow.</p>
 
       <address class="signature">
         Posted by
@@ -283,10 +239,10 @@ Optimal parameters:</p>
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/08/04/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+    <a href="/ksimek/research/2013/08/05/work-log" class="next" title="Work Log - Training Bugs">Work Log - Training Bugs &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/08/02/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/08/03/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>

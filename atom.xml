@@ -4,13 +4,308 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-08-04T10:53:28-07:00</updated>
+ <updated>2013-08-06T06:22:08-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log - Training Bugs</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/05/work-log"/>
+   <updated>2013-08-05T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/05/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;14852&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Continuing training of OU perturb model.&lt;/p&gt;
+
+&lt;p&gt;Yesterday, we had problems with the perturb scale exploding.  Have switched to using a logistic sigmoid instead of an exponential to map perturb_scale, which sets a lower-bound and and upper-bound during optimization.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;perturb_scale is now staying low, but stil getting weird results.&lt;/p&gt;
+
+&lt;p&gt;perturb_position_variance wants to be 9000+ ???&lt;/p&gt;
+
+&lt;p&gt;perturb_rate_variance wants to be ~40?&lt;/p&gt;
+
+&lt;p&gt;perturb_smoothing_variance wants to be ~0.0.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Trying new kernel: ind_kernel.  Like OU and SQEXP kernels, but no correlation between perturbations.  It's an intermediate step between no-perturb and ou-perturb, since it allows perturbations, but doesn't need a scale-length parameter.&lt;/p&gt;
+
+&lt;p&gt;Training results for ind_kernel:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;train_params_3 = 
+
+            smoothing_variance: 0.0024
+                noise_variance: 0.0132
+             position_variance: 1.5747e+04
+                 rate_variance: 0.1709
+    perturb_smoothing_variance: 0.0020
+         perturb_rate_variance: 26.3458
+     perturb_position_variance: 0.8770
+                 perturb_scale: 1.7199
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Very weird that perturb_rate variance&lt;/p&gt;
+
+&lt;p&gt;Consider limiting number of dimensions somehow...&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Force both smoothing_variances to be the same&lt;/li&gt;
+&lt;li&gt;remove perturb_scale parameter&lt;/li&gt;
+&lt;li&gt;???&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;....&lt;/p&gt;
+
+&lt;p&gt;recall that handling view-index in kernels has never been thoroughly tested...&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Let's visualize results for the ind_perturb model, and see if everything looks reasonable.&lt;/p&gt;
+
+&lt;p&gt;Created &lt;code&gt;test/tmp_visualize_test.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Interesting...  Some curves are &quot;reversed&quot;, i.e. the base is the &quot;end&quot; of the curve and the tip is the &quot;beginning&quot;.  This has some unintended consequences when applying the perturb model, because the tips are where perturbations are greatest, but when curves are reversed, the tips aren't affected by most of the modelled perturbations.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Weird.  As perturb_rate_variance increases, the per-view curves spread out radially like flower petals.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-06-visualize-training-1.png&quot; alt=&quot;high perturb_rate_variance causes radial spreading of curves&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I would have expected that the likelihood would take over, but this is clearly not happening.  Lets look at the likelihood...&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-06-visualize-training-2.png&quot; alt=&quot;Maximum-likelihood solution.  Posterior should revert to this as variance increases asymtotically.&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We must be running up against numerical precision errors.  Let's look at the equation for maximum posterior:&lt;/p&gt;
+
+&lt;div&gt; \[
+\mu_P = (\Sigma_0 \Sigma_l^{-1} + I)^{-1} (\Sigma_0 \Sigma_l^{-1} \mu_l + \mu_0)
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;When \(\Sigma_0\) has huge eigenvalues, this equation basically reduces to&lt;/p&gt;
+
+&lt;div&gt; \[
+\begin{align}
+\mu_P = (\Sigma_0 \Sigma_l^{-1})^{-1} \Sigma_0 \Sigma_l^{-1} \mu_l 
+     &amp;= \Sigma_l \Sigma_0^{-1} \Sigma_0 \Sigma_l^{-1} \mu_l
+     &amp;= \Sigma_l \Sigma_l^{-1} \mu_l
+     &amp;= \mu_l
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;However, the effective cancellation of \Sigma_0 can't occur, because the expression \((\Sigma_0 \Sigma_l&lt;sup&gt;{-1}&lt;/sup&gt; + I)\) has a huge condition number, which makes inverting it an unstable operation.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Anyways, that's visualization.  Is the same issue arising in ML computations?  Higher rate variance can result in significantly larger condition numbers, and IIRC, we don't take any special steps to handle such issues in the ML  computation anymore (for example, using the matrix inversion lemma).&lt;/p&gt;
+
+&lt;p&gt;Maybe we should force rate variance to be within a reasonable range.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Even when perturb_rate_variance is reasonable (1.0), we still get drifting:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-06-visualize-training-3.png&quot; alt=&quot;perturb_rate_variance == 1.0&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The degree of this phenomenon seems to be a smooth function of perturb_rate_variance.  If it was a numerical instability issue, we'd see it arise abruptly, indicating we had entered the unstable regime.&lt;/p&gt;
+
+&lt;p&gt;I'm now thinking this is a real issue with the model, not simply an artifact of computation.  Need to think more about it.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/04/work-log"/>
+   <updated>2013-08-04T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/04/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Troubleshooting training of OU perturbation model (&lt;code&gt;train/tr_curves_ml.m&lt;/code&gt;).&lt;/p&gt;
+
+&lt;p&gt;Found bug in &lt;code&gt;tr_curves_ml.m::ou_kernel&lt;/code&gt; -- &lt;code&gt;smoothing_variance&lt;/code&gt; was used where &lt;code&gt;perturb_smoothing_variance&lt;/code&gt; should have been (copy-paste bug).  Also fixed in &lt;code&gt;sqexp_kernel&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Optimizer appears to be running much more smoothly now.  Probably because there previously was a strong correlation, due to &lt;code&gt;smoothing_variance&lt;/code&gt; appearing in two different parts of the equation.  The resulting ridge could have caused slow progress.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Attempt #1&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Initial params:&lt;/p&gt;
+
+&lt;p&gt;train_params =&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;            smoothing_variance: 0.2500
+                noise_variance: 100
+             position_variance: 90000
+                 rate_variance: 2.2500
+    perturb_smoothing_variance: 0.2500
+         perturb_rate_variance: 2.2500
+     perturb_position_variance: 90000
+                 perturb_scale: 1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Stopped after 3 iterations.  Results:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;train_params_done_1 = 
+
+            smoothing_variance: 0.4501
+                noise_variance: 2.5982e-04
+             position_variance: 6.5359e+04
+                 rate_variance: 3.9645
+    perturb_smoothing_variance: 3.3437e-06
+         perturb_rate_variance: 0.7268
+     perturb_position_variance: 3.0785e+04
+                 perturb_scale: 0.5867
+
+Final ML: 28423.438936
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The final ML (2.84e4) is greater than the no-pertrub model (2.37e4).  This is expected, since this model has more parameters, so we can get a tighter fit (maybe overfitting).&lt;/p&gt;
+
+&lt;p&gt;I like that noise variance is much smaller (close to the minimum--do I need to lower the floor?).  This is expected, because the only source of IID noise is the rasterization process.&lt;/p&gt;
+
+&lt;p&gt;Position standard deviation is much higher than before (255 vs. 126), as is rate standard deviation (2.0 vs. 0.47).&lt;/p&gt;
+
+&lt;p&gt;Perturb variances are harder to explain.&lt;/p&gt;
+
+&lt;p&gt;Perturb smoothing variance is low, which is nice to see, because the worst of the perturbations are arising from miscalibrations (rate and position perturbations), not deformations.  But it's still far smaller than I expected.  hOnestly, I was expecting it to be almost the same as &lt;code&gt;smoothing_variance&lt;/code&gt;, but I realize now it makes sense for it to be smaller.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Perturb position variance is much, much larger than I expected.&lt;/strong&gt;  Standard deviation is 175.4, which is basically saying each plant has 17 cm of IID perturbations from the unobserved mean plant.   I have no good explanation for this, expect maybe that the initial value was ridiculously large.&lt;/p&gt;
+
+&lt;p&gt;Pertub scale seems reasonable.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Attempt #2&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Test sensitivity to initialization.  Initial values:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;train_params_2 = 
+
+            smoothing_variance: 0.0025
+                noise_variance: 0.1231
+             position_variance: 1.6676e+04
+                 rate_variance: 0.2212
+    perturb_smoothing_variance: 0.0500
+         perturb_rate_variance: 0.1000
+     perturb_position_variance: 1
+                 perturb_scale: 2
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;First four were initialized from the trained no-perturb model.&lt;/p&gt;
+
+&lt;p&gt;Note the biggest change: perturb_position_variance changed from 9000 to 1.&lt;/p&gt;
+
+&lt;p&gt;Terminated after 46 iterations; much better than the 3 iterations from last attempt.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;train_params_done_2 = 
+
+            smoothing_variance: 0.0019
+                noise_variance: 0.0721
+             position_variance: 1.6267e+04
+                 rate_variance: 0.2050
+    perturb_smoothing_variance: 6.7471e-10
+         perturb_rate_variance: 1.3201e-04
+     perturb_position_variance: 403.7082
+                 perturb_scale: 2.4888e+03
+
+Final ML: 25163.231449
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Weird that this is lower than that poorly-initialized model.  Consider initializing using a combination of Attempt #1 and Attempt #2's initial values.&lt;/p&gt;
+
+&lt;p&gt;Smoothing variance is much smaller than before, noise variance is larger.&lt;/p&gt;
+
+&lt;p&gt;Position variance is in the same order-of-magnitude, but about 1/5 the magnitude.&lt;/p&gt;
+
+&lt;p&gt;Rate variance is an OoM smaller.&lt;/p&gt;
+
+&lt;p&gt;Perturb smoothing variance is still near-zero.&lt;/p&gt;
+
+&lt;p&gt;Perturb rate variance is 3 OoM smaller.&lt;/p&gt;
+
+&lt;p&gt;Perturb position variance is 2 OoM smaller.&lt;/p&gt;
+
+&lt;p&gt;Perturb scale is sooooooo high.  Basically flat, so the regular and perturb variances sum.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Conclusions&lt;/strong&gt;: Result is very sensitive to initialization.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;: When perturb scale is this high, there exists a ridge, due to perturb variances playing the same role as normal variances.  Note that when perturb scale is infinity, this model degenerates to the no-perturb model.  Notice that Final ML isn't much better than the no-perturb.  Possibly when perturb scale exploded, the model could no longer improve, so constraining perturb scale to some small set of values may be a good idea (sigmoid transform).&lt;/p&gt;
+
+&lt;h2&gt;Next Steps&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Try smaller changes to initialization.&lt;/li&gt;
+&lt;li&gt;Try sigmoid transform on perturb scale.&lt;/li&gt;
+&lt;li&gt;Try training using standard deviations instead of variances.&lt;/li&gt;
+&lt;li&gt;Try changing one or more trained values to sensible defaults and retrain.&lt;/li&gt;
+&lt;li&gt;Work with standard deviations, not variances&lt;/li&gt;
+&lt;li&gt;Fix some 'known' values and optimize others.&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Work Log</title>
