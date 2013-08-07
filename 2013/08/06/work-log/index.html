@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log &larr; </title>
+   <title>Work Log - Singular Regions Issue; Training &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -76,7 +76,7 @@
 	
   
   
-  <h1 class="title">Work Log</h1>
+  <h1 class="title">Work Log - Singular Regions Issue; Training</h1>
 
   <div class="date emphnext">August 06, 2013</div>
     
@@ -231,13 +231,22 @@ perturb_smoothing_variance: 3.3860e-41
 Final ML:  2.516 x 10^4
 </code></pre>
 
+<p>Some of the global variance is can be pushed into the perturb_variance, since they are now correlated.</p>
+
 <p><em>SQEXP Perturb Model</em></p>
 
 <pre><code>Model:
-Final ML:
-</code></pre>
+        smoothing_variance: 0.0018
+            noise_variance: 0.0720
+         position_variance: 1.6689e+04
+             rate_variance: 0.2122
+perturb_smoothing_variance: 3.3860e-41
+     perturb_rate_variance: 1.4952e-06
+ perturb_position_variance: 0.5130
+             perturb_scale: 0.8425
 
-<p>Some of the global variance is can be pushed into the perturb_variance, since they are now correlated.</p>
+Final ML: 2.516 x 10^4
+</code></pre>
 
 <h2>General observations</h2>
 
@@ -247,7 +256,7 @@ Final ML:
 
 <p>Which of the perturb-components are really correlated?  Seems like position variance is probably independent, but rate variance might not be.  Definitely smoothing_variance (i.e. nonrigid deformations) should be correlated.</p>
 
-<p>====</p>
+<h1>TODO</h1>
 
 <ul>
 <li>try visualization with truncated likelihoods
@@ -257,9 +266,9 @@ Final ML:
 </ul>
 </li>
 <li>remove perturb_scale from ind model (better inference)</li>
-<li>hand-pick</li>
+<li>hand-pick parameters and fix them, to reduce dimensionality of search space.</li>
 <li>Handle "flipped" curves.  Try to infer direction</li>
-<li>Does the visualized max posterior look good for the trained values (I'm guessing not -- to strict of variances, overfitting)</li>
+<li>Does the visualized max posterior look good for the trained values (I'm guessing not -- too strict of variances, overfitting)</li>
 </ul>
 
 
@@ -271,6 +280,9 @@ Final ML:
 
 
   
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/08/07/work-log" class="next" title="Work Log - Training, Reversed Curves, and Theoretical Rate Variance">Work Log - Training, Reversed Curves, and Theoretical Rate Variance &rarr;</a>
   
   
     <a href="/ksimek/research/2013/08/05/work-log" class="prev" title="Work Log - Training Bugs">&larr; Work Log - Training Bugs</a>
@@ -290,7 +302,7 @@ Final ML:
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Singular Regions Issue; Training" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -338,7 +350,7 @@ Final ML:
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log");
+                    + encodeURIComponent("Work Log - Singular Regions Issue; Training");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

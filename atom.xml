@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-08-06T16:39:13-07:00</updated>
+ <updated>2013-08-07T11:50:55-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -13,7 +13,169 @@
 
  
  <entry>
-   <title>Work Log</title>
+   <title>Work Log - Training, Reversed Curves, and Theoretical Rate Variance</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/07/work-log"/>
+   <updated>2013-08-07T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/07/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Visualized results after capping likelihood variance.  As expected, degree of spreading stops growing as perturb_rate_variance continues to grow.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Tasks&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;manually flip some curves and see if model changes&lt;/li&gt;
+&lt;li&gt;try automatically determining which to curves need flipping&lt;/li&gt;
+&lt;li&gt;try to get training and visualization to agree&lt;/li&gt;
+&lt;li&gt;visualize curves moving through space over time&lt;/li&gt;
+&lt;li&gt;train background curve model
+
+&lt;ul&gt;
+&lt;li&gt;is background model better than foreground?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Long term goals&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;sampling framework
+
+&lt;ul&gt;
+&lt;li&gt;try using background pixel modeling to prune background curves&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Visualizing curve-direction revealed a bizarre artifact: most curves start somewhere in the middle of the reconstructed curve!&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Found issue - wasn't sorting by index when reconstructing.&lt;/p&gt;
+
+&lt;h2&gt;Breaking Change&lt;/h2&gt;
+
+&lt;p&gt;Modified &lt;code&gt;tr_curves_ml&lt;/code&gt; to &lt;em&gt;not&lt;/em&gt; include the background curve ml into the computation.  Recall that the normal ML computation code doesn't actually return ML, but a &lt;em&gt;ratio&lt;/em&gt; of the foreground curve ML and the background curve ML.  This indicates how much the model improves over the &quot;null model&quot;.&lt;/p&gt;
+
+&lt;p&gt;Since the background curve ml is constant during training, this shouldn't affect results.  However, if you want to confirm the correctness of &lt;code&gt;tr_curves_ml&lt;/code&gt; against the reference implementation in &lt;code&gt;curve_ml5.m&lt;/code&gt;, you'll need to manually divide by a constant.  See the documentation for &lt;code&gt;tr_curves_ml&lt;/code&gt; for more details.&lt;/p&gt;
+
+&lt;h2&gt;Reversing Curves&lt;/h2&gt;
+
+&lt;p&gt;Investigating the effect of reversing curves.&lt;/p&gt;
+
+&lt;p&gt;Visually determined which curves were reversed.  See modified version of &lt;code&gt;test/tmp_visualize_test&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Hacked &lt;code&gt;train/tr_construct_matrices.m&lt;/code&gt; with hard-coded list of curves to flip.  Re-ran training for &lt;em&gt;IND-Perturb&lt;/em&gt; model.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Hypothesis&lt;/strong&gt;: we should see larger values for perturb_rate_variance and/or perturb_smoothing_variance, and smaller values for perturb_position_variance.&lt;/p&gt;
+
+&lt;p&gt;Results:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Model:
+        smoothing_variance: 0.0020
+            noise_variance: 0.0720
+         position_variance: 1.3414e+04
+             rate_variance: 0.2378
+perturb_smoothing_variance: 3.3860e-41
+     perturb_rate_variance: 1.5332e-06
+ perturb_position_variance: 0.4662
+
+Final ML: -95.736042
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Compare against old results:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Model:
+        smoothing_variance: 0.0019
+            noise_variance: 0.0718
+         position_variance: 1.6706e+04
+             rate_variance: 0.2135
+perturb_smoothing_variance: 3.3860e-41
+     perturb_rate_variance: 1.4942e-06
+ perturb_position_variance: 0.4886
+
+Final ML: -97.463243
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Summary of changes:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;        smoothing_variance: +2.09%
+            noise_variance: 0.17%
+         position_variance: -19.7%
+             rate_variance: +11.3%
+perturb_smoothing_variance: 0 
+     perturb_rate_variance: +2.61%
+ perturb_position_variance: -4.59%
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;As expected, global position variance dropped; perturb rate grew while perturb position variance decreased.&lt;/p&gt;
+
+&lt;p&gt;Unexpected increase in rate_variance; expected it to stay constant.  Possibly due to random fluctuations; both old and new values (0.214 and 0.238, respectively) are near the theoretical optimum (0.23, see next section).&lt;/p&gt;
+
+&lt;p&gt;Also unexpected small increase in global smoothing variance (expected to be constant); also possibly due to random fluctuations.&lt;/p&gt;
+
+&lt;p&gt;Literally no change to perturb smoothing variance.  I'm starting to suspect something weird is going on with this value...&lt;/p&gt;
+
+&lt;h2&gt;Theoretical Rate Variance&lt;/h2&gt;
+
+&lt;p&gt;Was curious what the rate variance should be, assuming the rate vectors are drawn from a uniform distribution over the unit sphere.&lt;/p&gt;
+
+&lt;p&gt;Determined empirically that rate variance should be somewhere between 0.220 and 0.235.  Code below.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;% generate 10,000 3-vectors with distribution over direction
+dir = rand(3,10000);
+% normalize to lie on unit sphere
+dir = bsxfun(@times, dir, 1./sum(dir.^2));
+% Get the emperical covariance of the vectors
+Sigma = cov(dir')
+
+        ans =
+
+            0.2105    0.0556    0.0580
+            0.0556    0.2297    0.0680
+            0.0580    0.0680    0.3735
+% take the average of the diagonals
+mean(diag(Sigma))
+
+        ans =
+
+            0.2290
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This strongly suggests that the global rate variances we've seen in training are consistent with the theoretical value.  Great!&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log - Singular Regions Issue; Training</title>
    <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/06/work-log"/>
    <updated>2013-08-06T00:00:00-07:00</updated>
    <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/06/work-log</id>
@@ -165,13 +327,22 @@ perturb_smoothing_variance: 3.3860e-41
 Final ML:  2.516 x 10^4
 &lt;/code&gt;&lt;/pre&gt;
 
+&lt;p&gt;Some of the global variance is can be pushed into the perturb_variance, since they are now correlated.&lt;/p&gt;
+
 &lt;p&gt;&lt;em&gt;SQEXP Perturb Model&lt;/em&gt;&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;Model:
-Final ML:
-&lt;/code&gt;&lt;/pre&gt;
+        smoothing_variance: 0.0018
+            noise_variance: 0.0720
+         position_variance: 1.6689e+04
+             rate_variance: 0.2122
+perturb_smoothing_variance: 3.3860e-41
+     perturb_rate_variance: 1.4952e-06
+ perturb_position_variance: 0.5130
+             perturb_scale: 0.8425
 
-&lt;p&gt;Some of the global variance is can be pushed into the perturb_variance, since they are now correlated.&lt;/p&gt;
+Final ML: 2.516 x 10^4
+&lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2&gt;General observations&lt;/h2&gt;
 
@@ -181,7 +352,7 @@ Final ML:
 
 &lt;p&gt;Which of the perturb-components are really correlated?  Seems like position variance is probably independent, but rate variance might not be.  Definitely smoothing_variance (i.e. nonrigid deformations) should be correlated.&lt;/p&gt;
 
-&lt;p&gt;====&lt;/p&gt;
+&lt;h1&gt;TODO&lt;/h1&gt;
 
 &lt;ul&gt;
 &lt;li&gt;try visualization with truncated likelihoods
@@ -191,9 +362,9 @@ Final ML:
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;remove perturb_scale from ind model (better inference)&lt;/li&gt;
-&lt;li&gt;hand-pick&lt;/li&gt;
+&lt;li&gt;hand-pick parameters and fix them, to reduce dimensionality of search space.&lt;/li&gt;
 &lt;li&gt;Handle &quot;flipped&quot; curves.  Try to infer direction&lt;/li&gt;
-&lt;li&gt;Does the visualized max posterior look good for the trained values (I'm guessing not -- to strict of variances, overfitting)&lt;/li&gt;
+&lt;li&gt;Does the visualized max posterior look good for the trained values (I'm guessing not -- too strict of variances, overfitting)&lt;/li&gt;
 &lt;/ul&gt;
 
 </content>
