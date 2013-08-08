@@ -42,15 +42,16 @@
    <!-- three.js Javascript -->
     <script src="/ksimek/research/js/jquery.js"></script>
     <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
-    <script src="/ksimek/research/js/Detector.js"></script>
-    <script src="/ksimek/research/js/Three.js"></script>
-    <script src="/ksimek/research/js/calcam.js"></script>
+
+    
 
     <script type="text/javascript">
         $(document).ready(function(){
                 $('#javascript_error').hide();
         });
     </script>
+
+
 
 </head>
 <body id="">
@@ -70,6 +71,7 @@
 
     </ul>
   </div>
+
 
   
 <div id="page" class="article">
@@ -210,7 +212,8 @@ perturb_smoothing_variance: 0
 
 <p>Literally no change to perturb smoothing variance.  I'm starting to suspect something weird is going on with this value...</p>
 
-<h2>Theoretical Rate Variance</h2>
+<h2 id="optimal-rate-variance">Theoretical Rate Variance</h2>
+
 
 <p>Was curious what the rate variance should be, assuming the rate vectors are drawn from a uniform distribution over the unit sphere.</p>
 
@@ -260,6 +263,9 @@ mean(diag(Sigma))
 
 
   
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/08/08/work-log" class="next" title="Work Log - Visualizing Results; New training method">Work Log - Visualizing Results; New training method &rarr;</a>
   
   
     <a href="/ksimek/research/2013/08/06/work-log" class="prev" title="Work Log - Singular Regions Issue; Training">&larr; Work Log - Singular Regions Issue; Training</a>

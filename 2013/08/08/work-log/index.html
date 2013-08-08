@@ -1,0 +1,443 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Work Log - Visualizing Results; New training method &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+        
+    <script src="/ksimek/research/js/png_animation.js"></script>
+        
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+  <h1 class="title">Work Log - Visualizing Results; New training method</h1>
+
+  <div class="date emphnext">August 08, 2013</div>
+    
+
+
+  
+    
+
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Data Association v2</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_2</td>
+    </tr>
+
+
+</table>
+
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
+
+
+<h1>Visualization</h1>
+
+<p>I reconstructed the curves using the models I trained yesterday.  I was able to recover both the overall structure and track it's motion over 9 views.  For each of these results, use the slider below to change between each of the 9 views (the changes are subtle).</p>
+
+<p>I'm still struggling with smoothing variance being too low, which causes curves to be too straight.  For all of these results, I manually changed <code>smoothing_variance</code> to be 0.1.</p>
+
+<div>
+<script>
+$(function(){
+    var ind_urls = [
+        "/img/2013-08-08-ind-reconstruction_v1.png",
+        "/img/2013-08-08-ind-reconstruction_v2.png",
+        "/img/2013-08-08-ind-reconstruction_v3.png",
+        "/img/2013-08-08-ind-reconstruction_v4.png",
+        "/img/2013-08-08-ind-reconstruction_v5.png",
+        "/img/2013-08-08-ind-reconstruction_v6.png",
+        "/img/2013-08-08-ind-reconstruction_v7.png",
+        "/img/2013-08-08-ind-reconstruction_v8.png",
+        "/img/2013-08-08-ind-reconstruction_v9.png" 
+        ]
+
+    construct_animation($("#ind-reconstruction"), ind_urls);
+
+
+    var ou_urls = [
+        "/img/2013-08-08-ou-reconstruction_v1.png",
+        "/img/2013-08-08-ou-reconstruction_v2.png",
+        "/img/2013-08-08-ou-reconstruction_v3.png",
+        "/img/2013-08-08-ou-reconstruction_v4.png",
+        "/img/2013-08-08-ou-reconstruction_v5.png",
+        "/img/2013-08-08-ou-reconstruction_v6.png",
+        "/img/2013-08-08-ou-reconstruction_v7.png",
+        "/img/2013-08-08-ou-reconstruction_v8.png",
+        "/img/2013-08-08-ou-reconstruction_v9.png" 
+        ]
+
+    construct_animation($("#ou-reconstruction"), ou_urls);
+
+    var sqexp_urls = [
+        "/img/2013-08-08-sqexp-reconstruction_v1.png",
+        "/img/2013-08-08-sqexp-reconstruction_v2.png",
+        "/img/2013-08-08-sqexp-reconstruction_v3.png",
+        "/img/2013-08-08-sqexp-reconstruction_v4.png",
+        "/img/2013-08-08-sqexp-reconstruction_v5.png",
+        "/img/2013-08-08-sqexp-reconstruction_v6.png",
+        "/img/2013-08-08-sqexp-reconstruction_v7.png",
+        "/img/2013-08-08-sqexp-reconstruction_v8.png",
+        "/img/2013-08-08-sqexp-reconstruction_v9.png" 
+        ]
+
+    construct_animation($("#sqexp-reconstruction"), sqexp_urls);
+
+});
+</script>
+</div>
+
+
+<h2>Ind-Perturb Reconstruction</h2>
+
+<p>Below is the reconstruction for the independent-perturbation model.  The curves in each view are independently perturbed versions of central mean curves (not shown).</p>
+
+<div id="ind-reconstruction" style="width: 200px"> </div>
+
+
+<p>It is unclear how much of this motion is due to camera miscalibration, and how much is actual plant motion.  Nevertheless, this shows that we can use the perturbation models to simultaneously triangulate and track over time.</p>
+
+<p>First, although each <em>view's</em> perturbation is independent of the others, the perturbation is correlated between nearby points within the same view.  In other words, perturbations don't violate the smoothness constraint.</p>
+
+<h2>OU-Perturb Reconstruction</h2>
+
+<p>Next is the Ornstein-Ulenbeck perturbation model.  As opposed to the previous model, which modeled each view's perturbations as white noise, this model assumes Brownian motion over time.  Thus, we see a more naturally evolving time-series.</p>
+
+<div id="ou-reconstruction" style="width: 200px"> </div>
+
+
+<p>The OU process models brownian motion</p>
+
+<h2>SQEXP-Perturb Reconstruction</h2>
+
+<p>Finally we have the squared-exponential perturbation model.  Now Brownian motion has been replaced by smooth motion.  I'm doubtful that this is a natural motion model for these plants.  The scale parameter is so low, I question whether it has any significant effect.</p>
+
+<div id="sqexp-reconstruction" style="width: 200px"> </div>
+
+
+<h1>New Training Method</h1>
+
+<p>Need to determine why learned smoothing variance is so low.</p>
+
+<p>Is it even valid to do max-likelihood to train the parameters of the covariance function?</p>
+
+<p>Should we be training the smoothness parameter using the noiseless ground-truth data?</p>
+
+<h2>Two-pass Learning Procedure</h2>
+
+<ol>
+<li>First learn using noiseless data:
+
+<ol>
+<li>Set rate-variance to fixed ~0.23 (see <a href="/ksimek/research/2013/08/07/work-log/#optimal-rate-variance">yesterday's results</a>)</li>
+<li>Estimate  position_variance by emperical distribution over all point positions in ground truth.</li>
+<li>Estimate smoothing_variance by maximum likelihood over ground truth.</li>
+</ol>
+</li>
+<li>Learn the noise variance for the no-perturb model.
+
+<ol>
+<li>Find point correspondence between detected curves and corresponding ground truth curve.</li>
+<li>Compute variance between projected points and observed points.  This should maximize \(p(D \mid \Theta_0) \), where \(\Theta_0\) are the ground truth curves.</li>
+</ol>
+</li>
+<li>Learn perturb model parameters: noise_variance, perturb_{smoothing_variance, rate_varaince, position_variance}
+
+<ol>
+<li>Use nonlinear optimization to maximize \(p(D \mid \Theta_0) \), as defined below.  Start with no-perturb parameters.</li>
+</ol>
+</li>
+</ol>
+
+
+<div>Let \(\theta_0\) be the ground-truth curve, and \(\{\theta_i\}\) be the set of all (unobserved) per-view curves \(\theta_i\). Let \(S_i\) be the virtual point precision matrices, assuming noise variance \(\sigma_n^2 = 1\).  The likelihood conditioned on the ground truth data \(p(D \mid \theta_0)\) is given by: </div>
+
+
+
+
+<div> 
+\begin{align}
+p(D \mid \theta_0) &= \int_{\{\theta_i\}}  p(D_i, \{\theta_i\} \mid \theta_0)  d\{\theta_i\} \\
+                   &= \int_{\{\theta_i\}} \prod_{i=1}^N p(\theta_i \mid \theta_0) p(D_i | \theta_i) d\{\theta_i\} \\
+                   &= \prod_{i=1}^N \int_{\theta_i}  p(\theta_i \mid \theta_0) p(D_i | \theta_i) d\theta_i \\
+                   &= \prod_{i=1}^N \int_{\theta_i}  \mathcal{N}(\theta_i; \theta_0, \Sigma_p) \mathcal{N}(D_i;  \theta_i, \sigma_n^2 S_i^{-1}) d\theta_i \\
+                   &= \prod_{i=1}^N \int_{\theta_i}  \mathcal{N}(D_i ; \theta_0, \Sigma_p + \sigma_n^2 S_i^{-1})
+\end{align}
+</div>
+
+
+
+
+<div> where  \(\Sigma_p\) is the perturbation variance. </div>
+
+
+<p>This should be an improvement over the current method, where we use only ground-truth labellings (not positions) and fit all parameters simultaneously.  This method assumed too much noise variance and not enough smoothness variance.</p>
+
+<p>Since we actually know the noiseless curves, we should train to that, to avoid the confounding of smoothness variance and noise variance.  The ground truth curves are aso stronger sources of evidence, compared to the curves reconstructed from data.</p>
+
+<h1>TODO:</h1>
+
+<ul>
+<li>reproject per-view reconstructions and overlay with original image.</li>
+<li>obtain &amp; visualize unobserved "central curve"</li>
+<li>investigate the low smoothness variance.</li>
+</ul>
+
+
+<p>Later TODO</p>
+
+<ul>
+<li>automatic curve reversing?</li>
+<li>add branching</li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  
+    <a href="/ksimek/research/2013/08/07/work-log" class="prev" title="Work Log - Training, Reversed Curves, and Theoretical Rate Variance">&larr; Work Log - Training, Reversed Curves, and Theoretical Rate Variance</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+  
+  		<div id="fb-root"></div>
+
+<div class="post-share ulno mob">
+
+<!-- Hacker News -->
+<span class="hn"><span id="hnews"></span></span>
+
+<!-- Twitter -->
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Visualizing Results; New training method" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+
+<!-- Google+ -->
+<span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
+
+<!-- Facebook -->
+<!--
+<span class="fb"><div class="fb-like" data-send="false" data-layout="button_count" data-width="90" data-show-faces="false" data-font=""></div></span>
+-->
+
+<!-- Reddit -->
+<script type="text/javascript" src="http://www.reddit.com/static/button/button1.js"></script>
+</div>
+
+<script>
+  
+(function(doc, script) {
+ 	
+	//Async Social Buttons
+    var js, 
+        fjs = doc.getElementsByTagName(script)[0],
+        add = function(url, id) {
+            if (doc.getElementById(id)) {return;}
+            js = doc.createElement(script);
+            js.src = url;
+            id && (js.id = id);
+            fjs.parentNode.insertBefore(js, fjs);
+        };
+    
+    // Twitter SDK
+    add('//platform.twitter.com/widgets.js', 'twitter-wjs');
+
+    // Google+ button
+    add('https://apis.google.com/js/plusone.js');
+    
+    // Facebook SDK
+    add('//connect.facebook.net/en_GB/all.js#xfbml=1&appId=123', 'facebook-jssdk');
+    
+    //Hacker News Button 	
+ 	var hn_like = document.createElement('iframe');
+      hn_like.frameborder="no";
+      hn_like.scrolling="no";
+      hn_like.height="28px";
+      hn_like.width="110px";
+      hn_like.style="border:0px;";
+      hn_like.src = "http://hnlike.com/upvote.php?link="
+                    + encodeURIComponent(document.location)
+                    + "&title="
+                    + encodeURIComponent("Work Log - Visualizing Results; New training method");
+      hn_like.innerHTML="iframes not supported by your browser";
+      
+      var where = document.getElementById("hnews");
+      where.parentNode.insertBefore(
+        hn_like,
+        where
+      );
+}(document, 'script'));
+
+</script>
+
+  
+
+
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

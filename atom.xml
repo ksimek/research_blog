@@ -4,13 +4,205 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-08-08T12:08:32-07:00</updated>
+ <updated>2013-08-08T16:01:32-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log - Visualizing Results; New training method</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/08/work-log"/>
+   <updated>2013-08-08T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/08/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h1&gt;Visualization&lt;/h1&gt;
+
+&lt;p&gt;I reconstructed the curves using the models I trained yesterday.  I was able to recover both the overall structure and track it's motion over 9 views.  For each of these results, use the slider below to change between each of the 9 views (the changes are subtle).&lt;/p&gt;
+
+&lt;p&gt;I'm still struggling with smoothing variance being too low, which causes curves to be too straight.  For all of these results, I manually changed &lt;code&gt;smoothing_variance&lt;/code&gt; to be 0.1.&lt;/p&gt;
+
+&lt;div&gt;
+&lt;script&gt;
+$(function(){
+    var ind_urls = [
+        &quot;/img/2013-08-08-ind-reconstruction_v1.png&quot;,
+        &quot;/img/2013-08-08-ind-reconstruction_v2.png&quot;,
+        &quot;/img/2013-08-08-ind-reconstruction_v3.png&quot;,
+        &quot;/img/2013-08-08-ind-reconstruction_v4.png&quot;,
+        &quot;/img/2013-08-08-ind-reconstruction_v5.png&quot;,
+        &quot;/img/2013-08-08-ind-reconstruction_v6.png&quot;,
+        &quot;/img/2013-08-08-ind-reconstruction_v7.png&quot;,
+        &quot;/img/2013-08-08-ind-reconstruction_v8.png&quot;,
+        &quot;/img/2013-08-08-ind-reconstruction_v9.png&quot; 
+        ]
+
+    construct_animation($(&quot;#ind-reconstruction&quot;), ind_urls);
+
+
+    var ou_urls = [
+        &quot;/img/2013-08-08-ou-reconstruction_v1.png&quot;,
+        &quot;/img/2013-08-08-ou-reconstruction_v2.png&quot;,
+        &quot;/img/2013-08-08-ou-reconstruction_v3.png&quot;,
+        &quot;/img/2013-08-08-ou-reconstruction_v4.png&quot;,
+        &quot;/img/2013-08-08-ou-reconstruction_v5.png&quot;,
+        &quot;/img/2013-08-08-ou-reconstruction_v6.png&quot;,
+        &quot;/img/2013-08-08-ou-reconstruction_v7.png&quot;,
+        &quot;/img/2013-08-08-ou-reconstruction_v8.png&quot;,
+        &quot;/img/2013-08-08-ou-reconstruction_v9.png&quot; 
+        ]
+
+    construct_animation($(&quot;#ou-reconstruction&quot;), ou_urls);
+
+    var sqexp_urls = [
+        &quot;/img/2013-08-08-sqexp-reconstruction_v1.png&quot;,
+        &quot;/img/2013-08-08-sqexp-reconstruction_v2.png&quot;,
+        &quot;/img/2013-08-08-sqexp-reconstruction_v3.png&quot;,
+        &quot;/img/2013-08-08-sqexp-reconstruction_v4.png&quot;,
+        &quot;/img/2013-08-08-sqexp-reconstruction_v5.png&quot;,
+        &quot;/img/2013-08-08-sqexp-reconstruction_v6.png&quot;,
+        &quot;/img/2013-08-08-sqexp-reconstruction_v7.png&quot;,
+        &quot;/img/2013-08-08-sqexp-reconstruction_v8.png&quot;,
+        &quot;/img/2013-08-08-sqexp-reconstruction_v9.png&quot; 
+        ]
+
+    construct_animation($(&quot;#sqexp-reconstruction&quot;), sqexp_urls);
+
+});
+&lt;/script&gt;
+&lt;/div&gt;
+
+
+&lt;h2&gt;Ind-Perturb Reconstruction&lt;/h2&gt;
+
+&lt;p&gt;Below is the reconstruction for the independent-perturbation model.  The curves in each view are independently perturbed versions of central mean curves (not shown).&lt;/p&gt;
+
+&lt;div id=&quot;ind-reconstruction&quot; style=&quot;width: 200px&quot;&gt; &lt;/div&gt;
+
+
+&lt;p&gt;It is unclear how much of this motion is due to camera miscalibration, and how much is actual plant motion.  Nevertheless, this shows that we can use the perturbation models to simultaneously triangulate and track over time.&lt;/p&gt;
+
+&lt;p&gt;First, although each &lt;em&gt;view's&lt;/em&gt; perturbation is independent of the others, the perturbation is correlated between nearby points within the same view.  In other words, perturbations don't violate the smoothness constraint.&lt;/p&gt;
+
+&lt;h2&gt;OU-Perturb Reconstruction&lt;/h2&gt;
+
+&lt;p&gt;Next is the Ornstein-Ulenbeck perturbation model.  As opposed to the previous model, which modeled each view's perturbations as white noise, this model assumes Brownian motion over time.  Thus, we see a more naturally evolving time-series.&lt;/p&gt;
+
+&lt;div id=&quot;ou-reconstruction&quot; style=&quot;width: 200px&quot;&gt; &lt;/div&gt;
+
+
+&lt;p&gt;The OU process models brownian motion&lt;/p&gt;
+
+&lt;h2&gt;SQEXP-Perturb Reconstruction&lt;/h2&gt;
+
+&lt;p&gt;Finally we have the squared-exponential perturbation model.  Now Brownian motion has been replaced by smooth motion.  I'm doubtful that this is a natural motion model for these plants.  The scale parameter is so low, I question whether it has any significant effect.&lt;/p&gt;
+
+&lt;div id=&quot;sqexp-reconstruction&quot; style=&quot;width: 200px&quot;&gt; &lt;/div&gt;
+
+
+&lt;h1&gt;New Training Method&lt;/h1&gt;
+
+&lt;p&gt;Need to determine why learned smoothing variance is so low.&lt;/p&gt;
+
+&lt;p&gt;Is it even valid to do max-likelihood to train the parameters of the covariance function?&lt;/p&gt;
+
+&lt;p&gt;Should we be training the smoothness parameter using the noiseless ground-truth data?&lt;/p&gt;
+
+&lt;h2&gt;Two-pass Learning Procedure&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;First learn using noiseless data:
+
+&lt;ol&gt;
+&lt;li&gt;Set rate-variance to fixed ~0.23 (see &lt;a href=&quot;/ksimek/research/2013/08/07/work-log/#optimal-rate-variance&quot;&gt;yesterday's results&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;Estimate  position_variance by emperical distribution over all point positions in ground truth.&lt;/li&gt;
+&lt;li&gt;Estimate smoothing_variance by maximum likelihood over ground truth.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;Learn the noise variance for the no-perturb model.
+
+&lt;ol&gt;
+&lt;li&gt;Find point correspondence between detected curves and corresponding ground truth curve.&lt;/li&gt;
+&lt;li&gt;Compute variance between projected points and observed points.  This should maximize \(p(D \mid \Theta_0) \), where \(\Theta_0\) are the ground truth curves.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;Learn perturb model parameters: noise_variance, perturb_{smoothing_variance, rate_varaince, position_variance}
+
+&lt;ol&gt;
+&lt;li&gt;Use nonlinear optimization to maximize \(p(D \mid \Theta_0) \), as defined below.  Start with no-perturb parameters.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;div&gt;Let \(\theta_0\) be the ground-truth curve, and \(\{\theta_i\}\) be the set of all (unobserved) per-view curves \(\theta_i\). Let \(S_i\) be the virtual point precision matrices, assuming noise variance \(\sigma_n^2 = 1\).  The likelihood conditioned on the ground truth data \(p(D \mid \theta_0)\) is given by: &lt;/div&gt;
+
+
+
+
+&lt;div&gt; 
+\begin{align}
+p(D \mid \theta_0) &amp;= \int_{\{\theta_i\}}  p(D_i, \{\theta_i\} \mid \theta_0)  d\{\theta_i\} \\
+                   &amp;= \int_{\{\theta_i\}} \prod_{i=1}^N p(\theta_i \mid \theta_0) p(D_i | \theta_i) d\{\theta_i\} \\
+                   &amp;= \prod_{i=1}^N \int_{\theta_i}  p(\theta_i \mid \theta_0) p(D_i | \theta_i) d\theta_i \\
+                   &amp;= \prod_{i=1}^N \int_{\theta_i}  \mathcal{N}(\theta_i; \theta_0, \Sigma_p) \mathcal{N}(D_i;  \theta_i, \sigma_n^2 S_i^{-1}) d\theta_i \\
+                   &amp;= \prod_{i=1}^N \int_{\theta_i}  \mathcal{N}(D_i ; \theta_0, \Sigma_p + \sigma_n^2 S_i^{-1})
+\end{align}
+&lt;/div&gt;
+
+
+
+
+&lt;div&gt; where  \(\Sigma_p\) is the perturbation variance. &lt;/div&gt;
+
+
+&lt;p&gt;This should be an improvement over the current method, where we use only ground-truth labellings (not positions) and fit all parameters simultaneously.  This method assumed too much noise variance and not enough smoothness variance.&lt;/p&gt;
+
+&lt;p&gt;Since we actually know the noiseless curves, we should train to that, to avoid the confounding of smoothness variance and noise variance.  The ground truth curves are aso stronger sources of evidence, compared to the curves reconstructed from data.&lt;/p&gt;
+
+&lt;h1&gt;TODO:&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;reproject per-view reconstructions and overlay with original image.&lt;/li&gt;
+&lt;li&gt;obtain &amp;amp; visualize unobserved &quot;central curve&quot;&lt;/li&gt;
+&lt;li&gt;investigate the low smoothness variance.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Later TODO&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;automatic curve reversing?&lt;/li&gt;
+&lt;li&gt;add branching&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Work Log - Training, Reversed Curves, and Theoretical Rate Variance</title>
@@ -144,7 +336,8 @@ perturb_smoothing_variance: 0
 
 &lt;p&gt;Literally no change to perturb smoothing variance.  I'm starting to suspect something weird is going on with this value...&lt;/p&gt;
 
-&lt;h2&gt;Theoretical Rate Variance&lt;/h2&gt;
+&lt;h2 id=&quot;optimal-rate-variance&quot;&gt;Theoretical Rate Variance&lt;/h2&gt;
+
 
 &lt;p&gt;Was curious what the rate variance should be, assuming the rate vectors are drawn from a uniform distribution over the unit sphere.&lt;/p&gt;
 
