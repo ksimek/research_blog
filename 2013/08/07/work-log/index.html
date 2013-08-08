@@ -238,6 +238,20 @@ mean(diag(Sigma))
 
 <p>This strongly suggests that the global rate variances we've seen in training are consistent with the theoretical value.  Great!</p>
 
+<h2>Visualizing Curve Motion</h2>
+
+<p>Attempting to visualize perturbations between views.</p>
+
+<p>First attempt: tweak <code>test/test_visualize_test</code> to only display points from a particular view.  Doesn't work great, because only part of the plant is visible in each view, and those parts differ between views.</p>
+
+<p>Next attempt: tweak <code>curve_max_posterior.m</code>  to define a canonical index set for the curve, and then reconstruct for each view.</p>
+
+<p>More tomorrow...</p>
+
+<h2>TODO</h2>
+
+<p>Training Background model</p>
+
       <address class="signature">
         Posted by
         <a class="author" href="/ksimek/research/">Kyle Simek</a> 

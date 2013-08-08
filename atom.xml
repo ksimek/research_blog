@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-08-07T11:50:55-07:00</updated>
+ <updated>2013-08-08T12:08:32-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -171,6 +171,20 @@ mean(diag(Sigma))
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This strongly suggests that the global rate variances we've seen in training are consistent with the theoretical value.  Great!&lt;/p&gt;
+
+&lt;h2&gt;Visualizing Curve Motion&lt;/h2&gt;
+
+&lt;p&gt;Attempting to visualize perturbations between views.&lt;/p&gt;
+
+&lt;p&gt;First attempt: tweak &lt;code&gt;test/test_visualize_test&lt;/code&gt; to only display points from a particular view.  Doesn't work great, because only part of the plant is visible in each view, and those parts differ between views.&lt;/p&gt;
+
+&lt;p&gt;Next attempt: tweak &lt;code&gt;curve_max_posterior.m&lt;/code&gt;  to define a canonical index set for the curve, and then reconstruct for each view.&lt;/p&gt;
+
+&lt;p&gt;More tomorrow...&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;p&gt;Training Background model&lt;/p&gt;
 </content>
  </entry>
  
