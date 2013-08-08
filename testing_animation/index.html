@@ -1,0 +1,28 @@
+---
+layout: page
+title: "Index"
+description: ""
+javascript: ["png_animation.js"]
+---
+{% include JB/setup %}
+
+<div>
+<script>
+$(function(){
+    var urls = [ "{{site.base_url}}/img/2013-08-08-animated-reconstruction_v1.png",
+        "{{site.base_url}}/img/2013-08-08-animated-reconstruction_v2.png",
+        "{{site.base_url}}/img/2013-08-08-animated-reconstruction_v3.png",
+        "{{site.base_url}}/img/2013-08-08-animated-reconstruction_v4.png",
+        "{{site.base_url}}/img/2013-08-08-animated-reconstruction_v5.png",
+        "{{site.base_url}}/img/2013-08-08-animated-reconstruction_v6.png",
+        "{{site.base_url}}/img/2013-08-08-animated-reconstruction_v7.png",
+        "{{site.base_url}}/img/2013-08-08-animated-reconstruction_v8.png",
+        "{{site.base_url}}/img/2013-08-08-animated-reconstruction_v9.png" ]
+
+    construct_animation($("#animated-reconstruction"), urls);
+});
+</script>
+</div>
+
+<div id="animated-reconstruction" style="width: 200px">
+</div>
