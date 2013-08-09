@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-08-08T18:33:05-07:00</updated>
+ <updated>2013-08-08T18:38:28-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -47,7 +47,6 @@
 
 &lt;p&gt;I'm still struggling with smoothing variance being too low, which causes curves to be too straight.  For all of these results, I manually changed &lt;code&gt;smoothing_variance&lt;/code&gt; to be 0.1.&lt;/p&gt;
 
-&lt;div&gt;
 &lt;script&gt;
 $(function(){
     var ind_urls = [
@@ -95,7 +94,6 @@ $(function(){
 
 });
 &lt;/script&gt;
-&lt;/div&gt;
 
 
 &lt;h2&gt;Ind-Perturb Reconstruction&lt;/h2&gt;
