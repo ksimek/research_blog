@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-08-08T16:01:32-07:00</updated>
+ <updated>2013-08-08T18:33:05-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -486,7 +486,8 @@ mean(diag(Sigma))
 
 &lt;p&gt;We have to raise standard deviation to 12 cm for it to be accurate to three significant digits, which seems somewhat high.  Possibly, even with reasonable model parameters, we're still seeing some influence from the &quot;singular zone,&quot; so it may be a good thing that we aren't seeing the full reference value.&lt;/p&gt;
 
-&lt;p&gt;...&lt;/p&gt;
+&lt;h2 id=&quot;training-results&quot;&gt;Training Results&lt;/h2&gt;
+
 
 &lt;p&gt;Running training using clamped likelihoods.&lt;/p&gt;
 

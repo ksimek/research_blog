@@ -477,7 +477,8 @@ mean(diag(Sigma))
 
 &lt;p&gt;We have to raise standard deviation to 12 cm for it to be accurate to three significant digits, which seems somewhat high.  Possibly, even with reasonable model parameters, we're still seeing some influence from the &quot;singular zone,&quot; so it may be a good thing that we aren't seeing the full reference value.&lt;/p&gt;
 
-&lt;p&gt;...&lt;/p&gt;
+&lt;h2 id=&quot;training-results&quot;&gt;Training Results&lt;/h2&gt;
+
 
 &lt;p&gt;Running training using clamped likelihoods.&lt;/p&gt;
 
