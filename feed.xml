@@ -41,44 +41,44 @@
 &lt;script&gt;
 $(function(){
     var ind_urls = [
-        &quot;/img/2013-08-08-ind-reconstruction_v1.png&quot;,
-        &quot;/img/2013-08-08-ind-reconstruction_v2.png&quot;,
-        &quot;/img/2013-08-08-ind-reconstruction_v3.png&quot;,
-        &quot;/img/2013-08-08-ind-reconstruction_v4.png&quot;,
-        &quot;/img/2013-08-08-ind-reconstruction_v5.png&quot;,
-        &quot;/img/2013-08-08-ind-reconstruction_v6.png&quot;,
-        &quot;/img/2013-08-08-ind-reconstruction_v7.png&quot;,
-        &quot;/img/2013-08-08-ind-reconstruction_v8.png&quot;,
-        &quot;/img/2013-08-08-ind-reconstruction_v9.png&quot; 
+        &quot;/ksimek/research/img/2013-08-08-ind-reconstruction_v1.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-ind-reconstruction_v2.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-ind-reconstruction_v3.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-ind-reconstruction_v4.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-ind-reconstruction_v5.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-ind-reconstruction_v6.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-ind-reconstruction_v7.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-ind-reconstruction_v8.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-ind-reconstruction_v9.png&quot; 
         ]
 
     construct_animation($(&quot;#ind-reconstruction&quot;), ind_urls);
 
 
     var ou_urls = [
-        &quot;/img/2013-08-08-ou-reconstruction_v1.png&quot;,
-        &quot;/img/2013-08-08-ou-reconstruction_v2.png&quot;,
-        &quot;/img/2013-08-08-ou-reconstruction_v3.png&quot;,
-        &quot;/img/2013-08-08-ou-reconstruction_v4.png&quot;,
-        &quot;/img/2013-08-08-ou-reconstruction_v5.png&quot;,
-        &quot;/img/2013-08-08-ou-reconstruction_v6.png&quot;,
-        &quot;/img/2013-08-08-ou-reconstruction_v7.png&quot;,
-        &quot;/img/2013-08-08-ou-reconstruction_v8.png&quot;,
-        &quot;/img/2013-08-08-ou-reconstruction_v9.png&quot; 
+        &quot;/ksimek/research/img/2013-08-08-ou-reconstruction_v1.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-ou-reconstruction_v2.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-ou-reconstruction_v3.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-ou-reconstruction_v4.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-ou-reconstruction_v5.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-ou-reconstruction_v6.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-ou-reconstruction_v7.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-ou-reconstruction_v8.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-ou-reconstruction_v9.png&quot; 
         ]
 
     construct_animation($(&quot;#ou-reconstruction&quot;), ou_urls);
 
     var sqexp_urls = [
-        &quot;/img/2013-08-08-sqexp-reconstruction_v1.png&quot;,
-        &quot;/img/2013-08-08-sqexp-reconstruction_v2.png&quot;,
-        &quot;/img/2013-08-08-sqexp-reconstruction_v3.png&quot;,
-        &quot;/img/2013-08-08-sqexp-reconstruction_v4.png&quot;,
-        &quot;/img/2013-08-08-sqexp-reconstruction_v5.png&quot;,
-        &quot;/img/2013-08-08-sqexp-reconstruction_v6.png&quot;,
-        &quot;/img/2013-08-08-sqexp-reconstruction_v7.png&quot;,
-        &quot;/img/2013-08-08-sqexp-reconstruction_v8.png&quot;,
-        &quot;/img/2013-08-08-sqexp-reconstruction_v9.png&quot; 
+        &quot;/ksimek/research/img/2013-08-08-sqexp-reconstruction_v1.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-sqexp-reconstruction_v2.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-sqexp-reconstruction_v3.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-sqexp-reconstruction_v4.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-sqexp-reconstruction_v5.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-sqexp-reconstruction_v6.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-sqexp-reconstruction_v7.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-sqexp-reconstruction_v8.png&quot;,
+        &quot;/ksimek/research/img/2013-08-08-sqexp-reconstruction_v9.png&quot; 
         ]
 
     construct_animation($(&quot;#sqexp-reconstruction&quot;), sqexp_urls);
