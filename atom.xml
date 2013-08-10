@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-08-09T11:27:32-07:00</updated>
+ <updated>2013-08-10T13:53:00-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -14,9 +14,9 @@
  
  <entry>
    <title>Work Log</title>
-   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/09/work-log"/>
-   <updated>2013-08-09T00:00:00-07:00</updated>
-   <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/09/work-log</id>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/10/work-log"/>
+   <updated>2013-08-10T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/10/work-log</id>
    <content type="html">
 
 &lt;div class=&quot;meta-info&quot;&gt;
@@ -41,6 +41,103 @@
 &lt;/div&gt;
 
 
+&lt;p&gt;== Pre-tails issue ==
+&lt;strong&gt;Bug&lt;/strong&gt;
+Smallest index of reconstructed curves is significantly less than 1.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;tmp_setup_workspace
+min([test_Corrs_ll{1}.ll_indices{:}])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This results in long pre-tails, as seen in this image:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;min([test_Corrs_ll{1}.ll_indices{:}]&quot; alt=&quot;pretails&quot; /&gt;)&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Hypothesis&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Recall that reconstruction occurs by doing (1) rough triangulation, (2) smoothing, then (3) re-triangulating against the smoothed curve.  The initial triangulation usually results in a very bad index set, with spacing far larger than it should be, due to poor localization by maximum likelihood.  The subsequent smoothing causes the curve to stretch out longer than it should, so when re-triangulation occurs, ends are cut off.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt; Solution &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;After re-triangulating, re-index so the minimum index is zero.&lt;/p&gt;
+
+&lt;p&gt;Change to &lt;code&gt;correspondence/corr_to_likelihood.m&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;145  % re-index by subtracting minimum index
+146  min_index = min([Corr.ll_indices{:}]);
+147  Corr.ll_indices = cellfun(@(x) x - min_index, Corr.ll_indices, 'UniformOutput', false);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt; Fallout &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;This likely had an effect on training results, because marginal prior variance of the initial point was over-estimated, because it's index was over-estimated.&lt;/p&gt;
+
+&lt;h1&gt;Cleanup&lt;/h1&gt;
+
+&lt;p&gt;I'm afraid I made a mess of things yesterday when I was addressing the noise_variance issue in training.  Need to review the end-to-end systems for training, reconstruction and marginal likelihood evaluation.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;is training world-variance scaled everywhere?&lt;/li&gt;
+&lt;li&gt;is training world-variance projecting to 1.0?&lt;/li&gt;
+&lt;li&gt;is training-ml equal to inference-ml?&lt;/li&gt;
+&lt;li&gt;are the reconstructed results sensible?&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h1&gt;TODO&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;handle reversed curves&lt;/li&gt;
+&lt;li&gt;Retrain all models since the following changes
+
+&lt;ul&gt;
+&lt;li&gt;reversal fixes&lt;/li&gt;
+&lt;li&gt;noise variance fix&lt;/li&gt;
+&lt;li&gt;&quot;pre-tail&quot; index fix&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;central curve extraction&lt;/li&gt;
+&lt;li&gt;add branching&lt;/li&gt;
+&lt;li&gt;end-to-end sampling system&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log - Refactoring, cleanup, bug fixes</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/09/work-log"/>
+   <updated>2013-08-09T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/09/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15169&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
 &lt;h1&gt;Goals&lt;/h1&gt;
 
 &lt;ul&gt;
@@ -48,6 +145,49 @@
 &lt;li&gt;Overlay reconstruction onto images.&lt;/li&gt;
 &lt;li&gt;Test effect of reversing curves on ML.&lt;/li&gt;
 &lt;li&gt;Train background curve model.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h1&gt;Git Blog Mess&lt;/h1&gt;
+
+&lt;p&gt;Got sidetracked after screwing up a git commit of the research blog.  Not sure the cause, but several files were deleted from the &quot;source&quot; branch.  Changed the &quot;preview&quot; rake target so it builds to /tmp/research_blog_site, instead of the source directory.  Hopefully this will avoid these issues in the future.&lt;/p&gt;
+
+&lt;h1&gt;End-to-end experiment&lt;/h1&gt;
+
+&lt;p&gt;Created an experiment file that recreates yesterday's results from scratch: &lt;code&gt;exp_2013_08_09_animated_reconstruction.m&lt;/code&gt;.  Since it runs training, it takes about 5 minutes to run.&lt;/p&gt;
+
+&lt;p&gt;Also broke out reconstruction code into function in &lt;code&gt;reconstruction/reconstruct_views.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h1&gt;Overlay reconstruction onto images&lt;/h1&gt;
+
+&lt;p&gt;See &lt;code&gt;test/tmp_vis_overlay.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;I'm seeing some weirdness in the reconstructions.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Curves are too stiff&lt;/li&gt;
+&lt;li&gt;long pre-tails on a couple of curves.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h1&gt;Stiff Curves Solved&lt;/h1&gt;
+
+&lt;p&gt;Figured out what was causing stiff curves.  I forgot that during training, all precisions are stored with noise_variance fixed at 1.0, and then are scaled on the fly.  However, during visualization, that scaling doesn't occur; the precisions are assumed to be stored at the desired scale.  i.e. a dumb bug.&lt;/p&gt;
+
+&lt;p&gt;The new reconstructions now show a moderate amount of curvature, compared to their pre-bug stiff counterparts.&lt;/p&gt;
+
+&lt;p&gt;Found another bug:  when constructing the &quot;unscaled&quot; precisions in &lt;code&gt;tr_prep_likelihood.m&lt;/code&gt;, I called &lt;code&gt;corr_to_likelihood&lt;/code&gt; with &lt;code&gt;params.noise_variance&lt;/code&gt; instead of 1.0.  Thus, if I understand correctly, the reported training value for noise-variance is 100x lower than it should be.&lt;/p&gt;
+
+&lt;p&gt;That means the no-perturb model has a noise standard deviation on the order of 3.4 pixels and the perturb models are around 2.7.  This is closer to the range I was expecting, but I was hoping the perturb model stddev would be closer to 0.5, because it should arise only from pixel rasterization.  However, other sources of noise could be the curve detector, and also the cubic spline model might not be expressive enough to capture the model variance.&lt;/p&gt;
+
+&lt;p&gt;I think I need to re-run end-to-end training and reconstruction to make sure there aren't any side-effects of these fixes.&lt;/p&gt;
+
+&lt;p&gt;Committed to revision 15169&lt;/p&gt;
+
+&lt;h1&gt;TODO&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Determine cause of long pre-tails.&lt;/li&gt;
 &lt;/ul&gt;
 
 </content>
