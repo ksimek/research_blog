@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-08-12T15:27:20-07:00</updated>
+ <updated>2013-08-12T15:29:28-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -13,7 +13,7 @@
 
  
  <entry>
-   <title>Work Log - Re-run training</title>
+   <title>Work Log - Re-run training, Re-reconstruction, Curve-Flipping</title>
    <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/11/work-log"/>
    <updated>2013-08-11T00:00:00-07:00</updated>
    <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/11/work-log</id>
@@ -126,15 +126,15 @@ perturb_smoothing_variance: 7.1854e-19
 &lt;script&gt;
 $(function(){
     var urls = [
-        &quot;/img/2013-08-11-ind-model-1.png&quot;,
-        &quot;/img/2013-08-11-ind-model-2.png&quot;,
-        &quot;/img/2013-08-11-ind-model-3.png&quot;,
-        &quot;/img/2013-08-11-ind-model-4.png&quot;,
-        &quot;/img/2013-08-11-ind-model-5.png&quot;,
-        &quot;/img/2013-08-11-ind-model-6.png&quot;,
-        &quot;/img/2013-08-11-ind-model-7.png&quot;,
-        &quot;/img/2013-08-11-ind-model-8.png&quot;,
-        &quot;/img/2013-08-11-ind-model-9.png&quot;
+        &quot;/ksimek/research/img/2013-08-11-ind-model-1.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ind-model-2.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ind-model-3.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ind-model-4.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ind-model-5.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ind-model-6.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ind-model-7.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ind-model-8.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ind-model-9.png&quot;
         ]
 
     construct_animation($(&quot;#ind-reconstruct-anim&quot;), urls);
@@ -150,15 +150,15 @@ $(function(){
 &lt;script&gt;
 $(function(){
     var urls = [
-        &quot;/img/2013-08-11-ou-model-1.png&quot;,
-        &quot;/img/2013-08-11-ou-model-2.png&quot;,
-        &quot;/img/2013-08-11-ou-model-3.png&quot;,
-        &quot;/img/2013-08-11-ou-model-4.png&quot;,
-        &quot;/img/2013-08-11-ou-model-5.png&quot;,
-        &quot;/img/2013-08-11-ou-model-6.png&quot;,
-        &quot;/img/2013-08-11-ou-model-7.png&quot;,
-        &quot;/img/2013-08-11-ou-model-8.png&quot;,
-        &quot;/img/2013-08-11-ou-model-9.png&quot;
+        &quot;/ksimek/research/img/2013-08-11-ou-model-1.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ou-model-2.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ou-model-3.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ou-model-4.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ou-model-5.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ou-model-6.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ou-model-7.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ou-model-8.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ou-model-9.png&quot;
         ]
 
     construct_animation($(&quot;#ou-reconstruct-anim&quot;), urls);
@@ -174,15 +174,15 @@ $(function(){
 &lt;script&gt;
 $(function(){
     var urls = [
-        &quot;/img/2013-08-11-sqexp-model-1.png&quot;,
-        &quot;/img/2013-08-11-sqexp-model-2.png&quot;,
-        &quot;/img/2013-08-11-sqexp-model-3.png&quot;,
-        &quot;/img/2013-08-11-sqexp-model-4.png&quot;,
-        &quot;/img/2013-08-11-sqexp-model-5.png&quot;,
-        &quot;/img/2013-08-11-sqexp-model-6.png&quot;,
-        &quot;/img/2013-08-11-sqexp-model-7.png&quot;,
-        &quot;/img/2013-08-11-sqexp-model-8.png&quot;,
-        &quot;/img/2013-08-11-sqexp-model-9.png&quot;
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-1.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-2.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-3.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-4.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-5.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-6.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-7.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-8.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-9.png&quot;
         ]
 
     construct_animation($(&quot;#sqexp-reconstruct-anim&quot;), urls);

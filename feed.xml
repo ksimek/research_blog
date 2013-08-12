@@ -7,7 +7,7 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
-				<title>Work Log - Re-run training</title>
+				<title>Work Log - Re-run training, Re-reconstruction, Curve-Flipping</title>
 				<description>
 
 &lt;div class=&quot;meta-info&quot;&gt;
@@ -117,15 +117,15 @@ perturb_smoothing_variance: 7.1854e-19
 &lt;script&gt;
 $(function(){
     var urls = [
-        &quot;/img/2013-08-11-ind-model-1.png&quot;,
-        &quot;/img/2013-08-11-ind-model-2.png&quot;,
-        &quot;/img/2013-08-11-ind-model-3.png&quot;,
-        &quot;/img/2013-08-11-ind-model-4.png&quot;,
-        &quot;/img/2013-08-11-ind-model-5.png&quot;,
-        &quot;/img/2013-08-11-ind-model-6.png&quot;,
-        &quot;/img/2013-08-11-ind-model-7.png&quot;,
-        &quot;/img/2013-08-11-ind-model-8.png&quot;,
-        &quot;/img/2013-08-11-ind-model-9.png&quot;
+        &quot;/ksimek/research/img/2013-08-11-ind-model-1.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ind-model-2.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ind-model-3.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ind-model-4.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ind-model-5.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ind-model-6.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ind-model-7.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ind-model-8.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ind-model-9.png&quot;
         ]
 
     construct_animation($(&quot;#ind-reconstruct-anim&quot;), urls);
@@ -141,15 +141,15 @@ $(function(){
 &lt;script&gt;
 $(function(){
     var urls = [
-        &quot;/img/2013-08-11-ou-model-1.png&quot;,
-        &quot;/img/2013-08-11-ou-model-2.png&quot;,
-        &quot;/img/2013-08-11-ou-model-3.png&quot;,
-        &quot;/img/2013-08-11-ou-model-4.png&quot;,
-        &quot;/img/2013-08-11-ou-model-5.png&quot;,
-        &quot;/img/2013-08-11-ou-model-6.png&quot;,
-        &quot;/img/2013-08-11-ou-model-7.png&quot;,
-        &quot;/img/2013-08-11-ou-model-8.png&quot;,
-        &quot;/img/2013-08-11-ou-model-9.png&quot;
+        &quot;/ksimek/research/img/2013-08-11-ou-model-1.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ou-model-2.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ou-model-3.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ou-model-4.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ou-model-5.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ou-model-6.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ou-model-7.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ou-model-8.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-ou-model-9.png&quot;
         ]
 
     construct_animation($(&quot;#ou-reconstruct-anim&quot;), urls);
@@ -165,15 +165,15 @@ $(function(){
 &lt;script&gt;
 $(function(){
     var urls = [
-        &quot;/img/2013-08-11-sqexp-model-1.png&quot;,
-        &quot;/img/2013-08-11-sqexp-model-2.png&quot;,
-        &quot;/img/2013-08-11-sqexp-model-3.png&quot;,
-        &quot;/img/2013-08-11-sqexp-model-4.png&quot;,
-        &quot;/img/2013-08-11-sqexp-model-5.png&quot;,
-        &quot;/img/2013-08-11-sqexp-model-6.png&quot;,
-        &quot;/img/2013-08-11-sqexp-model-7.png&quot;,
-        &quot;/img/2013-08-11-sqexp-model-8.png&quot;,
-        &quot;/img/2013-08-11-sqexp-model-9.png&quot;
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-1.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-2.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-3.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-4.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-5.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-6.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-7.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-8.png&quot;,
+        &quot;/ksimek/research/img/2013-08-11-sqexp-model-9.png&quot;
         ]
 
     construct_animation($(&quot;#sqexp-reconstruct-anim&quot;), urls);
