@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log - Re-run training, Re-reconstruction, Curve-Flipping &larr; </title>
+   <title>Work Log - Theoretical Rate variance bug; Training background curve model &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -44,10 +44,6 @@
     <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
 
     
-        
-    <script src="/ksimek/research/js/png_animation.js"></script>
-        
-    
 
     <script type="text/javascript">
         $(document).ready(function(){
@@ -82,9 +78,9 @@
 	
   
   
-  <h1 class="title">Work Log - Re-run training, Re-reconstruction, Curve-Flipping</h1>
+  <h1 class="title">Work Log - Theoretical Rate variance bug; Training background curve model</h1>
 
-  <div class="date emphnext">August 11, 2013</div>
+  <div class="date emphnext">August 13, 2013</div>
     
 
 
@@ -113,176 +109,164 @@
 </div>
 
 
-<h1>Re-training</h1>
+<h1>Curve reversing thoughts</h1>
 
-<p>Re-ran training after several bug-fixes.</p>
+<p>The reversed curve issue only really matters during training.  Our tests show that curve-flip moves will mix well, even if the maximum isn't always correct.  Adding connections between parent and child curves should resolve these issues.</p>
 
-<h2>New Files:</h2>
+<p>During training, derive curve direction from ground-truth.</p>
+
+<h1>Theoretical Rate Variance (take 2)</h1>
+
+<p>Realized that my last attempt at this had two bugs:</p>
+
+<ol>
+<li>I used <code>rand()</code> instead of <code>randn()</code>.</li>
+<li>I was normalizing by the <em>squared</em> vector magnitude.</li>
+</ol>
+
+
+<p>Fixing this:</p>
+
+<pre><code>dir = randn(3,10000000);
+dir = bsxfun(@times, dir, 1./sqrt(sum(dir.^2)));
+var(dir(:))
+
+    ans =
+        0.3332
+</code></pre>
+
+<p>Compare this to earlier theoretical results of ~0.23.</p>
+
+<p>This new result is interesting, because it is 25% higher than the emperical results we've been getting.  I'm guessing that the fact all of the curves point upward reduces the variance. To prove, we'll force all points to be in the top hemishphere:</p>
+
+<pre><code> dir = randn(3,10000000);
+ dir(3,:) = abs(dir(3,:));
+ dir = bsxfun(@times, dir, 1./sum(dir.^2));
+
+ var(dir(:))
+
+    ans =
+        0.3149
+</code></pre>
+
+<p>Yep.  And in practive, our values take on an even smaller range of directions.</p>
+
+<p>...</p>
+
+<p>Repeating for the 2D case:</p>
+
+<pre><code>dir = randn(2,10000000);
+dir = bsxfun(@times, dir, 1./sqrt(sum(dir.^2)));
+var(dir(:))
+
+    ans =
+        0.5000
+</code></pre>
+
+<p>This strongly suggests a pattern of variance being 1/D.</p>
+
+<h1>Connection test</h1>
+
+<p>does connecting each of the curves result in better ML?  Do we need to marginalize?</p>
+
+<h1>training background model</h1>
+
+<p>construct training ML for background ML
+construct mats for bg curve models.</p>
+
+<p>Result: <code>train/tr_train_bg.m</code>.</p>
+
+<pre><code>     position_mean_2d: [2x1 double]
+ position_variance_2d: 1.7837e+04
+     rate_variance_2d: 0.5000
+    noise_variance_2d: 9.4597e-04
+smoothing_variance_2d: 0.0157
+</code></pre>
+
+<p>Interesting that noise_variance_2d is so low.  We expected it to be on the order of 1 pixel.  More discussion on this later.</p>
+
+<p>I retrained the BG model for <em>only</em> the foreground curves, and evaluated the ML under it.</p>
+
+<pre><code>     position_mean_2d: [2x1 double]
+ position_variance_2d: 5.8116e+03
+     rate_variance_2d: 0.5000
+    noise_variance_2d: 4.8105e-04
+smoothing_variance_2d: 0.0053
+</code></pre>
+
+<p>Smaller noise variance, smaller smoothing variance.  This shrinking of variance with smaller training set is typical overfitting behavior.  Not of much concern.</p>
+
+<p>Here's the comparison against the ML for the trained foreground model.</p>
+
+<pre><code>bg model = 4611.886746
+fg model = -8049.097873
+</code></pre>
+
+<p>Not good.  The FG model on true foreground curves should have a better marginal likelihood than the same curves under the BG model.</p>
+
+<p>Some questions</p>
 
 <ul>
-<li><code>train/tr_train_all.m</code>  - Utility method for training all four models.</li>
-<li><code>experiments/exp_2013_08_11_train_all.m</code>  - end-to-end training example; recreates results here.</li>
+<li>Why is bg noise variance so low??
+
+<ul>
+<li>did we smooth the detected curves before storing them?</li>
+<li>If so, why isn't the foreground model lower?</li>
+</ul>
+</li>
+<li>Why is the background model so much better than the foreground model?
+
+<ul>
+<li>We expect foreground curves to have a higher marginal likelihood under the foreground model than the background.</li>
+<li>could it be an indexing issue?</li>
+</ul>
+</li>
 </ul>
 
 
-<h2>Results</h2>
+<p>This warrants further investigation.</p>
 
-<p>All results generated by <code>exp_2013_08_11_train_all.m</code>.</p>
+<h2>Other observations</h2>
 
-<p><em>No-perturb model</em></p>
+<p>If I force the noise variance to be equal to that of the fg model (0.72), the ML drops significantly (fg results reprinted for convenience):</p>
 
-<pre><code>        smoothing_variance: 0.0024
-            noise_variance: 1.2308
-         position_variance: 1.6072e+04
-             rate_variance: 0.2743
-perturb_smoothing_variance: 1
-     perturb_rate_variance: 1
- perturb_position_variance: 1
-             perturb_scale: 2.5000
+<pre><code> bg model = -9413.1e+03
+fg model = -8049.097873
 </code></pre>
 
-<p><em>Ind-perturb model</em></p>
+<p>Now we're back in business.  This is a good sanity check, but it doesn't explain why we can't get similar noise variances for both models when training.</p>
 
-<pre><code>        smoothing_variance: 0.0019
-            noise_variance: 0.7192
-         position_variance: 1.6132e+04
-             rate_variance: 0.2451
-perturb_smoothing_variance: 7.1854e-19
-     perturb_rate_variance: 1.1292e-06
- perturb_position_variance: 0.4849
-             perturb_scale: 2.5000
+<p>Possibly the smoothing variance would need to change in this case.  Retraining, with noise_variance forced to 0.72:</p>
+
+<pre><code>     position_mean_2d: [2x1 double]
+ position_variance_2d: 5.8116e+03
+     rate_variance_2d: 0.5000
+    noise_variance_2d: 0.7204
+smoothing_variance_2d: 2.7394e-05
 </code></pre>
 
-<p><em>OU-perturb model</em></p>
+<p>Smoothing variance dropped dramatically.  ML comparison (fg results reprinted for convenience):</p>
 
-<pre><code>        smoothing_variance: 0.0019
-            noise_variance: 0.7204
-         position_variance: 1.6111e+04
-             rate_variance: 0.2465
-perturb_smoothing_variance: 7.1854e-19
-     perturb_rate_variance: 1.1296e-06
- perturb_position_variance: 0.5931
-             perturb_scale: 2.4654
+<pre><code>bg model = -9214.632874
+fg model = -8049.097873
 </code></pre>
 
-<p><em>SqExp-perturb model</em></p>
+<p>Note that bg ML didn't significantly change (-2%) after optimizing noise variance (which did change a lot).</p>
 
-<pre><code>        smoothing_variance: 0.0018
-            noise_variance: 0.7207
-         position_variance: 1.6117e+04
-             rate_variance: 0.2480
-perturb_smoothing_variance: 7.1854e-19
-     perturb_rate_variance: 1.1355e-06
- perturb_position_variance: 0.5172
-             perturb_scale: 0.9202
-</code></pre>
+<p>Might be worthwhile visualizing the optimal fits with these parameters.  Are we oversmoothing?  undersmoothing?  These would suggest a bug.</p>
 
-<p>Surprised to see that noise-variance only changed by a factor of 10, not 100.  However, the resulting noise_variance is right in the range that you'd expect arising from pixel-grid rasterization error.</p>
+<h2>Misc Thoughts</h2>
 
-<p>OU perturb-scale is lower than in the last case, and perturb position and rate variance is lower, too.</p>
+<p>Do we need to re-estimate the index set during training of the FG model?</p>
 
-<p>SqExp perturb-scale is higher than in the last case, and perturb rate variance is lower.</p>
+<p>Iterate: train, re-index, repeat.</p>
 
-<p>Lower position and rate variance makes sense after correcting curve-reversals.</p>
-
-<p>However, since we trimmed the pre-tails, a higher global and perturb position variance should result.  The result we're seeing is a combination of these competing effects.</p>
-
-<h1>Reconstructions</h1>
-
-<p>Some curves are flipped; need to an approach that will detect and correct flipped curves.</p>
-
-<p>Images and javascript generated by <code>../experiments/exp_2013_08_11_reconstruct_for_web.m</code></p>
-
-<p><em>Ind-perturb model</em></p>
-
-<script>
-$(function(){
-    var urls = [
-        "/ksimek/research/img/2013-08-11-ind-model-1.png",
-        "/ksimek/research/img/2013-08-11-ind-model-2.png",
-        "/ksimek/research/img/2013-08-11-ind-model-3.png",
-        "/ksimek/research/img/2013-08-11-ind-model-4.png",
-        "/ksimek/research/img/2013-08-11-ind-model-5.png",
-        "/ksimek/research/img/2013-08-11-ind-model-6.png",
-        "/ksimek/research/img/2013-08-11-ind-model-7.png",
-        "/ksimek/research/img/2013-08-11-ind-model-8.png",
-        "/ksimek/research/img/2013-08-11-ind-model-9.png"
-        ]
-
-    construct_animation($("#ind-reconstruct-anim"), urls);
-});
-</script>
-
-
-<div id="ind-reconstruct-anim" style="width:264px"> </div>
-
-
-<p><em>OO-perturb model</em></p>
-
-<script>
-$(function(){
-    var urls = [
-        "/ksimek/research/img/2013-08-11-ou-model-1.png",
-        "/ksimek/research/img/2013-08-11-ou-model-2.png",
-        "/ksimek/research/img/2013-08-11-ou-model-3.png",
-        "/ksimek/research/img/2013-08-11-ou-model-4.png",
-        "/ksimek/research/img/2013-08-11-ou-model-5.png",
-        "/ksimek/research/img/2013-08-11-ou-model-6.png",
-        "/ksimek/research/img/2013-08-11-ou-model-7.png",
-        "/ksimek/research/img/2013-08-11-ou-model-8.png",
-        "/ksimek/research/img/2013-08-11-ou-model-9.png"
-        ]
-
-    construct_animation($("#ou-reconstruct-anim"), urls);
-});
-</script>
-
-
-<div id="ou-reconstruct-anim" style="width:264px"> </div>
-
-
-<p><em>SqExp-perturb model</em></p>
-
-<script>
-$(function(){
-    var urls = [
-        "/ksimek/research/img/2013-08-11-sqexp-model-1.png",
-        "/ksimek/research/img/2013-08-11-sqexp-model-2.png",
-        "/ksimek/research/img/2013-08-11-sqexp-model-3.png",
-        "/ksimek/research/img/2013-08-11-sqexp-model-4.png",
-        "/ksimek/research/img/2013-08-11-sqexp-model-5.png",
-        "/ksimek/research/img/2013-08-11-sqexp-model-6.png",
-        "/ksimek/research/img/2013-08-11-sqexp-model-7.png",
-        "/ksimek/research/img/2013-08-11-sqexp-model-8.png",
-        "/ksimek/research/img/2013-08-11-sqexp-model-9.png"
-        ]
-
-    construct_animation($("#sqexp-reconstruct-anim"), urls);
-});
-</script>
-
-
-<div id="sqexp-reconstruct-anim" style="width:264px"> </div>
-
-
-<h1>Detecting and Flipping Curves</h1>
-
-<p>Experiment: <code>../experiments/exp_2013_08_11_flip_curves.m</code></p>
-
-<p>Result: doesn't really work.  Lots of false negatives.</p>
-
-<p>Algorithm output: 2     4     5     6     8    10    12
-Ground Truth: 1 2 4 5 6 8 9 10 11 12 14 15</p>
-
-<p>Not really sure why this is failing.  After flipping, most of these curves are closer to the origin, which is promoted by position_variance.  And any tip-perturbations should be better modelled after flipping.</p>
-
-<h1>TODO</h1>
+<h2>TODO</h2>
 
 <ul>
-<li>Think more on curve-reversing</li>
-<li>Central curve extraction</li>
-<li>add branching</li>
-<li>end-to-end correspondence sampling</li>
+<li>Further investigate the FG vs. BG marginal-likelihood issue.</li>
+<li>test the re-indexing approach to FG model training.</li>
+<li>re-build end-to-end sampler.</li>
 </ul>
 
 
@@ -295,11 +279,8 @@ Ground Truth: 1 2 4 5 6 8 9 10 11 12 14 15</p>
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/08/13/work-log" class="next" title="Work Log - Theoretical Rate variance bug; Training background curve model">Work Log - Theoretical Rate variance bug; Training background curve model &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/08/10/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/08/11/work-log" class="prev" title="Work Log - Re-run training, Re-reconstruction, Curve-Flipping">&larr; Work Log - Re-run training, Re-reconstruction, Curve-Flipping</a>
   
   </div>
   <div class="clearer"> </div>
@@ -316,7 +297,7 @@ Ground Truth: 1 2 4 5 6 8 9 10 11 12 14 15</p>
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Re-run training, Re-reconstruction, Curve-Flipping" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Theoretical Rate variance bug; Training background curve model" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -364,7 +345,7 @@ Ground Truth: 1 2 4 5 6 8 9 10 11 12 14 15</p>
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log - Re-run training, Re-reconstruction, Curve-Flipping");
+                    + encodeURIComponent("Work Log - Theoretical Rate variance bug; Training background curve model");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

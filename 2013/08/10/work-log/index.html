@@ -109,9 +109,9 @@
 </div>
 
 
-<p>== Pre-tails issue ==
-<strong>Bug</strong>
-Smallest index of reconstructed curves is significantly less than 1.</p>
+<h1>Pre-tails issue</h1>
+
+<p><strong>Bug</strong>: Smallest index of reconstructed curves is significantly greater than 0.</p>
 
 <pre><code>tmp_setup_workspace
 min([test_Corrs_ll{1}.ll_indices{:}])
@@ -119,7 +119,7 @@ min([test_Corrs_ll{1}.ll_indices{:}])
 
 <p>This results in long pre-tails, as seen in this image:</p>
 
-<p><img src="min([test_Corrs_ll{1}.ll_indices{:}]" alt="pretails" />)</p>
+<p><img src="/ksimek/research/img/2013-08-10-pretails.jpg" alt="pretails" /></p>
 
 <p><strong>Hypothesis</strong></p>
 

@@ -4,13 +4,205 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-08-12T15:29:28-07:00</updated>
+ <updated>2013-08-13T17:23:02-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log - Theoretical Rate variance bug; Training background curve model</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/13/work-log"/>
+   <updated>2013-08-13T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/13/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h1&gt;Curve reversing thoughts&lt;/h1&gt;
+
+&lt;p&gt;The reversed curve issue only really matters during training.  Our tests show that curve-flip moves will mix well, even if the maximum isn't always correct.  Adding connections between parent and child curves should resolve these issues.&lt;/p&gt;
+
+&lt;p&gt;During training, derive curve direction from ground-truth.&lt;/p&gt;
+
+&lt;h1&gt;Theoretical Rate Variance (take 2)&lt;/h1&gt;
+
+&lt;p&gt;Realized that my last attempt at this had two bugs:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;I used &lt;code&gt;rand()&lt;/code&gt; instead of &lt;code&gt;randn()&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;I was normalizing by the &lt;em&gt;squared&lt;/em&gt; vector magnitude.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Fixing this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;dir = randn(3,10000000);
+dir = bsxfun(@times, dir, 1./sqrt(sum(dir.^2)));
+var(dir(:))
+
+    ans =
+        0.3332
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Compare this to earlier theoretical results of ~0.23.&lt;/p&gt;
+
+&lt;p&gt;This new result is interesting, because it is 25% higher than the emperical results we've been getting.  I'm guessing that the fact all of the curves point upward reduces the variance. To prove, we'll force all points to be in the top hemishphere:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt; dir = randn(3,10000000);
+ dir(3,:) = abs(dir(3,:));
+ dir = bsxfun(@times, dir, 1./sum(dir.^2));
+
+ var(dir(:))
+
+    ans =
+        0.3149
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Yep.  And in practive, our values take on an even smaller range of directions.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Repeating for the 2D case:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;dir = randn(2,10000000);
+dir = bsxfun(@times, dir, 1./sqrt(sum(dir.^2)));
+var(dir(:))
+
+    ans =
+        0.5000
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This strongly suggests a pattern of variance being 1/D.&lt;/p&gt;
+
+&lt;h1&gt;Connection test&lt;/h1&gt;
+
+&lt;p&gt;does connecting each of the curves result in better ML?  Do we need to marginalize?&lt;/p&gt;
+
+&lt;h1&gt;training background model&lt;/h1&gt;
+
+&lt;p&gt;construct training ML for background ML
+construct mats for bg curve models.&lt;/p&gt;
+
+&lt;p&gt;Result: &lt;code&gt;train/tr_train_bg.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;     position_mean_2d: [2x1 double]
+ position_variance_2d: 1.7837e+04
+     rate_variance_2d: 0.5000
+    noise_variance_2d: 9.4597e-04
+smoothing_variance_2d: 0.0157
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Interesting that noise_variance_2d is so low.  We expected it to be on the order of 1 pixel.  More discussion on this later.&lt;/p&gt;
+
+&lt;p&gt;I retrained the BG model for &lt;em&gt;only&lt;/em&gt; the foreground curves, and evaluated the ML under it.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;     position_mean_2d: [2x1 double]
+ position_variance_2d: 5.8116e+03
+     rate_variance_2d: 0.5000
+    noise_variance_2d: 4.8105e-04
+smoothing_variance_2d: 0.0053
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Smaller noise variance, smaller smoothing variance.  This shrinking of variance with smaller training set is typical overfitting behavior.  Not of much concern.&lt;/p&gt;
+
+&lt;p&gt;Here's the comparison against the ML for the trained foreground model.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;bg model = 4611.886746
+fg model = -8049.097873
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Not good.  The FG model on true foreground curves should have a better marginal likelihood than the same curves under the BG model.&lt;/p&gt;
+
+&lt;p&gt;Some questions&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Why is bg noise variance so low??
+
+&lt;ul&gt;
+&lt;li&gt;did we smooth the detected curves before storing them?&lt;/li&gt;
+&lt;li&gt;If so, why isn't the foreground model lower?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Why is the background model so much better than the foreground model?
+
+&lt;ul&gt;
+&lt;li&gt;We expect foreground curves to have a higher marginal likelihood under the foreground model than the background.&lt;/li&gt;
+&lt;li&gt;could it be an indexing issue?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;This warrants further investigation.&lt;/p&gt;
+
+&lt;h2&gt;Other observations&lt;/h2&gt;
+
+&lt;p&gt;If I force the noise variance to be equal to that of the fg model (0.72), the ML drops significantly (fg results reprinted for convenience):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt; bg model = -9413.1e+03
+fg model = -8049.097873
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now we're back in business.  This is a good sanity check, but it doesn't explain why we can't get similar noise variances for both models when training.&lt;/p&gt;
+
+&lt;p&gt;Possibly the smoothing variance would need to change in this case.  Retraining, with noise_variance forced to 0.72:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;     position_mean_2d: [2x1 double]
+ position_variance_2d: 5.8116e+03
+     rate_variance_2d: 0.5000
+    noise_variance_2d: 0.7204
+smoothing_variance_2d: 2.7394e-05
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Smoothing variance dropped dramatically.  ML comparison (fg results reprinted for convenience):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;bg model = -9214.632874
+fg model = -8049.097873
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that bg ML didn't significantly change (-2%) after optimizing noise variance (which did change a lot).&lt;/p&gt;
+
+&lt;p&gt;Might be worthwhile visualizing the optimal fits with these parameters.  Are we oversmoothing?  undersmoothing?  These would suggest a bug.&lt;/p&gt;
+
+&lt;h2&gt;Misc Thoughts&lt;/h2&gt;
+
+&lt;p&gt;Do we need to re-estimate the index set during training of the FG model?&lt;/p&gt;
+
+&lt;p&gt;Iterate: train, re-index, repeat.&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Further investigate the FG vs. BG marginal-likelihood issue.&lt;/li&gt;
+&lt;li&gt;test the re-indexing approach to FG model training.&lt;/li&gt;
+&lt;li&gt;re-build end-to-end sampler.&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Work Log - Re-run training, Re-reconstruction, Curve-Flipping</title>
@@ -207,7 +399,10 @@ Ground Truth: 1 2 4 5 6 8 9 10 11 12 14 15&lt;/p&gt;
 &lt;h1&gt;TODO&lt;/h1&gt;
 
 &lt;ul&gt;
+&lt;li&gt;Think more on curve-reversing&lt;/li&gt;
 &lt;li&gt;Central curve extraction&lt;/li&gt;
+&lt;li&gt;add branching&lt;/li&gt;
+&lt;li&gt;end-to-end correspondence sampling&lt;/li&gt;
 &lt;/ul&gt;
 
 </content>
@@ -242,9 +437,9 @@ Ground Truth: 1 2 4 5 6 8 9 10 11 12 14 15&lt;/p&gt;
 &lt;/div&gt;
 
 
-&lt;p&gt;== Pre-tails issue ==
-&lt;strong&gt;Bug&lt;/strong&gt;
-Smallest index of reconstructed curves is significantly less than 1.&lt;/p&gt;
+&lt;h1&gt;Pre-tails issue&lt;/h1&gt;
+
+&lt;p&gt;&lt;strong&gt;Bug&lt;/strong&gt;: Smallest index of reconstructed curves is significantly greater than 0.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;tmp_setup_workspace
 min([test_Corrs_ll{1}.ll_indices{:}])
@@ -252,7 +447,7 @@ min([test_Corrs_ll{1}.ll_indices{:}])
 
 &lt;p&gt;This results in long pre-tails, as seen in this image:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;min([test_Corrs_ll{1}.ll_indices{:}]&quot; alt=&quot;pretails&quot; /&gt;)&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-10-pretails.jpg&quot; alt=&quot;pretails&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;Hypothesis&lt;/strong&gt;&lt;/p&gt;
 
