@@ -4,13 +4,188 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-08-13T17:23:02-07:00</updated>
+ <updated>2013-08-14T18:14:22-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log - Background ML bugs; Why is Foreground Noise Variance so large?</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/14/work-log"/>
+   <updated>2013-08-14T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/14/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h1&gt;ML Validity Testing&lt;/h1&gt;
+
+&lt;p&gt;In yesterday's test, I hadn't realized that the training ML didn't include all of the curves, only the foreground curves were included.  Rerunning:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Reference ML: -5.1552e+04
+Training ML: -5.0786e+04
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Okay, we're back in the ballpark -- Within 1.5% of the reference.&lt;/p&gt;
+
+&lt;p&gt;Found the other issue: the roundabout way I was using to generate the training covariance matrices was ignoring the user-specified position_variance_2d.  Results now match:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Reference ML: -5.1552e+04
+Training ML: -5.1552e+04
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Unfortunately, none of this explains why training is causing noise variance to collapse so low.  All discovered problems were merely bugs in the validation logic.  At least we know the training ML logic is valid.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Quick inspection shows that 2D curves are, indeed, pre-smoothed.  This means that noise variance can collapse to near-zero when fitting 2D curve.&lt;/p&gt;
+
+&lt;p&gt;The new question becomes: why doesn't it occur in the foreground (3D) model?&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Try re-indexing...&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;% update params related to smoothing variance
+params_2 = tbc_.params;
+params_2.smoothing_variance = training_results{1}.smoothing_variance;
+params_2.noise_variance = training_results{1}.noise_variance;
+% re-construct likelihood (including indicies)
+test_Corrs_ll_2 = tr_prep_likelihood(test_Corrs, data_, params_2);
+% re-run training
+train_params_done = tr_train(test_Corrs_ll_2, training_results{2}, 400, 3);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Results&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0011
+            noise_variance: 0.6846
+         position_variance: 1.3597e+04
+             rate_variance: 0.3042
+perturb_smoothing_variance: 7.1854e-19
+     perturb_rate_variance: 1.3013e-06
+ perturb_position_variance: 0.6621
+             perturb_scale: 2.9795
+
+Final ML: -7840.140322
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Compare against results prior to re-indexing: version:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0019
+            noise_variance: 0.7204
+         position_variance: 1.6111e+04
+             rate_variance: 0.2465
+perturb_smoothing_variance: 7.1854e-19
+     perturb_rate_variance: 1.1296e-06
+ perturb_position_variance: 0.5931
+             perturb_scale: 2.4654
+
+Final ML: -8049.9e+03
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;So we've improved, but nowhere near the background model's ML of 4611.9.  Note that curves got smoother and less noisy.  More correlation, more variance pushed into the perturbations.  (why the f*** perturb_smoothing_variance is just sitting there like an idiot is still beyond me).&lt;/p&gt;
+
+&lt;h2&gt;Miscellaneous thoughts&lt;/h2&gt;
+
+&lt;p&gt;Need to visualize ll_means against smoothed curve.  The perturbations should be correlated.  Maybe even plot them?  Note the perturbations need to be considered only in the directions parallel to the image plane.  &lt;strong&gt; This has never been done, and is necessary to validate the index-estimation in &lt;code&gt;correspondence/corr_to_likelihood&lt;/code&gt;.&lt;/strong&gt; Can we visualize after removing rate and offset components?  Yes: difference between ll_means and per-view reconstructed curve.&lt;/p&gt;
+
+&lt;p&gt;Consider smarter smoothing in &lt;code&gt;corr_to_likelihood&lt;/code&gt; -- using posterior max instead of &lt;code&gt;csaps&lt;/code&gt;.    Could give better index estimation if the visualization test shows problems.&lt;/p&gt;
+
+&lt;p&gt;What if we were using a 3D likelhood for background curves too? Could we still expect the BG ML to be insanely high, and the noise variance to be insanely peaked?  Backproject, estimate 3d noise variance, estimate index set.  The farther away it gets, the more variance in the correlated points.  Which means lower ML, right?  But training will push variance lower.&lt;/p&gt;
+
+&lt;p&gt;Note that larger noise variance in FG model will explain away bad triangulations.  Perturb variances also explain to some extent, but maybe they aren't sufficient to explain enough of it.&lt;/p&gt;
+
+&lt;p&gt;Why is perturb_smoothing_variance basically zero?  If it was higher, it could explain more of the traingulation error, and allow noise variance to drop.  Should we be using a different pertubation model?  Maybe Brownian motion instead of integrated brownian motion?  Visualizing perturbations would be informative here.&lt;/p&gt;
+
+&lt;p&gt;Do smooth perturbations follow a different dynamics model than linear and offset perturbations?  Can we force it to be larger?  what if it was the only option for modelling perturbations?   It's true that a small amount of smoothing variance can result in a huge amount of marginal point variance, and large variances kill ML's.  Probably a mean-reverting model is more sensible -- Ornstein Ulenbeck process, perhaps?  Or SqExp?  I avoided these in the past, because it changes the form of the marginal curve covariances -- they're no longer purely cubic-spline processes.  But I never considered the fact that we need to model triangulation error.&lt;/p&gt;
+
+&lt;p&gt;Observations: setting perturb_smoothing_variance to exactly zero has no change in ML.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Consider tying foreground and background noise variance during training.&lt;/strong&gt;  &amp;lt;---  This is the most pragmatic solution.  Avoids getting mired in details, and acknowledges what we know to be true: image noise arises from the same process in foreground and background models.&lt;/p&gt;
+
+&lt;p&gt;Possibly the fact that we allow a nonzero position_mean in 2D but not in 3D is the issue?&lt;/p&gt;
+
+&lt;h1&gt;Finer-grained index estimation&lt;/h1&gt;
+
+&lt;p&gt;Got it!  In &lt;code&gt;corr_to_likelihood.m&lt;/code&gt;, we have two parameters that determine how fine-grained the sampling is along the smoothed curve.  Each observed curve is then matched against the sampled curve.  The sampling period is 2 pixels, which means there's an average error of about 1 pixel in each index estimate.&lt;/p&gt;
+
+&lt;p&gt;Reducing the sampling period to 1 pixel and re-training gives:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0014
+            noise_variance: 0.3986
+         position_variance: 1.3555e+04
+             rate_variance: 0.3100
+perturb_smoothing_variance: 7.1854e-19
+     perturb_rate_variance: 3.3992e-04
+ perturb_position_variance: 0.6874
+             perturb_scale: 2.3823
+
+Final ML: -6357.585946
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Although we only slightly changed the sampling period, the final ML improved significantly.  The noise variance dropped from 0.7 to 0.4, too.  Perturb rate variance changed by 2 orders of magnitude!&lt;/p&gt;
+
+&lt;p&gt;Reducing sampling period to 0.5:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0018
+            noise_variance: 0.3060
+         position_variance: 1.3499e+04
+             rate_variance: 0.3098
+perturb_smoothing_variance: 7.1854e-19
+     perturb_rate_variance: 4.3411e-04
+ perturb_position_variance: 0.8152
+             perturb_scale: 2.4095
+
+Final ML: -5664.35
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The upward ML trend continues, but the noise variance appears to be flattening out.  The perturb_position_variance jumped upward unexpectedly.&lt;/p&gt;
+
+&lt;p&gt;This might explain all of the disparity between the 2D and 3D noise variances.  Unfortunately, we can't reduce the sampling period to 0.0004, because the runtime complexity of the matching  is O(N&lt;sup&gt;2),&lt;/sup&gt; where N is the number of sampled points.&lt;/p&gt;
+
+&lt;p&gt;Better idea: after finding the optimal region in the matching algorithm, improve it by projecting the point onto the line segments neighboring the matched point.  Constant-time, and significantly better!&lt;/p&gt;
+
+&lt;p&gt;Another thought: if the rasterization error was approx. 1 pixel, the sampling error could be reduced to the point where the rasterization error dominated (possibly a sampling period of  0.5 or 0.01 would achieve this).  That way, both 2D and 3D noise sigma would be dominated by rasterization error, and would train to similar values.&lt;/p&gt;
+
+&lt;h1&gt;TODO&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;implement post-match index improvement.&lt;/li&gt;
+&lt;li&gt;Plot reconstruction residuals, look for correlation model.
+
+&lt;ul&gt;
+&lt;li&gt;Goal: determine if residuals are truely independent, and belong in the noise bucket.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Try training BG and FG together, with the same noise variance.&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Work Log - Theoretical Rate variance bug; Training background curve model</title>
@@ -187,6 +362,19 @@ fg model = -8049.097873
 
 &lt;p&gt;Might be worthwhile visualizing the optimal fits with these parameters.  Are we oversmoothing?  undersmoothing?  These would suggest a bug.&lt;/p&gt;
 
+&lt;h2&gt;ML Validity Testing&lt;/h2&gt;
+
+&lt;p&gt;Running reference ml:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;data_2 = init_data_curves_ml(data_, bg_train_params_done_force)
+sum([data_2.curves_ml{:}])
+
+    ans =
+      -5.1552e+04
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Very different from the training implementation.  Need to dig deeper to determine the cause.&lt;/p&gt;
+
 &lt;h2&gt;Misc Thoughts&lt;/h2&gt;
 
 &lt;p&gt;Do we need to re-estimate the index set during training of the FG model?&lt;/p&gt;
@@ -196,11 +384,104 @@ fg model = -8049.097873
 &lt;h2&gt;TODO&lt;/h2&gt;
 
 &lt;ul&gt;
+&lt;li&gt;investigate disparity between training ML and reference ML for background curves.&lt;/li&gt;
 &lt;li&gt;Further investigate the FG vs. BG marginal-likelihood issue.&lt;/li&gt;
 &lt;li&gt;test the re-indexing approach to FG model training.&lt;/li&gt;
 &lt;li&gt;re-build end-to-end sampler.&lt;/li&gt;
 &lt;/ul&gt;
 
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Dissecting the Camera Matrix, Part 3: The Intrinsic Matrix</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/13/intrinsic"/>
+   <updated>2013-08-13T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/13/intrinsic</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Earlier we studied the extrinsic camera matrix, and examined three different interpretations of its parameters.  Today I'll demonstrate two equivalent interpretations of the camera matrix.  First, we'll see how the camera parameters correspond the geometry of real physical camera.  Then I'll show how each of the intrinsic parameters corresponds to a simple 2D transform.  Finally,  give a 3D demo illustrating both interpretations&lt;/p&gt;
+
+&lt;p&gt;This is an entry in the series &quot;Camera matrix, an interactive tour.&quot;  To read the other entries in the series, see the table of contents, here. (TODO)&lt;/p&gt;
+
+&lt;p&gt;The intrinsic matrix is:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;** EQUATION HERE **
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We usually interpret the intrinsic matrix as a transformation from 3D non-homogeneous camera coordinates to 2D homogeneous image coordinates by projecting onto the image plane.  I call this the &quot;camera-centric&quot; interpretation of the intrinsic matrix, where each of the parameters represents a physical aspect of our pinhole camera's geometry:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Focal length&lt;/strong&gt;: \(f_x\), \(f_y\) - The distance between the pinhole and the image plane (in pixels; all intrinsic values are measured in pixels -- more on this later).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Principal Point Offset&lt;/strong&gt;: \(x_0\), \(y_0\) - The position of pinhole's projection onto the camera's film, relative to the film's origin.  This projection is called the &quot;principal point&quot;, and the line from the principal point through the pinhole is called the &quot;principal axis&quot;.  Increasing \(x_0\) by 10 shifts the pinhole right by 10 pixels, or equivalently, shifts the film left by 10 pixels.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Axis skew&lt;/strong&gt;: \(s\) - As far as I know, there isn't any analogue for this in a traditional camera, but &lt;a href=&quot;http://www.epixea.com/research/multi-view-coding-thesisse8.html#x13-320002.2.1&quot;&gt;apparently some digitization processes can cause nonzero skew&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;At first glance, it seems like these 5 parameters couldn't completely describe the pinhole camera.  The focal length and principal point offset amount to simple translations of the film in space.  There must be other ways to transform the film relative to the pinhole, for example, rotation or scaling, right?  Lets address these one-by-one.&lt;/p&gt;
+
+&lt;p&gt;First we'll consider rotations of the film around the principal axis.  This is traightforward:  this is handled in the extrinsic matrix's rotation parameters (as the &quot;roll&quot; parameter if you're using a pitch-yaw-roll formulation).&lt;/p&gt;
+
+&lt;p&gt;What about other rotations that cause the film to be non-perpendicular to the pinhole?  This question is a bit ill-posed, because it assumes the pinhole has an orientation.  In truth, the pinhole in our camera model doesn't care what &quot;direction&quot; the camera is pointing -- light passes through it in all directions.  The orientation of the camera is defined by the film's orientation, which (again) is handled in the extrinsic camera matrix.  If the film is rotated around a point not lying on the prinpical axis, it will also result in changes to the focal length and principal point, too.&lt;/p&gt;
+
+&lt;p&gt;What if the film doubles in size, but stays in the same position?  This scenario changes the clipping bounds of the image, which isn't actually modelled by the intrinsic matrix.  In graphics systems like OpenGL, this is modelled by adding an extra orthographic projection after the intrinsic matrix is applied, which maps image coordinates to Normalized Device Coordinates.  This is described in more detail in my post on &lt;a href=&quot;/ksimek/research/2013/06/03/calibrated_cameras_in_opengl/&quot;&gt;calibrated cameras in OpenGL&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Why are values measured in pixels?&lt;/p&gt;
+
+&lt;p&gt;Imagine doubling all the physical dimensions of your pinhole camera: the film size and the focal length.  The resulting image would be unchanged (assuming the film's resolution remains constant).  The intrinsic matrix is only concerned with how points in 3d space are projected into pixel coordinates, and thus, it only represents relative dimensions.  The transformation is invariant to scaling of the camera dimensions; by representing dimensions in pixel units, we naturally capture this invariance.&lt;/p&gt;
+
+&lt;p&gt;If you know the size of your film (or digital sensor) in world units, you can convert focal length from pixels to world units.  If \(w\) is the width of the image in pixels, \(W\) is the width in world units, and the focal length in pixels is \(f_x\), you can use similar triangles to find the focal length in world units \(F_x\):&lt;/p&gt;
+
+&lt;div&gt; F_x = f_x * \frac{W_x}{w_x} &lt;/div&gt;
+
+
+&lt;p&gt;Other parameters \(f_x\), \(x_0\), and \(y_0\) can be found in a similar way.&lt;/p&gt;
+
+&lt;p&gt;Intrinsic parameters as 2D transformations&lt;/p&gt;
+
+&lt;p&gt;If we instead interpret our 3-vectors not as 3D image coordinates but as 2D homogeneous coordinates, we can come to an alternative interpretation of the intrinsic matrix: as a sequence of 2D affine transformations.  We can decompose the intrinsic matrix into the product of a scaling, translation, and shear amtrix, corresponding to focal length, principal point offset, and axis skew, respectively:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;TODO: equation here
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This interpretation implies that the intrinsic camera transformation occurs &lt;em&gt;post-projection&lt;/em&gt;.  One notable result of this is that intrinsic parameters cannot affect visiblity -- occluded objects cannot be revealed by simple 2D transformations in image space.&lt;/p&gt;
+
+&lt;p&gt;Full decomposition&lt;/p&gt;
+
+&lt;p&gt;We can now combine our decomposed intrinsic matrix with the extrinsic matrix decomposition we studied last time.  The result shows the sequence of five affine transformations that make up the complete camera matrix: (1) 3D rotation, (2) 3D translation, (3) 2D scaling, (4) 2D translation, and finally (5) 2D shear.&lt;/p&gt;
+
+&lt;p&gt;TODO EQUATION HERE&lt;/p&gt;
+
+&lt;p&gt;Demo&lt;/p&gt;
+
+&lt;p&gt;The demo below illustrates both interpretations of the intrinsic matrix.  The left pane represents the &quot;camera-geometry&quot; interpretation.  The yellow plane indicates the &quot;virtual&quot; image plane, but for all intents and purposes, represents the &quot;film&quot; of the pinhole camera.  Notice how the pinhole move relative to the image plane as \(x_0\) and \(y_0\) are adjusted.&lt;/p&gt;
+
+&lt;p&gt;The right pane represents the &quot;2D transformation&quot; interpretation.  Notice how changing focal length results in scaling of the projected image, and principal point results in pure translation.  Also note that since translation occurs &lt;em&gt;after&lt;/em&gt; scaling, larger focal lengths will result in larger translations as \(x_0\) and \(y_0\) are adjusted.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;TODO: demo here
+&lt;/code&gt;&lt;/pre&gt;
 </content>
  </entry>
  

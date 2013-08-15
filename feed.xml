@@ -7,6 +7,181 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Work Log - Background ML bugs; Why is Foreground Noise Variance so large?</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h1&gt;ML Validity Testing&lt;/h1&gt;
+
+&lt;p&gt;In yesterday's test, I hadn't realized that the training ML didn't include all of the curves, only the foreground curves were included.  Rerunning:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Reference ML: -5.1552e+04
+Training ML: -5.0786e+04
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Okay, we're back in the ballpark -- Within 1.5% of the reference.&lt;/p&gt;
+
+&lt;p&gt;Found the other issue: the roundabout way I was using to generate the training covariance matrices was ignoring the user-specified position_variance_2d.  Results now match:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Reference ML: -5.1552e+04
+Training ML: -5.1552e+04
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Unfortunately, none of this explains why training is causing noise variance to collapse so low.  All discovered problems were merely bugs in the validation logic.  At least we know the training ML logic is valid.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Quick inspection shows that 2D curves are, indeed, pre-smoothed.  This means that noise variance can collapse to near-zero when fitting 2D curve.&lt;/p&gt;
+
+&lt;p&gt;The new question becomes: why doesn't it occur in the foreground (3D) model?&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Try re-indexing...&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;% update params related to smoothing variance
+params_2 = tbc_.params;
+params_2.smoothing_variance = training_results{1}.smoothing_variance;
+params_2.noise_variance = training_results{1}.noise_variance;
+% re-construct likelihood (including indicies)
+test_Corrs_ll_2 = tr_prep_likelihood(test_Corrs, data_, params_2);
+% re-run training
+train_params_done = tr_train(test_Corrs_ll_2, training_results{2}, 400, 3);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Results&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0011
+            noise_variance: 0.6846
+         position_variance: 1.3597e+04
+             rate_variance: 0.3042
+perturb_smoothing_variance: 7.1854e-19
+     perturb_rate_variance: 1.3013e-06
+ perturb_position_variance: 0.6621
+             perturb_scale: 2.9795
+
+Final ML: -7840.140322
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Compare against results prior to re-indexing: version:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0019
+            noise_variance: 0.7204
+         position_variance: 1.6111e+04
+             rate_variance: 0.2465
+perturb_smoothing_variance: 7.1854e-19
+     perturb_rate_variance: 1.1296e-06
+ perturb_position_variance: 0.5931
+             perturb_scale: 2.4654
+
+Final ML: -8049.9e+03
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;So we've improved, but nowhere near the background model's ML of 4611.9.  Note that curves got smoother and less noisy.  More correlation, more variance pushed into the perturbations.  (why the f*** perturb_smoothing_variance is just sitting there like an idiot is still beyond me).&lt;/p&gt;
+
+&lt;h2&gt;Miscellaneous thoughts&lt;/h2&gt;
+
+&lt;p&gt;Need to visualize ll_means against smoothed curve.  The perturbations should be correlated.  Maybe even plot them?  Note the perturbations need to be considered only in the directions parallel to the image plane.  &lt;strong&gt; This has never been done, and is necessary to validate the index-estimation in &lt;code&gt;correspondence/corr_to_likelihood&lt;/code&gt;.&lt;/strong&gt; Can we visualize after removing rate and offset components?  Yes: difference between ll_means and per-view reconstructed curve.&lt;/p&gt;
+
+&lt;p&gt;Consider smarter smoothing in &lt;code&gt;corr_to_likelihood&lt;/code&gt; -- using posterior max instead of &lt;code&gt;csaps&lt;/code&gt;.    Could give better index estimation if the visualization test shows problems.&lt;/p&gt;
+
+&lt;p&gt;What if we were using a 3D likelhood for background curves too? Could we still expect the BG ML to be insanely high, and the noise variance to be insanely peaked?  Backproject, estimate 3d noise variance, estimate index set.  The farther away it gets, the more variance in the correlated points.  Which means lower ML, right?  But training will push variance lower.&lt;/p&gt;
+
+&lt;p&gt;Note that larger noise variance in FG model will explain away bad triangulations.  Perturb variances also explain to some extent, but maybe they aren't sufficient to explain enough of it.&lt;/p&gt;
+
+&lt;p&gt;Why is perturb_smoothing_variance basically zero?  If it was higher, it could explain more of the traingulation error, and allow noise variance to drop.  Should we be using a different pertubation model?  Maybe Brownian motion instead of integrated brownian motion?  Visualizing perturbations would be informative here.&lt;/p&gt;
+
+&lt;p&gt;Do smooth perturbations follow a different dynamics model than linear and offset perturbations?  Can we force it to be larger?  what if it was the only option for modelling perturbations?   It's true that a small amount of smoothing variance can result in a huge amount of marginal point variance, and large variances kill ML's.  Probably a mean-reverting model is more sensible -- Ornstein Ulenbeck process, perhaps?  Or SqExp?  I avoided these in the past, because it changes the form of the marginal curve covariances -- they're no longer purely cubic-spline processes.  But I never considered the fact that we need to model triangulation error.&lt;/p&gt;
+
+&lt;p&gt;Observations: setting perturb_smoothing_variance to exactly zero has no change in ML.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Consider tying foreground and background noise variance during training.&lt;/strong&gt;  &amp;lt;---  This is the most pragmatic solution.  Avoids getting mired in details, and acknowledges what we know to be true: image noise arises from the same process in foreground and background models.&lt;/p&gt;
+
+&lt;p&gt;Possibly the fact that we allow a nonzero position_mean in 2D but not in 3D is the issue?&lt;/p&gt;
+
+&lt;h1&gt;Finer-grained index estimation&lt;/h1&gt;
+
+&lt;p&gt;Got it!  In &lt;code&gt;corr_to_likelihood.m&lt;/code&gt;, we have two parameters that determine how fine-grained the sampling is along the smoothed curve.  Each observed curve is then matched against the sampled curve.  The sampling period is 2 pixels, which means there's an average error of about 1 pixel in each index estimate.&lt;/p&gt;
+
+&lt;p&gt;Reducing the sampling period to 1 pixel and re-training gives:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0014
+            noise_variance: 0.3986
+         position_variance: 1.3555e+04
+             rate_variance: 0.3100
+perturb_smoothing_variance: 7.1854e-19
+     perturb_rate_variance: 3.3992e-04
+ perturb_position_variance: 0.6874
+             perturb_scale: 2.3823
+
+Final ML: -6357.585946
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Although we only slightly changed the sampling period, the final ML improved significantly.  The noise variance dropped from 0.7 to 0.4, too.  Perturb rate variance changed by 2 orders of magnitude!&lt;/p&gt;
+
+&lt;p&gt;Reducing sampling period to 0.5:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0018
+            noise_variance: 0.3060
+         position_variance: 1.3499e+04
+             rate_variance: 0.3098
+perturb_smoothing_variance: 7.1854e-19
+     perturb_rate_variance: 4.3411e-04
+ perturb_position_variance: 0.8152
+             perturb_scale: 2.4095
+
+Final ML: -5664.35
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The upward ML trend continues, but the noise variance appears to be flattening out.  The perturb_position_variance jumped upward unexpectedly.&lt;/p&gt;
+
+&lt;p&gt;This might explain all of the disparity between the 2D and 3D noise variances.  Unfortunately, we can't reduce the sampling period to 0.0004, because the runtime complexity of the matching  is O(N&lt;sup&gt;2),&lt;/sup&gt; where N is the number of sampled points.&lt;/p&gt;
+
+&lt;p&gt;Better idea: after finding the optimal region in the matching algorithm, improve it by projecting the point onto the line segments neighboring the matched point.  Constant-time, and significantly better!&lt;/p&gt;
+
+&lt;p&gt;Another thought: if the rasterization error was approx. 1 pixel, the sampling error could be reduced to the point where the rasterization error dominated (possibly a sampling period of  0.5 or 0.01 would achieve this).  That way, both 2D and 3D noise sigma would be dominated by rasterization error, and would train to similar values.&lt;/p&gt;
+
+&lt;h1&gt;TODO&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;implement post-match index improvement.&lt;/li&gt;
+&lt;li&gt;Plot reconstruction residuals, look for correlation model.
+
+&lt;ul&gt;
+&lt;li&gt;Goal: determine if residuals are truely independent, and belong in the noise bucket.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Try training BG and FG together, with the same noise variance.&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Wed, 14 Aug 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/14/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/14/work-log</guid>
+			</item>
+		
+			<item>
 				<title>Work Log - Theoretical Rate variance bug; Training background curve model</title>
 				<description>
 
@@ -178,6 +353,19 @@ fg model = -8049.097873
 
 &lt;p&gt;Might be worthwhile visualizing the optimal fits with these parameters.  Are we oversmoothing?  undersmoothing?  These would suggest a bug.&lt;/p&gt;
 
+&lt;h2&gt;ML Validity Testing&lt;/h2&gt;
+
+&lt;p&gt;Running reference ml:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;data_2 = init_data_curves_ml(data_, bg_train_params_done_force)
+sum([data_2.curves_ml{:}])
+
+    ans =
+      -5.1552e+04
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Very different from the training implementation.  Need to dig deeper to determine the cause.&lt;/p&gt;
+
 &lt;h2&gt;Misc Thoughts&lt;/h2&gt;
 
 &lt;p&gt;Do we need to re-estimate the index set during training of the FG model?&lt;/p&gt;
@@ -187,6 +375,7 @@ fg model = -8049.097873
 &lt;h2&gt;TODO&lt;/h2&gt;
 
 &lt;ul&gt;
+&lt;li&gt;investigate disparity between training ML and reference ML for background curves.&lt;/li&gt;
 &lt;li&gt;Further investigate the FG vs. BG marginal-likelihood issue.&lt;/li&gt;
 &lt;li&gt;test the re-indexing approach to FG model training.&lt;/li&gt;
 &lt;li&gt;re-build end-to-end sampler.&lt;/li&gt;
@@ -196,6 +385,98 @@ fg model = -8049.097873
 				<pubDate>Tue, 13 Aug 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/13/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/13/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Dissecting the Camera Matrix, Part 3: The Intrinsic Matrix</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Earlier we studied the extrinsic camera matrix, and examined three different interpretations of its parameters.  Today I'll demonstrate two equivalent interpretations of the camera matrix.  First, we'll see how the camera parameters correspond the geometry of real physical camera.  Then I'll show how each of the intrinsic parameters corresponds to a simple 2D transform.  Finally,  give a 3D demo illustrating both interpretations&lt;/p&gt;
+
+&lt;p&gt;This is an entry in the series &quot;Camera matrix, an interactive tour.&quot;  To read the other entries in the series, see the table of contents, here. (TODO)&lt;/p&gt;
+
+&lt;p&gt;The intrinsic matrix is:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;** EQUATION HERE **
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We usually interpret the intrinsic matrix as a transformation from 3D non-homogeneous camera coordinates to 2D homogeneous image coordinates by projecting onto the image plane.  I call this the &quot;camera-centric&quot; interpretation of the intrinsic matrix, where each of the parameters represents a physical aspect of our pinhole camera's geometry:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Focal length&lt;/strong&gt;: \(f_x\), \(f_y\) - The distance between the pinhole and the image plane (in pixels; all intrinsic values are measured in pixels -- more on this later).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Principal Point Offset&lt;/strong&gt;: \(x_0\), \(y_0\) - The position of pinhole's projection onto the camera's film, relative to the film's origin.  This projection is called the &quot;principal point&quot;, and the line from the principal point through the pinhole is called the &quot;principal axis&quot;.  Increasing \(x_0\) by 10 shifts the pinhole right by 10 pixels, or equivalently, shifts the film left by 10 pixels.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Axis skew&lt;/strong&gt;: \(s\) - As far as I know, there isn't any analogue for this in a traditional camera, but &lt;a href=&quot;http://www.epixea.com/research/multi-view-coding-thesisse8.html#x13-320002.2.1&quot;&gt;apparently some digitization processes can cause nonzero skew&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;At first glance, it seems like these 5 parameters couldn't completely describe the pinhole camera.  The focal length and principal point offset amount to simple translations of the film in space.  There must be other ways to transform the film relative to the pinhole, for example, rotation or scaling, right?  Lets address these one-by-one.&lt;/p&gt;
+
+&lt;p&gt;First we'll consider rotations of the film around the principal axis.  This is traightforward:  this is handled in the extrinsic matrix's rotation parameters (as the &quot;roll&quot; parameter if you're using a pitch-yaw-roll formulation).&lt;/p&gt;
+
+&lt;p&gt;What about other rotations that cause the film to be non-perpendicular to the pinhole?  This question is a bit ill-posed, because it assumes the pinhole has an orientation.  In truth, the pinhole in our camera model doesn't care what &quot;direction&quot; the camera is pointing -- light passes through it in all directions.  The orientation of the camera is defined by the film's orientation, which (again) is handled in the extrinsic camera matrix.  If the film is rotated around a point not lying on the prinpical axis, it will also result in changes to the focal length and principal point, too.&lt;/p&gt;
+
+&lt;p&gt;What if the film doubles in size, but stays in the same position?  This scenario changes the clipping bounds of the image, which isn't actually modelled by the intrinsic matrix.  In graphics systems like OpenGL, this is modelled by adding an extra orthographic projection after the intrinsic matrix is applied, which maps image coordinates to Normalized Device Coordinates.  This is described in more detail in my post on &lt;a href=&quot;/ksimek/research/2013/06/03/calibrated_cameras_in_opengl/&quot;&gt;calibrated cameras in OpenGL&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Why are values measured in pixels?&lt;/p&gt;
+
+&lt;p&gt;Imagine doubling all the physical dimensions of your pinhole camera: the film size and the focal length.  The resulting image would be unchanged (assuming the film's resolution remains constant).  The intrinsic matrix is only concerned with how points in 3d space are projected into pixel coordinates, and thus, it only represents relative dimensions.  The transformation is invariant to scaling of the camera dimensions; by representing dimensions in pixel units, we naturally capture this invariance.&lt;/p&gt;
+
+&lt;p&gt;If you know the size of your film (or digital sensor) in world units, you can convert focal length from pixels to world units.  If \(w\) is the width of the image in pixels, \(W\) is the width in world units, and the focal length in pixels is \(f_x\), you can use similar triangles to find the focal length in world units \(F_x\):&lt;/p&gt;
+
+&lt;div&gt; F_x = f_x * \frac{W_x}{w_x} &lt;/div&gt;
+
+
+&lt;p&gt;Other parameters \(f_x\), \(x_0\), and \(y_0\) can be found in a similar way.&lt;/p&gt;
+
+&lt;p&gt;Intrinsic parameters as 2D transformations&lt;/p&gt;
+
+&lt;p&gt;If we instead interpret our 3-vectors not as 3D image coordinates but as 2D homogeneous coordinates, we can come to an alternative interpretation of the intrinsic matrix: as a sequence of 2D affine transformations.  We can decompose the intrinsic matrix into the product of a scaling, translation, and shear amtrix, corresponding to focal length, principal point offset, and axis skew, respectively:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;TODO: equation here
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This interpretation implies that the intrinsic camera transformation occurs &lt;em&gt;post-projection&lt;/em&gt;.  One notable result of this is that intrinsic parameters cannot affect visiblity -- occluded objects cannot be revealed by simple 2D transformations in image space.&lt;/p&gt;
+
+&lt;p&gt;Full decomposition&lt;/p&gt;
+
+&lt;p&gt;We can now combine our decomposed intrinsic matrix with the extrinsic matrix decomposition we studied last time.  The result shows the sequence of five affine transformations that make up the complete camera matrix: (1) 3D rotation, (2) 3D translation, (3) 2D scaling, (4) 2D translation, and finally (5) 2D shear.&lt;/p&gt;
+
+&lt;p&gt;TODO EQUATION HERE&lt;/p&gt;
+
+&lt;p&gt;Demo&lt;/p&gt;
+
+&lt;p&gt;The demo below illustrates both interpretations of the intrinsic matrix.  The left pane represents the &quot;camera-geometry&quot; interpretation.  The yellow plane indicates the &quot;virtual&quot; image plane, but for all intents and purposes, represents the &quot;film&quot; of the pinhole camera.  Notice how the pinhole move relative to the image plane as \(x_0\) and \(y_0\) are adjusted.&lt;/p&gt;
+
+&lt;p&gt;The right pane represents the &quot;2D transformation&quot; interpretation.  Notice how changing focal length results in scaling of the projected image, and principal point results in pure translation.  Also note that since translation occurs &lt;em&gt;after&lt;/em&gt; scaling, larger focal lengths will result in larger translations as \(x_0\) and \(y_0\) are adjusted.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;TODO: demo here
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+				<pubDate>Tue, 13 Aug 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/13/intrinsic</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/13/intrinsic</guid>
 			</item>
 		
 			<item>
@@ -1303,356 +1584,6 @@ Final ML: 2.516 x 10^4
 				<pubDate>Mon, 05 Aug 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/05/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/05/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Troubleshooting training of OU perturbation model (&lt;code&gt;train/tr_curves_ml.m&lt;/code&gt;).&lt;/p&gt;
-
-&lt;p&gt;Found bug in &lt;code&gt;tr_curves_ml.m::ou_kernel&lt;/code&gt; -- &lt;code&gt;smoothing_variance&lt;/code&gt; was used where &lt;code&gt;perturb_smoothing_variance&lt;/code&gt; should have been (copy-paste bug).  Also fixed in &lt;code&gt;sqexp_kernel&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;Optimizer appears to be running much more smoothly now.  Probably because there previously was a strong correlation, due to &lt;code&gt;smoothing_variance&lt;/code&gt; appearing in two different parts of the equation.  The resulting ridge could have caused slow progress.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Attempt #1&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Initial params:&lt;/p&gt;
-
-&lt;p&gt;train_params =&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;            smoothing_variance: 0.2500
-                noise_variance: 100
-             position_variance: 90000
-                 rate_variance: 2.2500
-    perturb_smoothing_variance: 0.2500
-         perturb_rate_variance: 2.2500
-     perturb_position_variance: 90000
-                 perturb_scale: 1
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Stopped after 3 iterations.  Results:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;train_params_done_1 = 
-
-            smoothing_variance: 0.4501
-                noise_variance: 2.5982e-04
-             position_variance: 6.5359e+04
-                 rate_variance: 3.9645
-    perturb_smoothing_variance: 3.3437e-06
-         perturb_rate_variance: 0.7268
-     perturb_position_variance: 3.0785e+04
-                 perturb_scale: 0.5867
-
-Final ML: 28423.438936
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The final ML (2.84e4) is greater than the no-pertrub model (2.37e4).  This is expected, since this model has more parameters, so we can get a tighter fit (maybe overfitting).&lt;/p&gt;
-
-&lt;p&gt;I like that noise variance is much smaller (close to the minimum--do I need to lower the floor?).  This is expected, because the only source of IID noise is the rasterization process.&lt;/p&gt;
-
-&lt;p&gt;Position standard deviation is much higher than before (255 vs. 126), as is rate standard deviation (2.0 vs. 0.47).&lt;/p&gt;
-
-&lt;p&gt;Perturb variances are harder to explain.&lt;/p&gt;
-
-&lt;p&gt;Perturb smoothing variance is low, which is nice to see, because the worst of the perturbations are arising from miscalibrations (rate and position perturbations), not deformations.  But it's still far smaller than I expected.  hOnestly, I was expecting it to be almost the same as &lt;code&gt;smoothing_variance&lt;/code&gt;, but I realize now it makes sense for it to be smaller.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Perturb position variance is much, much larger than I expected.&lt;/strong&gt;  Standard deviation is 175.4, which is basically saying each plant has 17 cm of IID perturbations from the unobserved mean plant.   I have no good explanation for this, expect maybe that the initial value was ridiculously large.&lt;/p&gt;
-
-&lt;p&gt;Pertub scale seems reasonable.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Attempt #2&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Test sensitivity to initialization.  Initial values:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;train_params_2 = 
-
-            smoothing_variance: 0.0025
-                noise_variance: 0.1231
-             position_variance: 1.6676e+04
-                 rate_variance: 0.2212
-    perturb_smoothing_variance: 0.0500
-         perturb_rate_variance: 0.1000
-     perturb_position_variance: 1
-                 perturb_scale: 2
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;First four were initialized from the trained no-perturb model.&lt;/p&gt;
-
-&lt;p&gt;Note the biggest change: perturb_position_variance changed from 9000 to 1.&lt;/p&gt;
-
-&lt;p&gt;Terminated after 46 iterations; much better than the 3 iterations from last attempt.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;train_params_done_2 = 
-
-            smoothing_variance: 0.0019
-                noise_variance: 0.0721
-             position_variance: 1.6267e+04
-                 rate_variance: 0.2050
-    perturb_smoothing_variance: 6.7471e-10
-         perturb_rate_variance: 1.3201e-04
-     perturb_position_variance: 403.7082
-                 perturb_scale: 2.4888e+03
-
-Final ML: 25163.231449
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Weird that this is lower than that poorly-initialized model.  Consider initializing using a combination of Attempt #1 and Attempt #2's initial values.&lt;/p&gt;
-
-&lt;p&gt;Smoothing variance is much smaller than before, noise variance is larger.&lt;/p&gt;
-
-&lt;p&gt;Position variance is in the same order-of-magnitude, but about 1/5 the magnitude.&lt;/p&gt;
-
-&lt;p&gt;Rate variance is an OoM smaller.&lt;/p&gt;
-
-&lt;p&gt;Perturb smoothing variance is still near-zero.&lt;/p&gt;
-
-&lt;p&gt;Perturb rate variance is 3 OoM smaller.&lt;/p&gt;
-
-&lt;p&gt;Perturb position variance is 2 OoM smaller.&lt;/p&gt;
-
-&lt;p&gt;Perturb scale is sooooooo high.  Basically flat, so the regular and perturb variances sum.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Conclusions&lt;/strong&gt;: Result is very sensitive to initialization.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;: When perturb scale is this high, there exists a ridge, due to perturb variances playing the same role as normal variances.  Note that when perturb scale is infinity, this model degenerates to the no-perturb model.  Notice that Final ML isn't much better than the no-perturb.  Possibly when perturb scale exploded, the model could no longer improve, so constraining perturb scale to some small set of values may be a good idea (sigmoid transform).&lt;/p&gt;
-
-&lt;h2&gt;Next Steps&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Try smaller changes to initialization.&lt;/li&gt;
-&lt;li&gt;Try sigmoid transform on perturb scale.&lt;/li&gt;
-&lt;li&gt;Try training using standard deviations instead of variances.&lt;/li&gt;
-&lt;li&gt;Try changing one or more trained values to sensible defaults and retrain.&lt;/li&gt;
-&lt;li&gt;Work with standard deviations, not variances&lt;/li&gt;
-&lt;li&gt;Fix some 'known' values and optimize others.&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Sun, 04 Aug 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/04/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/04/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Running optimizer...&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Issue&lt;/strong&gt;: Likelihood variance is collapsing to zero.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Guess&lt;/strong&gt;: Training ML is different from naive ML and isn't penalizing noise correctly.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Test 1&lt;/strong&gt;: save params, compare training ml and naive ml&lt;/p&gt;
-
-&lt;p&gt;Same result.&lt;/p&gt;
-
-&lt;h2&gt;Discussion&lt;/h2&gt;
-
-&lt;div&gt; The marginal likelihood is monotonically increasing as the noise variance \(\sigma_n^2\) approaches zero.  This shouldn't be happening, because as the likelihood variance collapses to a delta, the marginal likelihood should become equal to the prior evaluated at the (virtual) observed locations.&lt;/div&gt;
-
-
-
-
-&lt;div&gt;
-\begin{align}
-    \lim_{\sigma_n \to 0} p(D) &amp;= \lim_{\sigma_n \to 0} \int p_0(x) \; p_l(D \mid x) dx &amp; \text{(Marginalization)}\\
-         &amp;= \lim_{\sigma_n \to 0} \int p_0(x) \; f(D - x) dx &amp;   \text{(Convolution)} \\
-         &amp;= \int p_0(x) \delta(D - x) dx \\
-         &amp;= p_0(D) 
-\end{align}
-&lt;/div&gt;
-
-
-&lt;p&gt;This implies there's a bug in the code causing this phenomenon; the mathematical model is not the cause.&lt;/p&gt;
-
-&lt;h2&gt;Solved&lt;/h2&gt;
-
-&lt;div&gt;Found the bug.  When computing the likelihood precision \(S\) from the unscaled precision \(S_0\), the noise variance \(\sigma_n^2\) was multiplied instead of divided:&lt;/div&gt;
-
-
-&lt;pre&gt;&lt;code&gt;S = S0 * sigma_n; // incorrect
-S = S0 * (1/sigma_n); // corrected version
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2&gt;Resuming Training&lt;/h2&gt;
-
-&lt;p&gt;Had some trouble with noise sigmas being too low.  Solved by in two ways:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Attempts 1-3: clamping to a minimum value and then adding a penalty depending on the amount that was clamped.&lt;/li&gt;
-&lt;li&gt;Attempt 4:  offset by minimum value before transforming&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;p&gt;Command:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;train_params_done = tr_train(test_Corrs_ll, train_params, data_, 400);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;Attempt #1&lt;/strong&gt;:&lt;/p&gt;
-
-&lt;p&gt;Handle extreme values by incuring a penalty for variances smaller than 1e-5.  Result stored in &lt;code&gt;train_params_done_1&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;train_params_done_1 = 
-
-            smoothing_variance: 0.0025
-                noise_variance: 0.1231
-             position_variance: 1.6676e+04
-                 rate_variance: 0.2212
-    perturb_smoothing_variance: 1
-         perturb_rate_variance: 1
-     perturb_position_variance: 1
-                 perturb_scale: 1
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Surprisingly small smoothness sigma.  Surprisingly low rate variance.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Attempt #2&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Testing sensitivity to the magnitude of the penalty term.  Scaled up penalty by 1000.  Results in &lt;code&gt;train_params_done_2&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;train_params_done_2 = 
-
-            smoothing_variance: 0.0025
-                noise_variance: 0.1231
-             position_variance: 1.6676e+04
-                 rate_variance: 0.2212
-    perturb_smoothing_variance: 1
-         perturb_rate_variance: 1
-     perturb_position_variance: 1
-                 perturb_scale: 1
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Summary: no change.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Attempt #3&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Testing sensitivity to the threshold where the penalty term starts to be incurred.  Set MIN_NOISE_VARIANCE to 1e-3 and MIN_SMOOTHING_VARIANCE to 1e-7 (previously both 1e-5).  Results in &lt;code&gt;train_params_done_3&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;train_params_done_3 = 
-
-            smoothing_variance: 0.0025
-                noise_variance: 0.1231
-             position_variance: 1.6676e+04
-                 rate_variance: 0.2212
-    perturb_smoothing_variance: 1
-         perturb_rate_variance: 1
-     perturb_position_variance: 1
-                 perturb_scale: 1
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Summary: no change.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt; Attempt #4 &lt;/strong&gt;
-Handled small variances by offsetting before transforming:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;% converting param to state variable
-x(1) = log(smoothing_variance - MIN_SMOOTING_VARIANCE);
-
-% converting state variable to param
-x(1) = exp(smoothing_variance) + MIN_SMOOTING_VARIANCE;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is more elegant than the penalty hack used in the last three attempts.   Results:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;train_params_done = 
-
-            smoothing_variance: 0.0025
-                noise_variance: 0.1231
-             position_variance: 1.6676e+04
-                 rate_variance: 0.2212
-    perturb_smoothing_variance: 1
-         perturb_rate_variance: 1
-     perturb_position_variance: 1
-                 perturb_scale: 1
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Summary: no change.&lt;/p&gt;
-
-&lt;h2&gt;No-Perturb model summary:&lt;/h2&gt;
-
-&lt;p&gt;Successfully trained model.&lt;br/&gt;
-Required &lt;strong&gt;115 function evaluations&lt;/strong&gt;, taking &lt;strong&gt;112 s&lt;/strong&gt;.&lt;br/&gt;
-Optimal marginal likelihood:  &lt;strong&gt;23714.937760&lt;/strong&gt;.&lt;br/&gt;
-Optimal parameters:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;            smoothing_variance: 0.0025
-                noise_variance: 0.1231
-             position_variance: 1.6676e+04
-                 rate_variance: 0.2212
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Surprised at how small noise_variance was, considering the calibration noise.  However, I guess the maximum-likelihood reconstruction looked pretty good, if unity-apect-ratio axis scaling is used.&lt;/p&gt;
-
-&lt;h2&gt;Training OU-Perturb model&lt;/h2&gt;
-
-&lt;p&gt;Getting weird results.  Halted after second iteration; second iteration took 250 function evaluations; perturb_smoothing_variance gradient is zero.  Results:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;train_params_done = 
-
-            smoothing_variance: 1.5003e-05
-                noise_variance: 1.0087e-04
-             position_variance: 7.9393e+04
-                 rate_variance: 0.7879
-    perturb_smoothing_variance: 0.2500
-         perturb_rate_variance: 1.5183
-     perturb_position_variance: 2.5159e+04
-                 perturb_scale: 48.6163
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Recall that new model ML's aren't deeply tested; probably a bug in there (in the kernel implementation?  in the kernel theory? in the conversion from mats to kernel?).  Will continue tomorrow.&lt;/p&gt;
-</description>
-				<pubDate>Sat, 03 Aug 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/03/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/03/work-log</guid>
 			</item>
 		
 	</channel>

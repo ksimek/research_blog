@@ -15,8 +15,11 @@ http://vision.sista.arizona.edu/ksimek/research/testing_animation/index.html
 http://vision.sista.arizona.edu/ksimek/research/page2/index.html
 http://vision.sista.arizona.edu/ksimek/research/page3/index.html
 http://vision.sista.arizona.edu/ksimek/research/page4/index.html
+http://vision.sista.arizona.edu/ksimek/research/page5/index.html
 
+http://vision.sista.arizona.edu/ksimek/research/2013/08/14/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/08/13/work-log
+http://vision.sista.arizona.edu/ksimek/research/2013/08/13/intrinsic
 http://vision.sista.arizona.edu/ksimek/research/2013/08/11/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/08/10/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/08/09/work-log

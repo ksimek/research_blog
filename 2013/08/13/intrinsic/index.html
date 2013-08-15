@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log - Theoretical Rate variance bug; Training background curve model &larr; </title>
+   <title>Dissecting the Camera Matrix, Part 3: The Intrinsic Matrix &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -78,7 +78,7 @@
 	
   
   
-  <h1 class="title">Work Log - Theoretical Rate variance bug; Training background curve model</h1>
+  <h1 class="title">Dissecting the Camera Matrix, Part 3: The Intrinsic Matrix</h1>
 
   <div class="date emphnext">August 13, 2013</div>
     
@@ -109,180 +109,66 @@
 </div>
 
 
-<h1>Curve reversing thoughts</h1>
+<p>Earlier we studied the extrinsic camera matrix, and examined three different interpretations of its parameters.  Today I'll demonstrate two equivalent interpretations of the camera matrix.  First, we'll see how the camera parameters correspond the geometry of real physical camera.  Then I'll show how each of the intrinsic parameters corresponds to a simple 2D transform.  Finally,  give a 3D demo illustrating both interpretations</p>
 
-<p>The reversed curve issue only really matters during training.  Our tests show that curve-flip moves will mix well, even if the maximum isn't always correct.  Adding connections between parent and child curves should resolve these issues.</p>
+<p>This is an entry in the series "Camera matrix, an interactive tour."  To read the other entries in the series, see the table of contents, here. (TODO)</p>
 
-<p>During training, derive curve direction from ground-truth.</p>
+<p>The intrinsic matrix is:</p>
 
-<h1>Theoretical Rate Variance (take 2)</h1>
-
-<p>Realized that my last attempt at this had two bugs:</p>
-
-<ol>
-<li>I used <code>rand()</code> instead of <code>randn()</code>.</li>
-<li>I was normalizing by the <em>squared</em> vector magnitude.</li>
-</ol>
-
-
-<p>Fixing this:</p>
-
-<pre><code>dir = randn(3,10000000);
-dir = bsxfun(@times, dir, 1./sqrt(sum(dir.^2)));
-var(dir(:))
-
-    ans =
-        0.3332
+<pre><code>** EQUATION HERE **
 </code></pre>
 
-<p>Compare this to earlier theoretical results of ~0.23.</p>
-
-<p>This new result is interesting, because it is 25% higher than the emperical results we've been getting.  I'm guessing that the fact all of the curves point upward reduces the variance. To prove, we'll force all points to be in the top hemishphere:</p>
-
-<pre><code> dir = randn(3,10000000);
- dir(3,:) = abs(dir(3,:));
- dir = bsxfun(@times, dir, 1./sum(dir.^2));
-
- var(dir(:))
-
-    ans =
-        0.3149
-</code></pre>
-
-<p>Yep.  And in practive, our values take on an even smaller range of directions.</p>
-
-<p>...</p>
-
-<p>Repeating for the 2D case:</p>
-
-<pre><code>dir = randn(2,10000000);
-dir = bsxfun(@times, dir, 1./sqrt(sum(dir.^2)));
-var(dir(:))
-
-    ans =
-        0.5000
-</code></pre>
-
-<p>This strongly suggests a pattern of variance being 1/D.</p>
-
-<h1>Connection test</h1>
-
-<p>does connecting each of the curves result in better ML?  Do we need to marginalize?</p>
-
-<h1>training background model</h1>
-
-<p>construct training ML for background ML
-construct mats for bg curve models.</p>
-
-<p>Result: <code>train/tr_train_bg.m</code>.</p>
-
-<pre><code>     position_mean_2d: [2x1 double]
- position_variance_2d: 1.7837e+04
-     rate_variance_2d: 0.5000
-    noise_variance_2d: 9.4597e-04
-smoothing_variance_2d: 0.0157
-</code></pre>
-
-<p>Interesting that noise_variance_2d is so low.  We expected it to be on the order of 1 pixel.  More discussion on this later.</p>
-
-<p>I retrained the BG model for <em>only</em> the foreground curves, and evaluated the ML under it.</p>
-
-<pre><code>     position_mean_2d: [2x1 double]
- position_variance_2d: 5.8116e+03
-     rate_variance_2d: 0.5000
-    noise_variance_2d: 4.8105e-04
-smoothing_variance_2d: 0.0053
-</code></pre>
-
-<p>Smaller noise variance, smaller smoothing variance.  This shrinking of variance with smaller training set is typical overfitting behavior.  Not of much concern.</p>
-
-<p>Here's the comparison against the ML for the trained foreground model.</p>
-
-<pre><code>bg model = 4611.886746
-fg model = -8049.097873
-</code></pre>
-
-<p>Not good.  The FG model on true foreground curves should have a better marginal likelihood than the same curves under the BG model.</p>
-
-<p>Some questions</p>
+<p>We usually interpret the intrinsic matrix as a transformation from 3D non-homogeneous camera coordinates to 2D homogeneous image coordinates by projecting onto the image plane.  I call this the "camera-centric" interpretation of the intrinsic matrix, where each of the parameters represents a physical aspect of our pinhole camera's geometry:</p>
 
 <ul>
-<li>Why is bg noise variance so low??
-
-<ul>
-<li>did we smooth the detected curves before storing them?</li>
-<li>If so, why isn't the foreground model lower?</li>
-</ul>
-</li>
-<li>Why is the background model so much better than the foreground model?
-
-<ul>
-<li>We expect foreground curves to have a higher marginal likelihood under the foreground model than the background.</li>
-<li>could it be an indexing issue?</li>
-</ul>
-</li>
+<li><strong>Focal length</strong>: \(f_x\), \(f_y\) - The distance between the pinhole and the image plane (in pixels; all intrinsic values are measured in pixels -- more on this later).</li>
+<li><strong>Principal Point Offset</strong>: \(x_0\), \(y_0\) - The position of pinhole's projection onto the camera's film, relative to the film's origin.  This projection is called the "principal point", and the line from the principal point through the pinhole is called the "principal axis".  Increasing \(x_0\) by 10 shifts the pinhole right by 10 pixels, or equivalently, shifts the film left by 10 pixels.</li>
+<li><strong>Axis skew</strong>: \(s\) - As far as I know, there isn't any analogue for this in a traditional camera, but <a href="http://www.epixea.com/research/multi-view-coding-thesisse8.html#x13-320002.2.1">apparently some digitization processes can cause nonzero skew</a>.</li>
 </ul>
 
 
-<p>This warrants further investigation.</p>
+<p>At first glance, it seems like these 5 parameters couldn't completely describe the pinhole camera.  The focal length and principal point offset amount to simple translations of the film in space.  There must be other ways to transform the film relative to the pinhole, for example, rotation or scaling, right?  Lets address these one-by-one.</p>
 
-<h2>Other observations</h2>
+<p>First we'll consider rotations of the film around the principal axis.  This is traightforward:  this is handled in the extrinsic matrix's rotation parameters (as the "roll" parameter if you're using a pitch-yaw-roll formulation).</p>
 
-<p>If I force the noise variance to be equal to that of the fg model (0.72), the ML drops significantly (fg results reprinted for convenience):</p>
+<p>What about other rotations that cause the film to be non-perpendicular to the pinhole?  This question is a bit ill-posed, because it assumes the pinhole has an orientation.  In truth, the pinhole in our camera model doesn't care what "direction" the camera is pointing -- light passes through it in all directions.  The orientation of the camera is defined by the film's orientation, which (again) is handled in the extrinsic camera matrix.  If the film is rotated around a point not lying on the prinpical axis, it will also result in changes to the focal length and principal point, too.</p>
 
-<pre><code> bg model = -9413.1e+03
-fg model = -8049.097873
+<p>What if the film doubles in size, but stays in the same position?  This scenario changes the clipping bounds of the image, which isn't actually modelled by the intrinsic matrix.  In graphics systems like OpenGL, this is modelled by adding an extra orthographic projection after the intrinsic matrix is applied, which maps image coordinates to Normalized Device Coordinates.  This is described in more detail in my post on <a href="/ksimek/research/2013/06/03/calibrated_cameras_in_opengl/">calibrated cameras in OpenGL</a>.</p>
+
+<p>Why are values measured in pixels?</p>
+
+<p>Imagine doubling all the physical dimensions of your pinhole camera: the film size and the focal length.  The resulting image would be unchanged (assuming the film's resolution remains constant).  The intrinsic matrix is only concerned with how points in 3d space are projected into pixel coordinates, and thus, it only represents relative dimensions.  The transformation is invariant to scaling of the camera dimensions; by representing dimensions in pixel units, we naturally capture this invariance.</p>
+
+<p>If you know the size of your film (or digital sensor) in world units, you can convert focal length from pixels to world units.  If \(w\) is the width of the image in pixels, \(W\) is the width in world units, and the focal length in pixels is \(f_x\), you can use similar triangles to find the focal length in world units \(F_x\):</p>
+
+<div> F_x = f_x * \frac{W_x}{w_x} </div>
+
+
+<p>Other parameters \(f_x\), \(x_0\), and \(y_0\) can be found in a similar way.</p>
+
+<p>Intrinsic parameters as 2D transformations</p>
+
+<p>If we instead interpret our 3-vectors not as 3D image coordinates but as 2D homogeneous coordinates, we can come to an alternative interpretation of the intrinsic matrix: as a sequence of 2D affine transformations.  We can decompose the intrinsic matrix into the product of a scaling, translation, and shear amtrix, corresponding to focal length, principal point offset, and axis skew, respectively:</p>
+
+<pre><code>TODO: equation here
 </code></pre>
 
-<p>Now we're back in business.  This is a good sanity check, but it doesn't explain why we can't get similar noise variances for both models when training.</p>
+<p>This interpretation implies that the intrinsic camera transformation occurs <em>post-projection</em>.  One notable result of this is that intrinsic parameters cannot affect visiblity -- occluded objects cannot be revealed by simple 2D transformations in image space.</p>
 
-<p>Possibly the smoothing variance would need to change in this case.  Retraining, with noise_variance forced to 0.72:</p>
+<p>Full decomposition</p>
 
-<pre><code>     position_mean_2d: [2x1 double]
- position_variance_2d: 5.8116e+03
-     rate_variance_2d: 0.5000
-    noise_variance_2d: 0.7204
-smoothing_variance_2d: 2.7394e-05
+<p>We can now combine our decomposed intrinsic matrix with the extrinsic matrix decomposition we studied last time.  The result shows the sequence of five affine transformations that make up the complete camera matrix: (1) 3D rotation, (2) 3D translation, (3) 2D scaling, (4) 2D translation, and finally (5) 2D shear.</p>
+
+<p>TODO EQUATION HERE</p>
+
+<p>Demo</p>
+
+<p>The demo below illustrates both interpretations of the intrinsic matrix.  The left pane represents the "camera-geometry" interpretation.  The yellow plane indicates the "virtual" image plane, but for all intents and purposes, represents the "film" of the pinhole camera.  Notice how the pinhole move relative to the image plane as \(x_0\) and \(y_0\) are adjusted.</p>
+
+<p>The right pane represents the "2D transformation" interpretation.  Notice how changing focal length results in scaling of the projected image, and principal point results in pure translation.  Also note that since translation occurs <em>after</em> scaling, larger focal lengths will result in larger translations as \(x_0\) and \(y_0\) are adjusted.</p>
+
+<pre><code>TODO: demo here
 </code></pre>
-
-<p>Smoothing variance dropped dramatically.  ML comparison (fg results reprinted for convenience):</p>
-
-<pre><code>bg model = -9214.632874
-fg model = -8049.097873
-</code></pre>
-
-<p>Note that bg ML didn't significantly change (-2%) after optimizing noise variance (which did change a lot).</p>
-
-<p>Might be worthwhile visualizing the optimal fits with these parameters.  Are we oversmoothing?  undersmoothing?  These would suggest a bug.</p>
-
-<h2>ML Validity Testing</h2>
-
-<p>Running reference ml:</p>
-
-<pre><code>data_2 = init_data_curves_ml(data_, bg_train_params_done_force)
-sum([data_2.curves_ml{:}])
-
-    ans =
-      -5.1552e+04
-</code></pre>
-
-<p>Very different from the training implementation.  Need to dig deeper to determine the cause.</p>
-
-<h2>Misc Thoughts</h2>
-
-<p>Do we need to re-estimate the index set during training of the FG model?</p>
-
-<p>Iterate: train, re-index, repeat.</p>
-
-<h2>TODO</h2>
-
-<ul>
-<li>investigate disparity between training ML and reference ML for background curves.</li>
-<li>Further investigate the FG vs. BG marginal-likelihood issue.</li>
-<li>test the re-indexing approach to FG model training.</li>
-<li>re-build end-to-end sampler.</li>
-</ul>
-
 
       <address class="signature">
         Posted by
@@ -294,10 +180,10 @@ sum([data_2.curves_ml{:}])
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/08/14/work-log" class="next" title="Work Log - Background ML bugs; Why is Foreground Noise Variance so large?">Work Log - Background ML bugs; Why is Foreground Noise Variance so large? &rarr;</a>
+    <a href="/ksimek/research/2013/08/13/work-log" class="next" title="Work Log - Theoretical Rate variance bug; Training background curve model">Work Log - Theoretical Rate variance bug; Training background curve model &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/08/13/intrinsic" class="prev" title="Dissecting the Camera Matrix, Part 3: The Intrinsic Matrix">&larr; Dissecting the Camera Matrix, Part 3: The Intrinsic Matrix</a>
+    <a href="/ksimek/research/2013/08/11/work-log" class="prev" title="Work Log - Re-run training, Re-reconstruction, Curve-Flipping">&larr; Work Log - Re-run training, Re-reconstruction, Curve-Flipping</a>
   
   </div>
   <div class="clearer"> </div>
@@ -314,7 +200,7 @@ sum([data_2.curves_ml{:}])
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Theoretical Rate variance bug; Training background curve model" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Dissecting the Camera Matrix, Part 3: The Intrinsic Matrix" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -362,7 +248,7 @@ sum([data_2.curves_ml{:}])
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log - Theoretical Rate variance bug; Training background curve model");
+                    + encodeURIComponent("Dissecting the Camera Matrix, Part 3: The Intrinsic Matrix");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");
