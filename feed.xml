@@ -7,6 +7,73 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Continuing from yesterday.&lt;/p&gt;
+
+&lt;p&gt;Tried changing index_delta from 0.5 to 0.25.  ML suddenly dropped a &lt;em&gt;lot&lt;/em&gt;.  Realized that oversampling the smoothed curves causes significant degree of many-to-one, and our code prevents skipping more than one or two points during correspondences.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Main Idea:&lt;/strong&gt; Sampling period should be equal to (or close to) the data point-spacing.&lt;/p&gt;
+
+&lt;h1&gt;Index-refinement&lt;/h1&gt;
+
+&lt;p&gt;Allow indices to correspond to continuous values between the samples.&lt;/p&gt;
+
+&lt;p&gt;Modified &lt;code&gt;correspondence/corr_to_likelihood.m&lt;/code&gt; to post-process indices to search the neighboring line segments for a better value. Re-ran &lt;code&gt;tr_prep_likelihood&lt;/code&gt; to reconstruct Corrs collection.  ML improves after fix.&lt;/p&gt;
+
+&lt;p&gt;Need to confirm improved indexing by visualizing results.  See &lt;code&gt;experiments/exp_2013_08_15_visualize_indices.m&lt;/code&gt;, still in progress.  Some apparent bugs in aforementioned changes, causing bad results.  Still investigating...&lt;/p&gt;
+
+&lt;h1&gt;Mean-curve reconstruction&lt;/h1&gt;
+
+&lt;p&gt;Last week, I derived the equation for finding the maximum posterior per-view reconstruction.  Now we have a formula for the unobserved mean curve, i.e. the curve that each view is perturbed from.  Iterestingly, they both have the same form:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    \mu = K^* (S K + I)^{-1} S y
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Note that this is slightly different from the form used in a previous post.  This form is equivalent, and better reflects the form used by Williams and Rasmussen.&lt;/p&gt;
+
+&lt;div&gt;Here, \(K\) is the prior covariance, \(S\) is the likelihood precision matrix, and \(y\) are the virtual observations in 3D.  \(K^*\) is the covariance between the observed points (columns) and the points to be predicted (rows). The difference between the per-view and the mean reconstruction is the form of \(K^*\):  for the per-view reconstruction, \(K^*\) uses the full prior covariance, whereas with the mean reconstruction, the perturb covariances are set to zero.&lt;/div&gt;
+
+
+&lt;h2&gt;Usage&lt;/h2&gt;
+
+&lt;p&gt;Modified &lt;code&gt;curve_max_posterior_2.m&lt;/code&gt; by adding an extra optional parameter, &lt;code&gt;kernel_2&lt;/code&gt;.  If set, it assumes you want a mean reconstruction instead of a per-view reconstruction, and uses &lt;code&gt;kernel_2&lt;/code&gt; to build \(K*\).&lt;/p&gt;
+
+&lt;p&gt;Added an extra flag to &lt;code&gt;experiments/exp_2013_08_11_reconstruct_for_web.m&lt;/code&gt;, which if set to true, will also plot the mean curve.&lt;/p&gt;
+</description>
+				<pubDate>Thu, 15 Aug 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/15/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/15/work-log</guid>
+			</item>
+		
+			<item>
 				<title>Work Log - Background ML bugs; Why is Foreground Noise Variance so large?</title>
 				<description>
 
@@ -385,98 +452,6 @@ sum([data_2.curves_ml{:}])
 				<pubDate>Tue, 13 Aug 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/13/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/13/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Dissecting the Camera Matrix, Part 3: The Intrinsic Matrix</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Earlier we studied the extrinsic camera matrix, and examined three different interpretations of its parameters.  Today I'll demonstrate two equivalent interpretations of the camera matrix.  First, we'll see how the camera parameters correspond the geometry of real physical camera.  Then I'll show how each of the intrinsic parameters corresponds to a simple 2D transform.  Finally,  give a 3D demo illustrating both interpretations&lt;/p&gt;
-
-&lt;p&gt;This is an entry in the series &quot;Camera matrix, an interactive tour.&quot;  To read the other entries in the series, see the table of contents, here. (TODO)&lt;/p&gt;
-
-&lt;p&gt;The intrinsic matrix is:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;** EQUATION HERE **
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We usually interpret the intrinsic matrix as a transformation from 3D non-homogeneous camera coordinates to 2D homogeneous image coordinates by projecting onto the image plane.  I call this the &quot;camera-centric&quot; interpretation of the intrinsic matrix, where each of the parameters represents a physical aspect of our pinhole camera's geometry:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Focal length&lt;/strong&gt;: \(f_x\), \(f_y\) - The distance between the pinhole and the image plane (in pixels; all intrinsic values are measured in pixels -- more on this later).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Principal Point Offset&lt;/strong&gt;: \(x_0\), \(y_0\) - The position of pinhole's projection onto the camera's film, relative to the film's origin.  This projection is called the &quot;principal point&quot;, and the line from the principal point through the pinhole is called the &quot;principal axis&quot;.  Increasing \(x_0\) by 10 shifts the pinhole right by 10 pixels, or equivalently, shifts the film left by 10 pixels.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Axis skew&lt;/strong&gt;: \(s\) - As far as I know, there isn't any analogue for this in a traditional camera, but &lt;a href=&quot;http://www.epixea.com/research/multi-view-coding-thesisse8.html#x13-320002.2.1&quot;&gt;apparently some digitization processes can cause nonzero skew&lt;/a&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;At first glance, it seems like these 5 parameters couldn't completely describe the pinhole camera.  The focal length and principal point offset amount to simple translations of the film in space.  There must be other ways to transform the film relative to the pinhole, for example, rotation or scaling, right?  Lets address these one-by-one.&lt;/p&gt;
-
-&lt;p&gt;First we'll consider rotations of the film around the principal axis.  This is traightforward:  this is handled in the extrinsic matrix's rotation parameters (as the &quot;roll&quot; parameter if you're using a pitch-yaw-roll formulation).&lt;/p&gt;
-
-&lt;p&gt;What about other rotations that cause the film to be non-perpendicular to the pinhole?  This question is a bit ill-posed, because it assumes the pinhole has an orientation.  In truth, the pinhole in our camera model doesn't care what &quot;direction&quot; the camera is pointing -- light passes through it in all directions.  The orientation of the camera is defined by the film's orientation, which (again) is handled in the extrinsic camera matrix.  If the film is rotated around a point not lying on the prinpical axis, it will also result in changes to the focal length and principal point, too.&lt;/p&gt;
-
-&lt;p&gt;What if the film doubles in size, but stays in the same position?  This scenario changes the clipping bounds of the image, which isn't actually modelled by the intrinsic matrix.  In graphics systems like OpenGL, this is modelled by adding an extra orthographic projection after the intrinsic matrix is applied, which maps image coordinates to Normalized Device Coordinates.  This is described in more detail in my post on &lt;a href=&quot;/ksimek/research/2013/06/03/calibrated_cameras_in_opengl/&quot;&gt;calibrated cameras in OpenGL&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Why are values measured in pixels?&lt;/p&gt;
-
-&lt;p&gt;Imagine doubling all the physical dimensions of your pinhole camera: the film size and the focal length.  The resulting image would be unchanged (assuming the film's resolution remains constant).  The intrinsic matrix is only concerned with how points in 3d space are projected into pixel coordinates, and thus, it only represents relative dimensions.  The transformation is invariant to scaling of the camera dimensions; by representing dimensions in pixel units, we naturally capture this invariance.&lt;/p&gt;
-
-&lt;p&gt;If you know the size of your film (or digital sensor) in world units, you can convert focal length from pixels to world units.  If \(w\) is the width of the image in pixels, \(W\) is the width in world units, and the focal length in pixels is \(f_x\), you can use similar triangles to find the focal length in world units \(F_x\):&lt;/p&gt;
-
-&lt;div&gt; F_x = f_x * \frac{W_x}{w_x} &lt;/div&gt;
-
-
-&lt;p&gt;Other parameters \(f_x\), \(x_0\), and \(y_0\) can be found in a similar way.&lt;/p&gt;
-
-&lt;p&gt;Intrinsic parameters as 2D transformations&lt;/p&gt;
-
-&lt;p&gt;If we instead interpret our 3-vectors not as 3D image coordinates but as 2D homogeneous coordinates, we can come to an alternative interpretation of the intrinsic matrix: as a sequence of 2D affine transformations.  We can decompose the intrinsic matrix into the product of a scaling, translation, and shear amtrix, corresponding to focal length, principal point offset, and axis skew, respectively:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;TODO: equation here
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This interpretation implies that the intrinsic camera transformation occurs &lt;em&gt;post-projection&lt;/em&gt;.  One notable result of this is that intrinsic parameters cannot affect visiblity -- occluded objects cannot be revealed by simple 2D transformations in image space.&lt;/p&gt;
-
-&lt;p&gt;Full decomposition&lt;/p&gt;
-
-&lt;p&gt;We can now combine our decomposed intrinsic matrix with the extrinsic matrix decomposition we studied last time.  The result shows the sequence of five affine transformations that make up the complete camera matrix: (1) 3D rotation, (2) 3D translation, (3) 2D scaling, (4) 2D translation, and finally (5) 2D shear.&lt;/p&gt;
-
-&lt;p&gt;TODO EQUATION HERE&lt;/p&gt;
-
-&lt;p&gt;Demo&lt;/p&gt;
-
-&lt;p&gt;The demo below illustrates both interpretations of the intrinsic matrix.  The left pane represents the &quot;camera-geometry&quot; interpretation.  The yellow plane indicates the &quot;virtual&quot; image plane, but for all intents and purposes, represents the &quot;film&quot; of the pinhole camera.  Notice how the pinhole move relative to the image plane as \(x_0\) and \(y_0\) are adjusted.&lt;/p&gt;
-
-&lt;p&gt;The right pane represents the &quot;2D transformation&quot; interpretation.  Notice how changing focal length results in scaling of the projected image, and principal point results in pure translation.  Also note that since translation occurs &lt;em&gt;after&lt;/em&gt; scaling, larger focal lengths will result in larger translations as \(x_0\) and \(y_0\) are adjusted.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;TODO: demo here
-&lt;/code&gt;&lt;/pre&gt;
-</description>
-				<pubDate>Tue, 13 Aug 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/13/intrinsic</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/13/intrinsic</guid>
 			</item>
 		
 			<item>
