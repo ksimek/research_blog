@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-08-15T18:41:01-07:00</updated>
+ <updated>2013-08-15T18:41:57-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -13,7 +13,7 @@
 
  
  <entry>
-   <title>Work Log</title>
+   <title>Work Log - Index Refinement; Mean-curve Reconstruction</title>
    <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/15/work-log"/>
    <updated>2013-08-15T00:00:00-07:00</updated>
    <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/15/work-log</id>
