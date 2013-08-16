@@ -4,13 +4,274 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-08-15T18:41:57-07:00</updated>
+ <updated>2013-08-16T16:43:35-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log - Improved indexing; Retraining; Distinguishing between camera and plant motion</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/16/work-log"/>
+   <updated>2013-08-16T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/16/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h1&gt;Improved Indexing (ctd)&lt;/h1&gt;
+
+&lt;p&gt;Finished debugging changes to &lt;code&gt;corr_to_likelihood&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Recap: since projected model curves are discretely sampled at coarse intervals, multiple observed points may correspond to the same model point.  The results below show this. The projected model curve is sampled every 2 pixels (&lt;code&gt;index_delta_2d&lt;/code&gt;), so each model point has between 2 and 3 corresponding data points.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-16-bad-indexing.png&quot; alt=&quot;old indexing results in aliasing&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The new scheme post-processes the indexes by linearly interpolating the model curve and projecting the data point onto the neighboring line segments.  Resulting indices are much improved:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-16-better-indexing.png&quot; alt=&quot;new indexing scheme permits continuous (between-point) correspondences, which results in better indexing&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Note that viewing angle distorts the correspondence angles somewhat.  Non-perpendicular correspondence lines may be simply due to non-orthogonal viewing direction.&lt;/p&gt;
+
+&lt;p&gt;Since coarse sampling is no longer an issue, we can increase the 2D sample period and still get good results.  Below is the result after increasing 2D sampling period from 2 to 5:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-16-better-indexing-in-spite.png&quot; alt=&quot;new indexing scheme permits continuous (between-point) correspondences, which results in better indexing&quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;Improved training&lt;/h2&gt;
+
+&lt;p&gt;This has implications on training results.  Re-running training using &lt;code&gt;exp_2013_08_11_train_all&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;No Perturb Model&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0030
+            noise_variance: 1.0805
+         position_variance: 1.6270e+04
+             rate_variance: 0.2904
+perturb_smoothing_variance: 1
+     perturb_rate_variance: 1
+ perturb_position_variance: 1
+             perturb_scale: 2.5000
+
+Final ML: -9.094636e+03
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;em&gt;Ind-Perturb Model&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0034
+            noise_variance: 0.3472
+         position_variance: 1.6458e+04
+             rate_variance: 0.2605
+perturb_smoothing_variance: 1.4186e-06
+     perturb_rate_variance: 3.0555e-04
+ perturb_position_variance: 0.5467
+             perturb_scale: 2.5000
+
+Final ML: -6.203953e+03
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;em&gt;OU-Perturb Model&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0035
+            noise_variance: 0.3486
+         position_variance: 1.6440e+04
+             rate_variance: 0.2587
+perturb_smoothing_variance: 1.4874e-06
+     perturb_rate_variance: 3.6269e-04
+ perturb_position_variance: 0.7241
+             perturb_scale: 2.3364
+
+Final ML: -6.156721e+03
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;em&gt;SqExp-Perurb Model&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0035
+            noise_variance: 0.3479
+         position_variance: 1.6246e+04
+             rate_variance: 0.2745
+perturb_smoothing_variance: 1.5495e-06
+     perturb_rate_variance: 4.1614e-04
+ perturb_position_variance: 0.6613
+             perturb_scale: 0.9654
+
+Final ML: -6.159716e+03
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Awesome news:  perturb smoothing variance is now non-negligible!&lt;/strong&gt;  There must have been so much IID noise resulting from bad indexing that it totally masked the perturb smoothing variance.&lt;/p&gt;
+
+&lt;p&gt;The totally validates our efforts to fix indexing.  Before, the model was fundamentally broken; bad indexing was preventing us from making any correct inferences beyond a certain level of granularity.  By fixing indexing, we're suddenly able to everything clearly, whereas before we were squinting through a noisy haze.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Other observations&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;ML is much lower compared to the badly indexed results, which were one the order of -8000 (&lt;a href=&quot;/ksimek/research/2013/08/14/work-log/&quot;&gt;according to this post&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;Noise variance dropped from 0.68 to 0.35.&lt;/li&gt;
+&lt;li&gt;Smoothing variance has increased, probably because we attribute fewer deviations to IID noise.  Great!&lt;/li&gt;
+&lt;li&gt;Global rate variance is lower, while perturb rate variance roughly tripled.&lt;/li&gt;
+&lt;li&gt;Perturb scale dropped slightly.  Since noise variance can't explain independent deviations, the perturb-model takes over, becomes closer to independent.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Lets see if anything interesting comes out of our reconstructions...&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;OU-perturb Model&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;az = 24;
+el = 16;
+axis_ = [ 70.0000  110.0000   50.0000  110.0000   47.8040  224.0467 ]
+
+exp_2013_08_11_reconstruct_for_web(test_Corrs_ll_2, retraining_results{3}, 3, axis_, el, az, num_views, '/Users/ksimek/src/research_blog/img/2013-08-16-ou-model-%d.png', '/ksimek/research/img/2013-08-16-ou-model-%d.png', 'ou-reconstruct-anim', true)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;script&gt;
+$(function(){
+    var urls = [
+        &quot;/ksimek/research/img/2013-08-16-ou-model-1.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-ou-model-2.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-ou-model-3.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-ou-model-4.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-ou-model-5.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-ou-model-6.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-ou-model-7.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-ou-model-8.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-ou-model-9.png&quot;
+        ]
+
+    construct_animation($(&quot;#ou-reconstruct-anim&quot;), urls);
+});
+&lt;/script&gt;
+
+
+&lt;div id=&quot;ou-reconstruct-anim&quot; style=&quot;width:137px&quot;&gt; &lt;/div&gt;
+
+
+&lt;p&gt;&lt;em&gt;SqExp-Perturb Model&lt;/em&gt;&lt;/p&gt;
+
+&lt;script&gt;
+$(function(){
+    var urls = [
+        &quot;/ksimek/research/img/2013-08-16-sqexp-model-1.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-sqexp-model-2.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-sqexp-model-3.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-sqexp-model-4.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-sqexp-model-5.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-sqexp-model-6.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-sqexp-model-7.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-sqexp-model-8.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-sqexp-model-9.png&quot;
+        ]
+
+    construct_animation($(&quot;#sqexp-reconstruct-anim&quot;), urls);
+});
+&lt;/script&gt;
+
+
+&lt;div id=&quot;sqexp-reconstruct-anim&quot; style=&quot;width:136px&quot;&gt; &lt;/div&gt;
+
+
+&lt;h2&gt;Removing camera-based motion&lt;/h2&gt;
+
+&lt;p&gt;We can remove perturbations that arise from poor camera calibration by assuming it is captured in the linear and offset perturbations; under this assumption, the remaining cubic-spline smooth perturbations capture the true plant motion.&lt;/p&gt;
+
+&lt;div&gt;Removing linear and offset perturbations is as simple as removing their contributions to \(K^*\) in yesterday's equation for the mean of the predictive distribution.&lt;/div&gt;
+
+
+&lt;p&gt;Command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;reverse = false(1,num_tracks);
+reverse([1 2 4 5 6 8 9 10 11 12 14 15]) = true;
+% error above, should omit 11:
+% reverse([1 2 4 5 6 8 9 10 12 14 15]) = true;
+exp_2013_08_16_visualize_smooth_perturbations( ...
+        test_Corrs_ll_2, ...
+        retraining_results{3},  ...
+        3, axis_, el, az, num_views,  ...
+        '/Users/ksimek/src/research_blog/img/2013-08-16-ou-model-smooth-%d.png', ...
+        '/ksimek/research/img/2013-08-16-ou-model-smooth-%d.png', ...
+        'ou-reconstruct-smooth-anim', reverse)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Results:&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;OU-Perturb Model&lt;/em&gt;&lt;/p&gt;
+
+&lt;script&gt;
+$(function(){
+    var urls = [
+        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-1.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-2.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-3.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-4.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-5.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-6.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-7.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-8.png&quot;,
+        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-9.png&quot;
+        ]
+
+    construct_animation($(&quot;#ou-reconstruct-smooth-anim&quot;), urls);
+});
+&lt;/script&gt;
+
+
+&lt;div id=&quot;ou-reconstruct-smooth-anim&quot; style=&quot;width:250px&quot;&gt; &lt;/div&gt;
+
+
+&lt;p&gt;It's notable that the little curves at the top don't move.  Attaching them to the large main step will allow them to move, which should improve ML.&lt;/p&gt;
+
+&lt;p&gt;It should also significantly affect training if we train with attachments in place.  Perturb_position_variance should be responsible for less of the variance, and perturb_smoothing_variance should explain more.&lt;/p&gt;
+
+&lt;h1&gt;Attachments&lt;/h1&gt;
+
+&lt;p&gt;Tasks:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Create new attachments structure.  Indicates which curve and index the curve is attached to.&lt;/li&gt;
+&lt;li&gt;Algorithm to convert N attachment to M track-sets, where M is the number of connected components in the attachment structure.  (in practice, attachment structure might be irrelevant, given the track-set structure).&lt;/li&gt;
+&lt;li&gt;New function to construct prior matrix for track-sets, as opposed to individual tracks.&lt;/li&gt;
+&lt;li&gt;New function to evaluate ML over track-sets.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h1&gt;TODO&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Add attachments before training.&lt;/li&gt;
+&lt;li&gt;Complete end-to-end training
+
+&lt;ul&gt;
+&lt;li&gt;input: path of training and curves&lt;/li&gt;
+&lt;li&gt;automatically add attachments&lt;/li&gt;
+&lt;li&gt;automatically reverse curves as needed&lt;/li&gt;
+&lt;li&gt;save trained parameters somewhere&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Work Log - Index Refinement; Mean-curve Reconstruction</title>
