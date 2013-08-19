@@ -7,6 +7,63 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+
+</description>
+				<pubDate>Mon, 19 Aug 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/19/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/19/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Saturday Thoughts - Enabling Non-gaussian models by using Gaussian models as proposal distributions</title>
+				<description>&lt;p&gt;The different between the models we're fitting and the models we'd really like to use is that our model doesn't have a way to prefer certain branch angles or internode-distance.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately, adding those features would break the Gaussian-ness of our model.  So we couldn't use it to evaluate marginal likelhoods, which we need to evaluate curve-fragemnt correspondences, i.e. triangulation.&lt;/p&gt;
+
+&lt;p&gt;However, what's notable is that is that our models are invriably more permissive than the models we'd prefer.  So any model allowed under our preferred models would certainly be permitted by our &lt;em&gt;worse-but-Gaussian&lt;/em&gt; model.&lt;/p&gt;
+
+&lt;p&gt;So even though we can't distinguish between different species with our weaker model, we can triangulate with it.  And once we have a triangulation, we can switch to a stronger model to do classification.  Since the data is so strong, the posterior under the weak model is still extremely peaked.  We can do importance sampling to marginalize the strong model, using the weak model as a proposal distribution.&lt;/p&gt;
+
+&lt;p&gt;This also gives us an approach to using non-gaussian likelihoods (e.g. pixel-based likelihoods).&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;use matlab to construct gaussian model.&lt;/li&gt;
+&lt;li&gt;save and read into C++ code&lt;/li&gt;
+&lt;li&gt;Use C++ code for sampling full (non-Gaussian) model&lt;/li&gt;
+&lt;/ol&gt;
+
+</description>
+				<pubDate>Sat, 17 Aug 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/17/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/17/work-log</guid>
+			</item>
+		
+			<item>
 				<title>Work Log - Improved indexing; Retraining; Distinguishing between camera and plant motion</title>
 				<description>
 
@@ -1288,380 +1345,6 @@ p(D \mid \theta_0) &amp;= \int_{\{\theta_i\}}  p(D_i, \{\theta_i\} \mid \theta_0
 				<pubDate>Thu, 08 Aug 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/08/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/08/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log - Training, Reversed Curves, and Theoretical Rate Variance</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Visualized results after capping likelihood variance.  As expected, degree of spreading stops growing as perturb_rate_variance continues to grow.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Tasks&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;manually flip some curves and see if model changes&lt;/li&gt;
-&lt;li&gt;try automatically determining which to curves need flipping&lt;/li&gt;
-&lt;li&gt;try to get training and visualization to agree&lt;/li&gt;
-&lt;li&gt;visualize curves moving through space over time&lt;/li&gt;
-&lt;li&gt;train background curve model
-
-&lt;ul&gt;
-&lt;li&gt;is background model better than foreground?&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Long term goals&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;sampling framework
-
-&lt;ul&gt;
-&lt;li&gt;try using background pixel modeling to prune background curves&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Visualizing curve-direction revealed a bizarre artifact: most curves start somewhere in the middle of the reconstructed curve!&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Found issue - wasn't sorting by index when reconstructing.&lt;/p&gt;
-
-&lt;h2&gt;Breaking Change&lt;/h2&gt;
-
-&lt;p&gt;Modified &lt;code&gt;tr_curves_ml&lt;/code&gt; to &lt;em&gt;not&lt;/em&gt; include the background curve ml into the computation.  Recall that the normal ML computation code doesn't actually return ML, but a &lt;em&gt;ratio&lt;/em&gt; of the foreground curve ML and the background curve ML.  This indicates how much the model improves over the &quot;null model&quot;.&lt;/p&gt;
-
-&lt;p&gt;Since the background curve ml is constant during training, this shouldn't affect results.  However, if you want to confirm the correctness of &lt;code&gt;tr_curves_ml&lt;/code&gt; against the reference implementation in &lt;code&gt;curve_ml5.m&lt;/code&gt;, you'll need to manually divide by a constant.  See the documentation for &lt;code&gt;tr_curves_ml&lt;/code&gt; for more details.&lt;/p&gt;
-
-&lt;h2&gt;Reversing Curves&lt;/h2&gt;
-
-&lt;p&gt;Investigating the effect of reversing curves.&lt;/p&gt;
-
-&lt;p&gt;Visually determined which curves were reversed.  See modified version of &lt;code&gt;test/tmp_visualize_test&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;Hacked &lt;code&gt;train/tr_construct_matrices.m&lt;/code&gt; with hard-coded list of curves to flip.  Re-ran training for &lt;em&gt;IND-Perturb&lt;/em&gt; model.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Hypothesis&lt;/strong&gt;: we should see larger values for perturb_rate_variance and/or perturb_smoothing_variance, and smaller values for perturb_position_variance.&lt;/p&gt;
-
-&lt;p&gt;Results:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Model:
-        smoothing_variance: 0.0020
-            noise_variance: 0.0720
-         position_variance: 1.3414e+04
-             rate_variance: 0.2378
-perturb_smoothing_variance: 3.3860e-41
-     perturb_rate_variance: 1.5332e-06
- perturb_position_variance: 0.4662
-
-Final ML: -95.736042
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Compare against old results:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Model:
-        smoothing_variance: 0.0019
-            noise_variance: 0.0718
-         position_variance: 1.6706e+04
-             rate_variance: 0.2135
-perturb_smoothing_variance: 3.3860e-41
-     perturb_rate_variance: 1.4942e-06
- perturb_position_variance: 0.4886
-
-Final ML: -97.463243
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Summary of changes:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;        smoothing_variance: +2.09%
-            noise_variance: 0.17%
-         position_variance: -19.7%
-             rate_variance: +11.3%
-perturb_smoothing_variance: 0 
-     perturb_rate_variance: +2.61%
- perturb_position_variance: -4.59%
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;As expected, global position variance dropped; perturb rate grew while perturb position variance decreased.&lt;/p&gt;
-
-&lt;p&gt;Unexpected increase in rate_variance; expected it to stay constant.  Possibly due to random fluctuations; both old and new values (0.214 and 0.238, respectively) are near the theoretical optimum (0.23, see next section).&lt;/p&gt;
-
-&lt;p&gt;Also unexpected small increase in global smoothing variance (expected to be constant); also possibly due to random fluctuations.&lt;/p&gt;
-
-&lt;p&gt;Literally no change to perturb smoothing variance.  I'm starting to suspect something weird is going on with this value...&lt;/p&gt;
-
-&lt;h2 id=&quot;optimal-rate-variance&quot;&gt;Theoretical Rate Variance&lt;/h2&gt;
-
-
-&lt;p&gt;Was curious what the rate variance should be, assuming the rate vectors are drawn from a uniform distribution over the unit sphere.&lt;/p&gt;
-
-&lt;p&gt;Determined empirically that rate variance should be somewhere between 0.220 and 0.235.  Code below.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;% generate 10,000 3-vectors with distribution over direction
-dir = rand(3,10000);
-% normalize to lie on unit sphere
-dir = bsxfun(@times, dir, 1./sum(dir.^2));
-% Get the emperical covariance of the vectors
-Sigma = cov(dir')
-
-        ans =
-
-            0.2105    0.0556    0.0580
-            0.0556    0.2297    0.0680
-            0.0580    0.0680    0.3735
-% take the average of the diagonals
-mean(diag(Sigma))
-
-        ans =
-
-            0.2290
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This strongly suggests that the global rate variances we've seen in training are consistent with the theoretical value.  Great!&lt;/p&gt;
-
-&lt;h2&gt;Visualizing Curve Motion&lt;/h2&gt;
-
-&lt;p&gt;Attempting to visualize perturbations between views.&lt;/p&gt;
-
-&lt;p&gt;First attempt: tweak &lt;code&gt;test/test_visualize_test&lt;/code&gt; to only display points from a particular view.  Doesn't work great, because only part of the plant is visible in each view, and those parts differ between views.&lt;/p&gt;
-
-&lt;p&gt;Next attempt: tweak &lt;code&gt;curve_max_posterior.m&lt;/code&gt;  to define a canonical index set for the curve, and then reconstruct for each view.&lt;/p&gt;
-
-&lt;p&gt;More tomorrow...&lt;/p&gt;
-
-&lt;h2&gt;TODO&lt;/h2&gt;
-
-&lt;p&gt;Training Background model&lt;/p&gt;
-</description>
-				<pubDate>Wed, 07 Aug 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/07/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/07/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log - Singular Regions Issue; Training</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Investigating the &quot;Spreading&quot; issue with increases to perturb_rate_variance.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Confirmed the same phenomenon with increase to perturb_position_variance.&lt;/p&gt;
-
-&lt;p&gt;Setting perturb_position_variance to 1000:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-06-visualize-training-1.png&quot; alt=&quot;perturb_position_variance = 1000&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Setting perturb_position_variance to 1000000:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-06-visualize-training-2.png&quot; alt=&quot;perturb_position_variance = 1000000&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Spreading appears to increase monotonically with perturb_position_variance.&lt;/p&gt;
-
-&lt;p&gt;Again, this is surprising, because you'd expect them to revert to the maximum likelihood solution.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;However, recall that the per-view likelihood has infinite variance in the back-projection direction.  The spreading appears to be occuring in this direction.  The infinite variance means that any influence from the prior will overcome the likelihood.&lt;/p&gt;
-
-&lt;p&gt;But isn't the prior centered at zero?  Why is the result drifting so far from zero?&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;One thing is clear: with high perturb&lt;em&gt;* values, the correlation between nearby views becomes negligible compared to the within-view variance.  And since the likelihood variance has an infinite component, the posterior variance grows with perturb&lt;/em&gt;*.  While we can inspect the maximum posterior curve, it is relatively meaningless because the variance is so great.&lt;/p&gt;
-
-&lt;p&gt;Even so, why doesn't it just revert to the mean?&lt;/p&gt;
-
-&lt;p&gt;Mean rate is zero, but it can't be exactly zero, because the likelihood requires that the curve be near the data.  But the data's position is only known in two dimensions, so the posterior is free to manipulate the third dimension so that the rate is minimized.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Model is trying to use a linear-perturbation model to explain per-view deviations from the mean model.  Since the deviations don't arise from pure scaling, it has to contort into bizarre shapes to explain it.&lt;/p&gt;
-
-&lt;p&gt;But the bizarre shapes fit the data better, so it's worth it.&lt;/p&gt;
-
-&lt;h1&gt;&quot;Singular Regions&quot;&lt;/h1&gt;
-
-&lt;p&gt;GOT IT!  Recall that the likelihood variance is measured in world units, even though they are really image-based values.  As the curve moves toward the camera, the likelihood variance &lt;em&gt;should&lt;/em&gt; ideally reduce, since the same size of world perturbations result in larger image perturbations.  But in our model they don't, and so curves can stray farther from the data in the image, but still look nearby the data according to the Gaussian.&lt;/p&gt;
-
-&lt;p&gt;In the extreme case, all the points end up near the camera pinhole, and they will be in the center of the data Gaussian.  In practice, any point within \(\sigma&lt;sup&gt;2\)&lt;/sup&gt; of the camera will be well supported, where \(\sigma&lt;sup&gt;2\)&lt;/sup&gt; is the average noise variance in 3D.  I'll call this the &quot;Singular Region&quot;, where all the of likelihood's Gaussian &quot;cylinders&quot; (degenerate cones) intersect and overlap.&lt;/p&gt;
-
-&lt;p&gt;In terms of the marginal likelihood, this can cause counterintuitive behavior.  For example, large perturb_rate_variance might be good, because it allows the curve to wander into the &quot;singular zone&quot; near the camera.  Thinking of in spherical coordinates, there is a wedge of the sphere that points toward the camera, and as the perturb_rate_variance increases, this wedge remains relatively constant in angular size, but gets longer and longer.  The longer it gets, the more of singular zone it overlaps. Even though greater variance means there are more possible model configurations, there is a period during which the proportion of these configurations that are well-supported by the likelihood doesn't necessarily decrease, so the ML doesn't necessarily decrease, either.&lt;/p&gt;
-
-&lt;p&gt;This explains the phenomenon we saw during training, where the plot of ML vs. perturb_rate_variance (reproduced below).&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-06-training-plot.png&quot; alt=&quot;ML vs. perturb_rate_variance&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;The lump to the left is the result of the singular region giving false support near the camera.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Need to somehow place penalty for any point that strays too far from the mean curve.  Can this be done without radically distorting the model?&lt;/p&gt;
-
-&lt;p&gt;What if I placed a limit on the likelihood variance, instead of letting it be infinite?  It will prevent the prior of taking credit for lousy configurations during the ML marginalization.&lt;/p&gt;
-
-&lt;h1&gt;Experiments&lt;/h1&gt;
-
-&lt;p&gt;Modified &lt;code&gt;train/tr_construct_matrices.m&lt;/code&gt; to clamp the likelihood's maximum variance to some multiple of the largest finite eigenvalue (see local function &quot;fix_precisions&quot;).  ML shouldn't change much when using reasonable values.&lt;/p&gt;
-
-&lt;p&gt;Results:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Reference (no cap): 2.2675e+04  (inf)
-100x cap:           2.2109e+04  (1.2 mm)
-1000x cap:          2.2360e+04  (3.8 mm)
-10000x cap:         2.2510e+04  (12 mm)
-100000x cap:        2.2596e+04  (38 mm)
-1000000x cap:       2.2654e+04  (12 cm) 
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Capping the variance to 10000x the triangulation variance results in a standard deviation of about 12mm in practice, which seems very reasonable.&lt;/p&gt;
-
-&lt;p&gt;We have to raise standard deviation to 12 cm for it to be accurate to three significant digits, which seems somewhat high.  Possibly, even with reasonable model parameters, we're still seeing some influence from the &quot;singular zone,&quot; so it may be a good thing that we aren't seeing the full reference value.&lt;/p&gt;
-
-&lt;h2 id=&quot;training-results&quot;&gt;Training Results&lt;/h2&gt;
-
-
-&lt;p&gt;Running training using clamped likelihoods.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;No Perturb Model&lt;/em&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Model:
-        smoothing_variance: 0.0025
-            noise_variance: 0.1231
-         position_variance: 1.6658e+04
-             rate_variance: 0.2207
-
-Final ML: 2.371 x 10^4
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Exactly the same result as the non-clamped version.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Ind Perturb Model&lt;/em&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Model:
-        smoothing_variance: 0.0019
-            noise_variance: 0.0719
-         position_variance: 1.6729e+04
-             rate_variance: 0.2422
-perturb_smoothing_variance: 3.3860e-41
-     perturb_rate_variance: 1.4918e-06
- perturb_position_variance: 0.4801
-
-Final ML:  2.512 x 10^4
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Old non-clamped training resulted in perturb_rate_variance exploding.  The new perturb_rate_variance looks very reasonable.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;OU Perturb Model&lt;/em&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Model:
-        smoothing_variance: 0.0019
-            noise_variance: 0.0721
-         position_variance: 1.6681e+04
-             rate_variance: 0.2146
-perturb_smoothing_variance: 3.3860e-41
-     perturb_rate_variance: 1.4711e-06
- perturb_position_variance: 0.7793
-             perturb_scale: 3.7353
-
-Final ML:  2.516 x 10^4
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Some of the global variance is can be pushed into the perturb_variance, since they are now correlated.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;SQEXP Perturb Model&lt;/em&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Model:
-        smoothing_variance: 0.0018
-            noise_variance: 0.0720
-         position_variance: 1.6689e+04
-             rate_variance: 0.2122
-perturb_smoothing_variance: 3.3860e-41
-     perturb_rate_variance: 1.4952e-06
- perturb_position_variance: 0.5130
-             perturb_scale: 0.8425
-
-Final ML: 2.516 x 10^4
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2&gt;General observations&lt;/h2&gt;
-
-&lt;p&gt;It's still somewhat weird that perturb_smoothing_variance is so low.  I'm pretty sure there are non-negligible deformations occurring during the imaging process.  Maybe it's just the Ind-perturb model?  More likely it's because the curves that deform are reversed...&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Which of the perturb-components are really correlated?  Seems like position variance is probably independent, but rate variance might not be.  Definitely smoothing_variance (i.e. nonrigid deformations) should be correlated.&lt;/p&gt;
-
-&lt;h1&gt;TODO&lt;/h1&gt;
-
-&lt;ul&gt;
-&lt;li&gt;try visualization with truncated likelihoods
-
-&lt;ul&gt;
-&lt;li&gt;does increasing rate variance eventually have no effect?&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;remove perturb_scale from ind model (better inference)&lt;/li&gt;
-&lt;li&gt;hand-pick parameters and fix them, to reduce dimensionality of search space.&lt;/li&gt;
-&lt;li&gt;Handle &quot;flipped&quot; curves.  Try to infer direction&lt;/li&gt;
-&lt;li&gt;Does the visualized max posterior look good for the trained values (I'm guessing not -- too strict of variances, overfitting)&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Tue, 06 Aug 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/06/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/06/work-log</guid>
 			</item>
 		
 	</channel>

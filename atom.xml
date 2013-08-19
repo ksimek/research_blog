@@ -4,13 +4,70 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-08-16T16:43:35-07:00</updated>
+ <updated>2013-08-19T14:31:05-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/19/work-log"/>
+   <updated>2013-08-19T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/19/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Saturday Thoughts - Enabling Non-gaussian models by using Gaussian models as proposal distributions</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/17/work-log"/>
+   <updated>2013-08-17T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/17/work-log</id>
+   <content type="html">&lt;p&gt;The different between the models we're fitting and the models we'd really like to use is that our model doesn't have a way to prefer certain branch angles or internode-distance.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately, adding those features would break the Gaussian-ness of our model.  So we couldn't use it to evaluate marginal likelhoods, which we need to evaluate curve-fragemnt correspondences, i.e. triangulation.&lt;/p&gt;
+
+&lt;p&gt;However, what's notable is that is that our models are invriably more permissive than the models we'd prefer.  So any model allowed under our preferred models would certainly be permitted by our &lt;em&gt;worse-but-Gaussian&lt;/em&gt; model.&lt;/p&gt;
+
+&lt;p&gt;So even though we can't distinguish between different species with our weaker model, we can triangulate with it.  And once we have a triangulation, we can switch to a stronger model to do classification.  Since the data is so strong, the posterior under the weak model is still extremely peaked.  We can do importance sampling to marginalize the strong model, using the weak model as a proposal distribution.&lt;/p&gt;
+
+&lt;p&gt;This also gives us an approach to using non-gaussian likelihoods (e.g. pixel-based likelihoods).&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;use matlab to construct gaussian model.&lt;/li&gt;
+&lt;li&gt;save and read into C++ code&lt;/li&gt;
+&lt;li&gt;Use C++ code for sampling full (non-Gaussian) model&lt;/li&gt;
+&lt;/ol&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Work Log - Improved indexing; Retraining; Distinguishing between camera and plant motion</title>
