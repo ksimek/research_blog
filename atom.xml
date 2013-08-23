@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-08-19T14:31:05-07:00</updated>
+ <updated>2013-08-22T19:31:39-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -13,7 +13,456 @@
 
  
  <entry>
-   <title>Work Log</title>
+   <title>Work Log - Attachment ML Math (ctd); Implementing Attach()/Detach()</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/22/work-log"/>
+   <updated>2013-08-22T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/22/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Note new working path: &lt;code&gt;data_association_3&lt;/code&gt;&lt;/strong&gt;&lt;br/&gt;
+Fixed corrupt svn working copy.&lt;/p&gt;
+
+&lt;h1&gt;Computing \(\mu_b\) and \(\Sigma_b\)&lt;/h1&gt;
+
+&lt;div&gt; Since \(S\) is usually singular, we can't invert it, so we need to tweak yesterday's equations.  In what follows, the precision matrix \(S\) is decomposed into \(s s^\top\), which will allow us to keep the covariance matrix symmetric. 
+
+&lt;div&gt;
+The updated forumula for \(mu_b\) is:&lt;/div&gt;
+\[
+    \begin{align}
+    \mu_b &amp;= K_*^\top \left(K_{\mathcal{MB}} + S^{-1}\right)^{-1} y_{MB}  \\
+          &amp;= K_*^\top s^\top \left(s K_{\mathcal{MB}} s^\top + I\right)^{-1} s y_{MB}  \\
+    \end{align}
+\]
+
+The formulate for \(\Sigma_b\) is:
+
+\[
+    \Sigma_b = K_b - K_*^\top s^\top \left(s K_{\mathcal{MB}} s^\top + I\right)^{-1} s K_*
+\]
+
+Recall that \(K_b\) is the prior covariance of the branch point.
+&lt;/div&gt;
+
+
+&lt;br /&gt;
+
+
+&lt;h2&gt;Predictive covariance question&lt;/h2&gt;
+
+&lt;div&gt;
+&lt;p&gt;
+I realized during implementation that it isn't clear what the predictive covariance, \(K_*\), should be.  I know it's the covariance between the true branch point and the observed points in the markov blanket, but the observed points have associated view-indices, while the branch point does not.  After some thought, I realized that the covariance arising from view-indices is essentially *likelihood* variance in this context (i.e. imaging noise), and according to Williams and Rasmussen, these parts of the likelihood should be omitted when computing the covariance between data and true unobserved points.  (See equation (2.21), notice that off-diagonal elements don't include the noise variance, \(\sigma_n I\)).
+&lt;/p&gt;
+&lt;p&gt;
+To accomodate the use-case where you want to compute the covariance while ignoring view-index, I tweaked `kernel/get_model_kernel`; now, if you pass-in a `model_index` of zero, it returns a two-parameter no-perturb kernel where only spacial-indices are received.
+&lt;/p&gt;
+&lt;/div&gt;
+
+
+&lt;h2&gt;&lt;code&gt;ll_indices_flat&lt;/code&gt; vs. &lt;code&gt;prior_indices&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;There's some ambiguity in these two fields of a curve-track.  The difference is simply that in &lt;code&gt;ll_indices_flat&lt;/code&gt;, indices &lt;em&gt;always&lt;/em&gt; start at zero, whereas in &lt;code&gt;prior_indices&lt;/code&gt; the offset &lt;code&gt;start_index&lt;/code&gt; is added to all values.  In practice, there are rules for where these two fields should be used:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;when passing indices to a kernel, always use &lt;code&gt;prior_indices&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;When dealing with geometry (e.g. referring to a point along a curve), always use ll_indices.  That way, the position of the referred point is unchanged if &lt;code&gt;start_index&lt;/code&gt; ever changes.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h1&gt;Task progress&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Finish &lt;code&gt;attachment/att_set_branch_index.m&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;rough test of attachment stuff - (does it parse? does it run?)
+
+&lt;ul&gt;
+&lt;li&gt;It runs, but with buggy output for \(\mu_b\) and \(\Sigma_b\).&lt;/li&gt;
+&lt;li&gt;Found bug - incorrect re-indexing (xxyyzz to xyzxyz)&lt;/li&gt;
+&lt;li&gt;Now giving apparently good results.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Implement efficient tree ML&lt;/li&gt;
+&lt;li&gt;implement naive ML&lt;/li&gt;
+&lt;li&gt;write tests
+
+&lt;ol&gt;
+&lt;li&gt;compare against &lt;code&gt;curve_ml5.m&lt;/code&gt; for independent curves&lt;/li&gt;
+&lt;li&gt;compare against naive ML using full-covariance-matrix.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;invalidate children after calling attach/detach&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h1&gt;Misc notes&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;should place a condition on \(\Sigma_b\).  If it's variance is too high, need to expand markov-blanket.&lt;/li&gt;
+&lt;li&gt;Add &lt;code&gt;model_type to params&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Have &quot;make_correspondence&quot; initialize start_index, parent_index, branch_index.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h1&gt;chain of affects&lt;/h1&gt;
+
+&lt;p&gt;How are children affected when properties of the parent change?&lt;/p&gt;
+
+&lt;div&gt;
+&lt;table border=&quot;1&quot;&gt;
+&lt;tr&gt;
+&lt;th width=&quot;33%&quot;&gt;parent property&lt;/th&gt;
+&lt;th width=&quot;33%&quot;&gt;self affects&lt;/th&gt;
+&lt;th&gt;child affects&lt;/th&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Assoc/Correspondence&lt;/td&gt;
+&lt;td&gt;start_index (and inherited)&lt;/td&gt;
+&lt;td&gt;Branch_index (and inherited.  easy to re-estimate deterministically), marginal likelihood, (not start index)&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Start index&lt;/td&gt;
+&lt;td&gt;prior_K, prior_indices, ML&lt;/td&gt;
+&lt;td&gt;\(\mu_b\)*, \(\Sigma_b\)*, ML*&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Branch index&lt;/td&gt;
+&lt;td&gt;\(\mu_b\), \(\Sigma_b\), &lt;/td&gt;
+&lt;td&gt;none.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+
+&lt;tr&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;/table&gt;
+* Updating these might not be necessary
+&lt;/div&gt;
+
+
+&lt;h1&gt;TODO&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Implement Tree ML (2 ways, &quot;naive&quot; and &quot;fast&quot;)&lt;/li&gt;
+&lt;li&gt;Test&lt;/li&gt;
+&lt;li&gt;Get attachment for ground truth&lt;/li&gt;
+&lt;li&gt;Re-train using attachment&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log - Clique-tree math (ctd)</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/21/work-log"/>
+   <updated>2013-08-21T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/21/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h1&gt;Conditional clique node&lt;/h1&gt;
+
+&lt;p&gt;Continuing from yesterday, let's convert our conditional gaussian distribution to a gaussian function over \(x_c\) and \(\mu_b\).&lt;/p&gt;
+
+&lt;p&gt;Let \(II\) represent a stack of identity matrices:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+II = \left( \begin{array}{c} I\\I\\...\\I \end{array}\right)
+\]
+
+The exponential expression for the conditional Gaussian distribution is
+
+    \[
+    -\frac{1}{2} (x_C - II \mu_b)^\top \left( \Sigma_C + II \Sigma_b II^\top \right )^{-1}(x_C - II \mu_b)
+\]
+
+Let's convert this to a linear function over \((x_C, \mu_b)\), instead of just \(x_C\):
+        
+    \[
+    -\frac{1}{2} \left(\begin{array}{c}x_C \\ \mu_b \end{array} \right )^\top \left ( \begin{array}{cc}I &amp; -II\end{array}\right )^\top \left( \Sigma_C + II \Sigma_b II^\top \right )^{-1}\left ( \begin{array}{cc}I &amp; -II\end{array}\right )\left(\begin{array}{c}x_C \\ \mu_b \end{array}\right )
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Recall that \(\mu_b\) is a linear function of the data-points in the Markov-blanket, \(y_\mathcal{MB}\) (reproduced from &lt;a href=&quot;/ksimek/research/2013/08/19/work-log/&quot;&gt;yesterday's post&lt;/a&gt;)&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    \begin{align}
+    \mu_b &amp;= K_*^\top \left(K_{\mathcal{MB}} + S^{-1}\right)^{-1} y_{MB}  \\
+        &amp;= K_*^\top K^{-1}_{y_\mathcal{MB}}  y_\mathcal{MB}  \\
+    \end{align}
+\]
+
+Rewriting the expression as a function of \((x_C, y_\mathcal{MB})\):
+
+    \[
+    \begin{align}
+     &amp;=
+    -\frac{1}{2} \left(\begin{array}{c}x_C \\ K_* K^{-1}_{y_\mathcal{MB}}  y_\mathcal{MB} \end{array} \right )^\top
+    \left ( \begin{array}{cc}I &amp; -II\end{array}\right )^\top 
+    \left( \Sigma_C + II \Sigma_b II^\top \right )^{-1}
+    \left ( \begin{array}{cc}I &amp; -II\end{array}\right )
+    \left(\begin{array}{c}x_C \\ K_* K^{-1}_{y_\mathcal{MB}}  y_\mathcal{MB} \end{array}\right )
+    \\
+     &amp;=
+    -\frac{1}{2} \left(\begin{array}{c}x_C \\   y_\mathcal{MB} \end{array} \right )^\top
+    \left ( \begin{array}{cc}I &amp; -II K_* K^{-1}_{y_\mathcal{MB}} \end{array}\right )^\top 
+    \left( \Sigma_C + II \Sigma_b II^\top \right )^{-1}
+    \left ( \begin{array}{cc}I &amp; -II K_* K^{-1}_{y_\mathcal{MB}}\end{array}\right )
+    \left(\begin{array}{c}x_C \\ y_\mathcal{MB} \end{array}\right )
+    \end{align}
+\]
+
+And expanding \(\Sigma_b\):
+ 
+\[
+    \begin{align}
+    \Sigma_b &amp;= K_b - K_*^\top \left(K_{\mathcal{MB}} + S^{-1}\right)^{-1} K_* \\
+             &amp;= K_b - K_*^\top K^{-1}_{y_\mathcal{MB}} K_*
+
+    \end{align}
+\]
+
+The final expression is:
+
+    \[
+    \begin{align}
+     &amp;=
+    -\frac{1}{2} \left(\begin{array}{c}x_C \\   y_\mathcal{MB} \end{array} \right )^\top
+    \left ( \begin{array}{cc}I &amp; -II K_* K^{-1}_{y_\mathcal{MB}} \end{array}\right )^\top 
+    \left( \Sigma_C + II \left(K_b - K_*^\top K^{-1}_{y_\mathcal{MB}} K_* \right)  II^\top \right )^{-1}
+    \left ( \begin{array}{cc}I &amp; -II K_* K^{-1}_{y_\mathcal{MB}}\end{array}\right )
+    \left(\begin{array}{c}x_C \\ y_\mathcal{MB} \end{array}\right ) \\
+     &amp;=
+    -\frac{1}{2} \left(\begin{array}{c}x_C \\   y_\mathcal{MB} \end{array} \right )^\top
+    \Lambda_{C \mid \mathcal{MB}}
+    \left(\begin{array}{c}x_C \\ y_\mathcal{MB} \end{array}\right )
+    \end{align}
+\]
+
+the normalization constant is:
+    
+\[
+    Z = 
+    (2 \pi)^\frac{k}{2} \left | \Sigma_C + II \left(K_b - K_*^\top K^{-1}_{y_\mathcal{MB}} K_* \right)  II^\top \right |^\frac{1}{2}
+\]
+&lt;/div&gt;
+
+
+&lt;h2&gt;Test experiment&lt;/h2&gt;
+
+&lt;p&gt;See  &lt;code&gt;exp_2013_08_21_clique_tree_test.m&lt;/code&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;sample N points for curve 1, \(C_1\)&lt;/li&gt;
+&lt;li&gt;sample N points for curve 2, \(C_2\)&lt;/li&gt;
+&lt;li&gt;offset curve 1: \(C_2 = C_2 + C_1(:,5)\)&lt;/li&gt;
+&lt;li&gt;add noise to \(C_1\) and \(C_2\) to get data \(y_1\),\(y_2\)&lt;/li&gt;
+&lt;li&gt;add noise to \(C_1\) and \(C_2\) to get data \(y_1\), \(y_2\).&lt;/li&gt;
+&lt;li&gt;Construct full prior, \(\Sigma\) (see below for definition).&lt;/li&gt;
+&lt;li&gt;Evaluate ML directly from \(p(y_1, y_2) = \mathcal{N}(0, (\Sigma + \sigm_n I))\).&lt;/li&gt;
+&lt;li&gt;Construct ML decomposed: \(p(y_2 | y_1) p(y_1) \)&lt;/li&gt;
+&lt;li&gt;(didn't implement) Construct clique tree using
+
+&lt;ul&gt;
+&lt;li&gt;Node 1: \((0, \Sigma_1)\)&lt;/li&gt;
+&lt;li&gt;Node 2: \((0, inv(\Lambda_{C\mid \mathcal{MB}}))\)&lt;/li&gt;
+&lt;li&gt;multiply by corresponding noise nodes.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;(didn't implement) Marginalize clique tree.  compare against result in 7.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;I originally thought the result from 8 was only an approximation (mainly because I hadn't originally written it out that way).  In fact, it's an exact computation, but it isn't very useful in this form, because deep trees still exhibit linear growth of the condition-set, meaning cubic growth in running time.  In practice, we can replace \(y_1\) to the data markov-blanket, \(y_{1,\mathcal{MB}}\).  The data markov-blanket is naturally larger than the prior m.b., which is a single point, but if the noise is low relative to the point-spacing, the data m.b. should still be relatively small.  Thus, we can approximate the ML with a decomposed form that avoids cubic growth.&lt;/p&gt;
+
+&lt;p&gt;The alternative is to use the clique tree from step 9., but the former is simpler to implement, because we don't have to use the crazy linear form we developed above, and we don't have to do any message-passing.  We just need \(\Sigma_b\) and \(\mu_b\).&lt;/p&gt;
+
+&lt;h2&gt;Computing max posterior with attachments&lt;/h2&gt;
+
+&lt;p&gt;Since this operation won't be run during production, we can just implement it the naive way.&lt;/p&gt;
+
+&lt;p&gt;But if we wanted a fast version, we could to a forward-pass approximation, i.e. find the max for the root curve, and then pass that as data to the child curves.&lt;/p&gt;
+
+&lt;p&gt;A full forward-backward algorithm probably wouldn't be too hard, but probably not worth the trouble at the moment.&lt;/p&gt;
+
+&lt;h1&gt;Build Tasks&lt;/h1&gt;
+
+&lt;ol&gt;
+&lt;li&gt;apply attacment to trackset&lt;/li&gt;
+&lt;li&gt;guess branch spacing&lt;/li&gt;
+&lt;li&gt;construct independent cliques, given branch spacing.&lt;/li&gt;
+&lt;li&gt;Guess branch point&lt;/li&gt;
+&lt;li&gt;construct markov-blanket, \(\mathcal{MB}\).&lt;/li&gt;
+&lt;li&gt;construct \(sigma_b\) and \(\mu_b\) from parent \(\mathcal{MB}\).&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;h1&gt;TODO &amp;amp; In-progress&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;attachment/attach.m&lt;/code&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;attachment/att_set_start_index.m&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;attachment/att_set_branch_index.m&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Next
+
+&lt;ul&gt;
+&lt;li&gt;pre-flatten and pre_sort ll_*.
+
+&lt;ul&gt;
+&lt;li&gt;remove all calls to flatten_inputs&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;precompute likelihood covariance matrix.
+
+&lt;ul&gt;
+&lt;li&gt;remove logic from &lt;code&gt;curve_ml5.m&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;compute full branching ML using cached values.
+
+&lt;ul&gt;
+&lt;li&gt;identify connected components&lt;/li&gt;
+&lt;li&gt;topological sort&lt;/li&gt;
+&lt;li&gt;root-to-leaf evaluation over each CC.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>cleanup</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/21/cleanup"/>
+   <updated>2013-08-21T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/21/cleanup</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Note new working path: &lt;code&gt;data_association_3&lt;/code&gt;&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Started realizing that there are a huge number of dead/obsolete files in the &lt;code&gt;data_association_2&lt;/code&gt; directory.  It's time to migrate to a clean code-base, &lt;code&gt;data_association_3&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h1&gt;Reorganization&lt;/h1&gt;
+
+&lt;h2&gt;Setups&lt;/h2&gt;
+
+&lt;p&gt;Realized that &lt;code&gt;tmp_setup_workspace.m&lt;/code&gt; is very valuable, but will probably need to change and evolve over time.  Created new directory called &lt;code&gt;setups/&lt;/code&gt;, where setup scripts will be stored, organized by date.  Related files that the setup scrip needs will be stored in the same directory, with a similar name to the script itself.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;tmp_setup_workspace.m&lt;/code&gt; is now in &lt;code&gt;setups/setup_workspace_2013_08_21.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Format is: &lt;code&gt;setup_&amp;lt;type&amp;gt;_&amp;lt;date&amp;gt;.m&lt;/code&gt;.  Currently only type is &quot;workspace&quot;.
+Related &quot;load&quot; files have format: &lt;code&gt;setup_&amp;lt;type&amp;gt;_&amp;lt;date&amp;gt;.mat&lt;/code&gt;   or if multiple files, &lt;code&gt;setup_&amp;lt;type&amp;gt;_&amp;lt;date&amp;gt;.&amp;lt;N&amp;gt;.mat&lt;/code&gt;, where N is an increasing integer starting at 1.&lt;/p&gt;
+
+&lt;h2&gt;Mex files&lt;/h2&gt;
+
+&lt;p&gt;Propose creating a new file &lt;code&gt;compile_mex_scripts.m&lt;/code&gt;.  If called with no arguments, it will compile all scripts that are uncompiled.  Optional &quot;force_recompile&quot; parameter.&lt;/p&gt;
+
+&lt;h1&gt;Misc Notes/Issues&lt;/h1&gt;
+
+&lt;h2&gt;split_correspondence&lt;/h2&gt;
+
+&lt;p&gt;&lt;code&gt;split_correspondence.m&lt;/code&gt; is no longer available.  It became obsolete some time ago, around when we moved from &lt;code&gt;clean_correspondence.m&lt;/code&gt; to &lt;code&gt;corr_to_likelihood.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;When we return to end-to-end sampling, we'll need something like it.  Alternatively,  maybe full-rebuilding of the split curves is fast enough, now that we've mexed the bottlenecks?&lt;/p&gt;
+
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+
+&lt;p&gt;Not totally done, but we can at least run the workspace setup file.&lt;/p&gt;
+
+&lt;p&gt;Will save the current workspace, re-open matlab, and see what issues arise as we continue to work toward the short-term goal of implementing branching-curve marginal likelihood.&lt;/p&gt;
+
+&lt;p&gt;Workspace saved to &lt;code&gt;tmp/workspace_2013_08_21.mat&lt;/code&gt;.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log - Branching curve clique-tree</title>
    <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/19/work-log"/>
    <updated>2013-08-19T00:00:00-07:00</updated>
    <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/19/work-log</id>
@@ -38,6 +487,139 @@
 &lt;/table&gt;
 
     Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Thinking about attachments.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Organize into connected components.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Reviewing ML code, with considerations to generalizing for attachments.&lt;/p&gt;
+
+&lt;p&gt;Can we exploit the structure in the branching-prior covariance matrix to speed-up inversion in the marginal likelihood?  No obvious way.&lt;/p&gt;
+
+&lt;p&gt;Why did we abandon the clique-tree method?  Because it wasn't clear that the perturb-models would be compatible with it.  Now, it seems like it might be, as long as we set the markov-order high enough.  More importantly, it might be &lt;em&gt;necessary&lt;/em&gt;, because after adding attachment, the covariance matrix is growing too large to allow direct evaluation.&lt;/p&gt;
+
+&lt;p&gt;Construct clique tree per-track, conditioned on parent point.  In case of base-curves, the parent point is the prior.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;New fields&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;branch parent
+
+&lt;ul&gt;
+&lt;li&gt;curve index&lt;/li&gt;
+&lt;li&gt;point index&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;branch distance
+
+&lt;ul&gt;
+&lt;li&gt;i.e. starting index of self&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;gaussian structure
+
+&lt;ul&gt;
+&lt;li&gt;in canonical form&lt;/li&gt;
+&lt;li&gt;no position variance&lt;/li&gt;
+&lt;li&gt;no branching variance&lt;/li&gt;
+&lt;li&gt;yes branch distance&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;&lt;em&gt;Inferring branch distance&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;The reconstructed lateral branch curves are usually have gaps of several millimeters from their parent branch.  Assigning an index of zero to the first point will almost certainly result in a worse marginal likelihood, because these gaps are not well-modelled.&lt;/p&gt;
+
+&lt;p&gt;Instead, we should attempt to infer the branch distance(or better yet, try to marginalize over it).&lt;/p&gt;
+
+&lt;p&gt;Spent some time trying to derive a &quot;fast update&quot; for covariance matrices for inferring branch distance.  In this scheme, the matrices are computed assuming branch distance is zero, and then a easily computed delta matrix is added to account for non-zero branch distance.&lt;/p&gt;
+
+&lt;p&gt;After some work, it looks like the smoothing variance kernel is too complicated to permit such a method.  It's just easier to recompute the entire covariance matrix.&lt;/p&gt;
+
+&lt;h2&gt;Constructing branching clique-tree&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Construct individual cliques trees, assuming zero position variance (but including branch distance).  Call this the &quot;raw prior.&quot;&lt;/li&gt;
+&lt;li&gt;Given a branch-point-index, compute the markov-blanket of the data points on the parent.&lt;/li&gt;
+&lt;li&gt;Given raw prior and markov-blanket, construct conditional clique  node from raw clique node.&lt;/li&gt;
+&lt;li&gt;Given clique tree, multiply and marginalize from tips to root.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;All cliques will now be stored in track structure (currently named &lt;code&gt;Corrs&lt;/code&gt;).&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;How to construct conditional prior?&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;\(\mathcal{MB}\) - indices of the parent curve markov blanket, centered at branch point.&lt;/li&gt;
+&lt;li&gt;\(y_\mathcal{MB}\) - observations in the markov blanket&lt;/li&gt;
+&lt;li&gt;\(x_b\) - branch point&lt;/li&gt;
+&lt;li&gt;\(\Sigma_b\) - branch point predictive covariance, conditioned on markov blanket&lt;/li&gt;
+&lt;li&gt;\(x_c\) - child curve points, relative to branch point.&lt;/li&gt;
+&lt;li&gt;\(x_C\) - child curve points, relative to world origin&lt;/li&gt;
+&lt;li&gt;\(N\) - number of points in child curve.&lt;/li&gt;
+&lt;li&gt;\(\Sigma_c\) - curve predictive covariance, conditioned on branch point&lt;/li&gt;
+&lt;li&gt;\(\Sigma_C\) - curve predictive covariance, conditioned on markov blanket&lt;/li&gt;
+&lt;li&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;div&gt;
+The branch point distribution is given by the GP predictive distribution:
+    
+\[
+p(x_b | y_\mathcal{MB}) = \mathcal{N}(\mu_b, \Sigma_b) \]
+
+where 
+
+\[
+\begin{align}
+    \mu_b &amp;= K_* \left(K_{\mathcal{MB}} + S^{-1}\right)^{-1} y_{MB} \\
+    \Sigma_b &amp;= K_b - K_*^\top \left(K_{\mathcal{MB}} + S^{-1}\right)^{-1} K_*
+
+\end{align}
+\]
+
+Here, \(K_*\) is the kernel of the branch index vs. the markov blanket indices, \(k(t_\mathcal{MB}, t_b)\).
+&lt;/div&gt;
+
+
+&lt;p&gt;The conditional child curve distribution is&lt;/p&gt;
+
+&lt;div&gt;
+\[ p(x_C \mid x_b) = p(x_c) = \mathcal{N}(x_b, \Sigma_c) \]
+
+Here, \(Sigma_c\) is the raw curve covariance, whatever it may be.
+&lt;br /&gt;
+The marginal over the child curve arises due to the linear combination of random variables \(x_c\) and \(x_b\):
+
+\[
+x_C = x_c + \left ( \begin{array}{c}I\\I\\ \ldots \\I \end{array}\right) x_b
+\]
+
+The corresponding distribution is:
+
+\[
+p(x_C | y_\mathcal{MB}) = \mathcal{N}(\mu_C, \Sigma_C)
+\]
+
+where
+
+\[
+\begin{align}
+\mu_C &amp;= \left( \begin{array}{c}I\\I\\ \ldots \\I \end{array}\right) \mu_b \\
+\Sigma_C &amp;= \Sigma_c + \left( \begin{array}{c}I\\I\\ \ldots \\I \end{array}\right) \Sigma_b \left ( I \; I \ldots I \right )
+\end{align}
+\]
 &lt;/div&gt;
 
 
@@ -272,7 +854,8 @@ exp_2013_08_16_visualize_smooth_perturbations( ...
 
 &lt;p&gt;Results:&lt;/p&gt;
 
-&lt;p&gt;&lt;em&gt;OU-Perturb Model&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a id=&quot;removing-camera-perturbation&quot;&gt;&lt;/a&gt;
+&lt;em&gt;OU-Perturb Model&lt;/em&gt;&lt;/p&gt;
 
 &lt;script&gt;
 $(function(){
@@ -983,7 +1566,7 @@ Ground Truth: 1 2 4 5 6 8 9 10 11 12 14 15&lt;/p&gt;
  </entry>
  
  <entry>
-   <title>Work Log</title>
+   <title>Work Log - Pre-tails fix</title>
    <link href="http://vision.sista.arizona.edu/ksimek/research/2013/08/10/work-log"/>
    <updated>2013-08-10T00:00:00-07:00</updated>
    <id>http://vision.sista.arizona.edu/ksimek/research/2013/08/10/work-log</id>

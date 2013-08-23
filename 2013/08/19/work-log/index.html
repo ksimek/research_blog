@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log &larr; </title>
+   <title>Work Log - Branching curve clique-tree &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -78,7 +78,7 @@
 	
   
   
-  <h1 class="title">Work Log</h1>
+  <h1 class="title">Work Log - Branching curve clique-tree</h1>
 
   <div class="date emphnext">August 19, 2013</div>
     
@@ -109,6 +109,139 @@
 </div>
 
 
+<p>Thinking about attachments.</p>
+
+<ol>
+<li>Organize into connected components.</li>
+</ol>
+
+
+<p>Reviewing ML code, with considerations to generalizing for attachments.</p>
+
+<p>Can we exploit the structure in the branching-prior covariance matrix to speed-up inversion in the marginal likelihood?  No obvious way.</p>
+
+<p>Why did we abandon the clique-tree method?  Because it wasn't clear that the perturb-models would be compatible with it.  Now, it seems like it might be, as long as we set the markov-order high enough.  More importantly, it might be <em>necessary</em>, because after adding attachment, the covariance matrix is growing too large to allow direct evaluation.</p>
+
+<p>Construct clique tree per-track, conditioned on parent point.  In case of base-curves, the parent point is the prior.</p>
+
+<hr />
+
+<p>New fields</p>
+
+<ul>
+<li>branch parent
+
+<ul>
+<li>curve index</li>
+<li>point index</li>
+</ul>
+</li>
+<li>branch distance
+
+<ul>
+<li>i.e. starting index of self</li>
+</ul>
+</li>
+<li>gaussian structure
+
+<ul>
+<li>in canonical form</li>
+<li>no position variance</li>
+<li>no branching variance</li>
+<li>yes branch distance</li>
+</ul>
+</li>
+</ul>
+
+
+<p><em>Inferring branch distance</em></p>
+
+<p>The reconstructed lateral branch curves are usually have gaps of several millimeters from their parent branch.  Assigning an index of zero to the first point will almost certainly result in a worse marginal likelihood, because these gaps are not well-modelled.</p>
+
+<p>Instead, we should attempt to infer the branch distance(or better yet, try to marginalize over it).</p>
+
+<p>Spent some time trying to derive a "fast update" for covariance matrices for inferring branch distance.  In this scheme, the matrices are computed assuming branch distance is zero, and then a easily computed delta matrix is added to account for non-zero branch distance.</p>
+
+<p>After some work, it looks like the smoothing variance kernel is too complicated to permit such a method.  It's just easier to recompute the entire covariance matrix.</p>
+
+<h2>Constructing branching clique-tree</h2>
+
+<ol>
+<li>Construct individual cliques trees, assuming zero position variance (but including branch distance).  Call this the "raw prior."</li>
+<li>Given a branch-point-index, compute the markov-blanket of the data points on the parent.</li>
+<li>Given raw prior and markov-blanket, construct conditional clique  node from raw clique node.</li>
+<li>Given clique tree, multiply and marginalize from tips to root.</li>
+</ol>
+
+
+<p>All cliques will now be stored in track structure (currently named <code>Corrs</code>).</p>
+
+<p><strong>How to construct conditional prior?</strong></p>
+
+<ul>
+<li>\(\mathcal{MB}\) - indices of the parent curve markov blanket, centered at branch point.</li>
+<li>\(y_\mathcal{MB}\) - observations in the markov blanket</li>
+<li>\(x_b\) - branch point</li>
+<li>\(\Sigma_b\) - branch point predictive covariance, conditioned on markov blanket</li>
+<li>\(x_c\) - child curve points, relative to branch point.</li>
+<li>\(x_C\) - child curve points, relative to world origin</li>
+<li>\(N\) - number of points in child curve.</li>
+<li>\(\Sigma_c\) - curve predictive covariance, conditioned on branch point</li>
+<li>\(\Sigma_C\) - curve predictive covariance, conditioned on markov blanket</li>
+<li></li>
+</ul>
+
+
+<div>
+The branch point distribution is given by the GP predictive distribution:
+    
+\[
+p(x_b | y_\mathcal{MB}) = \mathcal{N}(\mu_b, \Sigma_b) \]
+
+where 
+
+\[
+\begin{align}
+    \mu_b &= K_* \left(K_{\mathcal{MB}} + S^{-1}\right)^{-1} y_{MB} \\
+    \Sigma_b &= K_b - K_*^\top \left(K_{\mathcal{MB}} + S^{-1}\right)^{-1} K_*
+
+\end{align}
+\]
+
+Here, \(K_*\) is the kernel of the branch index vs. the markov blanket indices, \(k(t_\mathcal{MB}, t_b)\).
+</div>
+
+
+<p>The conditional child curve distribution is</p>
+
+<div>
+\[ p(x_C \mid x_b) = p(x_c) = \mathcal{N}(x_b, \Sigma_c) \]
+
+Here, \(Sigma_c\) is the raw curve covariance, whatever it may be.
+<br />
+The marginal over the child curve arises due to the linear combination of random variables \(x_c\) and \(x_b\):
+
+\[
+x_C = x_c + \left ( \begin{array}{c}I\\I\\ \ldots \\I \end{array}\right) x_b
+\]
+
+The corresponding distribution is:
+
+\[
+p(x_C | y_\mathcal{MB}) = \mathcal{N}(\mu_C, \Sigma_C)
+\]
+
+where
+
+\[
+\begin{align}
+\mu_C &= \left( \begin{array}{c}I\\I\\ \ldots \\I \end{array}\right) \mu_b \\
+\Sigma_C &= \Sigma_c + \left( \begin{array}{c}I\\I\\ \ldots \\I \end{array}\right) \Sigma_b \left ( I \; I \ldots I \right )
+\end{align}
+\]
+</div>
+
+
 
 
       <address class="signature">
@@ -119,6 +252,9 @@
 
 
   
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/08/21/cleanup" class="next" title="cleanup">cleanup &rarr;</a>
   
   
     <a href="/ksimek/research/2013/08/17/work-log" class="prev" title="Saturday Thoughts - Enabling Non-gaussian models by using Gaussian models as proposal distributions">&larr; Saturday Thoughts - Enabling Non-gaussian models by using Gaussian models as proposal distributions</a>
@@ -138,7 +274,7 @@
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Branching curve clique-tree" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -186,7 +322,7 @@
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log");
+                    + encodeURIComponent("Work Log - Branching curve clique-tree");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

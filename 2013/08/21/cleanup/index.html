@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Saturday Thoughts - Enabling Non-gaussian models by using Gaussian models as proposal distributions &larr; </title>
+   <title>cleanup &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -78,29 +78,71 @@
 	
   
   
-  <h1 class="title">Saturday Thoughts - Enabling Non-gaussian models by using Gaussian models as proposal distributions</h1>
+  <h1 class="title">cleanup</h1>
 
-  <div class="date emphnext">August 17, 2013</div>
+  <div class="date emphnext">August 21, 2013</div>
     
 
 
   
-    <p>The different between the models we're fitting and the models we'd really like to use is that our model doesn't have a way to prefer certain branch angles or internode-distance.</p>
+    
 
-<p>Unfortunately, adding those features would break the Gaussian-ness of our model.  So we couldn't use it to evaluate marginal likelhoods, which we need to evaluate curve-fragemnt correspondences, i.e. triangulation.</p>
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Data Association v3</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
+    </tr>
 
-<p>However, what's notable is that is that our models are invriably more permissive than the models we'd prefer.  So any model allowed under our preferred models would certainly be permitted by our <em>worse-but-Gaussian</em> model.</p>
 
-<p>So even though we can't distinguish between different species with our weaker model, we can triangulate with it.  And once we have a triangulation, we can switch to a stronger model to do classification.  Since the data is so strong, the posterior under the weak model is still extremely peaked.  We can do importance sampling to marginalize the strong model, using the weak model as a proposal distribution.</p>
+</table>
 
-<p>This also gives us an approach to using non-gaussian likelihoods (e.g. pixel-based likelihoods).</p>
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
 
-<ol>
-<li>use matlab to construct gaussian model.</li>
-<li>save and read into C++ code</li>
-<li>Use C++ code for sampling full (non-Gaussian) model</li>
-</ol>
 
+<p><strong>Note new working path: <code>data_association_3</code></strong></p>
+
+<p>Started realizing that there are a huge number of dead/obsolete files in the <code>data_association_2</code> directory.  It's time to migrate to a clean code-base, <code>data_association_3</code>.</p>
+
+<h1>Reorganization</h1>
+
+<h2>Setups</h2>
+
+<p>Realized that <code>tmp_setup_workspace.m</code> is very valuable, but will probably need to change and evolve over time.  Created new directory called <code>setups/</code>, where setup scripts will be stored, organized by date.  Related files that the setup scrip needs will be stored in the same directory, with a similar name to the script itself.</p>
+
+<p><code>tmp_setup_workspace.m</code> is now in <code>setups/setup_workspace_2013_08_21.m</code>.</p>
+
+<p>Format is: <code>setup_&lt;type&gt;_&lt;date&gt;.m</code>.  Currently only type is "workspace".
+Related "load" files have format: <code>setup_&lt;type&gt;_&lt;date&gt;.mat</code>   or if multiple files, <code>setup_&lt;type&gt;_&lt;date&gt;.&lt;N&gt;.mat</code>, where N is an increasing integer starting at 1.</p>
+
+<h2>Mex files</h2>
+
+<p>Propose creating a new file <code>compile_mex_scripts.m</code>.  If called with no arguments, it will compile all scripts that are uncompiled.  Optional "force_recompile" parameter.</p>
+
+<h1>Misc Notes/Issues</h1>
+
+<h2>split_correspondence</h2>
+
+<p><code>split_correspondence.m</code> is no longer available.  It became obsolete some time ago, around when we moved from <code>clean_correspondence.m</code> to <code>corr_to_likelihood.m</code>.</p>
+
+<p>When we return to end-to-end sampling, we'll need something like it.  Alternatively,  maybe full-rebuilding of the split curves is fast enough, now that we've mexed the bottlenecks?</p>
+
+<h1>Conclusion</h1>
+
+<p>Not totally done, but we can at least run the workspace setup file.</p>
+
+<p>Will save the current workspace, re-open matlab, and see what issues arise as we continue to work toward the short-term goal of implementing branching-curve marginal likelihood.</p>
+
+<p>Workspace saved to <code>tmp/workspace_2013_08_21.mat</code>.</p>
 
       <address class="signature">
         Posted by
@@ -112,10 +154,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/08/19/work-log" class="next" title="Work Log - Branching curve clique-tree">Work Log - Branching curve clique-tree &rarr;</a>
+    <a href="/ksimek/research/2013/08/21/work-log" class="next" title="Work Log - Clique-tree math (ctd)">Work Log - Clique-tree math (ctd) &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/08/16/work-log" class="prev" title="Work Log - Improved indexing; Retraining; Distinguishing between camera and plant motion">&larr; Work Log - Improved indexing; Retraining; Distinguishing between camera and plant motion</a>
+    <a href="/ksimek/research/2013/08/19/work-log" class="prev" title="Work Log - Branching curve clique-tree">&larr; Work Log - Branching curve clique-tree</a>
   
   </div>
   <div class="clearer"> </div>
@@ -132,7 +174,7 @@
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Saturday Thoughts - Enabling Non-gaussian models by using Gaussian models as proposal distributions" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="cleanup" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -180,7 +222,7 @@
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Saturday Thoughts - Enabling Non-gaussian models by using Gaussian models as proposal distributions");
+                    + encodeURIComponent("cleanup");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

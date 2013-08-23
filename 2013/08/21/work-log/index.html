@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log - Pre-tails fix &larr; </title>
+   <title>Work Log - Clique-tree math (ctd) &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -78,9 +78,9 @@
 	
   
   
-  <h1 class="title">Work Log - Pre-tails fix</h1>
+  <h1 class="title">Work Log - Clique-tree math (ctd)</h1>
 
-  <div class="date emphnext">August 10, 2013</div>
+  <div class="date emphnext">August 21, 2013</div>
     
 
 
@@ -109,64 +109,181 @@
 </div>
 
 
-<h1>Pre-tails issue</h1>
+<h1>Conditional clique node</h1>
 
-<p><strong>Bug</strong>: Smallest index of reconstructed curves is significantly greater than 0.</p>
+<p>Continuing from yesterday, let's convert our conditional gaussian distribution to a gaussian function over \(x_c\) and \(\mu_b\).</p>
 
-<pre><code>tmp_setup_workspace
-min([test_Corrs_ll{1}.ll_indices{:}])
-</code></pre>
+<p>Let \(II\) represent a stack of identity matrices:</p>
 
-<p>This results in long pre-tails, as seen in this image:</p>
+<div>
+\[
+II = \left( \begin{array}{c} I\\I\\...\\I \end{array}\right)
+\]
 
-<p><img src="/ksimek/research/img/2013-08-10-pretails.jpg" alt="pretails" /></p>
+The exponential expression for the conditional Gaussian distribution is
 
-<p><strong>Hypothesis</strong></p>
+    \[
+    -\frac{1}{2} (x_C - II \mu_b)^\top \left( \Sigma_C + II \Sigma_b II^\top \right )^{-1}(x_C - II \mu_b)
+\]
 
-<p>Recall that reconstruction occurs by doing (1) rough triangulation, (2) smoothing, then (3) re-triangulating against the smoothed curve.  The initial triangulation usually results in a very bad index set, with spacing far larger than it should be, due to poor localization by maximum likelihood.  The subsequent smoothing causes the curve to stretch out longer than it should, so when re-triangulation occurs, ends are cut off.</p>
+Let's convert this to a linear function over \((x_C, \mu_b)\), instead of just \(x_C\):
+        
+    \[
+    -\frac{1}{2} \left(\begin{array}{c}x_C \\ \mu_b \end{array} \right )^\top \left ( \begin{array}{cc}I & -II\end{array}\right )^\top \left( \Sigma_C + II \Sigma_b II^\top \right )^{-1}\left ( \begin{array}{cc}I & -II\end{array}\right )\left(\begin{array}{c}x_C \\ \mu_b \end{array}\right )
+\]
+</div>
 
-<p><strong> Solution </strong></p>
 
-<p>After re-triangulating, re-index so the minimum index is zero.</p>
+<p>Recall that \(\mu_b\) is a linear function of the data-points in the Markov-blanket, \(y_\mathcal{MB}\) (reproduced from <a href="/ksimek/research/2013/08/19/work-log/">yesterday's post</a>)</p>
 
-<p>Change to <code>correspondence/corr_to_likelihood.m</code>:</p>
+<div>
+\[
+    \begin{align}
+    \mu_b &= K_*^\top \left(K_{\mathcal{MB}} + S^{-1}\right)^{-1} y_{MB}  \\
+        &= K_*^\top K^{-1}_{y_\mathcal{MB}}  y_\mathcal{MB}  \\
+    \end{align}
+\]
 
-<pre><code>145  % re-index by subtracting minimum index
-146  min_index = min([Corr.ll_indices{:}]);
-147  Corr.ll_indices = cellfun(@(x) x - min_index, Corr.ll_indices, 'UniformOutput', false);
-</code></pre>
+Rewriting the expression as a function of \((x_C, y_\mathcal{MB})\):
 
-<p><strong> Fallout </strong></p>
+    \[
+    \begin{align}
+     &=
+    -\frac{1}{2} \left(\begin{array}{c}x_C \\ K_* K^{-1}_{y_\mathcal{MB}}  y_\mathcal{MB} \end{array} \right )^\top
+    \left ( \begin{array}{cc}I & -II\end{array}\right )^\top 
+    \left( \Sigma_C + II \Sigma_b II^\top \right )^{-1}
+    \left ( \begin{array}{cc}I & -II\end{array}\right )
+    \left(\begin{array}{c}x_C \\ K_* K^{-1}_{y_\mathcal{MB}}  y_\mathcal{MB} \end{array}\right )
+    \\
+     &=
+    -\frac{1}{2} \left(\begin{array}{c}x_C \\   y_\mathcal{MB} \end{array} \right )^\top
+    \left ( \begin{array}{cc}I & -II K_* K^{-1}_{y_\mathcal{MB}} \end{array}\right )^\top 
+    \left( \Sigma_C + II \Sigma_b II^\top \right )^{-1}
+    \left ( \begin{array}{cc}I & -II K_* K^{-1}_{y_\mathcal{MB}}\end{array}\right )
+    \left(\begin{array}{c}x_C \\ y_\mathcal{MB} \end{array}\right )
+    \end{align}
+\]
 
-<p>This likely had an effect on training results, because marginal prior variance of the initial point was over-estimated, because it's index was over-estimated.</p>
+And expanding \(\Sigma_b\):
+ 
+\[
+    \begin{align}
+    \Sigma_b &= K_b - K_*^\top \left(K_{\mathcal{MB}} + S^{-1}\right)^{-1} K_* \\
+             &= K_b - K_*^\top K^{-1}_{y_\mathcal{MB}} K_*
 
-<h1>Cleanup</h1>
+    \end{align}
+\]
 
-<p>I'm afraid I made a mess of things yesterday when I was addressing the noise_variance issue in training.  Need to review the end-to-end systems for training, reconstruction and marginal likelihood evaluation.</p>
+The final expression is:
+
+    \[
+    \begin{align}
+     &=
+    -\frac{1}{2} \left(\begin{array}{c}x_C \\   y_\mathcal{MB} \end{array} \right )^\top
+    \left ( \begin{array}{cc}I & -II K_* K^{-1}_{y_\mathcal{MB}} \end{array}\right )^\top 
+    \left( \Sigma_C + II \left(K_b - K_*^\top K^{-1}_{y_\mathcal{MB}} K_* \right)  II^\top \right )^{-1}
+    \left ( \begin{array}{cc}I & -II K_* K^{-1}_{y_\mathcal{MB}}\end{array}\right )
+    \left(\begin{array}{c}x_C \\ y_\mathcal{MB} \end{array}\right ) \\
+     &=
+    -\frac{1}{2} \left(\begin{array}{c}x_C \\   y_\mathcal{MB} \end{array} \right )^\top
+    \Lambda_{C \mid \mathcal{MB}}
+    \left(\begin{array}{c}x_C \\ y_\mathcal{MB} \end{array}\right )
+    \end{align}
+\]
+
+the normalization constant is:
+    
+\[
+    Z = 
+    (2 \pi)^\frac{k}{2} \left | \Sigma_C + II \left(K_b - K_*^\top K^{-1}_{y_\mathcal{MB}} K_* \right)  II^\top \right |^\frac{1}{2}
+\]
+</div>
+
+
+<h2>Test experiment</h2>
+
+<p>See  <code>exp_2013_08_21_clique_tree_test.m</code></p>
+
+<ol>
+<li>sample N points for curve 1, \(C_1\)</li>
+<li>sample N points for curve 2, \(C_2\)</li>
+<li>offset curve 1: \(C_2 = C_2 + C_1(:,5)\)</li>
+<li>add noise to \(C_1\) and \(C_2\) to get data \(y_1\),\(y_2\)</li>
+<li>add noise to \(C_1\) and \(C_2\) to get data \(y_1\), \(y_2\).</li>
+<li>Construct full prior, \(\Sigma\) (see below for definition).</li>
+<li>Evaluate ML directly from \(p(y_1, y_2) = \mathcal{N}(0, (\Sigma + \sigm_n I))\).</li>
+<li>Construct ML decomposed: \(p(y_2 | y_1) p(y_1) \)</li>
+<li>(didn't implement) Construct clique tree using
 
 <ul>
-<li>is training world-variance scaled everywhere?</li>
-<li>is training world-variance projecting to 1.0?</li>
-<li>is training-ml equal to inference-ml?</li>
-<li>are the reconstructed results sensible?</li>
-</ul>
-
-
-<h1>TODO</h1>
-
-<ul>
-<li>handle reversed curves</li>
-<li>Retrain all models since the following changes
-
-<ul>
-<li>reversal fixes</li>
-<li>noise variance fix</li>
-<li>"pre-tail" index fix</li>
+<li>Node 1: \((0, \Sigma_1)\)</li>
+<li>Node 2: \((0, inv(\Lambda_{C\mid \mathcal{MB}}))\)</li>
+<li>multiply by corresponding noise nodes.</li>
 </ul>
 </li>
-<li>central curve extraction</li>
-<li>add branching</li>
-<li>end-to-end sampling system</li>
+<li>(didn't implement) Marginalize clique tree.  compare against result in 7.</li>
+</ol>
+
+
+<p>I originally thought the result from 8 was only an approximation (mainly because I hadn't originally written it out that way).  In fact, it's an exact computation, but it isn't very useful in this form, because deep trees still exhibit linear growth of the condition-set, meaning cubic growth in running time.  In practice, we can replace \(y_1\) to the data markov-blanket, \(y_{1,\mathcal{MB}}\).  The data markov-blanket is naturally larger than the prior m.b., which is a single point, but if the noise is low relative to the point-spacing, the data m.b. should still be relatively small.  Thus, we can approximate the ML with a decomposed form that avoids cubic growth.</p>
+
+<p>The alternative is to use the clique tree from step 9., but the former is simpler to implement, because we don't have to use the crazy linear form we developed above, and we don't have to do any message-passing.  We just need \(\Sigma_b\) and \(\mu_b\).</p>
+
+<h2>Computing max posterior with attachments</h2>
+
+<p>Since this operation won't be run during production, we can just implement it the naive way.</p>
+
+<p>But if we wanted a fast version, we could to a forward-pass approximation, i.e. find the max for the root curve, and then pass that as data to the child curves.</p>
+
+<p>A full forward-backward algorithm probably wouldn't be too hard, but probably not worth the trouble at the moment.</p>
+
+<h1>Build Tasks</h1>
+
+<ol>
+<li>apply attacment to trackset</li>
+<li>guess branch spacing</li>
+<li>construct independent cliques, given branch spacing.</li>
+<li>Guess branch point</li>
+<li>construct markov-blanket, \(\mathcal{MB}\).</li>
+<li>construct \(sigma_b\) and \(\mu_b\) from parent \(\mathcal{MB}\).</li>
+</ol>
+
+
+<h1>TODO &amp; In-progress</h1>
+
+<ul>
+<li><code>attachment/attach.m</code>
+
+<ul>
+<li><code>attachment/att_set_start_index.m</code></li>
+<li><code>attachment/att_set_branch_index.m</code></li>
+</ul>
+</li>
+<li>Next
+
+<ul>
+<li>pre-flatten and pre_sort ll_*.
+
+<ul>
+<li>remove all calls to flatten_inputs</li>
+</ul>
+</li>
+<li>precompute likelihood covariance matrix.
+
+<ul>
+<li>remove logic from <code>curve_ml5.m</code></li>
+</ul>
+</li>
+<li>compute full branching ML using cached values.
+
+<ul>
+<li>identify connected components</li>
+<li>topological sort</li>
+<li>root-to-leaf evaluation over each CC.</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
 
@@ -180,10 +297,10 @@ min([test_Corrs_ll{1}.ll_indices{:}])
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/08/11/work-log" class="next" title="Work Log - Re-run training, Re-reconstruction, Curve-Flipping">Work Log - Re-run training, Re-reconstruction, Curve-Flipping &rarr;</a>
+    <a href="/ksimek/research/2013/08/22/work-log" class="next" title="Work Log - Attachment ML Math (ctd); Implementing Attach()/Detach()">Work Log - Attachment ML Math (ctd); Implementing Attach()/Detach() &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/08/09/work-log" class="prev" title="Work Log - Refactoring, cleanup, bug fixes">&larr; Work Log - Refactoring, cleanup, bug fixes</a>
+    <a href="/ksimek/research/2013/08/21/cleanup" class="prev" title="cleanup">&larr; cleanup</a>
   
   </div>
   <div class="clearer"> </div>
@@ -200,7 +317,7 @@ min([test_Corrs_ll{1}.ll_indices{:}])
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Pre-tails fix" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Clique-tree math (ctd)" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -248,7 +365,7 @@ min([test_Corrs_ll{1}.ll_indices{:}])
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log - Pre-tails fix");
+                    + encodeURIComponent("Work Log - Clique-tree math (ctd)");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");
