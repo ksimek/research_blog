@@ -65,9 +65,12 @@ task :post do
     post.puts 'description: ""'
     post.puts "category: "
     post.puts "tags: []"
+    post.puts "meta: "
+    post.puts "#    \"SVN Revision\": 15169"
     post.puts "---"
     post.puts "{% include JB/setup %}"
-    post.puts "{% include research/tulips_da2_meta %}"
+    post.puts "{% include research/tulips_da3_meta %}"
+
   end
   system "vim #{filename}"
 end # task :post
