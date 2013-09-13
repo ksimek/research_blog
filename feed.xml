@@ -7,6 +7,707 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Goals:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;ground truth - trace datasets 7 through 10&lt;/li&gt;
+&lt;li&gt;build new attachment covariance&lt;/li&gt;
+&lt;li&gt;reconstruct ground truth using new attachment covariance&lt;/li&gt;
+&lt;li&gt;work attachment covariance function into ml&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Building Full Attachment Covariance Matrix&lt;/h2&gt;
+
+&lt;p&gt;See &lt;code&gt;attachment/construct_attachment_covariance.m&lt;/code&gt; (filename still in flux).&lt;/p&gt;
+
+&lt;p&gt;Issue: The recursive definition of the attached curve kernel that we outlined yesterday is too expensive to implement naively.  Can implement by re-using precomputed values, but the branch point isn't necessarilly one of the observed points, so it's not necesarilly represented in the curve's &lt;code&gt;prior_K&lt;/code&gt;.  This means we need to construct covariance entries between each of the attachment points and their parent and child curves.  Then we can run the &quot;memoized&quot; recursive function.&lt;/p&gt;
+
+&lt;h2&gt;Base self covariance&lt;/h2&gt;
+
+&lt;p&gt;Key idea: each child curve has a &quot;base self covariance&quot; that is extra covariance inherited from the branch point on parent that is added to all points of the curve self-covariance matrix.  That curve, in turn, has a base covariance, that &lt;em&gt;it&lt;/em&gt; inherits, all the way to the root, whose base covariance is the &quot;position variance&quot; parameter.  Thus, the leaves have a base covariance that is the sum of all the incremental variance of all the branches to the root.&lt;/p&gt;
+
+&lt;p&gt;The base covariance is an NxN matrix, where N is the number of views.  We construct each in isolation, and then cumulatively sum them from root to leaf.&lt;/p&gt;
+
+&lt;p&gt;Every element of the curve's observed-point covariance matrix is increased by the base_covariance relative to it's entry; e.g. if element (k_{ij}) is the covariance between a point in view 3 and a point in view 5, you'll add the (3,5) element of the base covariance matrix.&lt;/p&gt;
+
+&lt;h2&gt;Base Parent covariance&lt;/h2&gt;
+
+&lt;p&gt;Each child curve also hase a &quot;parent covariance&quot; (for lack of a better term), which is the set of covariances between the branch point and each of the parent points.  Again, this is inherited recursively; just as the curve's covariance has it's self-covariance added, the parent covariance has the paren'ts self-covariance added.&lt;/p&gt;
+
+&lt;p&gt;This will be used for the off-diagonal blocks of the full attachment covariance matrix.&lt;/p&gt;
+
+&lt;h2&gt;Implementation Misc&lt;/h2&gt;
+
+&lt;p&gt;Issues during implementation and testing of &lt;code&gt;construct_attachment_covariance&lt;/code&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;replacing Cell-of-structs with struct-array:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Corrs = cell2mat(Corrs);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;The trivial code path of calling &lt;code&gt;blkdiag&lt;/code&gt; takes 500ms. Wow!&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Running on the WACV dataset is giving bad results.&lt;/p&gt;
+
+&lt;p&gt;Looks like the covariance matrix is different from the one in the reference implementation.&lt;/p&gt;
+
+&lt;p&gt;TODO:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Need to convert from &quot;index of branch index&quot; to simply &quot;branch index&quot;.&lt;/li&gt;
+&lt;li&gt;More debugging.&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Thu, 12 Sep 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/12/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/12/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log - Branching prior covariance</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;In the past, we've formulated the branching prior covariance matrix by starting with an independent-curve block-diagonal covariance matrix and multiplying by an &quot;attachment matrix.&quot;  This works when the branching point appears in the index set, but we'd like to allow branching from any continuous point along the curve.  Stated differently, we currently model branching using a discritized model, but we'd prefer to express branching using the underlying continuous gaussian process.  This means modelling branching using the covariance function, rather than by manipulating the covariance matrix.&lt;/p&gt;
+
+&lt;div&gt;
+&lt;p&gt;
+The key observation here is that in addition to each point's smooth curvature variance, it inherits the covariance of its parent's branch point.   In order to model correlation between curves, we extend the definition of &quot;index&quot; to add the curve index, \(c_i\), in addition to point index and time/view index.  Thus, index is now a triple: (c_i, p_i, t_i).  Note that we've changed our notation; previously point index was \(t_i\) and time/view index was \(v_i\).  The new notation uses \(p_i\) and \(t_i\) respectively, to avoid confusion between spacial and temporal dimensions.  
+&lt;/p&gt;
+
+&lt;p&gt;
+Let's introduce two functions, \(\text{branch_curve}(c_i)\) and \(\text{branch_point}(c_i)\), which return the curve index and point index of curve \(c_i\)'s branch point, resepectively, or zero if \(c_i\) is a root curve.  We'll also use the convenience function \(\text{branch}(i)\), which is shorthand for full branch index, i.e. the tuple \(\text{branch_curve}(c_i), \text{branch_point}(p_i), t_i)\).  Note that the time-index \(t_i\) is preserved when getting the branch index.
+&lt;/p&gt;
+
+&lt;p&gt;
+Without loss of generality, we'll assume curves are indexed in topological order, with parents appearing occurring before descendants.  If there are multiple connected components in the graph, it will be important that all root nodes have a lower index than non-root nodes, so we can add a sentinal node with index \(c_i = 0\), and attach all root curves to it before ordering. (Note to self: breadth-first search order might be simpler to describe).   The branching covariance function is now:
+&lt;/p&gt;
+
+\[
+\begin{align}
+k\left( i, j \right) 
+     &amp;= 
+    k\left( (c_i, p_i, t_i), (c_j, p_j, t_j) \right)  \\
+     &amp;= k_\text{base} ( i, j ) +
+     \begin{cases}
+     k(j, i) &amp; \text{if } c_i &gt; c_j = 0 \\
+     \sigma_o  &amp; \text{if } \text{isroot}(c_i) \text{ and } \text{isroot}(c_j) \text{ and } c_i = c_j &amp;&amp;  \\
+     0 &amp; \text{if } \text{isroot}(c_i) \text{ and } \text{isroot}(c_j) \text{ and } c_i \neq c_j \\
+     k(i, \text{branch}(j)) &amp; \text{otherwise} 
+    \end{cases}
+\end{align}
+\]
+
+&lt;p&gt;
+For convenience, we've used the \(k(i,j) \) to stand-in for \(k\left((c_i, p_i, t_i), (c_j, p_j, t_j)\right)\).
+  Here, \(k_\text{base}(i,j)\) is the independent curve covariance (e.g. cubic spline covariance w/ perturbations).   In our case, \(k_\text{base}(\dot)\) is zero if \(c_i \neq c_j\), but this isn't necessarilly required.
+  &lt;/p&gt;
+&lt;/div&gt;
+
+
+&lt;ul&gt;
+&lt;li&gt;The first case just simplifies the definition by ensuring that if i and j are related, the ancestor always appears in the first position.&lt;/li&gt;
+&lt;li&gt;The second case handles the offset variance that allow root curves to translate away from the origin.&lt;/li&gt;
+&lt;li&gt;The third case ensures zero covariance between disconnected trees.&lt;/li&gt;
+&lt;li&gt;The fourth case inherits covariance from the second parameter's parent curve.  Note that \(c_j\) is always a non-root curve; if it were, one of the first three cases would handle it.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Testing &lt;/h2&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Finish tracing wacv datasets 7 through 11.&lt;/li&gt;
+&lt;li&gt;Test the new covariance function against a matrix-based approach.&lt;/li&gt;
+&lt;li&gt;Test the new covariance function by reconstructing 9-view sequence using WACV datasets.&lt;/li&gt;
+&lt;li&gt;implement attachment-based ml using new covariance function&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Tue, 10 Sep 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/10/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/10/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log - WACV results</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;WACV deadline has passed, but still working on reconstructing ground truth, because it's  a good test on the end-to-end system.&lt;/p&gt;
+
+&lt;p&gt;Open issues:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;weird issue with branching&lt;/li&gt;
+&lt;li&gt;clear up math issue with branching&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h1&gt;Branching bug&lt;/h1&gt;
+
+&lt;p&gt;Fixed!  It was a bug in &lt;code&gt;infer_branch_points()&lt;/code&gt; function.  I was assuming Corr.curve_sm used the same  index set as Corr.ll_means_flat, which it was not.&lt;/p&gt;
+
+&lt;p&gt;I wanted to use &lt;code&gt;Corr.curve_sm&lt;/code&gt;, because it is precomputed in &lt;code&gt;corr_to_likelihood()&lt;/code&gt;, and it would save me an extra semi-expensive call to the cubic spline smoother, &lt;code&gt;csaps()&lt;/code&gt;.  In the end, I modified &lt;code&gt;corr_to_likelihood&lt;/code&gt; to save the smoothing amount and used it to call csaps inside &lt;code&gt;run_wacv()&lt;/code&gt; to re-smooth the curves.  At least &lt;code&gt;csaps&lt;/code&gt; is faster (linear time) than computing the posterior mean (quadratic).&lt;/p&gt;
+
+&lt;h2&gt;Test Results&lt;/h2&gt;
+
+&lt;p&gt;Results on dataset 2:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-06-result_dataset_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Looks good!&lt;/p&gt;
+
+&lt;h2&gt;All Results&lt;/h2&gt;
+
+&lt;p&gt;Running on all 11 datasets...&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Matlab is running out of memory on the second dataset (apparently)&lt;/p&gt;
+
+&lt;p&gt;When running directly on second dataset, it's fine.  Is the pass on the first dataset leaking memory or something?&lt;/p&gt;
+
+&lt;p&gt;Maybe one of the mex files?&lt;/p&gt;
+
+&lt;p&gt;It's weird, because we've run on dataset #2 tens of times without this problem...&lt;/p&gt;
+
+&lt;p&gt;Now running directly on dataset #2 is resulting in a curve of over 1 million points.  investigating...&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Solution: the image dimensions were reversed (should be nrows X ncols, not width x height).  The triangulations were nutso, and after projecting and resampling, the number of points was in the millions.  It's interesting that it's so easy to make this algorithm blow up; are there other; will need to keep an eye out for more benign ways to trigger this kind of explosion.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2&gt;Ground truth issues&lt;/h2&gt;
+
+&lt;p&gt;Encountered this error message when running on all ground truth datasets:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Warning: file wacv-2012/datasets/3/ground_truth_2d.gt2
+Missing curves in view 6: 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16,
+
+Warning: file wacv-2012/datasets/6/ground_truth_2d.gt2
+Missing curves in view 2: 2, 3,
+
+Warning: file wacv-2012/datasets/6/ground_truth_2d.gt2
+Missing curves in view 3: 3,
+
+Warning: file wacv-2012/datasets/6/ground_truth_2d.gt2
+Missing curves in view 4: 2, 3,
+
+Warning: file wacv-2012/datasets/6/ground_truth_2d.gt2
+Missing curves in view 6: 2, 3,
+
+Warning: file wacv-2012/datasets/6/ground_truth_2d.gt2
+Missing curves in view 8: 1, 3,
+
+Warning: file wacv-2012/datasets/6/ground_truth_2d.gt2
+Missing curves in view 10: 3,
+
+Warning: file wacv-2012/datasets/6/ground_truth_2d.gt2
+Missing curves in view 15: 3,
+
+Warning: file wacv-2012/datasets/6/ground_truth_2d.gt2
+Missing curves in view 19: 3,
+
+Warning: file wacv-2012/datasets/6/ground_truth_2d.gt2
+Missing curves in view 23: 2, 3,
+
+Warning: file wacv-2012/datasets/6/ground_truth_2d.gt2
+Missing curves in view 27: 3,
+
+Warning: file wacv-2012/datasets/6/ground_truth_2d.gt2
+Missing curves in view 31: 3,
+
+Warning: file wacv-2012/datasets/6/ground_truth_2d.gt2
+Missing curves in view 35: 3,
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Dataset 6 looks to be totally crap; need to investigate.&lt;/p&gt;
+
+&lt;h2&gt;Found a bug in &lt;code&gt;corr_to_likelihood&lt;/code&gt; that led to out-of-bound indexing.&lt;/h2&gt;
+
+&lt;p&gt;Looks like Liu never finished ground-truthing dataset &lt;code&gt;2010-01-26/arab_1_36&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Skipping for now; lets see if others are okay...&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Dataset 9 is broken. investigating...&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Dataset 9 seems not terrible, actually.  A few missing views on the hard-to-trace views of a few curves.&lt;/p&gt;
+
+&lt;p&gt;Some cuves were so short that they contained only one point, which violated an assert that requires all curves to be at least 2 points long.  Adjusted the bezier-to-sampled-curve code so that the final point is always included.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Finished running all.  issues&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;dataset 1 is very rough&lt;/li&gt;
+&lt;li&gt;datasets 6 was skipped&lt;/li&gt;
+&lt;li&gt;datasets 7 - 11 are worthless.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Need to re-trace 6 through 11.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Finished re-trace of 6.  Whew, 90 minutes... that sucked.  Reconstruction looks good now.&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Finish tracing datasets 7 through 11.&lt;/li&gt;
+&lt;li&gt;Work on attached-curve-multi-view prior and reconstruction.&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Fri, 06 Sep 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/06/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/06/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log - WACV Deadline</title>
+				<description>&lt;p&gt;Late-hour realization: not sure how to handle attachment matrix when multiple-views are allowed.  Deriving the correct equations will take all afternoon; no time.  Decided to remove the tracking part from the paper.&lt;/p&gt;
+
+&lt;h1&gt;Reconstructions&lt;/h1&gt;
+
+&lt;p&gt;code in &lt;code&gt;wacv-2012/run_wacv.m&lt;/code&gt;.  Example call:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gt_paths = arrayfun(@(x) sprintf('wacv-2012/datasets/%d', x), 1:11, 'UniformOutput', false);
+gt_cam_fmt = [gt_paths{i} '/cal/calib_%d.txt'];
+gt_fname = [gt_paths{i} '/ground_truth_2d.gt2'];
+[mu, lengths] = run_wacv(gt_fname, gt_cam_fmt, 1:4:36, [397,530]', params, 1);
+mu = reshape(mu, 3, []);
+mu = mat2cell(mu, 3, lengths);
+colors = lines(numel(mu));
+for i = 1:numel(mu);
+    c = mu{i};
+    col = colors(i, :);
+    plot3(c(1,:), c(2,:), c(3,:), '-o', 'Color', col);
+    hold on
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Results&lt;/h2&gt;
+
+&lt;p&gt;&lt;em&gt;Dataset #1&lt;/em&gt;: curve #1 has some weird shape.  Probably and error in GT&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Dataset #2&lt;/em&gt;: again weirdness in curve #1.  Now I'm guessing it's an attachment issue:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-05-bad_result_c2_pass1.png&quot; alt=&quot;bad result&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Run again without attachments.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Dataset #2&lt;/em&gt;: curve 1 issue is better; now exhibiting some weird stray points.  few views, bad indices?&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-05-c2-pass2.png&quot; alt=&quot;result 2&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;It looks like the base curves are trying to attach to the &lt;em&gt;end&lt;/em&gt; of curve #1, instead of the beginning.&lt;/p&gt;
+</description>
+				<pubDate>Thu, 05 Sep 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/05/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/05/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log - Branching ML, debugging, training</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h1&gt;Blockwise precision decomposition issue&lt;/h1&gt;
+
+&lt;p&gt;Bug: when attaching, was getting incorrect results for estimated location of attachment.  Our copmutation used a subset of data points on the parent curve nearby the branch point to estimate the distribution of the branch point position.  We were simply taking a submatrix of the full (decomposed) precision matrix, which wasn't correct, due to the way the full decomposed matrix was constructed.&lt;/p&gt;
+
+&lt;h2&gt;Submatrix of decomposition != decomposition of submatrix&lt;/h2&gt;
+
+&lt;p&gt;When using subset of variables, need to be able to get submatrix of noise precision and prior.&lt;/p&gt;
+
+&lt;p&gt;Let \((s' s) = S\), and let \(P\) be a matrix that selects rows of \(S\).  if you want to decompose the submatrix \(P S P'\), in general, you cannot simply take the submatrix \(P s P'\).  There are at-least two special case where this is valid:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;\(s\) is a Cholesky decomposition of \(S\).  But since \(S\) is degenerate in our case, we can't use Cholesky.&lt;/li&gt;
+&lt;li&gt;\(S\) is block-diagonal, and \(P\) doesn't split-up the blocks.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;I thought that condition 2 was being satisfied, because I foolishly assumed the eigenvector matrix produced by eigenvalue decomposition was preserving block structure.  I had to modify &lt;code&gt;correspondence/flatten_sort_and_reverse.m&lt;/code&gt; to perform eigenvalue decomposition on each block individually.  I had previously determined that operating on groups of five blocks at once is faster than operating individually, but we'll have to sacrifice this speed-up for now.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Okay, fixed the precision problem.  After attaching stem 2 to stem 1, Corrs{2}.mu_b now looks reasonable.&lt;/p&gt;
+
+&lt;p&gt;Still getting really low ML's...&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Bingo!  Bug in &lt;code&gt;curve_tree_ml_2.m&lt;/code&gt; that was introduced when we started allowing non-zero means when evaluating our conditional normal distribution.   Recall the equation for marginal likelihood (reproduced from &lt;a href=&quot;/ksimek/research/2013/07/12/marginal-likelihood/&quot;&gt;this post&lt;/a&gt;):&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+     p(y) &amp;= \frac{Z_{l,3d} }{Z_l}\frac{1}{Z}  \exp\{x^\top S(S + S K S)^{-1} S x \} \\
+     &amp;= \frac{Z_{l,3d} }{Z_l}\frac{1}{Z}  \exp\{x^\top s^\top(I + s K s^\top)^{-1} s x \} \\
+     &amp;= \frac{Z_{l,3d} }{Z_l} \mathcal{N}\left (sx ; 0, (I + s K s^\top) \right )
+\end{align}
+\]
+&lt;/div&gt;
+
+
+
+
+&lt;div&gt;Aside: in the second line, we've substituded the decomposition, \(s^\top s = S\), which we use in practice.  &lt;/div&gt;
+
+
+&lt;p&gt;However, this equation assume zero mean.  If we include a nonzero mean, the \(s\) matrix distributes to both \(y\) and \(\mu\):&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+     p(y) &amp;= \frac{Z_{l,3d} }{Z_l}\frac{1}{Z}  \exp\{(x-\mu)^\top s^\top(I + s K s^\top)^{-1} s (x - \mu) \} \\
+     &amp;= \frac{Z_{l,3d} }{Z_l} \mathcal{N}\left (sx ; s \mu, (I + s K s^\top) \right )
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;In our implementation, we weren't multiplying \(\mu\) by \(s\).  Fixing this seems to fix the low ML issue:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Corrs = attach(Corrs, 2,1,12, -12, params);
+curve_tree_ml_2(Corrs, params, data_)
+
+    ans =
+
+       2.0903e+04
+
+Corrs_ind = attach(Corrs, 2,0,0,0, params);
+curve_tree_ml_2(Corrs_ind, params, data_)
+
+    ans =
+
+       2.0804e+04
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In the case above, ML is roughly maximized when branch index is -12 and start index is 12, which seems to agree with the data, visually.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Next:
+* get attachment, reversal, and branch points from ground truth
+* store ml_2d with corr. update on merge. use during ml computation instead of data_
+* branching in training ML
+* traing with branching
+* branch-wise reconstruction.&lt;/p&gt;
+</description>
+				<pubDate>Tue, 03 Sep 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/03/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/03/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log - Misc.</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h1&gt;Monday IVILAB infrastructure meeting&lt;/h1&gt;
+
+&lt;p&gt;I'll be organizing the Computational Intelligence seminar this semester.&lt;/p&gt;
+
+&lt;p&gt;Will need to&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Arrange volunteers&lt;/li&gt;
+&lt;li&gt;send announcements&lt;/li&gt;
+&lt;li&gt;send reminders to speakers&lt;/li&gt;
+&lt;li&gt;Set up seminar web page&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h1&gt;Building efficient curve-tree ML.&lt;/h1&gt;
+
+&lt;p&gt;Significant rework.&lt;/p&gt;
+
+&lt;p&gt;New field: branch_K and branch_mu to store mean and covariance of all points in curve.
+Prior_k now does not include offset covariance; stored in branch_K.
+mu_b and Sigma_b now store the branch point means and covariances for all views&lt;/p&gt;
+
+&lt;p&gt;fix kernel to not include offset index&lt;/p&gt;
+
+&lt;h1&gt;Issues&lt;/h1&gt;
+
+&lt;p&gt;Finished implementation.  Has bugs.&lt;/p&gt;
+
+&lt;h2&gt;Start-point has no effect&lt;/h2&gt;
+
+&lt;p&gt;Example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;start_pt = [0 100];
+ml = [];
+for i = 1:2
+    Corrs = attach(Corrs, 2, 1, start_pt(i), 0, params);
+    ml(i) = curve_tree_ml_2(Corrs, params, data_);
+end
+assert(ml(1) == ml(2));
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;em&gt;Fixed&lt;/em&gt; - stupid bug in &lt;code&gt;attachment/attach.m&lt;/code&gt; - was index offset was hard-coded to zero due to a refactoring mishap.&lt;/p&gt;
+
+&lt;h2&gt;Optimal Branch point isn't correct&lt;/h2&gt;
+
+&lt;p&gt;Example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;start_pt = [0 10 50 100 1000 5000];
+ml = [];
+for i = 1:2
+    Corrs = attach(Corrs, 2, 1, start_pt(i), 0, params);
+    ml(i) = curve_tree_ml_2(Corrs, params, data_);
+end
+assert(all(diff(ml) &amp;gt; 0);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;em&gt;Solved&lt;/em&gt; - curves were reversed.&lt;/p&gt;
+
+&lt;h1&gt;Handling reversed curves&lt;/h1&gt;
+
+&lt;p&gt;Should add a &lt;code&gt;reversed&lt;/code&gt; flag, which reverses indices before building likelihood and prior.  currently, constructing the likelihood occurs during the &quot;backproject and re-index&quot; phase, in file &lt;code&gt;correspondence/corr_to_likelihood.m&lt;/code&gt;.  Should refactor likelihood construction into its own function, so we don't have to re-backproject when we don't need to.&lt;/p&gt;
+
+&lt;p&gt;Let's review the data-flow so we can see more clearly where everything happens.&lt;/p&gt;
+
+&lt;h1&gt;Overview: end-to-end curve construction&lt;/h1&gt;
+
+&lt;ol&gt;
+&lt;li&gt;propose association and attachment
+
+&lt;ul&gt;
+&lt;li&gt;By sampling (no code yet)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;train/labels_from_ground_truth&lt;/code&gt; - propose from ground truth.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Output&lt;/strong&gt;: assoc {}&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Construct track
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;correspondence/make_correspondence&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Output&lt;/strong&gt;: Corrs {};  Corr.ml_2d&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Correspondence and triangulation
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;correspondence/build_full_correspondence.m&lt;/code&gt; - build from scratch&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;correspondence/merge_correspondence_2.m&lt;/code&gt; - merge two pieces&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Output&lt;/strong&gt;: &lt;code&gt;corr&lt;/code&gt;, &lt;code&gt;means&lt;/code&gt;, &lt;code&gt;precisions&lt;/code&gt;, &lt;code&gt;cov_error&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;backproject and estimate curvature
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;correspondence/corr_to_likelihood.m&lt;/code&gt; -&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Output&lt;/strong&gt;: &lt;code&gt;ll_{means, precisions, indices}&lt;/code&gt;, &lt;code&gt;curve_sm*&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;construct likelihood (flatten, sort, and reverse if needed)
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;correspondence/flatten_sort_and_reverse.m&lt;/code&gt; - (doesn't exist yet)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Output&lt;/strong&gt;: &lt;code&gt;ll_{means_flat, precisions_flat, indices_flat, S}&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;handle attachment recursively
+
+&lt;ol&gt;
+&lt;li&gt;compute conditional prior
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;attachment/att_set_start_index.m&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Output&lt;/strong&gt;: &lt;code&gt;start_index&lt;/code&gt;, &lt;code&gt;prior_K&lt;/code&gt;, &lt;code&gt;prior_indices&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;compute branch point posterior
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;attachment/att_set_branch_index.m&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Output&lt;/strong&gt;: &lt;code&gt;branch_index&lt;/code&gt;, &lt;code&gt;mu_b&lt;/code&gt;, &lt;code&gt;sigma_b&lt;/code&gt;, &lt;code&gt;branch_K&lt;/code&gt;, &lt;code&gt;branch_mu&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;Compute (ML, argmax, etc)&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Consider renaming step 4.  backproject against rough triangulation; estimate curvature at each point; determine index set.  At this point, the order of points don't matter, because the index set hasn't been put to use.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Action: reverse curve&lt;/strong&gt; - detach?, rerun step 5, 6.1 &amp;amp; 6.2 on self, update branch point &amp;amp; rerun 6.2 for children.&lt;/p&gt;
+
+&lt;h1&gt;Test: optimize branch point and start index&lt;/h1&gt;
+
+&lt;p&gt;(TODO)&lt;/p&gt;
+
+&lt;h1&gt;TODO&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;optimize test&lt;/li&gt;
+&lt;li&gt;get attachment, reversal, and branch points from ground truth&lt;/li&gt;
+&lt;li&gt;store &lt;code&gt;ml_2d&lt;/code&gt; with corr.  update on merge.  use during ml computation instead of data_&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Mon, 26 Aug 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/26/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/26/work-log</guid>
+			</item>
+		
+			<item>
 				<title>Work Log - Attachment ML Math (ctd); Implementing Attach()/Detach()</title>
 				<description>
 
@@ -25,6 +726,11 @@
         &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
     &lt;/tr&gt;
 
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15169&lt;/td&gt;
+    &lt;/tr&gt;
+
 
 &lt;/table&gt;
 
@@ -40,15 +746,16 @@ Fixed corrupt svn working copy.&lt;/p&gt;
 &lt;div&gt; Since \(S\) is usually singular, we can't invert it, so we need to tweak yesterday's equations.  In what follows, the precision matrix \(S\) is decomposed into \(s s^\top\), which will allow us to keep the covariance matrix symmetric. 
 
 &lt;div&gt;
-The updated forumula for \(mu_b\) is:&lt;/div&gt;
+The updated forumula for \(\mu_b\) is:&lt;/div&gt;
 \[
     \begin{align}
     \mu_b &amp;= K_*^\top \left(K_{\mathcal{MB}} + S^{-1}\right)^{-1} y_{MB}  \\
+    \tag{1}
           &amp;= K_*^\top s^\top \left(s K_{\mathcal{MB}} s^\top + I\right)^{-1} s y_{MB}  \\
     \end{align}
 \]
 
-The formulate for \(\Sigma_b\) is:
+The formula for \(\Sigma_b\) is:
 
 \[
     \Sigma_b = K_b - K_*^\top s^\top \left(s K_{\mathcal{MB}} s^\top + I\right)^{-1} s K_*
@@ -619,944 +1326,6 @@ where
 				<pubDate>Mon, 19 Aug 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/19/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/19/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Saturday Thoughts - Enabling Non-gaussian models by using Gaussian models as proposal distributions</title>
-				<description>&lt;p&gt;The different between the models we're fitting and the models we'd really like to use is that our model doesn't have a way to prefer certain branch angles or internode-distance.&lt;/p&gt;
-
-&lt;p&gt;Unfortunately, adding those features would break the Gaussian-ness of our model.  So we couldn't use it to evaluate marginal likelhoods, which we need to evaluate curve-fragemnt correspondences, i.e. triangulation.&lt;/p&gt;
-
-&lt;p&gt;However, what's notable is that is that our models are invriably more permissive than the models we'd prefer.  So any model allowed under our preferred models would certainly be permitted by our &lt;em&gt;worse-but-Gaussian&lt;/em&gt; model.&lt;/p&gt;
-
-&lt;p&gt;So even though we can't distinguish between different species with our weaker model, we can triangulate with it.  And once we have a triangulation, we can switch to a stronger model to do classification.  Since the data is so strong, the posterior under the weak model is still extremely peaked.  We can do importance sampling to marginalize the strong model, using the weak model as a proposal distribution.&lt;/p&gt;
-
-&lt;p&gt;This also gives us an approach to using non-gaussian likelihoods (e.g. pixel-based likelihoods).&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;use matlab to construct gaussian model.&lt;/li&gt;
-&lt;li&gt;save and read into C++ code&lt;/li&gt;
-&lt;li&gt;Use C++ code for sampling full (non-Gaussian) model&lt;/li&gt;
-&lt;/ol&gt;
-
-</description>
-				<pubDate>Sat, 17 Aug 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/17/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/17/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log - Improved indexing; Retraining; Distinguishing between camera and plant motion</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;h1&gt;Improved Indexing (ctd)&lt;/h1&gt;
-
-&lt;p&gt;Finished debugging changes to &lt;code&gt;corr_to_likelihood&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;Recap: since projected model curves are discretely sampled at coarse intervals, multiple observed points may correspond to the same model point.  The results below show this. The projected model curve is sampled every 2 pixels (&lt;code&gt;index_delta_2d&lt;/code&gt;), so each model point has between 2 and 3 corresponding data points.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-16-bad-indexing.png&quot; alt=&quot;old indexing results in aliasing&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;The new scheme post-processes the indexes by linearly interpolating the model curve and projecting the data point onto the neighboring line segments.  Resulting indices are much improved:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-16-better-indexing.png&quot; alt=&quot;new indexing scheme permits continuous (between-point) correspondences, which results in better indexing&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Note that viewing angle distorts the correspondence angles somewhat.  Non-perpendicular correspondence lines may be simply due to non-orthogonal viewing direction.&lt;/p&gt;
-
-&lt;p&gt;Since coarse sampling is no longer an issue, we can increase the 2D sample period and still get good results.  Below is the result after increasing 2D sampling period from 2 to 5:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-08-16-better-indexing-in-spite.png&quot; alt=&quot;new indexing scheme permits continuous (between-point) correspondences, which results in better indexing&quot; /&gt;&lt;/p&gt;
-
-&lt;h2&gt;Improved training&lt;/h2&gt;
-
-&lt;p&gt;This has implications on training results.  Re-running training using &lt;code&gt;exp_2013_08_11_train_all&lt;/code&gt;:&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;No Perturb Model&lt;/em&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0030
-            noise_variance: 1.0805
-         position_variance: 1.6270e+04
-             rate_variance: 0.2904
-perturb_smoothing_variance: 1
-     perturb_rate_variance: 1
- perturb_position_variance: 1
-             perturb_scale: 2.5000
-
-Final ML: -9.094636e+03
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;em&gt;Ind-Perturb Model&lt;/em&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0034
-            noise_variance: 0.3472
-         position_variance: 1.6458e+04
-             rate_variance: 0.2605
-perturb_smoothing_variance: 1.4186e-06
-     perturb_rate_variance: 3.0555e-04
- perturb_position_variance: 0.5467
-             perturb_scale: 2.5000
-
-Final ML: -6.203953e+03
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;em&gt;OU-Perturb Model&lt;/em&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0035
-            noise_variance: 0.3486
-         position_variance: 1.6440e+04
-             rate_variance: 0.2587
-perturb_smoothing_variance: 1.4874e-06
-     perturb_rate_variance: 3.6269e-04
- perturb_position_variance: 0.7241
-             perturb_scale: 2.3364
-
-Final ML: -6.156721e+03
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;em&gt;SqExp-Perurb Model&lt;/em&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0035
-            noise_variance: 0.3479
-         position_variance: 1.6246e+04
-             rate_variance: 0.2745
-perturb_smoothing_variance: 1.5495e-06
-     perturb_rate_variance: 4.1614e-04
- perturb_position_variance: 0.6613
-             perturb_scale: 0.9654
-
-Final ML: -6.159716e+03
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;Awesome news:  perturb smoothing variance is now non-negligible!&lt;/strong&gt;  There must have been so much IID noise resulting from bad indexing that it totally masked the perturb smoothing variance.&lt;/p&gt;
-
-&lt;p&gt;The totally validates our efforts to fix indexing.  Before, the model was fundamentally broken; bad indexing was preventing us from making any correct inferences beyond a certain level of granularity.  By fixing indexing, we're suddenly able to everything clearly, whereas before we were squinting through a noisy haze.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Other observations&lt;/strong&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;ML is much lower compared to the badly indexed results, which were one the order of -8000 (&lt;a href=&quot;/ksimek/research/2013/08/14/work-log/&quot;&gt;according to this post&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;Noise variance dropped from 0.68 to 0.35.&lt;/li&gt;
-&lt;li&gt;Smoothing variance has increased, probably because we attribute fewer deviations to IID noise.  Great!&lt;/li&gt;
-&lt;li&gt;Global rate variance is lower, while perturb rate variance roughly tripled.&lt;/li&gt;
-&lt;li&gt;Perturb scale dropped slightly.  Since noise variance can't explain independent deviations, the perturb-model takes over, becomes closer to independent.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Lets see if anything interesting comes out of our reconstructions...&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;OU-perturb Model&lt;/em&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;az = 24;
-el = 16;
-axis_ = [ 70.0000  110.0000   50.0000  110.0000   47.8040  224.0467 ]
-
-exp_2013_08_11_reconstruct_for_web(test_Corrs_ll_2, retraining_results{3}, 3, axis_, el, az, num_views, '/Users/ksimek/src/research_blog/img/2013-08-16-ou-model-%d.png', '/ksimek/research/img/2013-08-16-ou-model-%d.png', 'ou-reconstruct-anim', true)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;script&gt;
-$(function(){
-    var urls = [
-        &quot;/ksimek/research/img/2013-08-16-ou-model-1.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-ou-model-2.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-ou-model-3.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-ou-model-4.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-ou-model-5.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-ou-model-6.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-ou-model-7.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-ou-model-8.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-ou-model-9.png&quot;
-        ]
-
-    construct_animation($(&quot;#ou-reconstruct-anim&quot;), urls);
-});
-&lt;/script&gt;
-
-
-&lt;div id=&quot;ou-reconstruct-anim&quot; style=&quot;width:137px&quot;&gt; &lt;/div&gt;
-
-
-&lt;p&gt;&lt;em&gt;SqExp-Perturb Model&lt;/em&gt;&lt;/p&gt;
-
-&lt;script&gt;
-$(function(){
-    var urls = [
-        &quot;/ksimek/research/img/2013-08-16-sqexp-model-1.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-sqexp-model-2.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-sqexp-model-3.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-sqexp-model-4.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-sqexp-model-5.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-sqexp-model-6.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-sqexp-model-7.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-sqexp-model-8.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-sqexp-model-9.png&quot;
-        ]
-
-    construct_animation($(&quot;#sqexp-reconstruct-anim&quot;), urls);
-});
-&lt;/script&gt;
-
-
-&lt;div id=&quot;sqexp-reconstruct-anim&quot; style=&quot;width:136px&quot;&gt; &lt;/div&gt;
-
-
-&lt;h2&gt;Removing camera-based motion&lt;/h2&gt;
-
-&lt;p&gt;We can remove perturbations that arise from poor camera calibration by assuming it is captured in the linear and offset perturbations; under this assumption, the remaining cubic-spline smooth perturbations capture the true plant motion.&lt;/p&gt;
-
-&lt;div&gt;Removing linear and offset perturbations is as simple as removing their contributions to \(K^*\) in yesterday's equation for the mean of the predictive distribution.&lt;/div&gt;
-
-
-&lt;p&gt;Command:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;reverse = false(1,num_tracks);
-reverse([1 2 4 5 6 8 9 10 11 12 14 15]) = true;
-% error above, should omit 11:
-% reverse([1 2 4 5 6 8 9 10 12 14 15]) = true;
-exp_2013_08_16_visualize_smooth_perturbations( ...
-        test_Corrs_ll_2, ...
-        retraining_results{3},  ...
-        3, axis_, el, az, num_views,  ...
-        '/Users/ksimek/src/research_blog/img/2013-08-16-ou-model-smooth-%d.png', ...
-        '/ksimek/research/img/2013-08-16-ou-model-smooth-%d.png', ...
-        'ou-reconstruct-smooth-anim', reverse)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Results:&lt;/p&gt;
-
-&lt;p&gt;&lt;a id=&quot;removing-camera-perturbation&quot;&gt;&lt;/a&gt;
-&lt;em&gt;OU-Perturb Model&lt;/em&gt;&lt;/p&gt;
-
-&lt;script&gt;
-$(function(){
-    var urls = [
-        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-1.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-2.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-3.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-4.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-5.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-6.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-7.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-8.png&quot;,
-        &quot;/ksimek/research/img/2013-08-16-ou-model-smooth-9.png&quot;
-        ]
-
-    construct_animation($(&quot;#ou-reconstruct-smooth-anim&quot;), urls);
-});
-&lt;/script&gt;
-
-
-&lt;div id=&quot;ou-reconstruct-smooth-anim&quot; style=&quot;width:250px&quot;&gt; &lt;/div&gt;
-
-
-&lt;p&gt;It's notable that the little curves at the top don't move.  Attaching them to the large main step will allow them to move, which should improve ML.&lt;/p&gt;
-
-&lt;p&gt;It should also significantly affect training if we train with attachments in place.  Perturb_position_variance should be responsible for less of the variance, and perturb_smoothing_variance should explain more.&lt;/p&gt;
-
-&lt;h1&gt;Attachments&lt;/h1&gt;
-
-&lt;p&gt;Tasks:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Create new attachments structure.  Indicates which curve and index the curve is attached to.&lt;/li&gt;
-&lt;li&gt;Algorithm to convert N attachment to M track-sets, where M is the number of connected components in the attachment structure.  (in practice, attachment structure might be irrelevant, given the track-set structure).&lt;/li&gt;
-&lt;li&gt;New function to construct prior matrix for track-sets, as opposed to individual tracks.&lt;/li&gt;
-&lt;li&gt;New function to evaluate ML over track-sets.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;h1&gt;TODO&lt;/h1&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Add attachments before training.&lt;/li&gt;
-&lt;li&gt;Complete end-to-end training
-
-&lt;ul&gt;
-&lt;li&gt;input: path of training and curves&lt;/li&gt;
-&lt;li&gt;automatically add attachments&lt;/li&gt;
-&lt;li&gt;automatically reverse curves as needed&lt;/li&gt;
-&lt;li&gt;save trained parameters somewhere&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Fri, 16 Aug 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/16/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/16/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log - Index Refinement; Mean-curve Reconstruction</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Continuing from yesterday.&lt;/p&gt;
-
-&lt;p&gt;Tried changing index_delta from 0.5 to 0.25.  ML suddenly dropped a &lt;em&gt;lot&lt;/em&gt;.  Realized that oversampling the smoothed curves causes significant degree of many-to-one, and our code prevents skipping more than one or two points during correspondences.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Main Idea:&lt;/strong&gt; Sampling period should be equal to (or close to) the data point-spacing.&lt;/p&gt;
-
-&lt;h1&gt;Index-refinement&lt;/h1&gt;
-
-&lt;p&gt;Allow indices to correspond to continuous values between the samples.&lt;/p&gt;
-
-&lt;p&gt;Modified &lt;code&gt;correspondence/corr_to_likelihood.m&lt;/code&gt; to post-process indices to search the neighboring line segments for a better value. Re-ran &lt;code&gt;tr_prep_likelihood&lt;/code&gt; to reconstruct Corrs collection.  ML improves after fix.&lt;/p&gt;
-
-&lt;p&gt;Need to confirm improved indexing by visualizing results.  See &lt;code&gt;experiments/exp_2013_08_15_visualize_indices.m&lt;/code&gt;, still in progress.  Some apparent bugs in aforementioned changes, causing bad results.  Still investigating...&lt;/p&gt;
-
-&lt;h1&gt;Mean-curve reconstruction&lt;/h1&gt;
-
-&lt;p&gt;Last week, I derived the equation for finding the maximum posterior per-view reconstruction.  Now we have a formula for the unobserved mean curve, i.e. the curve that each view is perturbed from.  Iterestingly, they both have the same form:&lt;/p&gt;
-
-&lt;div&gt;
-\[
-    \mu = K^* (S K + I)^{-1} S y
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;Note that this is slightly different from the form used in a previous post.  This form is equivalent, and better reflects the form used by Williams and Rasmussen.&lt;/p&gt;
-
-&lt;div&gt;Here, \(K\) is the prior covariance, \(S\) is the likelihood precision matrix, and \(y\) are the virtual observations in 3D.  \(K^*\) is the covariance between the observed points (columns) and the points to be predicted (rows). The difference between the per-view and the mean reconstruction is the form of \(K^*\):  for the per-view reconstruction, \(K^*\) uses the full prior covariance, whereas with the mean reconstruction, the perturb covariances are set to zero.&lt;/div&gt;
-
-
-&lt;h2&gt;Usage&lt;/h2&gt;
-
-&lt;p&gt;Modified &lt;code&gt;curve_max_posterior_2.m&lt;/code&gt; by adding an extra optional parameter, &lt;code&gt;kernel_2&lt;/code&gt;.  If set, it assumes you want a mean reconstruction instead of a per-view reconstruction, and uses &lt;code&gt;kernel_2&lt;/code&gt; to build \(K*\).&lt;/p&gt;
-
-&lt;p&gt;Added an extra flag to &lt;code&gt;experiments/exp_2013_08_11_reconstruct_for_web.m&lt;/code&gt;, which if set to true, will also plot the mean curve.&lt;/p&gt;
-</description>
-				<pubDate>Thu, 15 Aug 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/15/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/15/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log - Background ML bugs; Why is Foreground Noise Variance so large?</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;h1&gt;ML Validity Testing&lt;/h1&gt;
-
-&lt;p&gt;In yesterday's test, I hadn't realized that the training ML didn't include all of the curves, only the foreground curves were included.  Rerunning:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Reference ML: -5.1552e+04
-Training ML: -5.0786e+04
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Okay, we're back in the ballpark -- Within 1.5% of the reference.&lt;/p&gt;
-
-&lt;p&gt;Found the other issue: the roundabout way I was using to generate the training covariance matrices was ignoring the user-specified position_variance_2d.  Results now match:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Reference ML: -5.1552e+04
-Training ML: -5.1552e+04
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Unfortunately, none of this explains why training is causing noise variance to collapse so low.  All discovered problems were merely bugs in the validation logic.  At least we know the training ML logic is valid.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Quick inspection shows that 2D curves are, indeed, pre-smoothed.  This means that noise variance can collapse to near-zero when fitting 2D curve.&lt;/p&gt;
-
-&lt;p&gt;The new question becomes: why doesn't it occur in the foreground (3D) model?&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Try re-indexing...&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;% update params related to smoothing variance
-params_2 = tbc_.params;
-params_2.smoothing_variance = training_results{1}.smoothing_variance;
-params_2.noise_variance = training_results{1}.noise_variance;
-% re-construct likelihood (including indicies)
-test_Corrs_ll_2 = tr_prep_likelihood(test_Corrs, data_, params_2);
-% re-run training
-train_params_done = tr_train(test_Corrs_ll_2, training_results{2}, 400, 3);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Results&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0011
-            noise_variance: 0.6846
-         position_variance: 1.3597e+04
-             rate_variance: 0.3042
-perturb_smoothing_variance: 7.1854e-19
-     perturb_rate_variance: 1.3013e-06
- perturb_position_variance: 0.6621
-             perturb_scale: 2.9795
-
-Final ML: -7840.140322
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Compare against results prior to re-indexing: version:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0019
-            noise_variance: 0.7204
-         position_variance: 1.6111e+04
-             rate_variance: 0.2465
-perturb_smoothing_variance: 7.1854e-19
-     perturb_rate_variance: 1.1296e-06
- perturb_position_variance: 0.5931
-             perturb_scale: 2.4654
-
-Final ML: -8049.9e+03
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;So we've improved, but nowhere near the background model's ML of 4611.9.  Note that curves got smoother and less noisy.  More correlation, more variance pushed into the perturbations.  (why the f*** perturb_smoothing_variance is just sitting there like an idiot is still beyond me).&lt;/p&gt;
-
-&lt;h2&gt;Miscellaneous thoughts&lt;/h2&gt;
-
-&lt;p&gt;Need to visualize ll_means against smoothed curve.  The perturbations should be correlated.  Maybe even plot them?  Note the perturbations need to be considered only in the directions parallel to the image plane.  &lt;strong&gt; This has never been done, and is necessary to validate the index-estimation in &lt;code&gt;correspondence/corr_to_likelihood&lt;/code&gt;.&lt;/strong&gt; Can we visualize after removing rate and offset components?  Yes: difference between ll_means and per-view reconstructed curve.&lt;/p&gt;
-
-&lt;p&gt;Consider smarter smoothing in &lt;code&gt;corr_to_likelihood&lt;/code&gt; -- using posterior max instead of &lt;code&gt;csaps&lt;/code&gt;.    Could give better index estimation if the visualization test shows problems.&lt;/p&gt;
-
-&lt;p&gt;What if we were using a 3D likelhood for background curves too? Could we still expect the BG ML to be insanely high, and the noise variance to be insanely peaked?  Backproject, estimate 3d noise variance, estimate index set.  The farther away it gets, the more variance in the correlated points.  Which means lower ML, right?  But training will push variance lower.&lt;/p&gt;
-
-&lt;p&gt;Note that larger noise variance in FG model will explain away bad triangulations.  Perturb variances also explain to some extent, but maybe they aren't sufficient to explain enough of it.&lt;/p&gt;
-
-&lt;p&gt;Why is perturb_smoothing_variance basically zero?  If it was higher, it could explain more of the traingulation error, and allow noise variance to drop.  Should we be using a different pertubation model?  Maybe Brownian motion instead of integrated brownian motion?  Visualizing perturbations would be informative here.&lt;/p&gt;
-
-&lt;p&gt;Do smooth perturbations follow a different dynamics model than linear and offset perturbations?  Can we force it to be larger?  what if it was the only option for modelling perturbations?   It's true that a small amount of smoothing variance can result in a huge amount of marginal point variance, and large variances kill ML's.  Probably a mean-reverting model is more sensible -- Ornstein Ulenbeck process, perhaps?  Or SqExp?  I avoided these in the past, because it changes the form of the marginal curve covariances -- they're no longer purely cubic-spline processes.  But I never considered the fact that we need to model triangulation error.&lt;/p&gt;
-
-&lt;p&gt;Observations: setting perturb_smoothing_variance to exactly zero has no change in ML.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Consider tying foreground and background noise variance during training.&lt;/strong&gt;  &amp;lt;---  This is the most pragmatic solution.  Avoids getting mired in details, and acknowledges what we know to be true: image noise arises from the same process in foreground and background models.&lt;/p&gt;
-
-&lt;p&gt;Possibly the fact that we allow a nonzero position_mean in 2D but not in 3D is the issue?&lt;/p&gt;
-
-&lt;h1&gt;Finer-grained index estimation&lt;/h1&gt;
-
-&lt;p&gt;Got it!  In &lt;code&gt;corr_to_likelihood.m&lt;/code&gt;, we have two parameters that determine how fine-grained the sampling is along the smoothed curve.  Each observed curve is then matched against the sampled curve.  The sampling period is 2 pixels, which means there's an average error of about 1 pixel in each index estimate.&lt;/p&gt;
-
-&lt;p&gt;Reducing the sampling period to 1 pixel and re-training gives:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0014
-            noise_variance: 0.3986
-         position_variance: 1.3555e+04
-             rate_variance: 0.3100
-perturb_smoothing_variance: 7.1854e-19
-     perturb_rate_variance: 3.3992e-04
- perturb_position_variance: 0.6874
-             perturb_scale: 2.3823
-
-Final ML: -6357.585946
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Although we only slightly changed the sampling period, the final ML improved significantly.  The noise variance dropped from 0.7 to 0.4, too.  Perturb rate variance changed by 2 orders of magnitude!&lt;/p&gt;
-
-&lt;p&gt;Reducing sampling period to 0.5:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0018
-            noise_variance: 0.3060
-         position_variance: 1.3499e+04
-             rate_variance: 0.3098
-perturb_smoothing_variance: 7.1854e-19
-     perturb_rate_variance: 4.3411e-04
- perturb_position_variance: 0.8152
-             perturb_scale: 2.4095
-
-Final ML: -5664.35
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The upward ML trend continues, but the noise variance appears to be flattening out.  The perturb_position_variance jumped upward unexpectedly.&lt;/p&gt;
-
-&lt;p&gt;This might explain all of the disparity between the 2D and 3D noise variances.  Unfortunately, we can't reduce the sampling period to 0.0004, because the runtime complexity of the matching  is O(N&lt;sup&gt;2),&lt;/sup&gt; where N is the number of sampled points.&lt;/p&gt;
-
-&lt;p&gt;Better idea: after finding the optimal region in the matching algorithm, improve it by projecting the point onto the line segments neighboring the matched point.  Constant-time, and significantly better!&lt;/p&gt;
-
-&lt;p&gt;Another thought: if the rasterization error was approx. 1 pixel, the sampling error could be reduced to the point where the rasterization error dominated (possibly a sampling period of  0.5 or 0.01 would achieve this).  That way, both 2D and 3D noise sigma would be dominated by rasterization error, and would train to similar values.&lt;/p&gt;
-
-&lt;h1&gt;TODO&lt;/h1&gt;
-
-&lt;ul&gt;
-&lt;li&gt;implement post-match index improvement.&lt;/li&gt;
-&lt;li&gt;Plot reconstruction residuals, look for correlation model.
-
-&lt;ul&gt;
-&lt;li&gt;Goal: determine if residuals are truely independent, and belong in the noise bucket.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Try training BG and FG together, with the same noise variance.&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Wed, 14 Aug 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/14/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/14/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log - Theoretical Rate variance bug; Training background curve model</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;h1&gt;Curve reversing thoughts&lt;/h1&gt;
-
-&lt;p&gt;The reversed curve issue only really matters during training.  Our tests show that curve-flip moves will mix well, even if the maximum isn't always correct.  Adding connections between parent and child curves should resolve these issues.&lt;/p&gt;
-
-&lt;p&gt;During training, derive curve direction from ground-truth.&lt;/p&gt;
-
-&lt;h1&gt;Theoretical Rate Variance (take 2)&lt;/h1&gt;
-
-&lt;p&gt;Realized that my last attempt at this had two bugs:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;I used &lt;code&gt;rand()&lt;/code&gt; instead of &lt;code&gt;randn()&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;I was normalizing by the &lt;em&gt;squared&lt;/em&gt; vector magnitude.&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;p&gt;Fixing this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;dir = randn(3,10000000);
-dir = bsxfun(@times, dir, 1./sqrt(sum(dir.^2)));
-var(dir(:))
-
-    ans =
-        0.3332
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Compare this to earlier theoretical results of ~0.23.&lt;/p&gt;
-
-&lt;p&gt;This new result is interesting, because it is 25% higher than the emperical results we've been getting.  I'm guessing that the fact all of the curves point upward reduces the variance. To prove, we'll force all points to be in the top hemishphere:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt; dir = randn(3,10000000);
- dir(3,:) = abs(dir(3,:));
- dir = bsxfun(@times, dir, 1./sum(dir.^2));
-
- var(dir(:))
-
-    ans =
-        0.3149
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Yep.  And in practive, our values take on an even smaller range of directions.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Repeating for the 2D case:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;dir = randn(2,10000000);
-dir = bsxfun(@times, dir, 1./sqrt(sum(dir.^2)));
-var(dir(:))
-
-    ans =
-        0.5000
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This strongly suggests a pattern of variance being 1/D.&lt;/p&gt;
-
-&lt;h1&gt;Connection test&lt;/h1&gt;
-
-&lt;p&gt;does connecting each of the curves result in better ML?  Do we need to marginalize?&lt;/p&gt;
-
-&lt;h1&gt;training background model&lt;/h1&gt;
-
-&lt;p&gt;construct training ML for background ML
-construct mats for bg curve models.&lt;/p&gt;
-
-&lt;p&gt;Result: &lt;code&gt;train/tr_train_bg.m&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;     position_mean_2d: [2x1 double]
- position_variance_2d: 1.7837e+04
-     rate_variance_2d: 0.5000
-    noise_variance_2d: 9.4597e-04
-smoothing_variance_2d: 0.0157
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Interesting that noise_variance_2d is so low.  We expected it to be on the order of 1 pixel.  More discussion on this later.&lt;/p&gt;
-
-&lt;p&gt;I retrained the BG model for &lt;em&gt;only&lt;/em&gt; the foreground curves, and evaluated the ML under it.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;     position_mean_2d: [2x1 double]
- position_variance_2d: 5.8116e+03
-     rate_variance_2d: 0.5000
-    noise_variance_2d: 4.8105e-04
-smoothing_variance_2d: 0.0053
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Smaller noise variance, smaller smoothing variance.  This shrinking of variance with smaller training set is typical overfitting behavior.  Not of much concern.&lt;/p&gt;
-
-&lt;p&gt;Here's the comparison against the ML for the trained foreground model.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;bg model = 4611.886746
-fg model = -8049.097873
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Not good.  The FG model on true foreground curves should have a better marginal likelihood than the same curves under the BG model.&lt;/p&gt;
-
-&lt;p&gt;Some questions&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Why is bg noise variance so low??
-
-&lt;ul&gt;
-&lt;li&gt;did we smooth the detected curves before storing them?&lt;/li&gt;
-&lt;li&gt;If so, why isn't the foreground model lower?&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Why is the background model so much better than the foreground model?
-
-&lt;ul&gt;
-&lt;li&gt;We expect foreground curves to have a higher marginal likelihood under the foreground model than the background.&lt;/li&gt;
-&lt;li&gt;could it be an indexing issue?&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;This warrants further investigation.&lt;/p&gt;
-
-&lt;h2&gt;Other observations&lt;/h2&gt;
-
-&lt;p&gt;If I force the noise variance to be equal to that of the fg model (0.72), the ML drops significantly (fg results reprinted for convenience):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt; bg model = -9413.1e+03
-fg model = -8049.097873
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now we're back in business.  This is a good sanity check, but it doesn't explain why we can't get similar noise variances for both models when training.&lt;/p&gt;
-
-&lt;p&gt;Possibly the smoothing variance would need to change in this case.  Retraining, with noise_variance forced to 0.72:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;     position_mean_2d: [2x1 double]
- position_variance_2d: 5.8116e+03
-     rate_variance_2d: 0.5000
-    noise_variance_2d: 0.7204
-smoothing_variance_2d: 2.7394e-05
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Smoothing variance dropped dramatically.  ML comparison (fg results reprinted for convenience):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;bg model = -9214.632874
-fg model = -8049.097873
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Note that bg ML didn't significantly change (-2%) after optimizing noise variance (which did change a lot).&lt;/p&gt;
-
-&lt;p&gt;Might be worthwhile visualizing the optimal fits with these parameters.  Are we oversmoothing?  undersmoothing?  These would suggest a bug.&lt;/p&gt;
-
-&lt;h2&gt;ML Validity Testing&lt;/h2&gt;
-
-&lt;p&gt;Running reference ml:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;data_2 = init_data_curves_ml(data_, bg_train_params_done_force)
-sum([data_2.curves_ml{:}])
-
-    ans =
-      -5.1552e+04
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Very different from the training implementation.  Need to dig deeper to determine the cause.&lt;/p&gt;
-
-&lt;h2&gt;Misc Thoughts&lt;/h2&gt;
-
-&lt;p&gt;Do we need to re-estimate the index set during training of the FG model?&lt;/p&gt;
-
-&lt;p&gt;Iterate: train, re-index, repeat.&lt;/p&gt;
-
-&lt;h2&gt;TODO&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;investigate disparity between training ML and reference ML for background curves.&lt;/li&gt;
-&lt;li&gt;Further investigate the FG vs. BG marginal-likelihood issue.&lt;/li&gt;
-&lt;li&gt;test the re-indexing approach to FG model training.&lt;/li&gt;
-&lt;li&gt;re-build end-to-end sampler.&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Tue, 13 Aug 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/13/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/13/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log - Re-run training, Re-reconstruction, Curve-Flipping</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v2&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_2&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;h1&gt;Re-training&lt;/h1&gt;
-
-&lt;p&gt;Re-ran training after several bug-fixes.&lt;/p&gt;
-
-&lt;h2&gt;New Files:&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;train/tr_train_all.m&lt;/code&gt;  - Utility method for training all four models.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;experiments/exp_2013_08_11_train_all.m&lt;/code&gt;  - end-to-end training example; recreates results here.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;h2&gt;Results&lt;/h2&gt;
-
-&lt;p&gt;All results generated by &lt;code&gt;exp_2013_08_11_train_all.m&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;No-perturb model&lt;/em&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0024
-            noise_variance: 1.2308
-         position_variance: 1.6072e+04
-             rate_variance: 0.2743
-perturb_smoothing_variance: 1
-     perturb_rate_variance: 1
- perturb_position_variance: 1
-             perturb_scale: 2.5000
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;em&gt;Ind-perturb model&lt;/em&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0019
-            noise_variance: 0.7192
-         position_variance: 1.6132e+04
-             rate_variance: 0.2451
-perturb_smoothing_variance: 7.1854e-19
-     perturb_rate_variance: 1.1292e-06
- perturb_position_variance: 0.4849
-             perturb_scale: 2.5000
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;em&gt;OU-perturb model&lt;/em&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0019
-            noise_variance: 0.7204
-         position_variance: 1.6111e+04
-             rate_variance: 0.2465
-perturb_smoothing_variance: 7.1854e-19
-     perturb_rate_variance: 1.1296e-06
- perturb_position_variance: 0.5931
-             perturb_scale: 2.4654
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;em&gt;SqExp-perturb model&lt;/em&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;        smoothing_variance: 0.0018
-            noise_variance: 0.7207
-         position_variance: 1.6117e+04
-             rate_variance: 0.2480
-perturb_smoothing_variance: 7.1854e-19
-     perturb_rate_variance: 1.1355e-06
- perturb_position_variance: 0.5172
-             perturb_scale: 0.9202
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Surprised to see that noise-variance only changed by a factor of 10, not 100.  However, the resulting noise_variance is right in the range that you'd expect arising from pixel-grid rasterization error.&lt;/p&gt;
-
-&lt;p&gt;OU perturb-scale is lower than in the last case, and perturb position and rate variance is lower, too.&lt;/p&gt;
-
-&lt;p&gt;SqExp perturb-scale is higher than in the last case, and perturb rate variance is lower.&lt;/p&gt;
-
-&lt;p&gt;Lower position and rate variance makes sense after correcting curve-reversals.&lt;/p&gt;
-
-&lt;p&gt;However, since we trimmed the pre-tails, a higher global and perturb position variance should result.  The result we're seeing is a combination of these competing effects.&lt;/p&gt;
-
-&lt;h1&gt;Reconstructions&lt;/h1&gt;
-
-&lt;p&gt;Some curves are flipped; need to an approach that will detect and correct flipped curves.&lt;/p&gt;
-
-&lt;p&gt;Images and javascript generated by &lt;code&gt;../experiments/exp_2013_08_11_reconstruct_for_web.m&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Ind-perturb model&lt;/em&gt;&lt;/p&gt;
-
-&lt;script&gt;
-$(function(){
-    var urls = [
-        &quot;/ksimek/research/img/2013-08-11-ind-model-1.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-ind-model-2.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-ind-model-3.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-ind-model-4.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-ind-model-5.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-ind-model-6.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-ind-model-7.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-ind-model-8.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-ind-model-9.png&quot;
-        ]
-
-    construct_animation($(&quot;#ind-reconstruct-anim&quot;), urls);
-});
-&lt;/script&gt;
-
-
-&lt;div id=&quot;ind-reconstruct-anim&quot; style=&quot;width:264px&quot;&gt; &lt;/div&gt;
-
-
-&lt;p&gt;&lt;em&gt;OO-perturb model&lt;/em&gt;&lt;/p&gt;
-
-&lt;script&gt;
-$(function(){
-    var urls = [
-        &quot;/ksimek/research/img/2013-08-11-ou-model-1.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-ou-model-2.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-ou-model-3.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-ou-model-4.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-ou-model-5.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-ou-model-6.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-ou-model-7.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-ou-model-8.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-ou-model-9.png&quot;
-        ]
-
-    construct_animation($(&quot;#ou-reconstruct-anim&quot;), urls);
-});
-&lt;/script&gt;
-
-
-&lt;div id=&quot;ou-reconstruct-anim&quot; style=&quot;width:264px&quot;&gt; &lt;/div&gt;
-
-
-&lt;p&gt;&lt;em&gt;SqExp-perturb model&lt;/em&gt;&lt;/p&gt;
-
-&lt;script&gt;
-$(function(){
-    var urls = [
-        &quot;/ksimek/research/img/2013-08-11-sqexp-model-1.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-sqexp-model-2.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-sqexp-model-3.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-sqexp-model-4.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-sqexp-model-5.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-sqexp-model-6.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-sqexp-model-7.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-sqexp-model-8.png&quot;,
-        &quot;/ksimek/research/img/2013-08-11-sqexp-model-9.png&quot;
-        ]
-
-    construct_animation($(&quot;#sqexp-reconstruct-anim&quot;), urls);
-});
-&lt;/script&gt;
-
-
-&lt;div id=&quot;sqexp-reconstruct-anim&quot; style=&quot;width:264px&quot;&gt; &lt;/div&gt;
-
-
-&lt;h1&gt;Detecting and Flipping Curves&lt;/h1&gt;
-
-&lt;p&gt;Experiment: &lt;code&gt;../experiments/exp_2013_08_11_flip_curves.m&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Result: doesn't really work.  Lots of false negatives.&lt;/p&gt;
-
-&lt;p&gt;Algorithm output: 2     4     5     6     8    10    12
-Ground Truth: 1 2 4 5 6 8 9 10 11 12 14 15&lt;/p&gt;
-
-&lt;p&gt;Not really sure why this is failing.  After flipping, most of these curves are closer to the origin, which is promoted by position_variance.  And any tip-perturbations should be better modelled after flipping.&lt;/p&gt;
-
-&lt;h1&gt;TODO&lt;/h1&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Think more on curve-reversing&lt;/li&gt;
-&lt;li&gt;Central curve extraction&lt;/li&gt;
-&lt;li&gt;add branching&lt;/li&gt;
-&lt;li&gt;end-to-end correspondence sampling&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Sun, 11 Aug 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/08/11/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/08/11/work-log</guid>
 			</item>
 		
 	</channel>

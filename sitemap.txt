@@ -12,11 +12,19 @@ http://vision.sista.arizona.edu/ksimek/research/projects/tulips.html
 http://vision.sista.arizona.edu/ksimek/research/sitemap.txt
 http://vision.sista.arizona.edu/ksimek/research/tags.html
 http://vision.sista.arizona.edu/ksimek/research/testing_animation/index.html
+http://vision.sista.arizona.edu/ksimek/research/WACV2014/index.html
 http://vision.sista.arizona.edu/ksimek/research/page2/index.html
 http://vision.sista.arizona.edu/ksimek/research/page3/index.html
 http://vision.sista.arizona.edu/ksimek/research/page4/index.html
 http://vision.sista.arizona.edu/ksimek/research/page5/index.html
+http://vision.sista.arizona.edu/ksimek/research/page6/index.html
 
+http://vision.sista.arizona.edu/ksimek/research/2013/09/12/work-log
+http://vision.sista.arizona.edu/ksimek/research/2013/09/10/work-log
+http://vision.sista.arizona.edu/ksimek/research/2013/09/06/work-log
+http://vision.sista.arizona.edu/ksimek/research/2013/09/05/work-log
+http://vision.sista.arizona.edu/ksimek/research/2013/09/03/work-log
+http://vision.sista.arizona.edu/ksimek/research/2013/08/26/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/08/22/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/08/21/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/08/21/cleanup

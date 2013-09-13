@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log - Attachment ML Math (ctd); Implementing Attach()/Detach() &larr; </title>
+   <title>Work Log - Misc. &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -78,9 +78,9 @@
 	
   
   
-  <h1 class="title">Work Log - Attachment ML Math (ctd); Implementing Attach()/Detach()</h1>
+  <h1 class="title">Work Log - Misc.</h1>
 
-  <div class="date emphnext">August 22, 2013</div>
+  <div class="date emphnext">August 26, 2013</div>
     
 
 
@@ -104,7 +104,7 @@
 
     <tr>
         <th>SVN Revision</th>
-        <td>15169</td>
+        <td>15229</td>
     </tr>
 
 
@@ -114,147 +114,147 @@
 </div>
 
 
-<p><strong>Note new working path: <code>data_association_3</code></strong><br/>
-Fixed corrupt svn working copy.</p>
+<h1>Monday IVILAB infrastructure meeting</h1>
 
-<h1>Computing \(\mu_b\) and \(\Sigma_b\)</h1>
+<p>I'll be organizing the Computational Intelligence seminar this semester.</p>
 
-<div> Since \(S\) is usually singular, we can't invert it, so we need to tweak yesterday's equations.  In what follows, the precision matrix \(S\) is decomposed into \(s s^\top\), which will allow us to keep the covariance matrix symmetric. 
-
-<div>
-The updated forumula for \(\mu_b\) is:</div>
-\[
-    \begin{align}
-    \mu_b &= K_*^\top \left(K_{\mathcal{MB}} + S^{-1}\right)^{-1} y_{MB}  \\
-    \tag{1}
-          &= K_*^\top s^\top \left(s K_{\mathcal{MB}} s^\top + I\right)^{-1} s y_{MB}  \\
-    \end{align}
-\]
-
-The formula for \(\Sigma_b\) is:
-
-\[
-    \Sigma_b = K_b - K_*^\top s^\top \left(s K_{\mathcal{MB}} s^\top + I\right)^{-1} s K_*
-\]
-
-Recall that \(K_b\) is the prior covariance of the branch point.
-</div>
-
-
-<br />
-
-
-<h2>Predictive covariance question</h2>
-
-<div>
-<p>
-I realized during implementation that it isn't clear what the predictive covariance, \(K_*\), should be.  I know it's the covariance between the true branch point and the observed points in the markov blanket, but the observed points have associated view-indices, while the branch point does not.  After some thought, I realized that the covariance arising from view-indices is essentially *likelihood* variance in this context (i.e. imaging noise), and according to Williams and Rasmussen, these parts of the likelihood should be omitted when computing the covariance between data and true unobserved points.  (See equation (2.21), notice that off-diagonal elements don't include the noise variance, \(\sigma_n I\)).
-</p>
-<p>
-To accomodate the use-case where you want to compute the covariance while ignoring view-index, I tweaked `kernel/get_model_kernel`; now, if you pass-in a `model_index` of zero, it returns a two-parameter no-perturb kernel where only spacial-indices are received.
-</p>
-</div>
-
-
-<h2><code>ll_indices_flat</code> vs. <code>prior_indices</code></h2>
-
-<p>There's some ambiguity in these two fields of a curve-track.  The difference is simply that in <code>ll_indices_flat</code>, indices <em>always</em> start at zero, whereas in <code>prior_indices</code> the offset <code>start_index</code> is added to all values.  In practice, there are rules for where these two fields should be used:</p>
+<p>Will need to</p>
 
 <ul>
-<li>when passing indices to a kernel, always use <code>prior_indices</code></li>
-<li>When dealing with geometry (e.g. referring to a point along a curve), always use ll_indices.  That way, the position of the referred point is unchanged if <code>start_index</code> ever changes.</li>
+<li>Arrange volunteers</li>
+<li>send announcements</li>
+<li>send reminders to speakers</li>
+<li>Set up seminar web page</li>
 </ul>
 
 
-<h1>Task progress</h1>
+<h1>Building efficient curve-tree ML.</h1>
 
-<ul>
-<li>Finish <code>attachment/att_set_branch_index.m</code>.</li>
-<li>rough test of attachment stuff - (does it parse? does it run?)
+<p>Significant rework.</p>
 
-<ul>
-<li>It runs, but with buggy output for \(\mu_b\) and \(\Sigma_b\).</li>
-<li>Found bug - incorrect re-indexing (xxyyzz to xyzxyz)</li>
-<li>Now giving apparently good results.</li>
-</ul>
-</li>
-<li>Implement efficient tree ML</li>
-<li>implement naive ML</li>
-<li>write tests
+<p>New field: branch_K and branch_mu to store mean and covariance of all points in curve.
+Prior_k now does not include offset covariance; stored in branch_K.
+mu_b and Sigma_b now store the branch point means and covariances for all views</p>
+
+<p>fix kernel to not include offset index</p>
+
+<h1>Issues</h1>
+
+<p>Finished implementation.  Has bugs.</p>
+
+<h2>Start-point has no effect</h2>
+
+<p>Example:</p>
+
+<pre><code>start_pt = [0 100];
+ml = [];
+for i = 1:2
+    Corrs = attach(Corrs, 2, 1, start_pt(i), 0, params);
+    ml(i) = curve_tree_ml_2(Corrs, params, data_);
+end
+assert(ml(1) == ml(2));
+</code></pre>
+
+<p><em>Fixed</em> - stupid bug in <code>attachment/attach.m</code> - was index offset was hard-coded to zero due to a refactoring mishap.</p>
+
+<h2>Optimal Branch point isn't correct</h2>
+
+<p>Example:</p>
+
+<pre><code>start_pt = [0 10 50 100 1000 5000];
+ml = [];
+for i = 1:2
+    Corrs = attach(Corrs, 2, 1, start_pt(i), 0, params);
+    ml(i) = curve_tree_ml_2(Corrs, params, data_);
+end
+assert(all(diff(ml) &gt; 0);
+</code></pre>
+
+<p><em>Solved</em> - curves were reversed.</p>
+
+<h1>Handling reversed curves</h1>
+
+<p>Should add a <code>reversed</code> flag, which reverses indices before building likelihood and prior.  currently, constructing the likelihood occurs during the "backproject and re-index" phase, in file <code>correspondence/corr_to_likelihood.m</code>.  Should refactor likelihood construction into its own function, so we don't have to re-backproject when we don't need to.</p>
+
+<p>Let's review the data-flow so we can see more clearly where everything happens.</p>
+
+<h1>Overview: end-to-end curve construction</h1>
 
 <ol>
-<li>compare against <code>curve_ml5.m</code> for independent curves</li>
-<li>compare against naive ML using full-covariance-matrix.</li>
-</ol>
-</li>
-<li>invalidate children after calling attach/detach</li>
-</ul>
-
-
-<h1>Misc notes</h1>
+<li>propose association and attachment
 
 <ul>
-<li>should place a condition on \(\Sigma_b\).  If it's variance is too high, need to expand markov-blanket.</li>
-<li>Add <code>model_type to params</code></li>
-<li>Have "make_correspondence" initialize start_index, parent_index, branch_index.</li>
+<li>By sampling (no code yet)</li>
+<li><code>train/labels_from_ground_truth</code> - propose from ground truth.</li>
+<li><strong>Output</strong>: assoc {}</li>
 </ul>
+</li>
+<li>Construct track
+
+<ul>
+<li><code>correspondence/make_correspondence</code></li>
+<li><strong>Output</strong>: Corrs {};  Corr.ml_2d</li>
+</ul>
+</li>
+<li>Correspondence and triangulation
+
+<ul>
+<li><code>correspondence/build_full_correspondence.m</code> - build from scratch</li>
+<li><code>correspondence/merge_correspondence_2.m</code> - merge two pieces</li>
+<li><strong>Output</strong>: <code>corr</code>, <code>means</code>, <code>precisions</code>, <code>cov_error</code></li>
+</ul>
+</li>
+<li>backproject and estimate curvature
+
+<ul>
+<li><code>correspondence/corr_to_likelihood.m</code> -</li>
+<li><strong>Output</strong>: <code>ll_{means, precisions, indices}</code>, <code>curve_sm*</code></li>
+</ul>
+</li>
+<li>construct likelihood (flatten, sort, and reverse if needed)
+
+<ul>
+<li><code>correspondence/flatten_sort_and_reverse.m</code> - (doesn't exist yet)</li>
+<li><strong>Output</strong>: <code>ll_{means_flat, precisions_flat, indices_flat, S}</code></li>
+</ul>
+</li>
+<li>handle attachment recursively
+
+<ol>
+<li>compute conditional prior
+
+<ul>
+<li><code>attachment/att_set_start_index.m</code></li>
+<li><strong>Output</strong>: <code>start_index</code>, <code>prior_K</code>, <code>prior_indices</code></li>
+</ul>
+</li>
+<li>compute branch point posterior
+
+<ul>
+<li><code>attachment/att_set_branch_index.m</code></li>
+<li><strong>Output</strong>: <code>branch_index</code>, <code>mu_b</code>, <code>sigma_b</code>, <code>branch_K</code>, <code>branch_mu</code></li>
+</ul>
+</li>
+</ol>
+</li>
+<li>Compute (ML, argmax, etc)</li>
+</ol>
 
 
-<h1>chain of affects</h1>
+<p>Consider renaming step 4.  backproject against rough triangulation; estimate curvature at each point; determine index set.  At this point, the order of points don't matter, because the index set hasn't been put to use.</p>
 
-<p>How are children affected when properties of the parent change?</p>
+<p><strong>Action: reverse curve</strong> - detach?, rerun step 5, 6.1 &amp; 6.2 on self, update branch point &amp; rerun 6.2 for children.</p>
 
-<div>
-<table border="1">
-<tr>
-<th width="33%">parent property</th>
-<th width="33%">self affects</th>
-<th>child affects</th>
-</tr>
+<h1>Test: optimize branch point and start index</h1>
 
-<tr>
-<td>Assoc/Correspondence</td>
-<td>start_index (and inherited)</td>
-<td>Branch_index (and inherited.  easy to re-estimate deterministically), marginal likelihood, (not start index)</td>
-</tr>
-
-<tr>
-<td>Start index</td>
-<td>prior_K, prior_indices, ML</td>
-<td>\(\mu_b\)*, \(\Sigma_b\)*, ML*</td>
-</tr>
-
-<tr>
-<td>Branch index</td>
-<td>\(\mu_b\), \(\Sigma_b\), </td>
-<td>none.</td>
-</tr>
-
-<tr>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-
-
-<tr>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-
-</table>
-* Updating these might not be necessary
-</div>
-
+<p>(TODO)</p>
 
 <h1>TODO</h1>
 
 <ul>
-<li>Implement Tree ML (2 ways, "naive" and "fast")</li>
-<li>Test</li>
-<li>Get attachment for ground truth</li>
-<li>Re-train using attachment</li>
+<li>optimize test</li>
+<li>get attachment, reversal, and branch points from ground truth</li>
+<li>store <code>ml_2d</code> with corr.  update on merge.  use during ml computation instead of data_</li>
 </ul>
 
 
@@ -268,10 +268,10 @@ To accomodate the use-case where you want to compute the covariance while ignori
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/08/26/work-log" class="next" title="Work Log - Misc.">Work Log - Misc. &rarr;</a>
+    <a href="/ksimek/research/2013/09/03/work-log" class="next" title="Work Log - Branching ML, debugging, training">Work Log - Branching ML, debugging, training &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/08/21/work-log" class="prev" title="Work Log - Clique-tree math (ctd)">&larr; Work Log - Clique-tree math (ctd)</a>
+    <a href="/ksimek/research/2013/08/22/work-log" class="prev" title="Work Log - Attachment ML Math (ctd); Implementing Attach()/Detach()">&larr; Work Log - Attachment ML Math (ctd); Implementing Attach()/Detach()</a>
   
   </div>
   <div class="clearer"> </div>
@@ -288,7 +288,7 @@ To accomodate the use-case where you want to compute the covariance while ignori
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Attachment ML Math (ctd); Implementing Attach()/Detach()" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Misc." data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -336,7 +336,7 @@ To accomodate the use-case where you want to compute the covariance while ignori
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log - Attachment ML Math (ctd); Implementing Attach()/Detach()");
+                    + encodeURIComponent("Work Log - Misc.");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

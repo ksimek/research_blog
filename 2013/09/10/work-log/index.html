@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log - Attachment ML Math (ctd); Implementing Attach()/Detach() &larr; </title>
+   <title>Work Log - Branching prior covariance &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -78,9 +78,9 @@
 	
   
   
-  <h1 class="title">Work Log - Attachment ML Math (ctd); Implementing Attach()/Detach()</h1>
+  <h1 class="title">Work Log - Branching prior covariance</h1>
 
-  <div class="date emphnext">August 22, 2013</div>
+  <div class="date emphnext">September 10, 2013</div>
     
 
 
@@ -104,7 +104,7 @@
 
     <tr>
         <th>SVN Revision</th>
-        <td>15169</td>
+        <td>15229</td>
     </tr>
 
 
@@ -114,147 +114,60 @@
 </div>
 
 
-<p><strong>Note new working path: <code>data_association_3</code></strong><br/>
-Fixed corrupt svn working copy.</p>
-
-<h1>Computing \(\mu_b\) and \(\Sigma_b\)</h1>
-
-<div> Since \(S\) is usually singular, we can't invert it, so we need to tweak yesterday's equations.  In what follows, the precision matrix \(S\) is decomposed into \(s s^\top\), which will allow us to keep the covariance matrix symmetric. 
-
-<div>
-The updated forumula for \(\mu_b\) is:</div>
-\[
-    \begin{align}
-    \mu_b &= K_*^\top \left(K_{\mathcal{MB}} + S^{-1}\right)^{-1} y_{MB}  \\
-    \tag{1}
-          &= K_*^\top s^\top \left(s K_{\mathcal{MB}} s^\top + I\right)^{-1} s y_{MB}  \\
-    \end{align}
-\]
-
-The formula for \(\Sigma_b\) is:
-
-\[
-    \Sigma_b = K_b - K_*^\top s^\top \left(s K_{\mathcal{MB}} s^\top + I\right)^{-1} s K_*
-\]
-
-Recall that \(K_b\) is the prior covariance of the branch point.
-</div>
-
-
-<br />
-
-
-<h2>Predictive covariance question</h2>
+<p>In the past, we've formulated the branching prior covariance matrix by starting with an independent-curve block-diagonal covariance matrix and multiplying by an "attachment matrix."  This works when the branching point appears in the index set, but we'd like to allow branching from any continuous point along the curve.  Stated differently, we currently model branching using a discritized model, but we'd prefer to express branching using the underlying continuous gaussian process.  This means modelling branching using the covariance function, rather than by manipulating the covariance matrix.</p>
 
 <div>
 <p>
-I realized during implementation that it isn't clear what the predictive covariance, \(K_*\), should be.  I know it's the covariance between the true branch point and the observed points in the markov blanket, but the observed points have associated view-indices, while the branch point does not.  After some thought, I realized that the covariance arising from view-indices is essentially *likelihood* variance in this context (i.e. imaging noise), and according to Williams and Rasmussen, these parts of the likelihood should be omitted when computing the covariance between data and true unobserved points.  (See equation (2.21), notice that off-diagonal elements don't include the noise variance, \(\sigma_n I\)).
+The key observation here is that in addition to each point's smooth curvature variance, it inherits the covariance of its parent's branch point.   In order to model correlation between curves, we extend the definition of "index" to add the curve index, \(c_i\), in addition to point index and time/view index.  Thus, index is now a triple: (c_i, p_i, t_i).  Note that we've changed our notation; previously point index was \(t_i\) and time/view index was \(v_i\).  The new notation uses \(p_i\) and \(t_i\) respectively, to avoid confusion between spacial and temporal dimensions.  
 </p>
+
 <p>
-To accomodate the use-case where you want to compute the covariance while ignoring view-index, I tweaked `kernel/get_model_kernel`; now, if you pass-in a `model_index` of zero, it returns a two-parameter no-perturb kernel where only spacial-indices are received.
+Let's introduce two functions, \(\text{branch_curve}(c_i)\) and \(\text{branch_point}(c_i)\), which return the curve index and point index of curve \(c_i\)'s branch point, resepectively, or zero if \(c_i\) is a root curve.  We'll also use the convenience function \(\text{branch}(i)\), which is shorthand for full branch index, i.e. the tuple \(\text{branch_curve}(c_i), \text{branch_point}(p_i), t_i)\).  Note that the time-index \(t_i\) is preserved when getting the branch index.
 </p>
+
+<p>
+Without loss of generality, we'll assume curves are indexed in topological order, with parents appearing occurring before descendants.  If there are multiple connected components in the graph, it will be important that all root nodes have a lower index than non-root nodes, so we can add a sentinal node with index \(c_i = 0\), and attach all root curves to it before ordering. (Note to self: breadth-first search order might be simpler to describe).   The branching covariance function is now:
+</p>
+
+\[
+\begin{align}
+k\left( i, j \right) 
+     &= 
+    k\left( (c_i, p_i, t_i), (c_j, p_j, t_j) \right)  \\
+     &= k_\text{base} ( i, j ) +
+     \begin{cases}
+     k(j, i) & \text{if } c_i > c_j = 0 \\
+     \sigma_o  & \text{if } \text{isroot}(c_i) \text{ and } \text{isroot}(c_j) \text{ and } c_i = c_j &&  \\
+     0 & \text{if } \text{isroot}(c_i) \text{ and } \text{isroot}(c_j) \text{ and } c_i \neq c_j \\
+     k(i, \text{branch}(j)) & \text{otherwise} 
+    \end{cases}
+\end{align}
+\]
+
+<p>
+For convenience, we've used the \(k(i,j) \) to stand-in for \(k\left((c_i, p_i, t_i), (c_j, p_j, t_j)\right)\).
+  Here, \(k_\text{base}(i,j)\) is the independent curve covariance (e.g. cubic spline covariance w/ perturbations).   In our case, \(k_\text{base}(\dot)\) is zero if \(c_i \neq c_j\), but this isn't necessarilly required.
+  </p>
 </div>
 
 
-<h2><code>ll_indices_flat</code> vs. <code>prior_indices</code></h2>
-
-<p>There's some ambiguity in these two fields of a curve-track.  The difference is simply that in <code>ll_indices_flat</code>, indices <em>always</em> start at zero, whereas in <code>prior_indices</code> the offset <code>start_index</code> is added to all values.  In practice, there are rules for where these two fields should be used:</p>
-
 <ul>
-<li>when passing indices to a kernel, always use <code>prior_indices</code></li>
-<li>When dealing with geometry (e.g. referring to a point along a curve), always use ll_indices.  That way, the position of the referred point is unchanged if <code>start_index</code> ever changes.</li>
+<li>The first case just simplifies the definition by ensuring that if i and j are related, the ancestor always appears in the first position.</li>
+<li>The second case handles the offset variance that allow root curves to translate away from the origin.</li>
+<li>The third case ensures zero covariance between disconnected trees.</li>
+<li>The fourth case inherits covariance from the second parameter's parent curve.  Note that \(c_j\) is always a non-root curve; if it were, one of the first three cases would handle it.</li>
 </ul>
 
 
-<h1>Task progress</h1>
+<h2>Testing </h2>
+
+<h2>TODO</h2>
 
 <ul>
-<li>Finish <code>attachment/att_set_branch_index.m</code>.</li>
-<li>rough test of attachment stuff - (does it parse? does it run?)
-
-<ul>
-<li>It runs, but with buggy output for \(\mu_b\) and \(\Sigma_b\).</li>
-<li>Found bug - incorrect re-indexing (xxyyzz to xyzxyz)</li>
-<li>Now giving apparently good results.</li>
-</ul>
-</li>
-<li>Implement efficient tree ML</li>
-<li>implement naive ML</li>
-<li>write tests
-
-<ol>
-<li>compare against <code>curve_ml5.m</code> for independent curves</li>
-<li>compare against naive ML using full-covariance-matrix.</li>
-</ol>
-</li>
-<li>invalidate children after calling attach/detach</li>
-</ul>
-
-
-<h1>Misc notes</h1>
-
-<ul>
-<li>should place a condition on \(\Sigma_b\).  If it's variance is too high, need to expand markov-blanket.</li>
-<li>Add <code>model_type to params</code></li>
-<li>Have "make_correspondence" initialize start_index, parent_index, branch_index.</li>
-</ul>
-
-
-<h1>chain of affects</h1>
-
-<p>How are children affected when properties of the parent change?</p>
-
-<div>
-<table border="1">
-<tr>
-<th width="33%">parent property</th>
-<th width="33%">self affects</th>
-<th>child affects</th>
-</tr>
-
-<tr>
-<td>Assoc/Correspondence</td>
-<td>start_index (and inherited)</td>
-<td>Branch_index (and inherited.  easy to re-estimate deterministically), marginal likelihood, (not start index)</td>
-</tr>
-
-<tr>
-<td>Start index</td>
-<td>prior_K, prior_indices, ML</td>
-<td>\(\mu_b\)*, \(\Sigma_b\)*, ML*</td>
-</tr>
-
-<tr>
-<td>Branch index</td>
-<td>\(\mu_b\), \(\Sigma_b\), </td>
-<td>none.</td>
-</tr>
-
-<tr>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-
-
-<tr>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-
-</table>
-* Updating these might not be necessary
-</div>
-
-
-<h1>TODO</h1>
-
-<ul>
-<li>Implement Tree ML (2 ways, "naive" and "fast")</li>
-<li>Test</li>
-<li>Get attachment for ground truth</li>
-<li>Re-train using attachment</li>
+<li>Finish tracing wacv datasets 7 through 11.</li>
+<li>Test the new covariance function against a matrix-based approach.</li>
+<li>Test the new covariance function by reconstructing 9-view sequence using WACV datasets.</li>
+<li>implement attachment-based ml using new covariance function</li>
 </ul>
 
 
@@ -268,10 +181,10 @@ To accomodate the use-case where you want to compute the covariance while ignori
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/08/26/work-log" class="next" title="Work Log - Misc.">Work Log - Misc. &rarr;</a>
+    <a href="/ksimek/research/2013/09/12/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/08/21/work-log" class="prev" title="Work Log - Clique-tree math (ctd)">&larr; Work Log - Clique-tree math (ctd)</a>
+    <a href="/ksimek/research/2013/09/06/work-log" class="prev" title="Work Log - WACV results">&larr; Work Log - WACV results</a>
   
   </div>
   <div class="clearer"> </div>
@@ -288,7 +201,7 @@ To accomodate the use-case where you want to compute the covariance while ignori
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Attachment ML Math (ctd); Implementing Attach()/Detach()" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Branching prior covariance" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -336,7 +249,7 @@ To accomodate the use-case where you want to compute the covariance while ignori
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log - Attachment ML Math (ctd); Implementing Attach()/Detach()");
+                    + encodeURIComponent("Work Log - Branching prior covariance");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

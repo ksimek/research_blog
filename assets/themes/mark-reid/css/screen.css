@@ -281,15 +281,29 @@ ul, ol {
 	margin-bottom: 1.5em;
 	line-height: 1.5em;
 	padding-left: 1.5em;
+    counter-reset: root;
 }
-ul li {
+ul > li {
 	list-style-type: square;
 	list-style-position: outside;
 }
-ol li {
-	list-style-type: decimal;
-	list-style-position: outside;
+li > ul, li > ol {
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
 }
+ol {
+    counter-reset: section;
+	list-style-type: none;
+}
+ol > li:before {
+    counter-increment: section;
+    content: counters(section, ".") ". "; 
+}
+li > ol > li:before {
+    counter-increment: section;
+    content: counters(section, ".") " "; 
+}
+
 dt { font-weight: bold;}
 dd { margin: 0 0 1.5em 0; text-align: justify; }
 

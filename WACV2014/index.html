@@ -1,0 +1,359 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Index &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page">
+	
+
+<h1 class="emphnext">Index</h1>
+
+<h1>Notation index</h1>
+
+<ul>
+<li>\(X\) set of 3D curve points</li>
+<li>\(x_i\) individual 3D curve point</li>
+<li>\(T\) index set.</li>
+<li>\(p\) camera pinhole</li>
+<li>Y set of 2D curve point opbservations</li>
+<li>y_i individual 2D curve point observation</li>
+<li></li>
+</ul>
+
+
+<h1>Prior</h1>
+
+<div>
+We model curves as a sequence of points \(X = \{x_1, ..., x_n\}\) that represent discrete samples along an underlying continuous curve.  Each point has an associated index \(t_i\)  that represents its distance along the curve.  The set of indices \(T = \{t_1, ..., t_n\}\) are called the curve's "spacial index set" or simply "index set".  For reasons that will become clear later,  we will sometimes also associate each point with the index \(v_i\) of the view in which it was observed.  In our imaging system, view-index corresponds to the time in which the image was captured, so we will refer to \(V = \{v_1, ..., v_n\}\) as the "temporal index set."
+</div>
+
+
+<h2>Gaussian Process Prior</h2>
+
+<p>We model the continuous curve using a Gaussian Process.  A Gaussian processes is defined as a collection of random variables, any countable subset of which are jointly Gaussian.  Although the number of points in our underlying curve is uncountably infinite, the Gaussian process permits tractable inference over any discrete subset of points along the curve in closed-form.  Without loss of generality, we assume the Gaussian processes have mean of zero; a general GP can be converted to a zero-mean GP by subtracting the mean from the observations during evaluation, and adding the mean to any predictions.</p>
+
+<p>The properties of a Gaussian process are dictated by its covariance function.  There are several covariance functions that model smooth curves, depending on the desired smoothness properties.  When modeling smooth curves, it is common to use an energy functional that penalizes the second derivative.  This is the energy functional associated with the cubic smoothing spline, and it can be represented in terms of a Gaussian process by using the covariance function \cite{Williams:2006vz},</p>
+
+<div>
+\[
+    k_{\text{smooth}}(t, t') = \frac{\mid t -  t' \mid \min(t, t')^2}{2} + \frac{\min(t, t')^3}{3}
+\]
+</div>
+
+
+<p>.</p>
+
+<p>This is a natural physical model for plant stems, as it penalizes bending.  Note that the first curve point has an index of zero, so it has zero variance under this covariance function.  Used alone, this function places an infinite penalty on the initial position and rate of this curve; we relax this by adding two extra terms:</p>
+
+<div>
+\[
+    k_{\text{cs}}(t, t') = \sigma^2_s k_\text{smooth}(t, t') + \sigma^2_o + \sigma^2_r t' \; t
+\]
+</div>
+
+
+<p>.</p>
+
+<p>The second term is an offset penalty, which penalizes the distance from the curve's initial point to the origin.  The third term penalizes the curve's initial rate with respect to its spatial index (which should ideally be 1.0).  Each term has a variance constant to control it's strength.</p>
+
+<p>We call the process described by this combined covariance function the "cubic spline (CS) process."  We use it to model plant stems, but our general approach permits any covariance function as long as it is symmetric and positive definite.</p>
+
+<h2>Modeling curve motion</h2>
+
+<p>If the curves are moving over time, we also need to model the temporal relationship between points.  Represeting the combined spacial and temporal indices as an odered pair, \((t, v)\), we can define a covariance function over pairs:</p>
+
+<div>
+\[
+    k\left((t, v), (t', v')\right) = k_{\text{cs}}(t, t') + k_{ou}(v, v') k'_\text{cs}(t, t')
+\]
+</div>
+
+
+
+
+<div>
+<p>
+The first term can be interpreted as the covariance for an unobserved mean curve, while the second term models the observed deviations from the mean curve.  Here, \(k_{ou}\) is an Ornstein-Uhlenbeck (OU) process, which models a mean-reverting random-walk.  This allows the curves to shift randomly over time, but prevents excessive drift.  The OU covariance modulates a second cubic-spline kernel, \(k'_\text{cs}\), which ensures that perturbations are spatially correlated and curves retain their smooth shape, despite drifting.  For any individual point, the contribution from the CS kernel is constant, and the point moves according to an OU process over time; at any time-slice, the contribution from the OU process is constant and the curve points move through space according to a CS process.  
+</p>
+</div>
+
+
+<p>By combining spatial and temporal relationships, this prior will allow us to simultaneously triangulate curve positions and track their motion over time.</p>
+
+<p>TODO: covariance matrix</p>
+
+<h2>Attachments </h2>
+
+<p>Until now, we've treated curves as independent of one-another.  However, in our plants, curve are arranged in a tree topology, with child curves attached to their parents.     We can modify our prior to enforce these attachments by modifying the covariance matrix.  Let \(K_1, K_2, ..., K_N\) be the covariance matrices for the \(N\) individual curves, ordered topographically (i.e. \(K_1\) is a root node, \(K_N\) is a leaf).  We start by arranging them into a block-diagonal covariance matrix, \(K_\text{ind}\).</p>
+
+<div>
+\[
+K_\text{ind} = \left (\begin{array}{cccc}
+    K_1 & 0 &  \cdots & 0 \\
+     0  & K_2 &  \cdots & 0  \\
+     \vdots & \vdots & \ddots & \vdots \\
+     0 & 0 & ... & K_N
+\end{array}
+\right)
+\]
+</div>
+
+
+<p>Let \((b, t) = branch(a)\) denote that curve \(a\) branches from the \(i\)-th point of curve \(b\).  We can introduce attachments using a lower triangular matrix,  \(C\), which adds correlations between parents and child.</p>
+
+<div>
+\[
+K = C K_\text{ind} C^\top
+\]
+</div>
+
+
+<p>where</p>
+
+<div>
+\[
+C = 
+\left (
+\begin{array}{ccccc}
+I & 0 & 0 & \cdots & 0\\
+C^{(21)} & I & 0 & \cdots  & 0 \\
+C^{(31)} & C^{(32)} & I & \cdots & 0\\
+\vdots & \vdots & \vdots & \ddots & 0 \\
+C^{(N1)} & C^{(N2)} & C^{(N3)} & \cdots & I \\
+\end{array}
+\right )
+\]
+</div>
+
+
+<p>and</p>
+
+<div>
+\[
+c^{(ab)}_{ij} = \begin{cases} 
+        1 & \text{if $branch(a) = (b, j)$ } \\
+        0 & \text{otherwise}
+        \end{cases}
+\]
+</div>
+
+
+<p>.</p>
+
+<p>Note that the resulting covariance matrix \(K\) is singular, because the branch points on the parent and child curves are 100% correlated.  This proves to be unproblematic during reconstruction, as we can avoid inverting \(K\).</p>
+
+<h2>From 1D to 3D</h2>
+
+<p>Until now, we've only considered one-dimensional curves.  We can extend the prior to three dimensions by assuming each dimension to be independent.  If we concatenate points into a single vector, \((x_!, y_1, z_1, x_2, y_2, z_2, \dots, x_n, y_n, z_n)\), the resulting covariance matrix becomes,</p>
+
+<div>
+\[
+    K_\text{3D} = P \left ( 
+        \begin{array}{ccc}
+        K & 0 & 0 \\
+        0 & K & 0 \\
+        0 & 0 & K
+        \end{array}
+            \right )
+        P^\top
+    \]
+</div>
+
+
+<p>,</p>
+
+<p>where \(P\) is a permutation matrix that re-orders variables \((x_1, ..., x_n, y_1, ..., y_n, z_1, ..., z_n)\) to the form \((x_1, y_1, z_1, ..., x_n, y_n, z_n)\).</p>
+
+<h1>Likelihood Function</h1>
+
+<p>Our likelihood function assumes observations \(Y\) arise by projecting each curve point into its corresponding image and perturbing by isotropic IID Gaussian noise with variance \(\sigma_n<sup>2\).</sup>  Using \(\pi(x_i\) to denote the projection of \(x_i\) into its corresponding view \(v_i\), the curve likelihood is the product of the individual point likelihoods,</p>
+
+<div>
+    p(Y | X) = \prod \mathcal{N}(y_i | \pi(x_i), \sigma^2_n)
+</div>
+
+
+<p>.</p>
+
+<p>Since projection by a perspective camera is a nonlinear operation, the resulting posterior is not Gaussian in \(X\).  We seek a Gaussian approximation to the posterior, which will allow efficient closed-form optimization.</p>
+
+<p>When considered as a function of \(x_i\),  the point-wise likelihood takes the shape of a cone whose tip is centered at the camera's pinhole, \(p\), and whose axis is aligned with the backprojection line, \(l_{bp}\) (see Figure \ref{likelihood_cone}).  If we knew the optimal depth \(\hat d\) for the imaged point, we could take a Laplace approximation of the likelihood at this point:</p>
+
+<p>TODO: laplace blah blah. p(D|x) = L(x) =  dL/dx<sup>*</sup></p>
+
+<p>Due to the projection ambiguity, this Gaussian will have infinite covariance in the backprojection direction; the resulting approximation will be cylinder-shaped.</p>
+
+<p>  We observe that the shape of the likelihood cone only matters in regions where the posterior has nonnegligible support -- elsewhere, any influence from the cone's shape is nullified by lack of evidence in other views.   If the posterior is sufficiently peaked, the cylindrical approximation will deviate minimally from the likelihood cone in the region of the peak, and error will be negligible, as illustrated in Figure \ref{2}.</p>
+
+<p>Estimating the posterior is a chicken-and-egg problem: we need the posterior to center our likelihood approximation, but we can't compute the posterior without the likelihood.<br/>
+We take a two-pass approach: (1) guess the likelihood by finding correspondences, smooth to find a rough posterior, and (2) re-estimate the likelihood from the estimated posterior.</p>
+
+<h2>Point Correspondences and Triangulation</h2>
+
+<div>
+<p>
+Let \(\mathbf{X} = {X_1, X_2, ..., X_N}\) be a set of 3D curves in a scene, which is viewed by a sequence of \(m\) calibrated cameras, indexed by \(V = \{v_1, ..., v_m\} \).   In each view \(v\), 3D curves are depicted by their 2D projections, \(\mathbf{Y}^{(v)} = \{Y^{(v,1)}, Y^{(v,2)}, ..., Y^{(v,N)}\}, where \(y^{(v,j)}_i\) is the \(i\)-th 2D point in the \(v\)-th view of the \(j\)-th 3D curve.  
+</p>
+
+<p>
+For each 2D point in view \(v\), we seek it's corresponding point in each of the other views \(v' \in V \setminus v\).  Given these point-correspondences, we can triangulate matching points to find the maximum likelihood curve in 3D.
+</p>
+
+<p>
+For any 3D curve \(X_k\) and views \(U \subset V\), we represent the set of 2D point correspondences by a matrix \(\mathcal{C}^{(U,k)}\), where \(\mathcal{c}_{ij}\) is the index of the 2D point in view \(u_i\) that corresponds to the \(j\)-th point in the 3D curve.  By representing 2D points correspondences by their relationship to the 3D curve, we can represent many-to-many correspondences between 2D curve points, as illustrated in Figure \ref{many-many-correspondence}.  Each column of \(\mathcal{C}\) is a set of corresponding points that can be triangulated to recover an estimate of the 3D curve. 
+</p>
+
+We enforce several constraints upon correspondences:
+    
+<ul>
+<li>
+<strong>Monotonic and Continuous</strong>: \((c_{i(j+1)} - c_{ij}) \in \{0, 1\}\).</li>
+<li>
+<strong>Complete</strong>: each row of \(\mathcal{C}\) contains all indices of the corresponding 2D curve.</li>
+<li>
+<strong>Concise</strong>:  each column of \(\mathcal{C}\) is unique.</li>
+</ul>
+
+<p>
+
+
+The trivial correspondence that represents a single view \(v\) and obeys these constraints is unique and defined by the sequence \(\{1, ..., n_v\}\).  Starting with trivial correspondences \(\mathcal{C}^{(v_1,k)}, \mathcal{C}^{(v_2,k)}, ... \mathcal{C}^{(v_m,k)}\),  we construct a full correspondence by recursively merging pairs of correspondences.   Using triangulation error as a cost function, we apply the dynamic time warping algorithm to find the optimal matching between the columns of two correspondence matrices.  It can be shown that if the input matrices obey the above constraints, the merged matrix is also compliant.  
+
+The resulting algorithm is \(O(|V| n^2)\), where \(n\) is the maximum number of points in the 2D curves.  We note that the correspondence matrix that results from this recursive-merging procedure is not necessarily the global optimum, but finding the global optimum using dynamic programming has \(O(n^{|V|})\) running time, which is intractable.  Our algorithm grows linearly with the number of views, and produces good results in practice.
+</p>
+</div>
+
+
+<h2>Re-estimate likelihood</h2>
+
+<p>test</p>
+
+<h1>Reconstruction</h1>
+
+<p>test</p>
+
+<p>Avoid inverting likelihood precisions.</p>
+
+
+</div><!-- End Page -->
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+
