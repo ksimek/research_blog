@@ -13,6 +13,11 @@ CONFIG = {
   'theme_package_version' => "0.1.0"
 }
 
+PROJECT_CONFIG = {
+  'working_directory' => '~/work/src/tulips/src/matlab/data_association_3',
+  'project_metafile' => 'tulips_da3_meta'
+}
+
 # Path configuration helper
 module JB
   class Path
@@ -56,7 +61,10 @@ task :post do
   if File.exist?(filename)
     abort("rake aborted!") if ask("#{filename} already exists. Do you want to overwrite?", ['y', 'n']) == 'n'
   end
-  
+
+  revision_cmd = "svn info #{PROJECT_CONFIG['working_directory']} | grep Revision | sed \"s/Revision: //\""
+  revision = `#{revision_cmd}`
+
   puts "Creating new post: #{filename}"
   open(filename, 'w') do |post|
     post.puts "---"
@@ -66,10 +74,10 @@ task :post do
     post.puts "category: "
     post.puts "tags: []"
     post.puts "meta: "
-    post.puts "#    \"SVN Revision\": 15169"
+    post.puts "    \"SVN Revision\": #{revision}"
     post.puts "---"
     post.puts "{% include JB/setup %}"
-    post.puts "{% include research/tulips_da3_meta %}"
+    post.puts "{% include research/#{PROJECT_CONFIG['project_metafile']} %}"
 
   end
   system "vim #{filename}"
