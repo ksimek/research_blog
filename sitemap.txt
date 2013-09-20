@@ -19,6 +19,12 @@ http://vision.sista.arizona.edu/ksimek/research/page4/index.html
 http://vision.sista.arizona.edu/ksimek/research/page5/index.html
 http://vision.sista.arizona.edu/ksimek/research/page6/index.html
 
+http://vision.sista.arizona.edu/ksimek/research/2013/09/20/branching-ml-done
+http://vision.sista.arizona.edu/ksimek/research/2013/09/19/work-log
+http://vision.sista.arizona.edu/ksimek/research/2013/09/19/dependencies
+http://vision.sista.arizona.edu/ksimek/research/2013/09/18/work-log
+http://vision.sista.arizona.edu/ksimek/research/2013/09/17/work-log
+http://vision.sista.arizona.edu/ksimek/research/2013/09/16/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/09/12/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/09/10/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/09/06/work-log

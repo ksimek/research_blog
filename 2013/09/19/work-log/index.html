@@ -1,0 +1,490 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>refactoring; dependencies &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] refactoring; dependencies
+    </h1>
+
+  <div class="date emphnext">September 19, 2013</div>
+    
+
+
+  
+    
+
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Data Association v3</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
+    </tr>
+
+    <tr>
+        <th>SVN Revision</th>
+        <td>15229</td>
+    </tr>
+
+
+</table>
+
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
+
+
+<h1>TODO</h1>
+
+<ul>
+<li>investigate difference between ML implementations</li>
+<li>handle nonzero start-index in branching. re-run confirmation</li>
+<li>ground truth - trace datasets 7 through 10</li>
+<li>retrain using attachment</li>
+</ul>
+
+
+<h1>Invstigating consistent ML implementations</h1>
+
+<p>Discovered issue:  was calling <code>curve_tree_ml</code> instead of <code>curve_tree_ml_2</code>.  Working now</p>
+
+<h2>Aside: common mistakeis</h2>
+
+<p>Losing a too much time to stupid organizational mistakes --</p>
+
+<ul>
+<li>indexing,</li>
+<li>passing wrong copies of variables to code,</li>
+<li>leaving random debugging code in miscellaneous functions,</li>
+<li>running wrong debugging branch in code,</li>
+<li>running wrong version of function.</li>
+</ul>
+
+
+<p>Code has gotten complex enough that managing all of these little sharp edges is too expensive.  Need to start being more disciplined.  Solutions</p>
+
+<ul>
+<li><strong>indexing</strong>: use functions for common indexing tasks
+
+<ul>
+<li><code>one_d_to_three_d</code></li>
+<li><code>to_block_index</code></li>
+</ul>
+</li>
+<li><strong>miscellaneous variables</strong>: clean-up workspace every evening</li>
+<li><strong>Debugging cruft</strong>:
+
+<ul>
+<li>if code is an in-line test, refactor questionable code into functions; write a real test.</li>
+<li>if code is a <code>plot</code>, <code>imagesc</code>, or <code>printf</code>, always wrap in a DEBUGGING block, even if its a two-minute test.</li>
+</ul>
+</li>
+<li><strong>Wrong debugging branch</strong>:
+
+<ul>
+<li>if using <code>method = 1</code> give names like <code>method = MARKOV</code></li>
+<li>display warnings for non-standard methods.</li>
+</ul>
+</li>
+<li><strong>wrong version of function</strong>: depends on future of old code
+
+<ul>
+<li><strong>deprecation</strong>: add block to old reference code: <code>fprintf('running legacy code (press enter)'); pause;</code></li>
+<li><strong>reference implementation</strong>: rename to *_ref.</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>Discussion: start_index and branch_index</h1>
+
+<p>In previous days, I was torn over whether I should add start_index to branch_index before evaluating.</p>
+
+<p>The answer is yes, because it greatly simplifies the optimization of start_index, because you don't have to re-adjust the children's branch_indices.</p>
+
+<p>how is markov blanket determined (pre or post offset indexing?)</p>
+
+<p>Do we need to recurse after attach?</p>
+
+<p>RAW VALUES should be stored, not derived values.  branch_index is a raw value.</p>
+
+<p>*Example: * C is attached to B.  We want to attach B to A, with start index of 10.  Assume branch_index is stored relative to the zero-index (as opposed to the first observed point).  After attaching, we need to update C's branch point; if we later detach B from A, B's branch point need to be updated again.  There's potential for drift to accumulate after all of these upates.</p>
+
+<p>To avoid confusion, replace branch_index to branch_distance; will convert to an index value before computing. Also <code>prior_indices</code> needs updating?  Or just eliminate</p>
+
+<h2>recursive Updating after attachment</h2>
+
+<p>Consider attachment:</p>
+
+<p>Before</p>
+
+<pre><code>(D -&gt; C -&gt; B)    (A)
+</code></pre>
+
+<p>After</p>
+
+<pre><code>(D -&gt; C -&gt; B -&gt; A) 
+</code></pre>
+
+<p>Visually,</p>
+
+<pre><code>             A   B C D         A B C D 
+             |   | | |         | | | |
+             |   | |/          | | |/
+             |   | +           | | +  
+             |   |/            | |/ 
+             |   +       ==&gt;   | +
+             |                 |/         
+             |                 +      
+</code></pre>
+
+<ul>
+<li>After attaching B to A,
+
+<ul>
+<li>C's branch index changes, so...
+
+<ul>
+<li>C's branch distribution changes, so...
+
+<ul>
+<li>D's branch distribution changes so...
+
+<ul>
+<li>D's ML changes</li>
+</ul>
+</li>
+<li>C's ML changes.</li>
+</ul>
+</li>
+<li>C's prior_K doesnt change.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>As far as stored fields go, it looks like branch distributions change recursively after attachment, etc.</p>
+
+<h1>Dependencies</h1>
+
+<p>Did some thinking about dependencies; what needs to be updated when parents are changed.  Scan of the notes are available below.  Also did <a href="/ksimek/research/reference/2013/09/19/dependencies/">a reference writeup</a>.</p>
+
+<p><a href="/ksimek/research/img/2013-09-19-dependency_notes.jpg">Dependency hand-written notes</a></p>
+
+<h1>Refactoring</h1>
+
+<p>Changed <code>Corr.branch_index</code> to <code>Corr.branch_distance</code>.</p>
+
+<p>Replaced all instances of <code>Corrs(i).branch_index</code> with <code>get_branch_index(Corrs, i)</code>.</p>
+
+<p>Replaced Corr.ll_indices* with Corr.ll_distances.</p>
+
+<p>removed Corr.prior_indices</p>
+
+<p>TODO: replace kernel(XX,YY) with eval_kernel(asdf)</p>
+
+<pre><code>see att_set_start_index_2
+</code></pre>
+
+<p>TODO: replace Corrs cell array with Corrs structure array</p>
+
+<h1>TODO</h1>
+
+<p>Minor</p>
+
+<ul>
+<li>re-run tests with non-zero start index</li>
+<li>test three-levels of branching
+
+<ul>
+<li>reconstruction</li>
+<li>ML vs. reference</li>
+</ul>
+</li>
+<li>cleanup Corr fields
+
+<ul>
+<li>eliminate clean_ fields</li>
+<li>group fields by processing stage</li>
+</ul>
+</li>
+<li>map-out processing pipeline</li>
+</ul>
+
+
+<p>Medium</p>
+
+<ul>
+<li>finish ground-truthing (Friday night, Saturday)</li>
+<li>implement recursive update</li>
+<li>code for inferring branching parameters.</li>
+<li>Finish training
+
+<ul>
+<li>infer branching parameters</li>
+<li>re-write training ML</li>
+<li>re-train prior parameters with full ML</li>
+</ul>
+</li>
+<li>MCMCDA sampler</li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/09/20/branching-ml-done" class="next" title="Branching ML Done">Branching ML Done &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2013/09/19/dependencies" class="prev" title="Summary of Dependency relationships">&larr; Summary of Dependency relationships</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+  
+  		<div id="fb-root"></div>
+
+<div class="post-share ulno mob">
+
+<!-- Hacker News -->
+<span class="hn"><span id="hnews"></span></span>
+
+<!-- Twitter -->
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="refactoring; dependencies" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+
+<!-- Google+ -->
+<span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
+
+<!-- Facebook -->
+<!--
+<span class="fb"><div class="fb-like" data-send="false" data-layout="button_count" data-width="90" data-show-faces="false" data-font=""></div></span>
+-->
+
+<!-- Reddit -->
+<script type="text/javascript" src="http://www.reddit.com/static/button/button1.js"></script>
+</div>
+
+<script>
+  
+(function(doc, script) {
+ 	
+	//Async Social Buttons
+    var js, 
+        fjs = doc.getElementsByTagName(script)[0],
+        add = function(url, id) {
+            if (doc.getElementById(id)) {return;}
+            js = doc.createElement(script);
+            js.src = url;
+            id && (js.id = id);
+            fjs.parentNode.insertBefore(js, fjs);
+        };
+    
+    // Twitter SDK
+    add('//platform.twitter.com/widgets.js', 'twitter-wjs');
+
+    // Google+ button
+    add('https://apis.google.com/js/plusone.js');
+    
+    // Facebook SDK
+    add('//connect.facebook.net/en_GB/all.js#xfbml=1&appId=123', 'facebook-jssdk');
+    
+    //Hacker News Button 	
+ 	var hn_like = document.createElement('iframe');
+      hn_like.frameborder="no";
+      hn_like.scrolling="no";
+      hn_like.height="28px";
+      hn_like.width="110px";
+      hn_like.style="border:0px;";
+      hn_like.src = "http://hnlike.com/upvote.php?link="
+                    + encodeURIComponent(document.location)
+                    + "&title="
+                    + encodeURIComponent("refactoring; dependencies");
+      hn_like.innerHTML="iframes not supported by your browser";
+      
+      var where = document.getElementById("hnews");
+      where.parentNode.insertBefore(
+        hn_like,
+        where
+      );
+}(document, 'script'));
+
+</script>
+
+  
+
+
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

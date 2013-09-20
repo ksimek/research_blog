@@ -1,0 +1,405 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Testing full-tree covariance matrix &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Testing full-tree covariance matrix
+    </h1>
+
+  <div class="date emphnext">September 18, 2013</div>
+    
+
+
+  
+    
+
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Data Association v3</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
+    </tr>
+
+    <tr>
+        <th>SVN Revision</th>
+        <td>15229</td>
+    </tr>
+
+
+</table>
+
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
+
+
+<p>Running covariance confirmation for model_type = 3.</p>
+
+<hr />
+
+<p>Results don't match.</p>
+
+<p>Off-diagonals are okay.</p>
+
+<p>on-diagonal's are larger in reference impl; on order of 10.</p>
+
+<p>Reference implementation has all positive eigenvalues.  Likely bug is in testing implementation.</p>
+
+<hr />
+
+<p><strong>Open question: Does branch_index need to be incremented by start_index?</strong></p>
+
+<p>also, is prior_K including start_index?</p>
+
+<hr />
+
+<p>Root curve is block incorrect, which means we can focus on either <code>build_root_object</code> or <code>build_sibling block</code>.</p>
+
+<hr />
+
+<p><strong>Got it</strong>: prior_K was computed with model_type = 1.  It contains no perturb covariance.  But root block does contain perturb covariance.</p>
+
+<p>Re-attach using:</p>
+
+<pre><code>wacv_Corrs_ratt = wacv_Corrs;
+for i = 1:numel(wacv_Corrs_reatt)
+    C = wacv_Corrs_reatt{i};
+    wacv_Corrs_reatt = attach_2(wacv_Corrs_reatt, i, C.parent_ci, C.start_index, C.branch_index,params);
+end
+</code></pre>
+
+<p>Now results are identical for the testing set</p>
+
+<hr />
+
+<p>results differ on the full set.</p>
+
+<p>in testing set, all branches occured from the zero point on the parent.  the full set has branches from other points, and we're getting different results.</p>
+
+<hr />
+
+<p>Found the cause of the problem: it was leftover cruft code I added during debugging.  Caused non-symmetric matrix.</p>
+
+<hr />
+
+<p>TODO: Move "confirm full covariance against reference implementation" into its own test folder</p>
+
+<p>TODO: handle nonzero start-index in branching. re-run confirmation</p>
+
+<p>TODO: finish "confirm curve-tree ML against reference implementation"</p>
+
+<hr />
+
+<p>Struggling with curve_ml5, where Chol is failing.  Looks like the problem is in att_Set_Branch_index; branch conditional covariance is not positive definite.</p>
+
+<hr />
+
+<p>Found: indexing bug in <code>attachment/attach_2.m</code></p>
+
+<hr />
+
+<p>Comparing three methods:</p>
+
+<pre><code>% method 1
+ml1 = curve_tree_ml_ref(wacv_Corrs_reatt, params, data_)
+% method 2
+ml2 = curve_tree_ml(wacv_Corrs_reatt, params, data_)
+% method 3
+ml3 = 0;
+for i = 1:numel(wacv_Corrs_reatt)
+    ml = ml + curve_ml5( ...
+            wacv_Corrs_reatt{i}, ...
+            data_, ...
+            params, ...
+            get_model_kernel(params, params.model_type), ...
+            params.ml_block_size, ...
+            params.ml_markov_order);
+end
+</code></pre>
+
+<p>All three currently differ significantly.</p>
+
+<p>Also compared against an indendent model, whose ML was about 300 points lower.</p>
+
+<p>At this point, method 2 and method 3 should be giving the same results, but aren't.</p>
+
+<hr />
+
+<p>Moved covariance matrix test to <code>test/test_construct_attachment_covariance.m</code>.</p>
+
+<p>Re-ran and now it's failing :-/</p>
+
+<p>Modified it to save the output; re-running to debug.</p>
+
+<p>Needed to re-run <code>attach_2()</code>, because prior_K was stale</p>
+
+<hr />
+
+<p>TODO:</p>
+
+<ul>
+<li>troubleshoot covariance test</li>
+<li>investigate difference between method 2 and method 3 above.</li>
+<li>handle nonzero start-index in branching. re-run confirmation</li>
+<li>ground truth - trace datasets 7 through 10</li>
+<li>retrain using attachment</li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/09/19/dependencies" class="next" title="Summary of Dependency relationships">Summary of Dependency relationships &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2013/09/17/work-log" class="prev" title="Building reference implementation of full-tree covariance">&larr; Building reference implementation of full-tree covariance</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+  
+  		<div id="fb-root"></div>
+
+<div class="post-share ulno mob">
+
+<!-- Hacker News -->
+<span class="hn"><span id="hnews"></span></span>
+
+<!-- Twitter -->
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Testing full-tree covariance matrix" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+
+<!-- Google+ -->
+<span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
+
+<!-- Facebook -->
+<!--
+<span class="fb"><div class="fb-like" data-send="false" data-layout="button_count" data-width="90" data-show-faces="false" data-font=""></div></span>
+-->
+
+<!-- Reddit -->
+<script type="text/javascript" src="http://www.reddit.com/static/button/button1.js"></script>
+</div>
+
+<script>
+  
+(function(doc, script) {
+ 	
+	//Async Social Buttons
+    var js, 
+        fjs = doc.getElementsByTagName(script)[0],
+        add = function(url, id) {
+            if (doc.getElementById(id)) {return;}
+            js = doc.createElement(script);
+            js.src = url;
+            id && (js.id = id);
+            fjs.parentNode.insertBefore(js, fjs);
+        };
+    
+    // Twitter SDK
+    add('//platform.twitter.com/widgets.js', 'twitter-wjs');
+
+    // Google+ button
+    add('https://apis.google.com/js/plusone.js');
+    
+    // Facebook SDK
+    add('//connect.facebook.net/en_GB/all.js#xfbml=1&appId=123', 'facebook-jssdk');
+    
+    //Hacker News Button 	
+ 	var hn_like = document.createElement('iframe');
+      hn_like.frameborder="no";
+      hn_like.scrolling="no";
+      hn_like.height="28px";
+      hn_like.width="110px";
+      hn_like.style="border:0px;";
+      hn_like.src = "http://hnlike.com/upvote.php?link="
+                    + encodeURIComponent(document.location)
+                    + "&title="
+                    + encodeURIComponent("Testing full-tree covariance matrix");
+      hn_like.innerHTML="iframes not supported by your browser";
+      
+      var where = document.getElementById("hnews");
+      where.parentNode.insertBefore(
+        hn_like,
+        where
+      );
+}(document, 'script'));
+
+</script>
+
+  
+
+
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

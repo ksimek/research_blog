@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log - Branching prior covariance &larr; </title>
+   <title>Branching prior covariance &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -67,6 +67,7 @@
       <li><a href="/ksimek/research/about.html">About</a></li>
       <li><a href="/ksimek/research/contact.html">Contact</a></li>
       <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
       <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
 
     </ul>
@@ -78,7 +79,12 @@
 	
   
   
-  <h1 class="title">Work Log - Branching prior covariance</h1>
+    
+
+
+  <h1 class="title">
+        [Work Log] Branching prior covariance
+    </h1>
 
   <div class="date emphnext">September 10, 2013</div>
     
@@ -134,22 +140,37 @@ Without loss of generality, we'll assume curves are indexed in topological order
 k\left( i, j \right) 
      &= 
     k\left( (c_i, p_i, t_i), (c_j, p_j, t_j) \right)  \\
-     &= k_\text{base} ( i, j ) +
+     &=  
      \begin{cases}
      k(j, i) & \text{if } c_i > c_j = 0 \\
-     \sigma_o  & \text{if } \text{isroot}(c_i) \text{ and } \text{isroot}(c_j) \text{ and } c_i = c_j &&  \\
-     0 & \text{if } \text{isroot}(c_i) \text{ and } \text{isroot}(c_j) \text{ and } c_i \neq c_j \\
-     k(i, \text{branch}(j)) & \text{otherwise} 
+     k_\text{base} ( i, j ) + k_o(ti, tj)  & \text{if } \text{isroot}(c_i) \text{ and } \text{isroot}(c_j) \text{ and } c_i = c_j &&  \\
+     k_\text{base} ( i, j ) + 0 & \text{if } \text{isroot}(c_i) \text{ and } \text{isroot}(c_j) \text{ and } c_i \neq c_j \\
+     k_\text{base} ( i, j ) + k(i, \text{branch}(j)) & \text{otherwise} 
     \end{cases}
 \end{align}
 \]
+
+
 
 <p>
 For convenience, we've used the \(k(i,j) \) to stand-in for \(k\left((c_i, p_i, t_i), (c_j, p_j, t_j)\right)\).
   Here, \(k_\text{base}(i,j)\) is the independent curve covariance (e.g. cubic spline covariance w/ perturbations).   In our case, \(k_\text{base}(\dot)\) is zero if \(c_i \neq c_j\), but this isn't necessarilly required.
   </p>
+
+<p>
+Here, \(k_o\) is to marginal covariance of the first curve point.  All points in the plant are measured relative to this point, so this covariance ends up in every element of the covariance matrix.  Since it only measures covariance of a specific point with respect to itself, curve and point index are irrelevant to \(k_o\).  Only the temporal is received, which allows us to model how the point moves over time.
+
+In the case of the Ornstein Uhlenbech process, \(k_o\) is
+
+\[
+k_o = \sigma_o + \exp(|t_i - t_j|) \sigma_{o,b})
+\]
+</p>
+
 </div>
 
+
+<p>Lets examine each case in the piecewise function.</p>
 
 <ul>
 <li>The first case just simplifies the definition by ensuring that if i and j are related, the ancestor always appears in the first position.</li>
@@ -181,10 +202,10 @@ For convenience, we've used the \(k(i,j) \) to stand-in for \(k\left((c_i, p_i, 
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/09/12/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+    <a href="/ksimek/research/2013/09/12/work-log" class="next" title="Branching prior covariance; implementing">Branching prior covariance; implementing &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/09/06/work-log" class="prev" title="Work Log - WACV results">&larr; Work Log - WACV results</a>
+    <a href="/ksimek/research/2013/09/06/work-log" class="prev" title="WACV results">&larr; WACV results</a>
   
   </div>
   <div class="clearer"> </div>
@@ -201,7 +222,7 @@ For convenience, we've used the \(k(i,j) \) to stand-in for \(k\left((c_i, p_i, 
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Branching prior covariance" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Branching prior covariance" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -249,7 +270,7 @@ For convenience, we've used the \(k(i,j) \) to stand-in for \(k\left((c_i, p_i, 
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log - Branching prior covariance");
+                    + encodeURIComponent("Branching prior covariance");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");
