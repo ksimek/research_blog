@@ -1,9 +1,16 @@
+{% if post.category %}
+    {% capture post_title %}
+        [{{post.category}}] {{post.title}}
+    {% endcapture %}
+{% else %}
+    {% assign post_title=post.title %}
+{% endif %}
 {% if excerpt %}
   <a class="title-link" href="{{ site.baseurl }}{{post.url}}">
-  <h1 class="title">{{ post.title }}</h1>
+  <h1 class="title">{{ post_title }}</h1>
   </a>
 {% else %}
-  <h1 class="title">{{ post.title }}</h1>
+  <h1 class="title">{{ post_title }}</h1>
 {% endif %}
   <div class="date emphnext">{{ post.date | date: "%B %d, %Y" }}</div>
     {% if page.edit %}

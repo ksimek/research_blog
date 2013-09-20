@@ -4,13 +4,14 @@ top: Kyle Simek
 layout: home 
 ---
 {% for post in paginator.posts %}
+    {% include custom/post_title %}
 <ul class="firehose-post article">
     <a href=""></a>
     {% assign excerpt = true %}
     {% assign link_title = true %}
     {% assign content = post.content %}
       <a class="title-link" href="{{ site.baseurl }}{{post.url}}">
-      <li class="title">{{ post.title }}</li>
+      <li class="title">{{ post_title }}</li>
       </a>
       <div class="date emphnext">{{ post.date | date: "%B %d, %Y" }}</div>
 </ul>

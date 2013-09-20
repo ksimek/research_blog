@@ -98,6 +98,10 @@ ul.ui-tabs-nav li
     text-decoration: none;
 }
 
+.post-category{
+    font-weight: bold;
+}
+
 .clearer {
     clear: both;
 }

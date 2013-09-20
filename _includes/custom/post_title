@@ -1,0 +1,12 @@
+    {% if post.title == "" %}
+        {% capture post_title %}
+            (No Title)
+        {% endcapture %}
+    {% else %}
+        {% assign post_title = post.title %}
+    {% endif %}
+    {% if post.category %}
+        {% capture post_title %}
+            [{{post.category | capitalize}}] {{post_title}}
+        {% endcapture %}
+    {% endif %}
