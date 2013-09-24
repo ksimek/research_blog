@@ -49,7 +49,7 @@ end #JB
 desc "Begin a new post in #{CONFIG['posts']}"
 task :post do
   abort("rake aborted: '#{CONFIG['posts']}' directory not found.") unless FileTest.directory?(CONFIG['posts'])
-  title = ENV["title"] || ""
+  title = ENV["title"] || "Work Log"
   slug = title.downcase.strip.gsub(' ', '-').gsub(/[^\w-]/, '')
   begin
     date = (ENV['date'] ? Time.parse(ENV['date']) : Time.now).strftime('%Y-%m-%d')
@@ -78,6 +78,80 @@ task :post do
     post.puts "---"
     post.puts "{% include JB/setup %}"
     post.puts "{% include research/#{PROJECT_CONFIG['project_metafile']} %}"
+
+  end
+  system "vim #{filename}"
+end # task :post
+
+# Usage: rake todo title="A Title" [date="2012-02-09"]
+desc "Begin a new to-do item in #{CONFIG['posts']}"
+task :todo do
+  abort("rake aborted: '#{CONFIG['posts']}' directory not found.") unless FileTest.directory?(CONFIG['posts'])
+  title = ENV["title"] || "todo"
+  slug = title.downcase.strip.gsub(' ', '-').gsub(/[^\w-]/, '')
+  begin
+    date = (ENV['date'] ? Time.parse(ENV['date']) : Time.now).strftime('%Y-%m-%d')
+  rescue Exception => e
+    puts "Error - date format must be YYYY-MM-DD, please check you typed it correctly!"
+    exit -1
+  end
+  filename = File.join(CONFIG['posts'], "#{date}-#{slug}.#{CONFIG['post_ext']}")
+  if File.exist?(filename)
+    abort("rake aborted!") if ask("#{filename} already exists. Do you want to overwrite?", ['y', 'n']) == 'n'
+  end
+
+  revision_cmd = "svn info #{PROJECT_CONFIG['working_directory']} | grep Revision | sed \"s/Revision: //\""
+  revision = `#{revision_cmd}`
+
+  puts "Creating new post: #{filename}"
+  open(filename, 'w') do |post|
+    post.puts "---"
+    post.puts "layout: post"
+    post.puts "title: \"#{title.gsub(/-/,' ')}\""
+    post.puts 'description: ""'
+    post.puts "category: 'TODO'"
+    post.puts "tags: []"
+    post.puts "meta: "
+    post.puts "#    \"SVN Revision\": #{revision}"
+    post.puts "---"
+    post.puts "{% include JB/setup %}"
+  end
+  system "vim #{filename}"
+end # task :post
+
+# Usage: rake post title="A Title" [date="2012-02-09"]
+desc "Begin a new reference item in #{CONFIG['posts']}"
+task :reference do
+  abort("rake aborted: '#{CONFIG['posts']}' directory not found.") unless FileTest.directory?(CONFIG['posts'])
+  title = ENV["title"] || "Reference"
+  slug = title.downcase.strip.gsub(' ', '-').gsub(/[^\w-]/, '')
+  begin
+    date = (ENV['date'] ? Time.parse(ENV['date']) : Time.now).strftime('%Y-%m-%d')
+  rescue Exception => e
+    puts "Error - date format must be YYYY-MM-DD, please check you typed it correctly!"
+    exit -1
+  end
+  filename = File.join(CONFIG['posts'], "#{date}-#{slug}.#{CONFIG['post_ext']}")
+  if File.exist?(filename)
+    abort("rake aborted!") if ask("#{filename} already exists. Do you want to overwrite?", ['y', 'n']) == 'n'
+  end
+
+  revision_cmd = "svn info #{PROJECT_CONFIG['working_directory']} | grep Revision | sed \"s/Revision: //\""
+  revision = `#{revision_cmd}`
+
+  puts "Creating new post: #{filename}"
+  open(filename, 'w') do |post|
+    post.puts "---"
+    post.puts "layout: post"
+    post.puts "title: \"#{title.gsub(/-/,' ')}\""
+    post.puts 'description: ""'
+    post.puts "category: 'Reference'"
+    post.puts "tags: []"
+    post.puts "meta: "
+    post.puts "#    \"SVN Revision\": #{revision}"
+    post.puts "---"
+    post.puts "{% include JB/setup %}"
+#   post.puts "{% include research/#{PROJECT_CONFIG['project_metafile']} %}"
 
   end
   system "vim #{filename}"
