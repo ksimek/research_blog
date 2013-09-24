@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Branching ML Done &larr; </title>
+   <title>MCMCDA Sampling with Attachment &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -83,97 +83,47 @@
 
 
   <h1 class="title">
-        [TODO] Branching ML Done
+        [Strategy] MCMCDA Sampling with Attachment
     </h1>
 
-  <div class="date emphnext">September 20, 2013</div>
+  <div class="date emphnext">September 23, 2013</div>
     
 
 
   
-    
+    <p>The old MCMCDA gibbs sampler runs into trouble now that we allow attachment.</p>
 
-<div class="meta-info">
-<table>
-    <tr>
-        <th>Project</th>
-        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
-    </tr>
-    <tr>
-        <th>Subproject</th>
-        <td>Data Association v3</td>
-    </tr>
-    <tr>
-        <th>Working path</th>
-        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
-    </tr>
+<p>Previously, for any observation, we would compute the ML of grouping it with each candidate, and select a candidate from those weights.</p>
 
-    <tr>
-        <th>SVN Revision</th>
-        <td>15229</td>
-    </tr>
+<p>The problem now is that regrouping an observation sometimes causes it's old group to vanish, and the question of what to do with the group's children is unanswered.  The same problem occurs if a regrouping makes a curve shorter, and children were attached to the now-missing structure.</p>
 
+<h2>Metropolis Hastings</h2>
 
-</table>
+<p>Things become much easier if we move away from Gibbs sampling.  Gibbs was nice for a proof of concept, because we never failed to pick embarrassingly good candidates, and we almost always moved toward a better result with each step.  However, it was very expensive, and now we have a question of how to compute the ML of a candidate whose attachment property is unknown.</p>
 
-    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
-</div>
+<p>So, we'll move to Metropolis Hastings.  We resolve the attachment issue by using a simple rule:  every time a track's association changes, we re-sample its the attachment and the attachment of its former children.</p>
 
+<h2>Sampling Associations.</h2>
 
-<p>Finally finished implementing and confirming the multi-view branching ML.  Next steps:</p>
-
-<p>Quick</p>
+<p>When sampling associations, we'll use two types of moves:</p>
 
 <ul>
-<li>re-run tests with non-zero start index</li>
-<li>test three-levels of branching
-
-<ul>
-<li>reconstruction</li>
-<li>ML vs. reference</li>
-</ul>
-</li>
-<li>cleanup Corr fields
-
-<ul>
-<li>eliminate clean_ fields</li>
-<li>group fields by processing stage</li>
-</ul>
-</li>
-<li>map-out processing pipeline</li>
+<li><strong>swap</strong>: re-assign a single observation</li>
+<li><strong>split/merge</strong> re-assign a group of observations</li>
 </ul>
 
 
-<p>Medium</p>
+<p>The swap move will be similar to the existing Gibbs move, except we'll choose from candidates uniformly at random.  Split/merge proposals will be naive; we'll incorporate an association prior to counter the exploding number of split moves.</p>
 
-<ul>
-<li>finish ground-truthing (Friday night, Saturday)</li>
-<li>implement recursive update</li>
-<li>code for inferring branching parameters.</li>
-<li>Finish training
+<h2>Re-sampling attachment</h2>
 
-<ul>
-<li>infer branching parameters</li>
-<li>re-write training ML</li>
-<li>re-train prior parameters with full ML
+<p>After sampling a new association, we'll re-sample attachment.  For this, we'll introduce a new function <code>sample_attachment</code>, which will be responsible for constructing a list of reasonable candidates and attachment parameters (Start point and branch position), and selecting one at random (probably based on geometry, i.e. not uniform).  It returns the sampled attachment, along with the proposal probability.  It can optionally receive a <code>hint</code> parameter, which is a list of attachment candidates, along with a guess as to the attachment parameters.  The candidate of "no attachment" should always be an option.</p>
 
-<ul>
-<li>jointly train FG and BG using same</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>gibbs sampler</li>
-<li>evaluation code</li>
-</ul>
+<p>We'll also need a function that returns the probabiliy of selecting a specific attachment, according to <code>sample_attachment</code>, for computing the reverse move.</p>
 
+<h2>Topology moves</h2>
 
-<p>Reach</p>
-
-<ul>
-<li>split-merge moves</li>
-</ul>
-
+<p>In addition to association moves, we'll also have topology moves.  This will consist of simply calling <code>sample_attachment</code> without a sampling an association beforehand.</p>
 
       <address class="signature">
         Posted by
@@ -185,10 +135,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/09/23/mcmcda-sampling-with-attachment" class="next" title="MCMCDA Sampling with Attachment">MCMCDA Sampling with Attachment &rarr;</a>
+    <a href="/ksimek/research/2013/09/23/splitmerge-moves-and-association-priors" class="next" title="Split/Merge moves and Association Priors">Split/Merge moves and Association Priors &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/09/19/work-log" class="prev" title="refactoring; dependencies">&larr; refactoring; dependencies</a>
+    <a href="/ksimek/research/2013/09/20/branching-ml-done" class="prev" title="Branching ML Done">&larr; Branching ML Done</a>
   
   </div>
   <div class="clearer"> </div>
@@ -205,7 +155,7 @@
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Branching ML Done" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="MCMCDA Sampling with Attachment" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -253,7 +203,7 @@
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Branching ML Done");
+                    + encodeURIComponent("MCMCDA Sampling with Attachment");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

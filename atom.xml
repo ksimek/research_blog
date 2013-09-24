@@ -4,13 +4,120 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-09-20T16:37:35-07:00</updated>
+ <updated>2013-09-23T18:46:20-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/09/23/work-log"/>
+   <updated>2013-09-23T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/09/23/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Updating data structures to Version 2&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;* Refactored several variable names, some functions may need updating.
+* Corrs was changed from cell-of-structs to a cell-array.  Some functions may still need updating.
+* Removed old, unused variables
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Thinking on sampling&lt;/h2&gt;
+
+&lt;p&gt;Did a writeup on MCMCDA with attachments, see associated &quot;strategy&quot; entry&lt;/p&gt;
+
+&lt;h2&gt;Thinking on priors&lt;/h2&gt;
+
+&lt;p&gt;Did a writeup on association priors, see associated &quot;reference&quot; entry&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Split/Merge moves and Association Priors</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/09/23/splitmerge-moves-and-association-priors"/>
+   <updated>2013-09-23T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/09/23/splitmerge-moves-and-association-priors</id>
+   <content type="html">&lt;p&gt;Thinking again about split/merge moves, and the problem of the exploding number of split moves as the nubmer of observations increases.&lt;/p&gt;
+
+&lt;p&gt;Part of the problem is the fact that we're treating all associations as equal under the prior.  This has the side-effect that the prior strongly prefers more curves in a model as opposed to fewer.  Consider a scenario with N observations, and M curves.  There are M&lt;sup&gt;N&lt;/sup&gt; number of ways to assign these observations to M curves.  Compare this with a model with one curve -- there's only one possible assigment.  Since all assignments are equal under the prior, the model with M curves is more favored by the prior by a factor of M&lt;sup&gt;N.&lt;/sup&gt;&lt;/p&gt;
+
+&lt;p&gt;For this reason, I propose that a more sensible prior is one that is uniform over the number of curves in the scene.  Then, given the number of curves, the prior over associations is uniform.  In other words, given an association, it's prior should be 1/M&lt;sup&gt;N,&lt;/sup&gt; where M is the number of curves represented in the association.&lt;/p&gt;
+
+&lt;p&gt;When running a split move, the number of ways to split is 2&lt;sup&gt;K,&lt;/sup&gt; where K is the number of observations associated with the original curve.  If chosen uniformly, the Metropolis-Hastings proposal probability is 2&lt;sup&gt;K.&lt;/sup&gt;  This should cancel nicely with the prior term in the MH acceptance ratio.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>MCMCDA Sampling with Attachment</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/09/23/mcmcda-sampling-with-attachment"/>
+   <updated>2013-09-23T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/09/23/mcmcda-sampling-with-attachment</id>
+   <content type="html">&lt;p&gt;The old MCMCDA gibbs sampler runs into trouble now that we allow attachment.&lt;/p&gt;
+
+&lt;p&gt;Previously, for any observation, we would compute the ML of grouping it with each candidate, and select a candidate from those weights.&lt;/p&gt;
+
+&lt;p&gt;The problem now is that regrouping an observation sometimes causes it's old group to vanish, and the question of what to do with the group's children is unanswered.  The same problem occurs if a regrouping makes a curve shorter, and children were attached to the now-missing structure.&lt;/p&gt;
+
+&lt;h2&gt;Metropolis Hastings&lt;/h2&gt;
+
+&lt;p&gt;Things become much easier if we move away from Gibbs sampling.  Gibbs was nice for a proof of concept, because we never failed to pick embarrassingly good candidates, and we almost always moved toward a better result with each step.  However, it was very expensive, and now we have a question of how to compute the ML of a candidate whose attachment property is unknown.&lt;/p&gt;
+
+&lt;p&gt;So, we'll move to Metropolis Hastings.  We resolve the attachment issue by using a simple rule:  every time a track's association changes, we re-sample its the attachment and the attachment of its former children.&lt;/p&gt;
+
+&lt;h2&gt;Sampling Associations.&lt;/h2&gt;
+
+&lt;p&gt;When sampling associations, we'll use two types of moves:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;swap&lt;/strong&gt;: re-assign a single observation&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;split/merge&lt;/strong&gt; re-assign a group of observations&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;The swap move will be similar to the existing Gibbs move, except we'll choose from candidates uniformly at random.  Split/merge proposals will be naive; we'll incorporate an association prior to counter the exploding number of split moves.&lt;/p&gt;
+
+&lt;h2&gt;Re-sampling attachment&lt;/h2&gt;
+
+&lt;p&gt;After sampling a new association, we'll re-sample attachment.  For this, we'll introduce a new function &lt;code&gt;sample_attachment&lt;/code&gt;, which will be responsible for constructing a list of reasonable candidates and attachment parameters (Start point and branch position), and selecting one at random (probably based on geometry, i.e. not uniform).  It returns the sampled attachment, along with the proposal probability.  It can optionally receive a &lt;code&gt;hint&lt;/code&gt; parameter, which is a list of attachment candidates, along with a guess as to the attachment parameters.  The candidate of &quot;no attachment&quot; should always be an option.&lt;/p&gt;
+
+&lt;p&gt;We'll also need a function that returns the probabiliy of selecting a specific attachment, according to &lt;code&gt;sample_attachment&lt;/code&gt;, for computing the reverse move.&lt;/p&gt;
+
+&lt;h2&gt;Topology moves&lt;/h2&gt;
+
+&lt;p&gt;In addition to association moves, we'll also have topology moves.  This will consist of simply calling &lt;code&gt;sample_attachment&lt;/code&gt; without a sampling an association beforehand.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Branching ML Done</title>

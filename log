@@ -1,0 +1,300 @@
+commit 13bfdf9f1243484ea6e5e646e434e9c7a39fe949
+Author: Kyle Simek <ksimek@email.arizona.edu>
+Date:   Fri Sep 20 16:36:51 2013 -0700
+
+    reworking posts into categories; category now displays with title.
+
+commit 6b99fa982b008f94cb5cb44cc21e7bde2022f2b3
+Author: Kyle Simek <ksimek@email.arizona.edu>
+Date:   Thu Sep 12 22:33:10 2013 -0700
+
+    misc lump upload
+
+commit 0c157896f0c48137c1b920f8e3967f4eeeedf063
+Author: Kyle Simek <ksimek@email.arizona.edu>
+Date:   Thu Aug 22 19:31:36 2013 -0700
+
+    daily
+
+commit 8c345d2238a6825f2807de6ccca014cb43b6e0d5
+Author: Kyle Simek <ksimek@email.arizona.edu>
+Date:   Wed Aug 14 18:21:42 2013 -0700
+
+    daily
+
+commit 3d0cb088e110c6df8138a18871e1390e613aa8c3
+Author: Kyle Simek <ksimek@email.arizona.edu>
+Date:   Wed Aug 14 18:21:05 2013 -0700
+
+    Revert to 2e034db
+
+commit b352a21ee3b19667484f4731d947e0088f1e5eee
+Author: Kyle Simek <ksimek@email.arizona.edu>
+Date:   Wed Aug 14 18:14:19 2013 -0700
+
+    daily
+
+commit bf27c0350f994e218e7f2da47f3e901a38ab3f58
+Author: Kyle Simek <ksimek@email.arizona.edu>
+Date:   Fri Jun 28 11:58:17 2013 -0700
+
+    summary
+
+commit 8dfd7d740ffc58f55262b0c78da60cf43e59c8f3
+Author: Kyle Simek <ksimek@email.arizona.edu>
+Date:   Mon Jun 17 16:35:37 2013 -0700
+
+    daily
+
+commit 4e37fc6f3bc815e821205f084188ce2cb994e8a8
+Author: Kyle Simek <ksimek@email.arizona.edu>
+Date:   Sun Jun 16 12:40:21 2013 -0700
+
+    adding meta box to pages
+
+commit 9aeac7b332b9322248ea3b4ffa84f379206a5277
+Author: Kyle Simek <ksimek@email.arizona.edu>
+Date:   Mon Jun 10 16:38:33 2013 -0700
+
+    Fixing problems with subdirectory deployment
+
+commit 4e4f7ab4e41d4a29979e930e46e97ec0e861ac6f
+Author: Kyle Simek <ksimek@email.arizona.edu>
+Date:   Mon Jun 3 11:41:54 2013 -0700
+
+    Adding new article on simulating calibrated cameras in opengl
+
+commit 9c0026973bf54324304ed1b917bb227603d87071
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Sat Mar 24 13:27:43 2012 -0700
+
+    bump to 0.2.13
+
+commit cc7a99f390a464e4d03bc5cb55d4e8ed42d10e34
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Sat Mar 24 12:52:28 2012 -0700
+
+    styling
+
+commit 1aa9527657ca44cd637342ff2bd3610e92e388a5
+Author: Lukas Knuth <mr.luke.187@googlemail.com>
+Date:   Tue Mar 20 22:49:55 2012 +0100
+
+    Added the description-variable in the Rakefile to include it in newly created posts/pages
+
+commit 162a85dfb6f2801840b00ae995adeb322487132b
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Wed Mar 7 14:52:22 2012 -0800
+
+    Bump to 0.2.9
+
+commit 6d97712a41efa1cc0a68751dc776dd8c063befdb
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Wed Mar 7 14:47:30 2012 -0800
+
+    Fix typo
+
+commit 9a69c8ed2470d8ff74736a45c8dbc42786ecbceb
+Author: Alistair Hutchison <github@alistairh.co.uk>
+Date:   Wed Mar 7 13:28:24 2012 +0000
+
+    Fix for the error on post creation if date was not specified.
+
+commit cefdd4e2c3ff08a1e949e035d492387b90329c88
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Thu Mar 1 03:49:02 2012 -0800
+
+    bump to 0.2.8
+    
+    Forgot about my buddy @metalelf0 =/
+
+commit 9c1cf75ce89f9c99504a1f812a0f88fffd0430a1
+Author: Andrea Schiavini <andrea.schiavini@gmail.com>
+Date:   Mon Feb 13 12:54:25 2012 +0100
+
+    Added exception handling to display a user friendly message when time parse goes wrong
+
+commit 1a9411aea96ef71839de44890889dda751227e6a
+Author: Andrea Schiavini <andrea.schiavini@gmail.com>
+Date:   Mon Feb 13 12:50:18 2012 +0100
+
+    Forgot including require time
+
+commit 2d629f296120ffd42c3ed5f4a1b94fff15b3204d
+Author: Andrea Schiavini <andrea.schiavini@gmail.com>
+Date:   Mon Feb 13 12:46:46 2012 +0100
+
+    Using Time.parse to ensure date format is valid
+
+commit 02e2f861e799310994e5dfd42df479a443d9e963
+Author: Andrea Schiavini <andrea.schiavini@gmail.com>
+Date:   Wed Feb 8 14:45:46 2012 +0100
+
+    Added option to specify time when creating posts
+
+commit 12e41751883d7336225cfd039139137bac9eca4d
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Thu Mar 1 03:18:33 2012 -0800
+
+    bump to 0.2.7
+
+commit ca37b93198908805edf8efbe2d3e8045933f46f4
+Merge: 535aa3d 4a03980
+Author: Jade <plusjade@gmail.com>
+Date:   Thu Mar 1 01:05:11 2012 -0800
+
+    Merge pull request #40 from 3martini/windows-topic
+    
+    Windows MSYS Support
+
+commit 535aa3d0af530830f3d420f82a2523e986c7fa36
+Merge: c031df4 4a4a4a8
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Thu Mar 1 00:13:06 2012 -0800
+
+    Merge remote-tracking branch 'nolith/custom-rake' into jb-development. issue #33
+
+commit 4a03980a8c5127d7b839e6e8bdad47b17b5777bc
+Author: Anton Vattay <3martini@gmail.com>
+Date:   Thu Feb 23 16:33:14 2012 -0500
+
+    Improved error text.
+
+commit ba5fa9bdac5d04e3d2d94b3b1d359289fffcd534
+Author: Anton Vattay <3martini@gmail.com>
+Date:   Thu Feb 23 16:31:35 2012 -0500
+
+    Issue #46, theme install fails on msys, permissions.
+
+commit 068e522ce302f948bf3144104dea738316a6ff73
+Author: Anton Vattay <3martini@gmail.com>
+Date:   Wed Feb 8 17:52:15 2012 -0500
+
+    Added error check for git clone system call.
+
+commit 4a4a4a880925b1c5ff7313fe3d2853a37e7720a4
+Author: Alessio Caiazza <nolith@abisso.org>
+Date:   Mon Feb 6 11:05:22 2012 +0100
+
+    Loading custom rake file from _rake/*.rake
+
+commit 4c29c7ed76a1f972b456f3cd158432caef5c0a81
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Fri Feb 3 16:28:43 2012 -0800
+
+    bump version : 0.2.0
+
+commit fdfb9c4c6fda97f213320005abff731f79ef822b
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Wed Feb 1 17:26:01 2012 -0800
+
+    Fix prompt complaining that directories already exist
+    
+    When installing from a theme package we create an array of all files to be mirrored. We need to omit directories from this array since directories are recursively created for a given file. This needlessly raised 'directory already exist' errors which was annoying. - Also make error output friendlier
+
+commit 533d840a7556217ebc8250e157de843b9a9f5f04
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Wed Feb 1 15:15:35 2012 -0800
+
+    Namespace 'switch_theme'
+    
+    Make sure to maintain backwards compatibility
+
+commit 21b64c2b1c06096026c4e78763dd3467fe0f43d5
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Wed Feb 1 15:03:57 2012 -0800
+
+    Update theme packager methods
+    
+    Allow users to pass git url for a given theme to be installed. Use manifest to maintain compatibility. Add TomDoc comments
+
+commit 53a801b0e26639892b433dea6069fb8fe8030e75
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Tue Jan 31 16:19:11 2012 -0800
+
+    Implement theme installer v 0.1.0
+
+commit 9bd0deabd4d1dba78194b68e0d4e2c3f3853eddb
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Tue Jan 24 02:11:01 2012 -0800
+
+    Use ENV variables for switch_theme
+
+commit 6d0e38b3657f2631f977c6c748698e20ae939bb3
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Mon Jan 23 02:34:21 2012 -0800
+
+    Add rake task to create pages
+    
+    Usage: rake page name='about.md'
+
+commit f52ff5aa62f0b1ecebac14f8556b60550a3a8712
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Mon Jan 23 02:31:42 2012 -0800
+
+    Refactor new post rake task
+    
+    Rename from 'rake new_post' to 'rake post'. Also use environment variables over rake arguments
+
+commit a1a7efaf71ca45188737a73aca11aa8e05f8502a
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Mon Jan 23 00:52:44 2012 -0800
+
+    Include 'JB/setup' in all posts and pages
+    
+    This is the only way we can have global access to dynamic liquid variables. Using site configuration is too convulated since switching themes and runing in development vs. production relies on being able to dynamically define variables
+
+commit fe33e5180c3a9e9ede03d36c758c47fcd1dee406
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Sat Jan 21 18:09:53 2012 -0800
+
+    Provide set_paths to all layouts
+
+commit 61cdb7a8031d1c99c222c4242e199a31c42dabb8
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Fri Jan 20 23:37:40 2012 -0800
+
+    Themes can define configuration data
+    
+    Themes can define a 'settings.yml' file which will get injected into the root default.html layout YAML Front Matter which can be accessed through the 'page' variable.
+
+commit 9d7d4eb4f946a895ee79219813355af86a17c120
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Wed Jan 18 15:35:10 2012 -0800
+
+    reorganize rakefile
+    
+    Namely standardized some logic and put config variables in hash
+
+commit 246e91a7493a2eb9e79fb6ed552ce4b7b1c633ae
+Merge: e26b5f7 6ee3125
+Author: Jade <plusjade@gmail.com>
+Date:   Wed Jan 18 14:42:39 2012 -0800
+
+    Merge pull request #11 from pradeep1288/master
+    
+    Created a new rake task : new_post
+
+commit 6e70fddae61a1de1bd7fba7aa43f7c2f0f3d8af6
+Author: Jesse Chan-Norris <jcn@pith.org>
+Date:   Mon Jan 16 21:20:25 2012 -0500
+
+    Change directory tests in switch_theme task to use FileTest.directory? instead of Dir.exists? for ruby 1.8.7 compatibility.
+
+commit 6ee3125c179e2f610b039b3ace9a3836a998a4ee
+Author: Pradeep Nayak <pradeep1288@gmail.com>
+Date:   Mon Jan 16 21:17:25 2012 +0530
+
+    adding the new_post task, with bugs fixed which were pointed out by @swanson
+
+commit 223a9ca6a2da0cf571d343c5832510162a279bf5
+Author: Yuya Saito <studiomohawk@gmail.com>
+Date:   Thu Jan 12 17:41:52 2012 +0900
+
+    add rake preview for development
+
+commit 4c18e3c136bea49e3335ab594ae22d999892cf27
+Author: Jade Dominguez <plusjade@gmail.com>
+Date:   Fri Dec 30 14:17:44 2011 -0800
+
+    version 0.0.1

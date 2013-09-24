@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Branching ML Done &larr; </title>
+   <title>Split/Merge moves and Association Priors &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -83,97 +83,21 @@
 
 
   <h1 class="title">
-        [TODO] Branching ML Done
+        [Reference] Split/Merge moves and Association Priors
     </h1>
 
-  <div class="date emphnext">September 20, 2013</div>
+  <div class="date emphnext">September 23, 2013</div>
     
 
 
   
-    
+    <p>Thinking again about split/merge moves, and the problem of the exploding number of split moves as the nubmer of observations increases.</p>
 
-<div class="meta-info">
-<table>
-    <tr>
-        <th>Project</th>
-        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
-    </tr>
-    <tr>
-        <th>Subproject</th>
-        <td>Data Association v3</td>
-    </tr>
-    <tr>
-        <th>Working path</th>
-        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
-    </tr>
+<p>Part of the problem is the fact that we're treating all associations as equal under the prior.  This has the side-effect that the prior strongly prefers more curves in a model as opposed to fewer.  Consider a scenario with N observations, and M curves.  There are M<sup>N</sup> number of ways to assign these observations to M curves.  Compare this with a model with one curve -- there's only one possible assigment.  Since all assignments are equal under the prior, the model with M curves is more favored by the prior by a factor of M<sup>N.</sup></p>
 
-    <tr>
-        <th>SVN Revision</th>
-        <td>15229</td>
-    </tr>
+<p>For this reason, I propose that a more sensible prior is one that is uniform over the number of curves in the scene.  Then, given the number of curves, the prior over associations is uniform.  In other words, given an association, it's prior should be 1/M<sup>N,</sup> where M is the number of curves represented in the association.</p>
 
-
-</table>
-
-    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
-</div>
-
-
-<p>Finally finished implementing and confirming the multi-view branching ML.  Next steps:</p>
-
-<p>Quick</p>
-
-<ul>
-<li>re-run tests with non-zero start index</li>
-<li>test three-levels of branching
-
-<ul>
-<li>reconstruction</li>
-<li>ML vs. reference</li>
-</ul>
-</li>
-<li>cleanup Corr fields
-
-<ul>
-<li>eliminate clean_ fields</li>
-<li>group fields by processing stage</li>
-</ul>
-</li>
-<li>map-out processing pipeline</li>
-</ul>
-
-
-<p>Medium</p>
-
-<ul>
-<li>finish ground-truthing (Friday night, Saturday)</li>
-<li>implement recursive update</li>
-<li>code for inferring branching parameters.</li>
-<li>Finish training
-
-<ul>
-<li>infer branching parameters</li>
-<li>re-write training ML</li>
-<li>re-train prior parameters with full ML
-
-<ul>
-<li>jointly train FG and BG using same</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>gibbs sampler</li>
-<li>evaluation code</li>
-</ul>
-
-
-<p>Reach</p>
-
-<ul>
-<li>split-merge moves</li>
-</ul>
-
+<p>When running a split move, the number of ways to split is 2<sup>K,</sup> where K is the number of observations associated with the original curve.  If chosen uniformly, the Metropolis-Hastings proposal probability is 2<sup>K.</sup>  This should cancel nicely with the prior term in the MH acceptance ratio.</p>
 
       <address class="signature">
         Posted by
@@ -185,10 +109,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/09/23/mcmcda-sampling-with-attachment" class="next" title="MCMCDA Sampling with Attachment">MCMCDA Sampling with Attachment &rarr;</a>
+    <a href="/ksimek/research/2013/09/23/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/09/19/work-log" class="prev" title="refactoring; dependencies">&larr; refactoring; dependencies</a>
+    <a href="/ksimek/research/2013/09/23/mcmcda-sampling-with-attachment" class="prev" title="MCMCDA Sampling with Attachment">&larr; MCMCDA Sampling with Attachment</a>
   
   </div>
   <div class="clearer"> </div>
@@ -205,7 +129,7 @@
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Branching ML Done" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Split/Merge moves and Association Priors" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -253,7 +177,7 @@
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Branching ML Done");
+                    + encodeURIComponent("Split/Merge moves and Association Priors");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

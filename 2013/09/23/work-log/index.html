@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Branching ML Done &larr; </title>
+   <title>Work Log &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -83,10 +83,10 @@
 
 
   <h1 class="title">
-        [TODO] Branching ML Done
+        [Work Log] Work Log
     </h1>
 
-  <div class="date emphnext">September 20, 2013</div>
+  <div class="date emphnext">September 23, 2013</div>
     
 
 
@@ -120,60 +120,20 @@
 </div>
 
 
-<p>Finally finished implementing and confirming the multi-view branching ML.  Next steps:</p>
+<h2>Updating data structures to Version 2</h2>
 
-<p>Quick</p>
+<pre><code>* Refactored several variable names, some functions may need updating.
+* Corrs was changed from cell-of-structs to a cell-array.  Some functions may still need updating.
+* Removed old, unused variables
+</code></pre>
 
-<ul>
-<li>re-run tests with non-zero start index</li>
-<li>test three-levels of branching
+<h2>Thinking on sampling</h2>
 
-<ul>
-<li>reconstruction</li>
-<li>ML vs. reference</li>
-</ul>
-</li>
-<li>cleanup Corr fields
+<p>Did a writeup on MCMCDA with attachments, see associated "strategy" entry</p>
 
-<ul>
-<li>eliminate clean_ fields</li>
-<li>group fields by processing stage</li>
-</ul>
-</li>
-<li>map-out processing pipeline</li>
-</ul>
+<h2>Thinking on priors</h2>
 
-
-<p>Medium</p>
-
-<ul>
-<li>finish ground-truthing (Friday night, Saturday)</li>
-<li>implement recursive update</li>
-<li>code for inferring branching parameters.</li>
-<li>Finish training
-
-<ul>
-<li>infer branching parameters</li>
-<li>re-write training ML</li>
-<li>re-train prior parameters with full ML
-
-<ul>
-<li>jointly train FG and BG using same</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>gibbs sampler</li>
-<li>evaluation code</li>
-</ul>
-
-
-<p>Reach</p>
-
-<ul>
-<li>split-merge moves</li>
-</ul>
-
+<p>Did a writeup on association priors, see associated "reference" entry</p>
 
       <address class="signature">
         Posted by
@@ -184,11 +144,8 @@
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/09/23/mcmcda-sampling-with-attachment" class="next" title="MCMCDA Sampling with Attachment">MCMCDA Sampling with Attachment &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/09/19/work-log" class="prev" title="refactoring; dependencies">&larr; refactoring; dependencies</a>
+    <a href="/ksimek/research/2013/09/23/splitmerge-moves-and-association-priors" class="prev" title="Split/Merge moves and Association Priors">&larr; Split/Merge moves and Association Priors</a>
   
   </div>
   <div class="clearer"> </div>
@@ -205,7 +162,7 @@
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Branching ML Done" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -253,7 +210,7 @@
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Branching ML Done");
+                    + encodeURIComponent("Work Log");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");
