@@ -86,7 +86,7 @@
         [Work Log] Work Log
     </h1>
 
-  <div class="date emphnext">September 23, 2013</div>
+  <div class="date emphnext">September 24, 2013</div>
     
 
 
@@ -120,20 +120,19 @@
 </div>
 
 
-<h2>Updating data structures to Version 2</h2>
+<p>Struggling with re-assigning associations.</p>
 
-<pre><code>* Refactored several variable names, some functions may need updating.
-* Corrs was changed from cell-of-structs to a cell-array.  Some functions may still need updating.
-* Removed old, unused variables
-</code></pre>
+<p>Yesterday, I was planning to re-sample attachments after every change to association.  The bookkeeping necessary to ensure reversibility of this is proving to be a nightmare, and it's questionable whether it actually improves results.  The counter-argument is that MH moves should be cheap to propose, but re-sampling attachments has significant cost.  All that cost is wasted if the proposed move is a bad one, which it often will be.  Also, most curves only change slightly when association changes, so changing the branching is probably a bad idea.</p>
 
-<h2>Thinking on sampling</h2>
+<p>Two special cases need to be handled.  First is when a change to association causes a curve to become shorter, and an attachment point disappears.  In this case, we allow it, but during evaluation, clamp to the endpoint.</p>
 
-<p>Did a writeup on MCMCDA with attachments, see associated "strategy" entry</p>
+<p>However, when birth/death occurs, re-doing attachment is absolutely necessary.  In this case, we take a simpler apprach than yesterday's strategy:  on death, child curves become root curves; on birth, new curve gathers children from root curves.  Or alternatively, birth/death is illegal if curve has children.</p>
 
-<h2>Thinking on priors</h2>
+<p>The preceeding dicusson about avoiding re-attachment is only valid for re-assignment moves.  For split/merge moves, we must update attachment.  But this is easy too: on merge, child sets are merged; on split, sample A vs. B based on distance.</p>
 
-<p>Did a writeup on association priors, see associated "reference" entry</p>
+<h2>Approach #2</h2>
+
+<p>When re-assigning associations, if it results in a dangling curve, reject</p>
 
       <address class="signature">
         Posted by
@@ -145,10 +144,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/09/24/todo" class="next" title="todo">todo &rarr;</a>
+    <a href="/ksimek/research/2013/09/25/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/09/23/splitmerge-moves-and-association-priors" class="prev" title="Split/Merge moves and Association Priors">&larr; Split/Merge moves and Association Priors</a>
+    <a href="/ksimek/research/2013/09/24/todo" class="prev" title="todo">&larr; todo</a>
   
   </div>
   <div class="clearer"> </div>

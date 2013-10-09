@@ -1,0 +1,494 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Work Log &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Work Log
+    </h1>
+
+  <div class="date emphnext">September 30, 2013</div>
+    
+
+
+  
+    
+
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Data Association v3</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
+    </tr>
+
+    <tr>
+        <th>SVN Revision</th>
+        <td>15229</td>
+    </tr>
+
+
+</table>
+
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
+
+
+<p>Have some problems with offline correspondence pair_matching.</p>
+
+<p>Is it a bug introduced in the reconstruction code?  Lots of refactors there, recently.</p>
+
+<p>Test by re-running wacv results.</p>
+
+<h2>WACV Reconstruction (revisited)</h2>
+
+<p>Now that datasets six through eleven have been re-ground-truthed, should confirm them by running wacv reconstruction code on them.  Also this should confirm whether we've introduced any reconstruction bugs in the last week or two.</p>
+
+<hr />
+
+<p>Problem with dataset six:  curve #4 isn't connected to its parent.</p>
+
+<p>Problem with dataset 1: really crooked.  Inspecting the ground-truth doesn't show any obvious problems that would cause this.  Maybe reversed curves? (which should be handled, but maybe aren't)</p>
+
+<p><img src="/ksimek/research/img/2013-09-30-dataset1.png" alt="Dataset 1" /></p>
+
+<p>Dataset 6: base curve attaches from wrong side (red curve below):</p>
+
+<p><img src="/ksimek/research/img/2013-09-30-dataset6.png" alt="Dataset 6" /></p>
+
+<p>Dataset 7: Wacky top curves, missing connections at top, no base curves:</p>
+
+<p><img src="/ksimek/research/img/2013-09-30-dataset7.png" alt="Dataset 7" /></p>
+
+<p>Dataset 8: missed connections, bad top curves</p>
+
+<p><img src="/ksimek/research/img/2013-09-30-dataset8.png" alt="Dataset 8" /></p>
+
+<p>Dataset 9: problems...</p>
+
+<p><img src="/ksimek/research/img/2013-09-30-dataset9.png" alt="Dataset 9" /></p>
+
+<p>Datset 10:  Good!</p>
+
+<p><img src="/ksimek/research/img/2013-09-30-dataset10.png" alt="Dataset 10" /></p>
+
+<p>Datset 11: Bad top-curve associations</p>
+
+<p><img src="/ksimek/research/img/2013-09-30-dataset11.png" alt="Dataset 11" /></p>
+
+<h2>Revenge of the Pre-curves</h2>
+
+<p>When investigating issues from dataset 6, discovered that results improved when ensuring that lateral curves don't go past the parent curve.  For example</p>
+
+<pre><code>   |   /      |   /     |   /
+   |  /       |  /      |  /
+   | /        |_/      _|_/
+   |          |         |
+   |          |         |
+   |          |         |
+ Good       Best       Bad
+</code></pre>
+
+<h2>Priors and proposal distributions</h2>
+
+<p>Thinking about split proposal distributions.</p>
+
+<p>I've been thinking about the combinitorics of partitions and realized I'v been counting wrong.  Given M curves and N observations, I was counting the number of partitions as \(M<sup>N\).</sup>  This doesn't account for the fact that order of cluster id's doesn't matter, so a better count would be \(M<sup>N</sup> / N! \), which divides by the number of permutations of the cluster id's.    However, this is still wrong, because it counts assignments with empty clusters (which is indistinquishible from a model with N-1 clusters.  The real number of partitions is given by <a href="http://en.wikipedia.org/wiki/Stirling_number_of_the_second_kind">Stirling numbers of the second kind</a>.</p>
+
+<p>The same goes for the partitioning that occurs during a split move.</p>
+
+<p>Implemented <code>tools/build_stirling2.m</code>, which builds an NxN matrix of the log of Stirling numbers of the second kind.</p>
+
+<p>Want to know that probability of accepting a merge move in various configurations, assuming the likelihood is constant.  Here's the test code:</p>
+
+<pre><code>% number of observations: 918
+% number of tracks: n
+% number of observations in track i: k_i
+
+p_merged  = @(n,k) -sm(918,n-1);
+p_split = @(n,k) -sm(918,n);
+q_split = @(n,k) log(1/(n-1)) - sm(k, 2);
+q_merge = @(n,k) -log(nchoosek(n, 2));
+alpha = @(n,k) p_merged(n,k) - p_split(n,k) + q_split(n,k) - q_merge(n,k);
+</code></pre>
+
+<p>Running in several scenarios from plant-modelling problem:</p>
+
+<pre><code>% small number of curves; L,M,S number of observations
+&gt;&gt; alpha(5, 50)
+
+ans =
+
+  169.0363
+
+&gt;&gt; alpha(5, 20)
+
+ans =
+
+  189.8307
+
+&gt;&gt;  alpha(5, 5)
+
+ans =
+
+  200.2747
+
+% medium number of curves; L,M,S number of observations
+&gt;&gt; alpha(10, 50)
+
+ans =
+
+   60.8395
+
+&gt;&gt; alpha(10, 20)
+
+ans =
+
+   81.6339
+
+&gt;&gt; alpha(10, 5)
+
+ans =
+
+   92.0779
+
+% huge number of curves; L,M,S number of observations
+&gt;&gt; alpha(100, 50)
+
+ans =
+
+  -26.7355
+
+&gt;&gt; alpha(100, 20)
+
+ans =
+
+   -5.9411
+
+&gt;&gt; alpha(100, 5)
+
+ans =
+
+    4.5029
+</code></pre>
+
+<blockquote><p><em>Update</em>: These numbers are slightly off, due to a bug in the stirling number computation (now fixed).  The resulting alphas aren't substantially different.</p></blockquote>
+
+<p>In most realistic-model scenarios, the probability of accepting a merge move (ignoring the likelihood; assuming constant) is 100% (i.e. positive alpha).</p>
+
+<p>When the number of curves is huge (e.g. early in the sampler, when we need merges the most), the probability of acceptance is non-negligible only if the number of observations in the resulting curve is relatively small.  This is usually the case, and continuously merging short curves will result the acceptance probability getting larger and larger.</p>
+
+<p>It is interesting that in the presence of a constant likelihood, the sampler would ever prever fewer tracks to more.</p>
+
+<p>In these cases, the sampler is preferring to split up curves with abnormally large number of observations (compared to other pertitions).</p>
+
+<p>Would it be interesting to sample over partitions and see how the partition numbers and sizes evolve over time?  Heck yes!</p>
+
+<h1>Toy problem: sampling partitions</h1>
+
+<p>Prior: Uniform over number of groups.  Given a group, uniform over partitions.</p>
+
+<p>Likelihood: uniform.  For simplicity, I'd like the sampler's exploration to not be influenced by which split or merge we pick.</p>
+
+<p>We implement a split-merge move.  When splitting, a group is picked at random, and its members are randomly split into two groups.  On merge, two groups are picked at random and merged.</p>
+
+<p>The prior of a model with N observations and k groups is \(1/s(N,k)\) where s the number of ways to partition N into k groups.</p>
+
+<h2>Results</h2>
+
+<p>When initialized with a single monolithic group (k=1), the sampler jumps between k=1 and k=2, rejecting about 50% of the time.  <strong>The sampler never jumps to k=3.</strong></p>
+
+<p>This is a problem, because we'd expect to spend the same amount of time in the k=3 state as any other, since the target distribution is uniform over number of tracks.</p>
+
+<p>Either this is a bug, a flaw in my assumptions, or "simply" a mixing problem (a huge practical issue, but theoretically still correct).</p>
+
+<p>After exhausting myself bug-hunting, I decided to explore the mixing issue.</p>
+
+<p>Instead of initializing to k=1, I initialized to k=3.  Both the split and merge move have an acceptance probability of exp(-51.0), meaning it accept once in every 7.1e23 samples.  This sampler <strong>definitely has bad mixing</strong>.</p>
+
+<p><em>Aside</em>. It seemed notable that the split and merge move had the exact same acceptance probability for k=3.  At first this seems sensible, since the sampler should spend as much time in a two-group model as in a four-group. It turns out not to be true for any other \(k \neq 3\) I tried, but all exhibited poor mixing.  In fact, this asymmetry is natural, as the cardinality of the split proposals doesn't grow at exactly the same rate as the cardinality of the data-partitions.  This is balanced by the fact that you might transition to a lower model less often than the higher model, but you might spend more time in the lower model once you're there.</p>
+
+<p>Note that although we've used a uniform likelihood, this mixing problem likely can't be fixed by using a different likelihood.  The likelihood could drive the sampler in a specific direction, but the reverse direction would be even harder to explore.  So the likelihood only makes matters worse.</p>
+
+<p>Q: Can I compute the expected length spent in each state?</p>
+
+<p>A: yes.  1/p_leave, where p_leave = (0.5 * split_alpha + 0.5 * merge_alpha)</p>
+
+<p>Q: Can I compute the expected direction of transition between states?
+A: yes.  split_alpha / (split_alpha + merge_alpha);</p>
+
+<p>Q: Can I compute the expected ratio between an N-group model and an N+1 group model?
+A: Do MCMC sampling.  When you reach a state, add its expected number of rejected samples to its tally, then transition up or down according to the direction distribution.</p>
+
+<h2>New toy sampler: Expected ratio between model probabilities</h2>
+
+<pre><code>% compute expected samples
+% compute up probability
+% (state, tallies)
+% random walk between states, 
+</code></pre>
+
+<h2>TODO</h2>
+
+<ul>
+<li>Fix dataset six: connect curve 4 to parent</li>
+<li>Add confirmation code to check for multiple connected components in ground truth.</li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/10/02/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2013/09/28/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+  
+  		<div id="fb-root"></div>
+
+<div class="post-share ulno mob">
+
+<!-- Hacker News -->
+<span class="hn"><span id="hnews"></span></span>
+
+<!-- Twitter -->
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+
+<!-- Google+ -->
+<span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
+
+<!-- Facebook -->
+<!--
+<span class="fb"><div class="fb-like" data-send="false" data-layout="button_count" data-width="90" data-show-faces="false" data-font=""></div></span>
+-->
+
+<!-- Reddit -->
+<script type="text/javascript" src="http://www.reddit.com/static/button/button1.js"></script>
+</div>
+
+<script>
+  
+(function(doc, script) {
+ 	
+	//Async Social Buttons
+    var js, 
+        fjs = doc.getElementsByTagName(script)[0],
+        add = function(url, id) {
+            if (doc.getElementById(id)) {return;}
+            js = doc.createElement(script);
+            js.src = url;
+            id && (js.id = id);
+            fjs.parentNode.insertBefore(js, fjs);
+        };
+    
+    // Twitter SDK
+    add('//platform.twitter.com/widgets.js', 'twitter-wjs');
+
+    // Google+ button
+    add('https://apis.google.com/js/plusone.js');
+    
+    // Facebook SDK
+    add('//connect.facebook.net/en_GB/all.js#xfbml=1&appId=123', 'facebook-jssdk');
+    
+    //Hacker News Button 	
+ 	var hn_like = document.createElement('iframe');
+      hn_like.frameborder="no";
+      hn_like.scrolling="no";
+      hn_like.height="28px";
+      hn_like.width="110px";
+      hn_like.style="border:0px;";
+      hn_like.src = "http://hnlike.com/upvote.php?link="
+                    + encodeURIComponent(document.location)
+                    + "&title="
+                    + encodeURIComponent("Work Log");
+      hn_like.innerHTML="iframes not supported by your browser";
+      
+      var where = document.getElementById("hnews");
+      where.parentNode.insertBefore(
+        hn_like,
+        where
+      );
+}(document, 'script'));
+
+</script>
+
+  
+
+
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

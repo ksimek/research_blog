@@ -4,13 +4,1034 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-09-23T18:46:20-07:00</updated>
+ <updated>2013-10-09T14:41:45-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/10/08/work-log"/>
+   <updated>2013-10-08T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/10/08/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Likelihood Server&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;likelihood_server&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Working on compiling render server.&lt;/p&gt;
+
+&lt;p&gt;Do I want to compute likelihood in C++ too?&lt;/p&gt;
+
+&lt;p&gt;Code exists for it.  Maybe best to just re-use code from curve_sampling.cpp and abandon render server.&lt;/p&gt;
+
+&lt;p&gt;Lets do that.&lt;/p&gt;
+
+&lt;h2&gt;Reviewing old curve sampling code&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Pixel store&lt;/li&gt;
+&lt;li&gt;renderer&lt;/li&gt;
+&lt;li&gt;multi-view likelihood&lt;/li&gt;
+&lt;li&gt;pixel likelihood&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Pixel likelihood receives a pointer to linear array of reals that represent the pixel matrix.&lt;/p&gt;
+
+&lt;p&gt;Multi-view likelihood receives a renderable and handles all the rendering and pixel-retreival, and dispatches to pixel likelihood objects for computing.  is constructed with one or more cameras.  On evaluation it receives a renderable object, projects it under each camera, retreives the pixels, and passes to a pixel likelihood.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Refactor&lt;/strong&gt;: Separate rendering into a &quot;renderer&quot; object, which can be split into its own process if needed.  It will also make leapfrog pixel-reading simpler.&lt;/p&gt;
+
+&lt;p&gt;End product will&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;receive message from matlab containing curves&lt;/li&gt;
+&lt;li&gt;decode curves into vectors&lt;/li&gt;
+&lt;li&gt;convert into gl_curves (renderables)&lt;/li&gt;
+&lt;li&gt;pass to likelihood object&lt;/li&gt;
+&lt;li&gt;convert log-posterior to message&lt;/li&gt;
+&lt;li&gt;transmit back to matlab&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;all functionality is already implemented, just need to weed out code rot and put it together.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Getting weird link errors.  For some reason, the build system is using gcc instead of g++ to link my main program.  Will try re-running kjb_add_makefiles
+&lt;strong&gt;Refactor&lt;/strong&gt;: specify all parameters at command-line (width, height, cameras, etc)&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Meanwhile, I'm planning the program&lt;/p&gt;
+
+&lt;p&gt;inputs:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;* dimensions
+* cameras
+* likelihood parameters
+* 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Steps&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;* initialize likelihood
+* initialize TCP server
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Abandoning GL_context from sampler_cpp&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/10/03/work-log"/>
+   <updated>2013-10-03T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/10/03/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Thought more on split/merge.  Could make merge a special case of split, and the move becomes a split/split process.  At every step, pick a track, pick a subset of observations from that track, then reassign them all to an existing curve or a new curve.  It's symmetric, which is nice, but the probability of a merge being selected becomes vanishingly small very quickly.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Looking into issues with offline pair-candidate generation.  So many bad candidates are coming up, and their ML values look better than the good candidates.&lt;/p&gt;
+
+&lt;p&gt;A big issue is that we aren't penalizing missing data (gaps/tails), and we don't enforce multiple-view consistency (only two views need to match).&lt;/p&gt;
+
+&lt;p&gt;Option 1: use a stronger likelihood to rule out background curves.  Use per-pixel foreground/background classifier?  Use color consistency metric?  Sample from posterior, project, check pixels, repeat -- gets a monte-carlo of marginal likelihood.&lt;/p&gt;
+
+&lt;p&gt;Option 2: use foreground/background classifier to classify fragments; misusing a background fragment in a foreground pair results in some penalty.&lt;/p&gt;
+
+&lt;p&gt;Option 1 is nice theoretically, but has lots of moving parts (new features, training, monte-carlo issue, need to know how thick to make branches.)  Unlikely to get working in two weeks.  Also isn't clear what the role of the detector curves are.  Are they data?  data-driven proposals?&lt;/p&gt;
+
+&lt;p&gt;Options 2 is a bit weird, but doesn't introduce dimensionality issues.  But also doesn't specifically address the issue of bizzare candidates being introduced.  For example, a bad pair could still be proposed as long as they're both foreground curves.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/10/02/work-log"/>
+   <updated>2013-10-02T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/10/02/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Debugging split/merge toy sampler.&lt;/p&gt;
+
+&lt;p&gt;Split from 5 to 6 groups:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt; split_alpha = -p_merge + p_split - q_split + q_merge - log(psplitmv) + log(0.5);
+ K&amp;gt;&amp;gt; p_merge
+
+ p_merge =
+
+   -1.4437e+03
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;-1.4437e+03 + -1.6060e+03 - -125.6828 + -2.7081&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt; K&amp;gt;&amp;gt; p_split
+
+ p_split =
+
+   -1.6060e+03
+
+   K&amp;gt;&amp;gt; q_split
+
+   q_split =
+
+    -125.6828
+
+    K&amp;gt;&amp;gt; q_merge
+
+    q_merge =
+
+       -2.7081
+
+       K&amp;gt;&amp;gt; log(psplitmv)
+
+  ans =
+
+     -0.6931
+
+     K&amp;gt;&amp;gt; log(0.5)
+
+  ans =
+
+     -0.6931
+
+     K&amp;gt;&amp;gt; 
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Merge from 6 to 5 groups:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;merge_alpha = p_merge - p_split + q_split - q_merge - pmergemv + psplitmv ;
+K&amp;gt;&amp;gt; p_merge
+
+p_merge =
+
+  -1.4437e+03
+
+K&amp;gt;&amp;gt; p_split
+
+p_split =
+
+  -1.6060e+03
+
+K&amp;gt;&amp;gt; q_split
+
+q_split =
+
+ -208.8604
+
+K&amp;gt;&amp;gt; q_merge
+
+q_merge =
+
+   -2.7081
+
+K&amp;gt;&amp;gt; pmergemv
+
+pmergemv =
+
+   -0.6931
+
+K&amp;gt;&amp;gt; psplitmv
+
+psplitmv =
+
+   -0.6931
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that q_split doesn't match between the two moves.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;After reflection, this shouldn't match, because we're comparing two different cases.  Specifically, the post-split results in two small groups, where as the pre-merge model has 6 groups of equal size.  Smaller groups have smaller number of ways to split, so the proposal probability is higher.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Killed myself today thinking about this problem and getting exactly nowhere.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/09/30/work-log"/>
+   <updated>2013-09-30T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/09/30/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Have some problems with offline correspondence pair_matching.&lt;/p&gt;
+
+&lt;p&gt;Is it a bug introduced in the reconstruction code?  Lots of refactors there, recently.&lt;/p&gt;
+
+&lt;p&gt;Test by re-running wacv results.&lt;/p&gt;
+
+&lt;h2&gt;WACV Reconstruction (revisited)&lt;/h2&gt;
+
+&lt;p&gt;Now that datasets six through eleven have been re-ground-truthed, should confirm them by running wacv reconstruction code on them.  Also this should confirm whether we've introduced any reconstruction bugs in the last week or two.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Problem with dataset six:  curve #4 isn't connected to its parent.&lt;/p&gt;
+
+&lt;p&gt;Problem with dataset 1: really crooked.  Inspecting the ground-truth doesn't show any obvious problems that would cause this.  Maybe reversed curves? (which should be handled, but maybe aren't)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset1.png&quot; alt=&quot;Dataset 1&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Dataset 6: base curve attaches from wrong side (red curve below):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset6.png&quot; alt=&quot;Dataset 6&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Dataset 7: Wacky top curves, missing connections at top, no base curves:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset7.png&quot; alt=&quot;Dataset 7&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Dataset 8: missed connections, bad top curves&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset8.png&quot; alt=&quot;Dataset 8&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Dataset 9: problems...&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset9.png&quot; alt=&quot;Dataset 9&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Datset 10:  Good!&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset10.png&quot; alt=&quot;Dataset 10&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Datset 11: Bad top-curve associations&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset11.png&quot; alt=&quot;Dataset 11&quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;Revenge of the Pre-curves&lt;/h2&gt;
+
+&lt;p&gt;When investigating issues from dataset 6, discovered that results improved when ensuring that lateral curves don't go past the parent curve.  For example&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;   |   /      |   /     |   /
+   |  /       |  /      |  /
+   | /        |_/      _|_/
+   |          |         |
+   |          |         |
+   |          |         |
+ Good       Best       Bad
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Priors and proposal distributions&lt;/h2&gt;
+
+&lt;p&gt;Thinking about split proposal distributions.&lt;/p&gt;
+
+&lt;p&gt;I've been thinking about the combinitorics of partitions and realized I'v been counting wrong.  Given M curves and N observations, I was counting the number of partitions as \(M&lt;sup&gt;N\).&lt;/sup&gt;  This doesn't account for the fact that order of cluster id's doesn't matter, so a better count would be \(M&lt;sup&gt;N&lt;/sup&gt; / N! \), which divides by the number of permutations of the cluster id's.    However, this is still wrong, because it counts assignments with empty clusters (which is indistinquishible from a model with N-1 clusters.  The real number of partitions is given by &lt;a href=&quot;http://en.wikipedia.org/wiki/Stirling_number_of_the_second_kind&quot;&gt;Stirling numbers of the second kind&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The same goes for the partitioning that occurs during a split move.&lt;/p&gt;
+
+&lt;p&gt;Implemented &lt;code&gt;tools/build_stirling2.m&lt;/code&gt;, which builds an NxN matrix of the log of Stirling numbers of the second kind.&lt;/p&gt;
+
+&lt;p&gt;Want to know that probability of accepting a merge move in various configurations, assuming the likelihood is constant.  Here's the test code:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;% number of observations: 918
+% number of tracks: n
+% number of observations in track i: k_i
+
+p_merged  = @(n,k) -sm(918,n-1);
+p_split = @(n,k) -sm(918,n);
+q_split = @(n,k) log(1/(n-1)) - sm(k, 2);
+q_merge = @(n,k) -log(nchoosek(n, 2));
+alpha = @(n,k) p_merged(n,k) - p_split(n,k) + q_split(n,k) - q_merge(n,k);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Running in several scenarios from plant-modelling problem:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;% small number of curves; L,M,S number of observations
+&amp;gt;&amp;gt; alpha(5, 50)
+
+ans =
+
+  169.0363
+
+&amp;gt;&amp;gt; alpha(5, 20)
+
+ans =
+
+  189.8307
+
+&amp;gt;&amp;gt;  alpha(5, 5)
+
+ans =
+
+  200.2747
+
+% medium number of curves; L,M,S number of observations
+&amp;gt;&amp;gt; alpha(10, 50)
+
+ans =
+
+   60.8395
+
+&amp;gt;&amp;gt; alpha(10, 20)
+
+ans =
+
+   81.6339
+
+&amp;gt;&amp;gt; alpha(10, 5)
+
+ans =
+
+   92.0779
+
+% huge number of curves; L,M,S number of observations
+&amp;gt;&amp;gt; alpha(100, 50)
+
+ans =
+
+  -26.7355
+
+&amp;gt;&amp;gt; alpha(100, 20)
+
+ans =
+
+   -5.9411
+
+&amp;gt;&amp;gt; alpha(100, 5)
+
+ans =
+
+    4.5029
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;&lt;p&gt;&lt;em&gt;Update&lt;/em&gt;: These numbers are slightly off, due to a bug in the stirling number computation (now fixed).  The resulting alphas aren't substantially different.&lt;/p&gt;&lt;/blockquote&gt;
+
+&lt;p&gt;In most realistic-model scenarios, the probability of accepting a merge move (ignoring the likelihood; assuming constant) is 100% (i.e. positive alpha).&lt;/p&gt;
+
+&lt;p&gt;When the number of curves is huge (e.g. early in the sampler, when we need merges the most), the probability of acceptance is non-negligible only if the number of observations in the resulting curve is relatively small.  This is usually the case, and continuously merging short curves will result the acceptance probability getting larger and larger.&lt;/p&gt;
+
+&lt;p&gt;It is interesting that in the presence of a constant likelihood, the sampler would ever prever fewer tracks to more.&lt;/p&gt;
+
+&lt;p&gt;In these cases, the sampler is preferring to split up curves with abnormally large number of observations (compared to other pertitions).&lt;/p&gt;
+
+&lt;p&gt;Would it be interesting to sample over partitions and see how the partition numbers and sizes evolve over time?  Heck yes!&lt;/p&gt;
+
+&lt;h1&gt;Toy problem: sampling partitions&lt;/h1&gt;
+
+&lt;p&gt;Prior: Uniform over number of groups.  Given a group, uniform over partitions.&lt;/p&gt;
+
+&lt;p&gt;Likelihood: uniform.  For simplicity, I'd like the sampler's exploration to not be influenced by which split or merge we pick.&lt;/p&gt;
+
+&lt;p&gt;We implement a split-merge move.  When splitting, a group is picked at random, and its members are randomly split into two groups.  On merge, two groups are picked at random and merged.&lt;/p&gt;
+
+&lt;p&gt;The prior of a model with N observations and k groups is \(1/s(N,k)\) where s the number of ways to partition N into k groups.&lt;/p&gt;
+
+&lt;h2&gt;Results&lt;/h2&gt;
+
+&lt;p&gt;When initialized with a single monolithic group (k=1), the sampler jumps between k=1 and k=2, rejecting about 50% of the time.  &lt;strong&gt;The sampler never jumps to k=3.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;This is a problem, because we'd expect to spend the same amount of time in the k=3 state as any other, since the target distribution is uniform over number of tracks.&lt;/p&gt;
+
+&lt;p&gt;Either this is a bug, a flaw in my assumptions, or &quot;simply&quot; a mixing problem (a huge practical issue, but theoretically still correct).&lt;/p&gt;
+
+&lt;p&gt;After exhausting myself bug-hunting, I decided to explore the mixing issue.&lt;/p&gt;
+
+&lt;p&gt;Instead of initializing to k=1, I initialized to k=3.  Both the split and merge move have an acceptance probability of exp(-51.0), meaning it accept once in every 7.1e23 samples.  This sampler &lt;strong&gt;definitely has bad mixing&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Aside&lt;/em&gt;. It seemed notable that the split and merge move had the exact same acceptance probability for k=3.  At first this seems sensible, since the sampler should spend as much time in a two-group model as in a four-group. It turns out not to be true for any other \(k \neq 3\) I tried, but all exhibited poor mixing.  In fact, this asymmetry is natural, as the cardinality of the split proposals doesn't grow at exactly the same rate as the cardinality of the data-partitions.  This is balanced by the fact that you might transition to a lower model less often than the higher model, but you might spend more time in the lower model once you're there.&lt;/p&gt;
+
+&lt;p&gt;Note that although we've used a uniform likelihood, this mixing problem likely can't be fixed by using a different likelihood.  The likelihood could drive the sampler in a specific direction, but the reverse direction would be even harder to explore.  So the likelihood only makes matters worse.&lt;/p&gt;
+
+&lt;p&gt;Q: Can I compute the expected length spent in each state?&lt;/p&gt;
+
+&lt;p&gt;A: yes.  1/p_leave, where p_leave = (0.5 * split_alpha + 0.5 * merge_alpha)&lt;/p&gt;
+
+&lt;p&gt;Q: Can I compute the expected direction of transition between states?
+A: yes.  split_alpha / (split_alpha + merge_alpha);&lt;/p&gt;
+
+&lt;p&gt;Q: Can I compute the expected ratio between an N-group model and an N+1 group model?
+A: Do MCMC sampling.  When you reach a state, add its expected number of rejected samples to its tally, then transition up or down according to the direction distribution.&lt;/p&gt;
+
+&lt;h2&gt;New toy sampler: Expected ratio between model probabilities&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;% compute expected samples
+% compute up probability
+% (state, tallies)
+% random walk between states, 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Fix dataset six: connect curve 4 to parent&lt;/li&gt;
+&lt;li&gt;Add confirmation code to check for multiple connected components in ground truth.&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/09/28/work-log"/>
+   <updated>2013-09-28T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/09/28/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Finished re-doing Liu's ground-truth.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/09/26/work-log"/>
+   <updated>2013-09-26T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/09/26/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Problem with revamped index-estimation code:  it fails miserably on poorly-triangulatable hypotheses.&lt;/p&gt;
+
+&lt;p&gt;The heuristic triangulation explodes in size, probably because triangulated points are all over the map (need to confirm this).&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Adding error codes; if any part of the pipeline can't complete for any reason, set error code and return.  On error, the MCMC move will simply reject the proposal.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Issue with &lt;code&gt;build_full_correspondence&lt;/code&gt;: input track is destroyed and replaced.&lt;/p&gt;
+
+&lt;p&gt;Refactored to replace make_correspondence with init_track.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;make_correspondence -&amp;gt; init_track
+make_trivial_correspondence -&amp;gt; init_trivial_corespondence
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Running &lt;code&gt;offline_pair_candidates_2&lt;/code&gt;.  Seems to be running without crashing.&lt;/p&gt;
+
+&lt;p&gt;Takes about 10 minutes;  seems fast considering all the new logic we've added (re-triangulation, 2D DTW). Probably the mex'd DTW is helping.  Some profiling will likely identify some low-hanging optimization fruit here, too.&lt;/p&gt;
+
+&lt;p&gt;Need to inspect triangulated curves when done.&lt;/p&gt;
+
+&lt;p&gt;Need to see if background subtraction classifier will help prune.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Oops, spoke too soon.  Crash at about 75% completion.&lt;/p&gt;
+
+&lt;p&gt;Random bug in candidate-proposal generator.  wasn't handling the &quot;no candidates&quot; case, resulted in index-out-of-bounds error.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>todo</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/09/26/todo"/>
+   <updated>2013-09-26T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/09/26/todo</id>
+   <content type="html">&lt;ul&gt;
+&lt;li&gt;TESTS
+
+&lt;ul&gt;
+&lt;li&gt;Three levels of branching
+
+&lt;ul&gt;
+&lt;li&gt;visual test: reconstruction&lt;/li&gt;
+&lt;li&gt;numeric test: fast ML vs reference&lt;/li&gt;
+&lt;li&gt;numeric test: fast Covariance matrix vs. reference&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Finish ground truthing&lt;/li&gt;
+&lt;li&gt;implement recursive update&lt;/li&gt;
+&lt;li&gt;end-to-end sampler
+
+&lt;ul&gt;
+&lt;li&gt;test birth/death move&lt;/li&gt;
+&lt;li&gt;finish swap move&lt;/li&gt;
+&lt;li&gt;implement attachment moves&lt;/li&gt;
+&lt;li&gt;re-order move (see &lt;a href=&quot;/ksimek/research/2013/09/24/todo/&quot;&gt;here&lt;/a&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;evaluation&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Track stages</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/09/26/reference"/>
+   <updated>2013-09-26T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/09/26/reference</id>
+   <content type="html">&lt;p&gt;A track's &quot;stage&quot; is a description of where it is in the processing pipeline.&lt;/p&gt;
+
+&lt;p&gt;Each stage has one or more track fields associated with it.  No stage may modify fields from the previous stages.&lt;/p&gt;
+
+&lt;h2&gt;Stage 0&lt;/h2&gt;
+
+&lt;p&gt;Track is ready to be processed.   At this stage, the only valid fields are those set by the user, namely:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Track.assoc
+Track.reversed
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To construct a stage-zero track:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;init_track
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Stage 1&lt;/h2&gt;
+
+&lt;p&gt;A stage 1 track has passed the correspondence stage.&lt;/p&gt;
+
+&lt;p&gt;Three functions can prepare a track for stage 1:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;init_trivial_track
+merge_correspondence
+build_full_correspondence
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Associated fields are:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;corr
+means
+precisions
+cov_error
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Stage 2:&lt;/h2&gt;
+
+&lt;p&gt;In stage 2, raw curve likelihood fields have been constructed, and are ready for post-processing.&lt;/p&gt;
+
+&lt;p&gt;The transition from stage 1 to stage 2 is relatively expensive, as every point requires backprojection, a pass of dynamic time warping, and a few iterations newton's method to find the index set.&lt;/p&gt;
+
+&lt;p&gt;Associated fields&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ll_means
+ll_precisions
+ll_distances
+sm_lambda
+curve_sm
+curve_sm_t
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Associated functions&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;corr_to_likelihood
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Stage 3&lt;/h2&gt;
+
+&lt;p&gt;Stage three consists of inexpensive post-processing of the likelihood fields.  Curve reversal is handled here; flattening and sorting is lumped into this stage too.  Reversing and re-evaluating curves is a common use-case, and this can be done efficiently by keeping stage 3 separate from stage 2.&lt;/p&gt;
+
+&lt;p&gt;This is also where the likelihood covariance blocks are computed; since this is somewhat time-costly, it may be moved into stage 2 in the future.&lt;/p&gt;
+
+&lt;p&gt;Associated fields&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ll_views_flat
+ll_means_flat
+ll_precisions_flat
+ll_distances_flat
+ll_S
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Associated functions&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;flatten_sort_and_reverse
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Stage 4: Attachment&lt;/h2&gt;
+
+&lt;p&gt;Stage 4 is where topology is handled.  The predictive distribution of the branch point is computed and stored for efficient computation of the marginal likelihood later.&lt;/p&gt;
+
+&lt;p&gt;Stage 4 needs to be applied recursively to all children.&lt;/p&gt;
+
+&lt;p&gt;Associated fields&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;parent_ci
+start_index
+prior_K
+branch_distance
+mu_b
+Sigma_b
+branch_mu
+branch_K
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Associated functions&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;attach
+detach
+att_set_branch_distance (called from attach)
+att_set_start_index (called from attach/detach)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Stage 5&lt;/h2&gt;
+
+&lt;p&gt;Marginal likelihood has been computed for this track, conditioned on its parent.&lt;/p&gt;
+
+&lt;p&gt;Note: in the current implementation, ml field is not set, and curve_ml simply returns the ml value.  This will change in the near future to comply with the multi-stage model described in this post.&lt;/p&gt;
+
+&lt;p&gt;Associated fields&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ml
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Associated function&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;curve_ml
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Running all stages&lt;/h2&gt;
+
+&lt;p&gt;In many cases, it's not necessary to construct tracks from scratch.   Reversing a curve only requires re-running stages 3 through 5.  Attaching or detaching a curve only requires re-running Stages 4 and 5.&lt;/p&gt;
+
+&lt;p&gt;However, some cases require a full end-to-end running of stages 1 through 5.  The function that does this is:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;build_track
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This function is also a nice reference of how to run each stage.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/09/25/work-log"/>
+   <updated>2013-09-25T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/09/25/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Coding swap and birth/death moves.&lt;/p&gt;
+
+&lt;p&gt;Lots of refactoring.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;new function &lt;code&gt;attachment/detach.m&lt;/code&gt;; moved some code from attach to detach function.&lt;/li&gt;
+&lt;li&gt;Reworked &lt;code&gt;kernel/&lt;/code&gt; directory.
+
+&lt;ul&gt;
+&lt;li&gt;added function: &lt;code&gt;kernel/get_base_covariance.m&lt;/code&gt;.  Used to implement detach.&lt;/li&gt;
+&lt;li&gt;new function: &lt;code&gt;kernel/get_model_temporal_kernel.m&lt;/code&gt;.  Returns ind, ou, or sqexp kernel&lt;/li&gt;
+&lt;li&gt;Eliminated &lt;code&gt;kernel/*_perturb_model.m&lt;/code&gt;.  &lt;code&gt;Get_model_kernel&lt;/code&gt; now constructs these directly using &lt;code&gt;get_model_temporal_kernel&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Reworked &lt;code&gt;kernel/get_model_kernel.m&lt;/code&gt; to use get_model_temporal_kernel.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Birth/Death Move&lt;/h2&gt;
+
+&lt;p&gt;Implemented birth/death move.  New concept: birth and death candidate sets; on birth, candidate is moved from one to the other.&lt;/p&gt;
+
+&lt;h2&gt;Migrating legacy sampling code&lt;/h2&gt;
+
+&lt;p&gt;Reworking old sampler code&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&quot;sampling context&quot; object; (see &lt;code&gt;inference/ctx_*&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;offline construction of curve-pair (see &lt;code&gt;inference/offline_*&lt;/code&gt;);&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Refactoring Tracks (previously Corrs)&lt;/h2&gt;
+
+&lt;p&gt;Continuing to update the codebase to use the new &quot;Tracks&quot; structure instead  of &quot;Corrs&quot;.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;New function &lt;code&gt;correspondence/build_empty_curveset.m&lt;/code&gt;.  This is useful in two ways: (a) constructing an initial object before sampling begins, and (b) constructing a single track, which is now defined as a trackset of length 1.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;To be continued...&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;need to test &lt;code&gt;mcmc_birth_death.m&lt;/code&gt;.
+
+&lt;ul&gt;
+&lt;li&gt;need to construct context &lt;code&gt;ctx_init.m&lt;/code&gt;
+
+&lt;ul&gt;
+&lt;li&gt;need to construct offline pair candidates: &lt;code&gt;offline_pair_candidates_2&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Current task: constructing offline pair candidates.  Command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;data_2 = offline_pair_candidates_2(data_, params, 0, 1, 3);
+&lt;/code&gt;&lt;/pre&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/09/24/work-log"/>
+   <updated>2013-09-24T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/09/24/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Struggling with re-assigning associations.&lt;/p&gt;
+
+&lt;p&gt;Yesterday, I was planning to re-sample attachments after every change to association.  The bookkeeping necessary to ensure reversibility of this is proving to be a nightmare, and it's questionable whether it actually improves results.  The counter-argument is that MH moves should be cheap to propose, but re-sampling attachments has significant cost.  All that cost is wasted if the proposed move is a bad one, which it often will be.  Also, most curves only change slightly when association changes, so changing the branching is probably a bad idea.&lt;/p&gt;
+
+&lt;p&gt;Two special cases need to be handled.  First is when a change to association causes a curve to become shorter, and an attachment point disappears.  In this case, we allow it, but during evaluation, clamp to the endpoint.&lt;/p&gt;
+
+&lt;p&gt;However, when birth/death occurs, re-doing attachment is absolutely necessary.  In this case, we take a simpler apprach than yesterday's strategy:  on death, child curves become root curves; on birth, new curve gathers children from root curves.  Or alternatively, birth/death is illegal if curve has children.&lt;/p&gt;
+
+&lt;p&gt;The preceeding dicusson about avoiding re-attachment is only valid for re-assignment moves.  For split/merge moves, we must update attachment.  But this is easy too: on merge, child sets are merged; on split, sample A vs. B based on distance.&lt;/p&gt;
+
+&lt;h2&gt;Approach #2&lt;/h2&gt;
+
+&lt;p&gt;When re-assigning associations, if it results in a dangling curve, reject&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>todo</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/09/24/todo"/>
+   <updated>2013-09-24T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/09/24/todo</id>
+   <content type="html">&lt;h2&gt;Track order issue&lt;/h2&gt;
+
+&lt;p&gt;There are situations where ties between tracks are broken by giving priority to the track with lower index. For this reason, we should have a move where tracks randomly change order.&lt;/p&gt;
+
+&lt;h1&gt;TODO&lt;/h1&gt;
+
+&lt;p&gt;Quick&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;test three-levels of branching
+
+&lt;ul&gt;
+&lt;li&gt;reconstruction&lt;/li&gt;
+&lt;li&gt;ML vs. reference&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;cleanup Corr fields
+
+&lt;ul&gt;
+&lt;li&gt;group fields by processing stage&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;map-out processing pipeline&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Medium&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;finish ground-truthing (Friday night, Saturday)&lt;/li&gt;
+&lt;li&gt;implement recursive update&lt;/li&gt;
+&lt;li&gt;code for inferring branching parameters.&lt;/li&gt;
+&lt;li&gt;Finish training
+
+&lt;ul&gt;
+&lt;li&gt;infer branching parameters&lt;/li&gt;
+&lt;li&gt;re-write training ML&lt;/li&gt;
+&lt;li&gt;re-train prior parameters with full ML
+
+&lt;ul&gt;
+&lt;li&gt;jointly train FG and BG using same&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;MCMCDA sampler
+
+&lt;ul&gt;
+&lt;li&gt;association moves&lt;/li&gt;
+&lt;li&gt;split/merge moves&lt;/li&gt;
+&lt;li&gt;re-order moves&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;evaluation code&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Work Log</title>

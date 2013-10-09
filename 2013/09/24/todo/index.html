@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log &larr; </title>
+   <title>todo &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -83,57 +83,70 @@
 
 
   <h1 class="title">
-        [Work Log] Work Log
+        [TODO] todo
     </h1>
 
-  <div class="date emphnext">September 23, 2013</div>
+  <div class="date emphnext">September 24, 2013</div>
     
 
 
   
-    
+    <h2>Track order issue</h2>
 
-<div class="meta-info">
-<table>
-    <tr>
-        <th>Project</th>
-        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
-    </tr>
-    <tr>
-        <th>Subproject</th>
-        <td>Data Association v3</td>
-    </tr>
-    <tr>
-        <th>Working path</th>
-        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
-    </tr>
+<p>There are situations where ties between tracks are broken by giving priority to the track with lower index. For this reason, we should have a move where tracks randomly change order.</p>
 
-    <tr>
-        <th>SVN Revision</th>
-        <td>15229</td>
-    </tr>
+<h1>TODO</h1>
 
+<p>Quick</p>
 
-</table>
+<ul>
+<li>test three-levels of branching
 
-    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
-</div>
+<ul>
+<li>reconstruction</li>
+<li>ML vs. reference</li>
+</ul>
+</li>
+<li>cleanup Corr fields
+
+<ul>
+<li>group fields by processing stage</li>
+</ul>
+</li>
+<li>map-out processing pipeline</li>
+</ul>
 
 
-<h2>Updating data structures to Version 2</h2>
+<p>Medium</p>
 
-<pre><code>* Refactored several variable names, some functions may need updating.
-* Corrs was changed from cell-of-structs to a cell-array.  Some functions may still need updating.
-* Removed old, unused variables
-</code></pre>
+<ul>
+<li>finish ground-truthing (Friday night, Saturday)</li>
+<li>implement recursive update</li>
+<li>code for inferring branching parameters.</li>
+<li>Finish training
 
-<h2>Thinking on sampling</h2>
+<ul>
+<li>infer branching parameters</li>
+<li>re-write training ML</li>
+<li>re-train prior parameters with full ML
 
-<p>Did a writeup on MCMCDA with attachments, see associated "strategy" entry</p>
+<ul>
+<li>jointly train FG and BG using same</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>MCMCDA sampler
 
-<h2>Thinking on priors</h2>
+<ul>
+<li>association moves</li>
+<li>split/merge moves</li>
+<li>re-order moves</li>
+</ul>
+</li>
+<li>evaluation code</li>
+</ul>
 
-<p>Did a writeup on association priors, see associated "reference" entry</p>
 
       <address class="signature">
         Posted by
@@ -145,10 +158,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/09/24/todo" class="next" title="todo">todo &rarr;</a>
+    <a href="/ksimek/research/2013/09/24/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/09/23/splitmerge-moves-and-association-priors" class="prev" title="Split/Merge moves and Association Priors">&larr; Split/Merge moves and Association Priors</a>
+    <a href="/ksimek/research/2013/09/23/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>
@@ -165,7 +178,7 @@
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="todo" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -213,7 +226,7 @@
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log");
+                    + encodeURIComponent("todo");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

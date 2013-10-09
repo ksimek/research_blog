@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log &larr; </title>
+   <title>Track stages &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -83,57 +83,143 @@
 
 
   <h1 class="title">
-        [Work Log] Work Log
+        [Reference] Track stages
     </h1>
 
-  <div class="date emphnext">September 23, 2013</div>
+  <div class="date emphnext">September 26, 2013</div>
     
 
 
   
-    
+    <p>A track's "stage" is a description of where it is in the processing pipeline.</p>
 
-<div class="meta-info">
-<table>
-    <tr>
-        <th>Project</th>
-        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
-    </tr>
-    <tr>
-        <th>Subproject</th>
-        <td>Data Association v3</td>
-    </tr>
-    <tr>
-        <th>Working path</th>
-        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
-    </tr>
+<p>Each stage has one or more track fields associated with it.  No stage may modify fields from the previous stages.</p>
 
-    <tr>
-        <th>SVN Revision</th>
-        <td>15229</td>
-    </tr>
+<h2>Stage 0</h2>
 
+<p>Track is ready to be processed.   At this stage, the only valid fields are those set by the user, namely:</p>
 
-</table>
-
-    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
-</div>
-
-
-<h2>Updating data structures to Version 2</h2>
-
-<pre><code>* Refactored several variable names, some functions may need updating.
-* Corrs was changed from cell-of-structs to a cell-array.  Some functions may still need updating.
-* Removed old, unused variables
+<pre><code>Track.assoc
+Track.reversed
 </code></pre>
 
-<h2>Thinking on sampling</h2>
+<p>To construct a stage-zero track:</p>
 
-<p>Did a writeup on MCMCDA with attachments, see associated "strategy" entry</p>
+<pre><code>init_track
+</code></pre>
 
-<h2>Thinking on priors</h2>
+<h2>Stage 1</h2>
 
-<p>Did a writeup on association priors, see associated "reference" entry</p>
+<p>A stage 1 track has passed the correspondence stage.</p>
+
+<p>Three functions can prepare a track for stage 1:</p>
+
+<pre><code>init_trivial_track
+merge_correspondence
+build_full_correspondence
+</code></pre>
+
+<p>Associated fields are:</p>
+
+<pre><code>corr
+means
+precisions
+cov_error
+</code></pre>
+
+<h2>Stage 2:</h2>
+
+<p>In stage 2, raw curve likelihood fields have been constructed, and are ready for post-processing.</p>
+
+<p>The transition from stage 1 to stage 2 is relatively expensive, as every point requires backprojection, a pass of dynamic time warping, and a few iterations newton's method to find the index set.</p>
+
+<p>Associated fields</p>
+
+<pre><code>ll_means
+ll_precisions
+ll_distances
+sm_lambda
+curve_sm
+curve_sm_t
+</code></pre>
+
+<p>Associated functions</p>
+
+<pre><code>corr_to_likelihood
+</code></pre>
+
+<h2>Stage 3</h2>
+
+<p>Stage three consists of inexpensive post-processing of the likelihood fields.  Curve reversal is handled here; flattening and sorting is lumped into this stage too.  Reversing and re-evaluating curves is a common use-case, and this can be done efficiently by keeping stage 3 separate from stage 2.</p>
+
+<p>This is also where the likelihood covariance blocks are computed; since this is somewhat time-costly, it may be moved into stage 2 in the future.</p>
+
+<p>Associated fields</p>
+
+<pre><code>ll_views_flat
+ll_means_flat
+ll_precisions_flat
+ll_distances_flat
+ll_S
+</code></pre>
+
+<p>Associated functions</p>
+
+<pre><code>flatten_sort_and_reverse
+</code></pre>
+
+<h2>Stage 4: Attachment</h2>
+
+<p>Stage 4 is where topology is handled.  The predictive distribution of the branch point is computed and stored for efficient computation of the marginal likelihood later.</p>
+
+<p>Stage 4 needs to be applied recursively to all children.</p>
+
+<p>Associated fields</p>
+
+<pre><code>parent_ci
+start_index
+prior_K
+branch_distance
+mu_b
+Sigma_b
+branch_mu
+branch_K
+</code></pre>
+
+<p>Associated functions</p>
+
+<pre><code>attach
+detach
+att_set_branch_distance (called from attach)
+att_set_start_index (called from attach/detach)
+</code></pre>
+
+<h2>Stage 5</h2>
+
+<p>Marginal likelihood has been computed for this track, conditioned on its parent.</p>
+
+<p>Note: in the current implementation, ml field is not set, and curve_ml simply returns the ml value.  This will change in the near future to comply with the multi-stage model described in this post.</p>
+
+<p>Associated fields</p>
+
+<pre><code>ml
+</code></pre>
+
+<p>Associated function</p>
+
+<pre><code>curve_ml
+</code></pre>
+
+<h2>Running all stages</h2>
+
+<p>In many cases, it's not necessary to construct tracks from scratch.   Reversing a curve only requires re-running stages 3 through 5.  Attaching or detaching a curve only requires re-running Stages 4 and 5.</p>
+
+<p>However, some cases require a full end-to-end running of stages 1 through 5.  The function that does this is:</p>
+
+<pre><code>build_track
+</code></pre>
+
+<p>This function is also a nice reference of how to run each stage.</p>
 
       <address class="signature">
         Posted by
@@ -145,10 +231,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/09/24/todo" class="next" title="todo">todo &rarr;</a>
+    <a href="/ksimek/research/2013/09/26/todo" class="next" title="todo">todo &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/09/23/splitmerge-moves-and-association-priors" class="prev" title="Split/Merge moves and Association Priors">&larr; Split/Merge moves and Association Priors</a>
+    <a href="/ksimek/research/2013/09/25/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>
@@ -165,7 +251,7 @@
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Track stages" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -213,7 +299,7 @@
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log");
+                    + encodeURIComponent("Track stages");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

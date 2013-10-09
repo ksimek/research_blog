@@ -86,7 +86,7 @@
         [Work Log] Work Log
     </h1>
 
-  <div class="date emphnext">September 23, 2013</div>
+  <div class="date emphnext">September 26, 2013</div>
     
 
 
@@ -120,20 +120,39 @@
 </div>
 
 
-<h2>Updating data structures to Version 2</h2>
+<p>Problem with revamped index-estimation code:  it fails miserably on poorly-triangulatable hypotheses.</p>
 
-<pre><code>* Refactored several variable names, some functions may need updating.
-* Corrs was changed from cell-of-structs to a cell-array.  Some functions may still need updating.
-* Removed old, unused variables
+<p>The heuristic triangulation explodes in size, probably because triangulated points are all over the map (need to confirm this).</p>
+
+<hr />
+
+<p>Adding error codes; if any part of the pipeline can't complete for any reason, set error code and return.  On error, the MCMC move will simply reject the proposal.</p>
+
+<hr />
+
+<p>Issue with <code>build_full_correspondence</code>: input track is destroyed and replaced.</p>
+
+<p>Refactored to replace make_correspondence with init_track.</p>
+
+<pre><code>make_correspondence -&gt; init_track
+make_trivial_correspondence -&gt; init_trivial_corespondence
 </code></pre>
 
-<h2>Thinking on sampling</h2>
+<hr />
 
-<p>Did a writeup on MCMCDA with attachments, see associated "strategy" entry</p>
+<p>Running <code>offline_pair_candidates_2</code>.  Seems to be running without crashing.</p>
 
-<h2>Thinking on priors</h2>
+<p>Takes about 10 minutes;  seems fast considering all the new logic we've added (re-triangulation, 2D DTW). Probably the mex'd DTW is helping.  Some profiling will likely identify some low-hanging optimization fruit here, too.</p>
 
-<p>Did a writeup on association priors, see associated "reference" entry</p>
+<p>Need to inspect triangulated curves when done.</p>
+
+<p>Need to see if background subtraction classifier will help prune.</p>
+
+<hr />
+
+<p>Oops, spoke too soon.  Crash at about 75% completion.</p>
+
+<p>Random bug in candidate-proposal generator.  wasn't handling the "no candidates" case, resulted in index-out-of-bounds error.</p>
 
       <address class="signature">
         Posted by
@@ -145,10 +164,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/09/24/todo" class="next" title="todo">todo &rarr;</a>
+    <a href="/ksimek/research/2013/09/28/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/09/23/splitmerge-moves-and-association-priors" class="prev" title="Split/Merge moves and Association Priors">&larr; Split/Merge moves and Association Priors</a>
+    <a href="/ksimek/research/2013/09/26/todo" class="prev" title="todo">&larr; todo</a>
   
   </div>
   <div class="clearer"> </div>

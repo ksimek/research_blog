@@ -86,7 +86,7 @@
         [Work Log] Work Log
     </h1>
 
-  <div class="date emphnext">September 23, 2013</div>
+  <div class="date emphnext">September 25, 2013</div>
     
 
 
@@ -120,20 +120,68 @@
 </div>
 
 
-<h2>Updating data structures to Version 2</h2>
+<p>Coding swap and birth/death moves.</p>
 
-<pre><code>* Refactored several variable names, some functions may need updating.
-* Corrs was changed from cell-of-structs to a cell-array.  Some functions may still need updating.
-* Removed old, unused variables
+<p>Lots of refactoring.</p>
+
+<ul>
+<li>new function <code>attachment/detach.m</code>; moved some code from attach to detach function.</li>
+<li>Reworked <code>kernel/</code> directory.
+
+<ul>
+<li>added function: <code>kernel/get_base_covariance.m</code>.  Used to implement detach.</li>
+<li>new function: <code>kernel/get_model_temporal_kernel.m</code>.  Returns ind, ou, or sqexp kernel</li>
+<li>Eliminated <code>kernel/*_perturb_model.m</code>.  <code>Get_model_kernel</code> now constructs these directly using <code>get_model_temporal_kernel</code>.</li>
+<li>Reworked <code>kernel/get_model_kernel.m</code> to use get_model_temporal_kernel.</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Birth/Death Move</h2>
+
+<p>Implemented birth/death move.  New concept: birth and death candidate sets; on birth, candidate is moved from one to the other.</p>
+
+<h2>Migrating legacy sampling code</h2>
+
+<p>Reworking old sampler code</p>
+
+<ul>
+<li>"sampling context" object; (see <code>inference/ctx_*</code>)</li>
+<li>offline construction of curve-pair (see <code>inference/offline_*</code>);</li>
+</ul>
+
+
+<h2>Refactoring Tracks (previously Corrs)</h2>
+
+<p>Continuing to update the codebase to use the new "Tracks" structure instead  of "Corrs".</p>
+
+<ul>
+<li>New function <code>correspondence/build_empty_curveset.m</code>.  This is useful in two ways: (a) constructing an initial object before sampling begins, and (b) constructing a single track, which is now defined as a trackset of length 1.</li>
+</ul>
+
+
+<h2>To be continued...</h2>
+
+<ul>
+<li>need to test <code>mcmc_birth_death.m</code>.
+
+<ul>
+<li>need to construct context <code>ctx_init.m</code>
+
+<ul>
+<li>need to construct offline pair candidates: <code>offline_pair_candidates_2</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Current task: constructing offline pair candidates.  Command:</p>
+
+<pre><code>data_2 = offline_pair_candidates_2(data_, params, 0, 1, 3);
 </code></pre>
-
-<h2>Thinking on sampling</h2>
-
-<p>Did a writeup on MCMCDA with attachments, see associated "strategy" entry</p>
-
-<h2>Thinking on priors</h2>
-
-<p>Did a writeup on association priors, see associated "reference" entry</p>
 
       <address class="signature">
         Posted by
@@ -145,10 +193,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/09/24/todo" class="next" title="todo">todo &rarr;</a>
+    <a href="/ksimek/research/2013/09/26/reference" class="next" title="Track stages">Track stages &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/09/23/splitmerge-moves-and-association-priors" class="prev" title="Split/Merge moves and Association Priors">&larr; Split/Merge moves and Association Priors</a>
+    <a href="/ksimek/research/2013/09/24/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>

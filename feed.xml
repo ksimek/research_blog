@@ -18,11 +18,11 @@
     &lt;/tr&gt;
     &lt;tr&gt;
         &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
+        &lt;td&gt;Likelihood Server&lt;/td&gt;
     &lt;/tr&gt;
     &lt;tr&gt;
         &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;likelihood_server&lt;/td&gt;
     &lt;/tr&gt;
 
     &lt;tr&gt;
@@ -37,84 +37,78 @@
 &lt;/div&gt;
 
 
-&lt;h2&gt;Updating data structures to Version 2&lt;/h2&gt;
+&lt;p&gt;Working on compiling render server.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;* Refactored several variable names, some functions may need updating.
-* Corrs was changed from cell-of-structs to a cell-array.  Some functions may still need updating.
-* Removed old, unused variables
-&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Do I want to compute likelihood in C++ too?&lt;/p&gt;
 
-&lt;h2&gt;Thinking on sampling&lt;/h2&gt;
+&lt;p&gt;Code exists for it.  Maybe best to just re-use code from curve_sampling.cpp and abandon render server.&lt;/p&gt;
 
-&lt;p&gt;Did a writeup on MCMCDA with attachments, see associated &quot;strategy&quot; entry&lt;/p&gt;
+&lt;p&gt;Lets do that.&lt;/p&gt;
 
-&lt;h2&gt;Thinking on priors&lt;/h2&gt;
-
-&lt;p&gt;Did a writeup on association priors, see associated &quot;reference&quot; entry&lt;/p&gt;
-</description>
-				<pubDate>Mon, 23 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/23/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/23/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Split/Merge moves and Association Priors</title>
-				<description>&lt;p&gt;Thinking again about split/merge moves, and the problem of the exploding number of split moves as the nubmer of observations increases.&lt;/p&gt;
-
-&lt;p&gt;Part of the problem is the fact that we're treating all associations as equal under the prior.  This has the side-effect that the prior strongly prefers more curves in a model as opposed to fewer.  Consider a scenario with N observations, and M curves.  There are M&lt;sup&gt;N&lt;/sup&gt; number of ways to assign these observations to M curves.  Compare this with a model with one curve -- there's only one possible assigment.  Since all assignments are equal under the prior, the model with M curves is more favored by the prior by a factor of M&lt;sup&gt;N.&lt;/sup&gt;&lt;/p&gt;
-
-&lt;p&gt;For this reason, I propose that a more sensible prior is one that is uniform over the number of curves in the scene.  Then, given the number of curves, the prior over associations is uniform.  In other words, given an association, it's prior should be 1/M&lt;sup&gt;N,&lt;/sup&gt; where M is the number of curves represented in the association.&lt;/p&gt;
-
-&lt;p&gt;When running a split move, the number of ways to split is 2&lt;sup&gt;K,&lt;/sup&gt; where K is the number of observations associated with the original curve.  If chosen uniformly, the Metropolis-Hastings proposal probability is 2&lt;sup&gt;K.&lt;/sup&gt;  This should cancel nicely with the prior term in the MH acceptance ratio.&lt;/p&gt;
-</description>
-				<pubDate>Mon, 23 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/23/splitmerge-moves-and-association-priors</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/23/splitmerge-moves-and-association-priors</guid>
-			</item>
-		
-			<item>
-				<title>MCMCDA Sampling with Attachment</title>
-				<description>&lt;p&gt;The old MCMCDA gibbs sampler runs into trouble now that we allow attachment.&lt;/p&gt;
-
-&lt;p&gt;Previously, for any observation, we would compute the ML of grouping it with each candidate, and select a candidate from those weights.&lt;/p&gt;
-
-&lt;p&gt;The problem now is that regrouping an observation sometimes causes it's old group to vanish, and the question of what to do with the group's children is unanswered.  The same problem occurs if a regrouping makes a curve shorter, and children were attached to the now-missing structure.&lt;/p&gt;
-
-&lt;h2&gt;Metropolis Hastings&lt;/h2&gt;
-
-&lt;p&gt;Things become much easier if we move away from Gibbs sampling.  Gibbs was nice for a proof of concept, because we never failed to pick embarrassingly good candidates, and we almost always moved toward a better result with each step.  However, it was very expensive, and now we have a question of how to compute the ML of a candidate whose attachment property is unknown.&lt;/p&gt;
-
-&lt;p&gt;So, we'll move to Metropolis Hastings.  We resolve the attachment issue by using a simple rule:  every time a track's association changes, we re-sample its the attachment and the attachment of its former children.&lt;/p&gt;
-
-&lt;h2&gt;Sampling Associations.&lt;/h2&gt;
-
-&lt;p&gt;When sampling associations, we'll use two types of moves:&lt;/p&gt;
+&lt;h2&gt;Reviewing old curve sampling code&lt;/h2&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;swap&lt;/strong&gt;: re-assign a single observation&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;split/merge&lt;/strong&gt; re-assign a group of observations&lt;/li&gt;
+&lt;li&gt;Pixel store&lt;/li&gt;
+&lt;li&gt;renderer&lt;/li&gt;
+&lt;li&gt;multi-view likelihood&lt;/li&gt;
+&lt;li&gt;pixel likelihood&lt;/li&gt;
 &lt;/ul&gt;
 
 
-&lt;p&gt;The swap move will be similar to the existing Gibbs move, except we'll choose from candidates uniformly at random.  Split/merge proposals will be naive; we'll incorporate an association prior to counter the exploding number of split moves.&lt;/p&gt;
+&lt;p&gt;Pixel likelihood receives a pointer to linear array of reals that represent the pixel matrix.&lt;/p&gt;
 
-&lt;h2&gt;Re-sampling attachment&lt;/h2&gt;
+&lt;p&gt;Multi-view likelihood receives a renderable and handles all the rendering and pixel-retreival, and dispatches to pixel likelihood objects for computing.  is constructed with one or more cameras.  On evaluation it receives a renderable object, projects it under each camera, retreives the pixels, and passes to a pixel likelihood.&lt;/p&gt;
 
-&lt;p&gt;After sampling a new association, we'll re-sample attachment.  For this, we'll introduce a new function &lt;code&gt;sample_attachment&lt;/code&gt;, which will be responsible for constructing a list of reasonable candidates and attachment parameters (Start point and branch position), and selecting one at random (probably based on geometry, i.e. not uniform).  It returns the sampled attachment, along with the proposal probability.  It can optionally receive a &lt;code&gt;hint&lt;/code&gt; parameter, which is a list of attachment candidates, along with a guess as to the attachment parameters.  The candidate of &quot;no attachment&quot; should always be an option.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Refactor&lt;/strong&gt;: Separate rendering into a &quot;renderer&quot; object, which can be split into its own process if needed.  It will also make leapfrog pixel-reading simpler.&lt;/p&gt;
 
-&lt;p&gt;We'll also need a function that returns the probabiliy of selecting a specific attachment, according to &lt;code&gt;sample_attachment&lt;/code&gt;, for computing the reverse move.&lt;/p&gt;
+&lt;p&gt;End product will&lt;/p&gt;
 
-&lt;h2&gt;Topology moves&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;receive message from matlab containing curves&lt;/li&gt;
+&lt;li&gt;decode curves into vectors&lt;/li&gt;
+&lt;li&gt;convert into gl_curves (renderables)&lt;/li&gt;
+&lt;li&gt;pass to likelihood object&lt;/li&gt;
+&lt;li&gt;convert log-posterior to message&lt;/li&gt;
+&lt;li&gt;transmit back to matlab&lt;/li&gt;
+&lt;/ol&gt;
 
-&lt;p&gt;In addition to association moves, we'll also have topology moves.  This will consist of simply calling &lt;code&gt;sample_attachment&lt;/code&gt; without a sampling an association beforehand.&lt;/p&gt;
+
+&lt;p&gt;all functionality is already implemented, just need to weed out code rot and put it together.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Getting weird link errors.  For some reason, the build system is using gcc instead of g++ to link my main program.  Will try re-running kjb_add_makefiles
+&lt;strong&gt;Refactor&lt;/strong&gt;: specify all parameters at command-line (width, height, cameras, etc)&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Meanwhile, I'm planning the program&lt;/p&gt;
+
+&lt;p&gt;inputs:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;* dimensions
+* cameras
+* likelihood parameters
+* 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Steps&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;* initialize likelihood
+* initialize TCP server
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Abandoning GL_context from sampler_cpp&lt;/p&gt;
 </description>
-				<pubDate>Mon, 23 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/23/mcmcda-sampling-with-attachment</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/23/mcmcda-sampling-with-attachment</guid>
+				<pubDate>Tue, 08 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/08/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/08/work-log</guid>
 			</item>
 		
 			<item>
-				<title>Branching ML Done</title>
+				<title>Work Log</title>
 				<description>
 
 &lt;div class=&quot;meta-info&quot;&gt;
@@ -144,68 +138,29 @@
 &lt;/div&gt;
 
 
-&lt;p&gt;Finally finished implementing and confirming the multi-view branching ML.  Next steps:&lt;/p&gt;
+&lt;p&gt;Thought more on split/merge.  Could make merge a special case of split, and the move becomes a split/split process.  At every step, pick a track, pick a subset of observations from that track, then reassign them all to an existing curve or a new curve.  It's symmetric, which is nice, but the probability of a merge being selected becomes vanishingly small very quickly.&lt;/p&gt;
 
-&lt;p&gt;Quick&lt;/p&gt;
+&lt;hr /&gt;
 
-&lt;ul&gt;
-&lt;li&gt;re-run tests with non-zero start index&lt;/li&gt;
-&lt;li&gt;test three-levels of branching
+&lt;p&gt;Looking into issues with offline pair-candidate generation.  So many bad candidates are coming up, and their ML values look better than the good candidates.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;reconstruction&lt;/li&gt;
-&lt;li&gt;ML vs. reference&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;cleanup Corr fields
+&lt;p&gt;A big issue is that we aren't penalizing missing data (gaps/tails), and we don't enforce multiple-view consistency (only two views need to match).&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;eliminate clean_ fields&lt;/li&gt;
-&lt;li&gt;group fields by processing stage&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;map-out processing pipeline&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;Option 1: use a stronger likelihood to rule out background curves.  Use per-pixel foreground/background classifier?  Use color consistency metric?  Sample from posterior, project, check pixels, repeat -- gets a monte-carlo of marginal likelihood.&lt;/p&gt;
 
+&lt;p&gt;Option 2: use foreground/background classifier to classify fragments; misusing a background fragment in a foreground pair results in some penalty.&lt;/p&gt;
 
-&lt;p&gt;Medium&lt;/p&gt;
+&lt;p&gt;Option 1 is nice theoretically, but has lots of moving parts (new features, training, monte-carlo issue, need to know how thick to make branches.)  Unlikely to get working in two weeks.  Also isn't clear what the role of the detector curves are.  Are they data?  data-driven proposals?&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;finish ground-truthing (Friday night, Saturday)&lt;/li&gt;
-&lt;li&gt;implement recursive update&lt;/li&gt;
-&lt;li&gt;code for inferring branching parameters.&lt;/li&gt;
-&lt;li&gt;Finish training
-
-&lt;ul&gt;
-&lt;li&gt;infer branching parameters&lt;/li&gt;
-&lt;li&gt;re-write training ML&lt;/li&gt;
-&lt;li&gt;re-train prior parameters with full ML
-
-&lt;ul&gt;
-&lt;li&gt;jointly train FG and BG using same&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;gibbs sampler&lt;/li&gt;
-&lt;li&gt;evaluation code&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Reach&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;split-merge moves&lt;/li&gt;
-&lt;/ul&gt;
-
+&lt;p&gt;Options 2 is a bit weird, but doesn't introduce dimensionality issues.  But also doesn't specifically address the issue of bizzare candidates being introduced.  For example, a bad pair could still be proposed as long as they're both foreground curves.&lt;/p&gt;
 </description>
-				<pubDate>Fri, 20 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/20/branching-ml-done</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/20/branching-ml-done</guid>
+				<pubDate>Thu, 03 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/03/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/03/work-log</guid>
 			</item>
 		
 			<item>
-				<title>refactoring; dependencies</title>
+				<title>Work Log</title>
 				<description>
 
 &lt;div class=&quot;meta-info&quot;&gt;
@@ -235,211 +190,113 @@
 &lt;/div&gt;
 
 
-&lt;h1&gt;TODO&lt;/h1&gt;
+&lt;p&gt;Debugging split/merge toy sampler.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;investigate difference between ML implementations&lt;/li&gt;
-&lt;li&gt;handle nonzero start-index in branching. re-run confirmation&lt;/li&gt;
-&lt;li&gt;ground truth - trace datasets 7 through 10&lt;/li&gt;
-&lt;li&gt;retrain using attachment&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;Split from 5 to 6 groups:&lt;/p&gt;
 
+&lt;pre&gt;&lt;code&gt; split_alpha = -p_merge + p_split - q_split + q_merge - log(psplitmv) + log(0.5);
+ K&amp;gt;&amp;gt; p_merge
 
-&lt;h1&gt;Invstigating consistent ML implementations&lt;/h1&gt;
+ p_merge =
 
-&lt;p&gt;Discovered issue:  was calling &lt;code&gt;curve_tree_ml&lt;/code&gt; instead of &lt;code&gt;curve_tree_ml_2&lt;/code&gt;.  Working now&lt;/p&gt;
-
-&lt;h2&gt;Aside: common mistakeis&lt;/h2&gt;
-
-&lt;p&gt;Losing a too much time to stupid organizational mistakes --&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;indexing,&lt;/li&gt;
-&lt;li&gt;passing wrong copies of variables to code,&lt;/li&gt;
-&lt;li&gt;leaving random debugging code in miscellaneous functions,&lt;/li&gt;
-&lt;li&gt;running wrong debugging branch in code,&lt;/li&gt;
-&lt;li&gt;running wrong version of function.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Code has gotten complex enough that managing all of these little sharp edges is too expensive.  Need to start being more disciplined.  Solutions&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;indexing&lt;/strong&gt;: use functions for common indexing tasks
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;one_d_to_three_d&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;to_block_index&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;miscellaneous variables&lt;/strong&gt;: clean-up workspace every evening&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Debugging cruft&lt;/strong&gt;:
-
-&lt;ul&gt;
-&lt;li&gt;if code is an in-line test, refactor questionable code into functions; write a real test.&lt;/li&gt;
-&lt;li&gt;if code is a &lt;code&gt;plot&lt;/code&gt;, &lt;code&gt;imagesc&lt;/code&gt;, or &lt;code&gt;printf&lt;/code&gt;, always wrap in a DEBUGGING block, even if its a two-minute test.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Wrong debugging branch&lt;/strong&gt;:
-
-&lt;ul&gt;
-&lt;li&gt;if using &lt;code&gt;method = 1&lt;/code&gt; give names like &lt;code&gt;method = MARKOV&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;display warnings for non-standard methods.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;wrong version of function&lt;/strong&gt;: depends on future of old code
-
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;deprecation&lt;/strong&gt;: add block to old reference code: &lt;code&gt;fprintf('running legacy code (press enter)'); pause;&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;reference implementation&lt;/strong&gt;: rename to *_ref.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;h1&gt;Discussion: start_index and branch_index&lt;/h1&gt;
-
-&lt;p&gt;In previous days, I was torn over whether I should add start_index to branch_index before evaluating.&lt;/p&gt;
-
-&lt;p&gt;The answer is yes, because it greatly simplifies the optimization of start_index, because you don't have to re-adjust the children's branch_indices.&lt;/p&gt;
-
-&lt;p&gt;how is markov blanket determined (pre or post offset indexing?)&lt;/p&gt;
-
-&lt;p&gt;Do we need to recurse after attach?&lt;/p&gt;
-
-&lt;p&gt;RAW VALUES should be stored, not derived values.  branch_index is a raw value.&lt;/p&gt;
-
-&lt;p&gt;*Example: * C is attached to B.  We want to attach B to A, with start index of 10.  Assume branch_index is stored relative to the zero-index (as opposed to the first observed point).  After attaching, we need to update C's branch point; if we later detach B from A, B's branch point need to be updated again.  There's potential for drift to accumulate after all of these upates.&lt;/p&gt;
-
-&lt;p&gt;To avoid confusion, replace branch_index to branch_distance; will convert to an index value before computing. Also &lt;code&gt;prior_indices&lt;/code&gt; needs updating?  Or just eliminate&lt;/p&gt;
-
-&lt;h2&gt;recursive Updating after attachment&lt;/h2&gt;
-
-&lt;p&gt;Consider attachment:&lt;/p&gt;
-
-&lt;p&gt;Before&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;(D -&amp;gt; C -&amp;gt; B)    (A)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;After&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;(D -&amp;gt; C -&amp;gt; B -&amp;gt; A) 
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Visually,&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;             A   B C D         A B C D 
-             |   | | |         | | | |
-             |   | |/          | | |/
-             |   | +           | | +  
-             |   |/            | |/ 
-             |   +       ==&amp;gt;   | +
-             |                 |/         
-             |                 +      
+   -1.4437e+03
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;ul&gt;
-&lt;li&gt;After attaching B to A,
+&lt;li&gt;&lt;p&gt;-1.4437e+03 + -1.6060e+03 - -125.6828 + -2.7081&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;C's branch index changes, so...
+&lt;pre&gt;&lt;code&gt; K&amp;gt;&amp;gt; p_split
 
-&lt;ul&gt;
-&lt;li&gt;C's branch distribution changes, so...
+ p_split =
 
-&lt;ul&gt;
-&lt;li&gt;D's branch distribution changes so...
+   -1.6060e+03
 
-&lt;ul&gt;
-&lt;li&gt;D's ML changes&lt;/li&gt;
+   K&amp;gt;&amp;gt; q_split
+
+   q_split =
+
+    -125.6828
+
+    K&amp;gt;&amp;gt; q_merge
+
+    q_merge =
+
+       -2.7081
+
+       K&amp;gt;&amp;gt; log(psplitmv)
+
+  ans =
+
+     -0.6931
+
+     K&amp;gt;&amp;gt; log(0.5)
+
+  ans =
+
+     -0.6931
+
+     K&amp;gt;&amp;gt; 
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;C's ML changes.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;C's prior_K doesnt change.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
 
 
-&lt;p&gt;As far as stored fields go, it looks like branch distributions change recursively after attachment, etc.&lt;/p&gt;
+&lt;p&gt;Merge from 6 to 5 groups:&lt;/p&gt;
 
-&lt;h1&gt;Dependencies&lt;/h1&gt;
+&lt;pre&gt;&lt;code&gt;merge_alpha = p_merge - p_split + q_split - q_merge - pmergemv + psplitmv ;
+K&amp;gt;&amp;gt; p_merge
 
-&lt;p&gt;Did some thinking about dependencies; what needs to be updated when parents are changed.  Scan of the notes are available below.  Also did &lt;a href=&quot;/ksimek/research/reference/2013/09/19/dependencies/&quot;&gt;a reference writeup&lt;/a&gt;.&lt;/p&gt;
+p_merge =
 
-&lt;p&gt;&lt;a href=&quot;/ksimek/research/img/2013-09-19-dependency_notes.jpg&quot;&gt;Dependency hand-written notes&lt;/a&gt;&lt;/p&gt;
+  -1.4437e+03
 
-&lt;h1&gt;Refactoring&lt;/h1&gt;
+K&amp;gt;&amp;gt; p_split
 
-&lt;p&gt;Changed &lt;code&gt;Corr.branch_index&lt;/code&gt; to &lt;code&gt;Corr.branch_distance&lt;/code&gt;.&lt;/p&gt;
+p_split =
 
-&lt;p&gt;Replaced all instances of &lt;code&gt;Corrs(i).branch_index&lt;/code&gt; with &lt;code&gt;get_branch_index(Corrs, i)&lt;/code&gt;.&lt;/p&gt;
+  -1.6060e+03
 
-&lt;p&gt;Replaced Corr.ll_indices* with Corr.ll_distances.&lt;/p&gt;
+K&amp;gt;&amp;gt; q_split
 
-&lt;p&gt;removed Corr.prior_indices&lt;/p&gt;
+q_split =
 
-&lt;p&gt;TODO: replace kernel(XX,YY) with eval_kernel(asdf)&lt;/p&gt;
+ -208.8604
 
-&lt;pre&gt;&lt;code&gt;see att_set_start_index_2
+K&amp;gt;&amp;gt; q_merge
+
+q_merge =
+
+   -2.7081
+
+K&amp;gt;&amp;gt; pmergemv
+
+pmergemv =
+
+   -0.6931
+
+K&amp;gt;&amp;gt; psplitmv
+
+psplitmv =
+
+   -0.6931
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;TODO: replace Corrs cell array with Corrs structure array&lt;/p&gt;
+&lt;p&gt;Note that q_split doesn't match between the two moves.&lt;/p&gt;
 
-&lt;h1&gt;TODO&lt;/h1&gt;
+&lt;hr /&gt;
 
-&lt;p&gt;Minor&lt;/p&gt;
+&lt;p&gt;After reflection, this shouldn't match, because we're comparing two different cases.  Specifically, the post-split results in two small groups, where as the pre-merge model has 6 groups of equal size.  Smaller groups have smaller number of ways to split, so the proposal probability is higher.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;re-run tests with non-zero start index&lt;/li&gt;
-&lt;li&gt;test three-levels of branching
+&lt;hr /&gt;
 
-&lt;ul&gt;
-&lt;li&gt;reconstruction&lt;/li&gt;
-&lt;li&gt;ML vs. reference&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;cleanup Corr fields
-
-&lt;ul&gt;
-&lt;li&gt;eliminate clean_ fields&lt;/li&gt;
-&lt;li&gt;group fields by processing stage&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;map-out processing pipeline&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Medium&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;finish ground-truthing (Friday night, Saturday)&lt;/li&gt;
-&lt;li&gt;implement recursive update&lt;/li&gt;
-&lt;li&gt;code for inferring branching parameters.&lt;/li&gt;
-&lt;li&gt;Finish training
-
-&lt;ul&gt;
-&lt;li&gt;infer branching parameters&lt;/li&gt;
-&lt;li&gt;re-write training ML&lt;/li&gt;
-&lt;li&gt;re-train prior parameters with full ML&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;MCMCDA sampler&lt;/li&gt;
-&lt;/ul&gt;
-
+&lt;p&gt;Killed myself today thinking about this problem and getting exactly nowhere.&lt;/p&gt;
 </description>
-				<pubDate>Thu, 19 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/19/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/19/work-log</guid>
+				<pubDate>Wed, 02 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/02/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/02/work-log</guid>
 			</item>
 		
 			<item>
-				<title>Summary of Dependency relationships</title>
+				<title>Work Log</title>
 				<description>
 
 &lt;div class=&quot;meta-info&quot;&gt;
@@ -469,379 +326,215 @@
 &lt;/div&gt;
 
 
-&lt;p&gt;The dependency between individual variables is a bit complicated, but if we group variables together, the relationship between the groups is simple.  We group parameters into &quot;self&quot; parameters and &quot;inherited&quot; parameters.&lt;/p&gt;
+&lt;p&gt;Have some problems with offline correspondence pair_matching.&lt;/p&gt;
 
-&lt;p&gt;Self parameters are immune to changes to parents or children.
-Inherited parameters are affected by any changes to parent.&lt;/p&gt;
+&lt;p&gt;Is it a bug introduced in the reconstruction code?  Lots of refactors there, recently.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;SELF PARAMETERS
+&lt;p&gt;Test by re-running wacv results.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;em&gt;reconstruction fields&lt;/em&gt;: assoc, corr, ll_*,&lt;/li&gt;
-&lt;li&gt;start index&lt;/li&gt;
-&lt;li&gt;prior_K&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;INHERITED PARAMETERS
+&lt;h2&gt;WACV Reconstruction (revisited)&lt;/h2&gt;
 
-&lt;ul&gt;
-&lt;li&gt;branch distance, branch_index&lt;/li&gt;
-&lt;li&gt;&lt;em&gt;branch distribution&lt;/em&gt;:  mu_b, mu_Sigma, branch_mu, branch_Sigma&lt;/li&gt;
-&lt;li&gt;Marginal likelihood.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;This can be summarized as follows:&lt;/p&gt;
-
-&lt;blockquote&gt;&lt;p&gt;Any time a curve is changed in any way, we must recursively update all inherited parameters.&lt;/p&gt;&lt;/blockquote&gt;
-
-&lt;p&gt;This &quot;if anything changes, update everything&quot; rule is a bit broad, and we can use a finer-grained definition to update fewer inherited fields, but in general, we only avoid updating fields that are inexpensive to update anyway.  For heavy-wieght fields (e.g. branch distribution and ML), they are affected by everything, so we're forced to update them after every change.  Thus, the simpler rule is only nominally less efficeint, and much easier to implement and understand.&lt;/p&gt;
-</description>
-				<pubDate>Thu, 19 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/19/dependencies</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/19/dependencies</guid>
-			</item>
-		
-			<item>
-				<title>Testing full-tree covariance matrix</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15229&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Running covariance confirmation for model_type = 3.&lt;/p&gt;
+&lt;p&gt;Now that datasets six through eleven have been re-ground-truthed, should confirm them by running wacv reconstruction code on them.  Also this should confirm whether we've introduced any reconstruction bugs in the last week or two.&lt;/p&gt;
 
 &lt;hr /&gt;
 
-&lt;p&gt;Results don't match.&lt;/p&gt;
+&lt;p&gt;Problem with dataset six:  curve #4 isn't connected to its parent.&lt;/p&gt;
 
-&lt;p&gt;Off-diagonals are okay.&lt;/p&gt;
+&lt;p&gt;Problem with dataset 1: really crooked.  Inspecting the ground-truth doesn't show any obvious problems that would cause this.  Maybe reversed curves? (which should be handled, but maybe aren't)&lt;/p&gt;
 
-&lt;p&gt;on-diagonal's are larger in reference impl; on order of 10.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset1.png&quot; alt=&quot;Dataset 1&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;Reference implementation has all positive eigenvalues.  Likely bug is in testing implementation.&lt;/p&gt;
+&lt;p&gt;Dataset 6: base curve attaches from wrong side (red curve below):&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset6.png&quot; alt=&quot;Dataset 6&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Open question: Does branch_index need to be incremented by start_index?&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Dataset 7: Wacky top curves, missing connections at top, no base curves:&lt;/p&gt;
 
-&lt;p&gt;also, is prior_K including start_index?&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset7.png&quot; alt=&quot;Dataset 7&quot; /&gt;&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;p&gt;Dataset 8: missed connections, bad top curves&lt;/p&gt;
 
-&lt;p&gt;Root curve is block incorrect, which means we can focus on either &lt;code&gt;build_root_object&lt;/code&gt; or &lt;code&gt;build_sibling block&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset8.png&quot; alt=&quot;Dataset 8&quot; /&gt;&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;p&gt;Dataset 9: problems...&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Got it&lt;/strong&gt;: prior_K was computed with model_type = 1.  It contains no perturb covariance.  But root block does contain perturb covariance.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset9.png&quot; alt=&quot;Dataset 9&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;Re-attach using:&lt;/p&gt;
+&lt;p&gt;Datset 10:  Good!&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;wacv_Corrs_ratt = wacv_Corrs;
-for i = 1:numel(wacv_Corrs_reatt)
-    C = wacv_Corrs_reatt{i};
-    wacv_Corrs_reatt = attach_2(wacv_Corrs_reatt, i, C.parent_ci, C.start_index, C.branch_index,params);
-end
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset10.png&quot; alt=&quot;Dataset 10&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Datset 11: Bad top-curve associations&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset11.png&quot; alt=&quot;Dataset 11&quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;Revenge of the Pre-curves&lt;/h2&gt;
+
+&lt;p&gt;When investigating issues from dataset 6, discovered that results improved when ensuring that lateral curves don't go past the parent curve.  For example&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;   |   /      |   /     |   /
+   |  /       |  /      |  /
+   | /        |_/      _|_/
+   |          |         |
+   |          |         |
+   |          |         |
+ Good       Best       Bad
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Now results are identical for the testing set&lt;/p&gt;
+&lt;h2&gt;Priors and proposal distributions&lt;/h2&gt;
 
-&lt;hr /&gt;
+&lt;p&gt;Thinking about split proposal distributions.&lt;/p&gt;
 
-&lt;p&gt;results differ on the full set.&lt;/p&gt;
+&lt;p&gt;I've been thinking about the combinitorics of partitions and realized I'v been counting wrong.  Given M curves and N observations, I was counting the number of partitions as \(M&lt;sup&gt;N\).&lt;/sup&gt;  This doesn't account for the fact that order of cluster id's doesn't matter, so a better count would be \(M&lt;sup&gt;N&lt;/sup&gt; / N! \), which divides by the number of permutations of the cluster id's.    However, this is still wrong, because it counts assignments with empty clusters (which is indistinquishible from a model with N-1 clusters.  The real number of partitions is given by &lt;a href=&quot;http://en.wikipedia.org/wiki/Stirling_number_of_the_second_kind&quot;&gt;Stirling numbers of the second kind&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;in testing set, all branches occured from the zero point on the parent.  the full set has branches from other points, and we're getting different results.&lt;/p&gt;
+&lt;p&gt;The same goes for the partitioning that occurs during a split move.&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;p&gt;Implemented &lt;code&gt;tools/build_stirling2.m&lt;/code&gt;, which builds an NxN matrix of the log of Stirling numbers of the second kind.&lt;/p&gt;
 
-&lt;p&gt;Found the cause of the problem: it was leftover cruft code I added during debugging.  Caused non-symmetric matrix.&lt;/p&gt;
+&lt;p&gt;Want to know that probability of accepting a merge move in various configurations, assuming the likelihood is constant.  Here's the test code:&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;pre&gt;&lt;code&gt;% number of observations: 918
+% number of tracks: n
+% number of observations in track i: k_i
 
-&lt;p&gt;TODO: Move &quot;confirm full covariance against reference implementation&quot; into its own test folder&lt;/p&gt;
-
-&lt;p&gt;TODO: handle nonzero start-index in branching. re-run confirmation&lt;/p&gt;
-
-&lt;p&gt;TODO: finish &quot;confirm curve-tree ML against reference implementation&quot;&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Struggling with curve_ml5, where Chol is failing.  Looks like the problem is in att_Set_Branch_index; branch conditional covariance is not positive definite.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Found: indexing bug in &lt;code&gt;attachment/attach_2.m&lt;/code&gt;&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Comparing three methods:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;% method 1
-ml1 = curve_tree_ml_ref(wacv_Corrs_reatt, params, data_)
-% method 2
-ml2 = curve_tree_ml(wacv_Corrs_reatt, params, data_)
-% method 3
-ml3 = 0;
-for i = 1:numel(wacv_Corrs_reatt)
-    ml = ml + curve_ml5( ...
-            wacv_Corrs_reatt{i}, ...
-            data_, ...
-            params, ...
-            get_model_kernel(params, params.model_type), ...
-            params.ml_block_size, ...
-            params.ml_markov_order);
-end
+p_merged  = @(n,k) -sm(918,n-1);
+p_split = @(n,k) -sm(918,n);
+q_split = @(n,k) log(1/(n-1)) - sm(k, 2);
+q_merge = @(n,k) -log(nchoosek(n, 2));
+alpha = @(n,k) p_merged(n,k) - p_split(n,k) + q_split(n,k) - q_merge(n,k);
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;All three currently differ significantly.&lt;/p&gt;
+&lt;p&gt;Running in several scenarios from plant-modelling problem:&lt;/p&gt;
 
-&lt;p&gt;Also compared against an indendent model, whose ML was about 300 points lower.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;% small number of curves; L,M,S number of observations
+&amp;gt;&amp;gt; alpha(5, 50)
 
-&lt;p&gt;At this point, method 2 and method 3 should be giving the same results, but aren't.&lt;/p&gt;
+ans =
 
-&lt;hr /&gt;
+  169.0363
 
-&lt;p&gt;Moved covariance matrix test to &lt;code&gt;test/test_construct_attachment_covariance.m&lt;/code&gt;.&lt;/p&gt;
+&amp;gt;&amp;gt; alpha(5, 20)
 
-&lt;p&gt;Re-ran and now it's failing :-/&lt;/p&gt;
+ans =
 
-&lt;p&gt;Modified it to save the output; re-running to debug.&lt;/p&gt;
+  189.8307
 
-&lt;p&gt;Needed to re-run &lt;code&gt;attach_2()&lt;/code&gt;, because prior_K was stale&lt;/p&gt;
+&amp;gt;&amp;gt;  alpha(5, 5)
 
-&lt;hr /&gt;
+ans =
 
-&lt;p&gt;TODO:&lt;/p&gt;
+  200.2747
 
-&lt;ul&gt;
-&lt;li&gt;troubleshoot covariance test&lt;/li&gt;
-&lt;li&gt;investigate difference between method 2 and method 3 above.&lt;/li&gt;
-&lt;li&gt;handle nonzero start-index in branching. re-run confirmation&lt;/li&gt;
-&lt;li&gt;ground truth - trace datasets 7 through 10&lt;/li&gt;
-&lt;li&gt;retrain using attachment&lt;/li&gt;
-&lt;/ul&gt;
+% medium number of curves; L,M,S number of observations
+&amp;gt;&amp;gt; alpha(10, 50)
 
-</description>
-				<pubDate>Wed, 18 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/18/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/18/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Building reference implementation of full-tree covariance</title>
-				<description>
+ans =
 
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
-    &lt;/tr&gt;
+   60.8395
 
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15229&lt;/td&gt;
-    &lt;/tr&gt;
+&amp;gt;&amp;gt; alpha(10, 20)
 
+ans =
 
-&lt;/table&gt;
+   81.6339
 
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
+&amp;gt;&amp;gt; alpha(10, 5)
 
+ans =
 
+   92.0779
 
+% huge number of curves; L,M,S number of observations
+&amp;gt;&amp;gt; alpha(100, 50)
 
-&lt;div&gt;
-Building reference version of `build_attachment_covariance()`.  It does full recursion for every element, taking \(O(n^2 \log n)\) time.
-&lt;/div&gt;
+ans =
 
+  -26.7355
 
-&lt;hr /&gt;
+&amp;gt;&amp;gt; alpha(100, 20)
 
-&lt;p&gt;Running now with model_type = 1;  estimated runtime: 45 minutes.  (compare this to less than 5 seconds in the fast version).&lt;/p&gt;
+ans =
 
-&lt;hr /&gt;
+   -5.9411
 
-&lt;p&gt;Results don't match.&lt;/p&gt;
+&amp;gt;&amp;gt; alpha(100, 5)
 
-&lt;p&gt;Issue 1: topology indices array was reversed; handled inheritance wrongly.
-Issue 2: forgot about start_index; should add to all curve indices.&lt;/p&gt;
+ans =
 
-&lt;p&gt;Results now match when model type = 1.&lt;/p&gt;
+    4.5029
+&lt;/code&gt;&lt;/pre&gt;
 
-&lt;hr /&gt;
+&lt;blockquote&gt;&lt;p&gt;&lt;em&gt;Update&lt;/em&gt;: These numbers are slightly off, due to a bug in the stirling number computation (now fixed).  The resulting alphas aren't substantially different.&lt;/p&gt;&lt;/blockquote&gt;
 
-&lt;p&gt;Matching results suggest that the covariance matrix is correctly implemented as designed, but why are we getting negative eigenvalues?&lt;/p&gt;
+&lt;p&gt;In most realistic-model scenarios, the probability of accepting a merge move (ignoring the likelihood; assuming constant) is 100% (i.e. positive alpha).&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;p&gt;When the number of curves is huge (e.g. early in the sampler, when we need merges the most), the probability of acceptance is non-negligible only if the number of observations in the resulting curve is relatively small.  This is usually the case, and continuously merging short curves will result the acceptance probability getting larger and larger.&lt;/p&gt;
 
-&lt;p&gt;Next: re-run with model_type = 3.&lt;/p&gt;
-</description>
-				<pubDate>Tue, 17 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/17/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/17/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Full-tree covariance; Run on WACV dataset</title>
-				<description>
+&lt;p&gt;It is interesting that in the presence of a constant likelihood, the sampler would ever prever fewer tracks to more.&lt;/p&gt;
 
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
-    &lt;/tr&gt;
+&lt;p&gt;In these cases, the sampler is preferring to split up curves with abnormally large number of observations (compared to other pertitions).&lt;/p&gt;
 
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15229&lt;/td&gt;
-    &lt;/tr&gt;
+&lt;p&gt;Would it be interesting to sample over partitions and see how the partition numbers and sizes evolve over time?  Heck yes!&lt;/p&gt;
 
+&lt;h1&gt;Toy problem: sampling partitions&lt;/h1&gt;
 
-&lt;/table&gt;
+&lt;p&gt;Prior: Uniform over number of groups.  Given a group, uniform over partitions.&lt;/p&gt;
 
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
+&lt;p&gt;Likelihood: uniform.  For simplicity, I'd like the sampler's exploration to not be influenced by which split or merge we pick.&lt;/p&gt;
 
+&lt;p&gt;We implement a split-merge move.  When splitting, a group is picked at random, and its members are randomly split into two groups.  On merge, two groups are picked at random and merged.&lt;/p&gt;
 
-&lt;p&gt;Finished testing &lt;code&gt;construct_attachment_covariance.m&lt;/code&gt; against legacy method for constructing covariance matrix.  Constructed new test &lt;code&gt;wacv_2014/run_wacv_2.m&lt;/code&gt; to compare new method against old method in &lt;code&gt;wacv_2014/run_wacv.m&lt;/code&gt;.  After significant amount of debugging, results match.&lt;/p&gt;
+&lt;p&gt;The prior of a model with N observations and k groups is \(1/s(N,k)\) where s the number of ways to partition N into k groups.&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Tweak to Corr.prior_K: &lt;/strong&gt; don't replicate until needed.  New function &lt;code&gt;tools/one_d_to_trhee_d&lt;/code&gt; helps with this.&lt;/p&gt;
+&lt;h2&gt;Results&lt;/h2&gt;
 
-&lt;p&gt;Now, to test new covariance matrix algorithm against the existing branching ML code to confirm that the latter is correct...&lt;/p&gt;
+&lt;p&gt;When initialized with a single monolithic group (k=1), the sampler jumps between k=1 and k=2, rejecting about 50% of the time.  &lt;strong&gt;The sampler never jumps to k=3.&lt;/strong&gt;&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;p&gt;This is a problem, because we'd expect to spend the same amount of time in the k=3 state as any other, since the target distribution is uniform over number of tracks.&lt;/p&gt;
 
-&lt;p&gt;Wrote &lt;code&gt;curve_tree_ml_ref&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Either this is a bug, a flaw in my assumptions, or &quot;simply&quot; a mixing problem (a huge practical issue, but theoretically still correct).&lt;/p&gt;
 
-&lt;p&gt;Having trouble running  on wacv dataset.  The covariance matrix constructed by &lt;code&gt;construct_attachment_covariance&lt;/code&gt; has several &lt;em&gt;negative eigenvalues&lt;/em&gt; (magnitude on the order of 1000).  These don't appear when attachments don't exist.&lt;/p&gt;
+&lt;p&gt;After exhausting myself bug-hunting, I decided to explore the mixing issue.&lt;/p&gt;
 
-&lt;p&gt;Old method of constructing the covariance matrix has several negative eigenvalues, but they're on the order of 1e-9.  (were'nt they identical?)&lt;/p&gt;
+&lt;p&gt;Instead of initializing to k=1, I initialized to k=3.  Both the split and merge move have an acceptance probability of exp(-51.0), meaning it accept once in every 7.1e23 samples.  This sampler &lt;strong&gt;definitely has bad mixing&lt;/strong&gt;.&lt;/p&gt;
 
-&lt;p&gt;Lets go back to the WACV example and run everything on those...&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Aside&lt;/em&gt;. It seemed notable that the split and merge move had the exact same acceptance probability for k=3.  At first this seems sensible, since the sampler should spend as much time in a two-group model as in a four-group. It turns out not to be true for any other \(k \neq 3\) I tried, but all exhibited poor mixing.  In fact, this asymmetry is natural, as the cardinality of the split proposals doesn't grow at exactly the same rate as the cardinality of the data-partitions.  This is balanced by the fact that you might transition to a lower model less often than the higher model, but you might spend more time in the lower model once you're there.&lt;/p&gt;
 
-&lt;p&gt;The big question to answer is: &lt;strong&gt;is WACV ML better with attachments or worse?&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Note that although we've used a uniform likelihood, this mixing problem likely can't be fixed by using a different likelihood.  The likelihood could drive the sampler in a specific direction, but the reverse direction would be even harder to explore.  So the likelihood only makes matters worse.&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;p&gt;Q: Can I compute the expected length spent in each state?&lt;/p&gt;
 
-&lt;p&gt;On second look, the test and reference prior matricies &lt;strong&gt;don't&lt;/strong&gt; match.  Going back to debugging &lt;code&gt;construct_attachment_covaraince.m&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;A: yes.  1/p_leave, where p_leave = (0.5 * split_alpha + 0.5 * merge_alpha)&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;p&gt;Q: Can I compute the expected direction of transition between states?
+A: yes.  split_alpha / (split_alpha + merge_alpha);&lt;/p&gt;
 
-&lt;p&gt;found bug in bugfix in attach.m.   results now match&lt;/p&gt;
+&lt;p&gt;Q: Can I compute the expected ratio between an N-group model and an N+1 group model?
+A: Do MCMC sampling.  When you reach a state, add its expected number of rejected samples to its tally, then transition up or down according to the direction distribution.&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;h2&gt;New toy sampler: Expected ratio between model probabilities&lt;/h2&gt;
 
-&lt;p&gt;Now covariancaes from wacv and curve_tree_ml_ref don't match.  Furthermore, curve_tree_ml_ref crashes because the matrix isn't positive definite.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Found issue: wacv program forced model_type to be 1 (no-perturb model).  This accounts for the difference between wacv reconstruction and the reference ML code.&lt;/p&gt;
-
-&lt;p&gt;Still don't know why we're getting negative eigenvalues when model_type != 1.&lt;/p&gt;
-
-&lt;h2&gt;Medium-term planning&lt;/h2&gt;
-
-&lt;p&gt;Q: What is needed to get end-to-end running?&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Efficient ML for branching model.&lt;/li&gt;
-&lt;li&gt;inference of branch points, given attachment (part of proposal mechanism?)&lt;/li&gt;
-&lt;li&gt;training with attachment
-
-&lt;ul&gt;
-&lt;li&gt;updated training ML&lt;/li&gt;
-&lt;li&gt;updated training procedure&lt;/li&gt;
-&lt;li&gt;joint training of foreground and background, with shared noise parameter&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;re-write sampling infrastructure
-
-&lt;ul&gt;
-&lt;li&gt;pair candidates&lt;/li&gt;
-&lt;li&gt;gibbs moves&lt;/li&gt;
-&lt;li&gt;merge/split (using Swendsen Wang?)&lt;/li&gt;
-&lt;li&gt;attach/detach&lt;/li&gt;
-&lt;li&gt;HACKS
-
-&lt;ul&gt;
-&lt;li&gt;background subtraction?&lt;/li&gt;
-&lt;li&gt;&quot;cheating&quot; (nonreversible) merge/split&lt;/li&gt;
-&lt;li&gt;forced attachment?&lt;/li&gt;
-&lt;li&gt;heuristic initialization?&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-
+&lt;pre&gt;&lt;code&gt;% compute expected samples
+% compute up probability
+% (state, tallies)
+% random walk between states, 
+&lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2&gt;TODO&lt;/h2&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Finish debugging reference ML: &lt;code&gt;curve_tree_ml_ref.m&lt;/code&gt;
-
-&lt;ul&gt;
-&lt;li&gt;why are we getting negative eigenvalues in prior matrix when model_type &gt; 1?&lt;/li&gt;
-&lt;li&gt;compare against long-hand version of matrix (slow, full recursive version).  Does it still have negative eigenvalues?&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Confirm that WACV dataset has better ML when attachments are modeled.&lt;/li&gt;
+&lt;li&gt;Fix dataset six: connect curve 4 to parent&lt;/li&gt;
+&lt;li&gt;Add confirmation code to check for multiple connected components in ground truth.&lt;/li&gt;
 &lt;/ul&gt;
 
 </description>
-				<pubDate>Mon, 16 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/16/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/16/work-log</guid>
+				<pubDate>Mon, 30 Sep 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/30/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/30/work-log</guid>
 			</item>
 		
 			<item>
-				<title>Branching prior covariance; implementing</title>
+				<title>Work Log</title>
 				<description>
 
 &lt;div class=&quot;meta-info&quot;&gt;
@@ -871,68 +564,403 @@ Issue 2: forgot about start_index; should add to all curve indices.&lt;/p&gt;
 &lt;/div&gt;
 
 
-&lt;p&gt;Goals:&lt;/p&gt;
+&lt;p&gt;Finished re-doing Liu's ground-truth.&lt;/p&gt;
+</description>
+				<pubDate>Sat, 28 Sep 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/28/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/28/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>
 
-&lt;ul&gt;
-&lt;li&gt;ground truth - trace datasets 7 through 10&lt;/li&gt;
-&lt;li&gt;build new attachment covariance&lt;/li&gt;
-&lt;li&gt;reconstruct ground truth using new attachment covariance&lt;/li&gt;
-&lt;li&gt;work attachment covariance function into ml&lt;/li&gt;
-&lt;/ul&gt;
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
 
 
-&lt;h2&gt;Building Full Attachment Covariance Matrix&lt;/h2&gt;
+&lt;/table&gt;
 
-&lt;p&gt;See &lt;code&gt;attachment/construct_attachment_covariance.m&lt;/code&gt; (filename still in flux).&lt;/p&gt;
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
 
-&lt;p&gt;Issue: The recursive definition of the attached curve kernel that we outlined yesterday is too expensive to implement naively.  Can implement by re-using precomputed values, but the branch point isn't necessarilly one of the observed points, so it's not necesarilly represented in the curve's &lt;code&gt;prior_K&lt;/code&gt;.  This means we need to construct covariance entries between each of the attachment points and their parent and child curves.  Then we can run the &quot;memoized&quot; recursive function.&lt;/p&gt;
 
-&lt;h2&gt;Base self covariance&lt;/h2&gt;
+&lt;p&gt;Problem with revamped index-estimation code:  it fails miserably on poorly-triangulatable hypotheses.&lt;/p&gt;
 
-&lt;p&gt;Key idea: each child curve has a &quot;base self covariance&quot; that is extra covariance inherited from the branch point on parent that is added to all points of the curve self-covariance matrix.  That curve, in turn, has a base covariance, that &lt;em&gt;it&lt;/em&gt; inherits, all the way to the root, whose base covariance is the &quot;position variance&quot; parameter.  Thus, the leaves have a base covariance that is the sum of all the incremental variance of all the branches to the root.&lt;/p&gt;
-
-&lt;p&gt;The base covariance is an NxN matrix, where N is the number of views.  We construct each in isolation, and then cumulatively sum them from root to leaf.&lt;/p&gt;
-
-&lt;p&gt;Every element of the curve's observed-point covariance matrix is increased by the base_covariance relative to it's entry; e.g. if element (k_{ij}) is the covariance between a point in view 3 and a point in view 5, you'll add the (3,5) element of the base covariance matrix.&lt;/p&gt;
-
-&lt;h2&gt;Base Parent covariance&lt;/h2&gt;
-
-&lt;p&gt;Each child curve also hase a &quot;parent covariance&quot; (for lack of a better term), which is the set of covariances between the branch point and each of the parent points.  Again, this is inherited recursively; just as the curve's covariance has it's self-covariance added, the parent covariance has the paren'ts self-covariance added.&lt;/p&gt;
-
-&lt;p&gt;This will be used for the off-diagonal blocks of the full attachment covariance matrix.&lt;/p&gt;
-
-&lt;h2&gt;Implementation Misc&lt;/h2&gt;
-
-&lt;p&gt;Issues during implementation and testing of &lt;code&gt;construct_attachment_covariance&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;The heuristic triangulation explodes in size, probably because triangulated points are all over the map (need to confirm this).&lt;/p&gt;
 
 &lt;hr /&gt;
 
-&lt;p&gt;replacing Cell-of-structs with struct-array:&lt;/p&gt;
+&lt;p&gt;Adding error codes; if any part of the pipeline can't complete for any reason, set error code and return.  On error, the MCMC move will simply reject the proposal.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;Corrs = cell2mat(Corrs);
+&lt;hr /&gt;
+
+&lt;p&gt;Issue with &lt;code&gt;build_full_correspondence&lt;/code&gt;: input track is destroyed and replaced.&lt;/p&gt;
+
+&lt;p&gt;Refactored to replace make_correspondence with init_track.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;make_correspondence -&amp;gt; init_track
+make_trivial_correspondence -&amp;gt; init_trivial_corespondence
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;hr /&gt;
 
-&lt;p&gt;The trivial code path of calling &lt;code&gt;blkdiag&lt;/code&gt; takes 500ms. Wow!&lt;/p&gt;
+&lt;p&gt;Running &lt;code&gt;offline_pair_candidates_2&lt;/code&gt;.  Seems to be running without crashing.&lt;/p&gt;
+
+&lt;p&gt;Takes about 10 minutes;  seems fast considering all the new logic we've added (re-triangulation, 2D DTW). Probably the mex'd DTW is helping.  Some profiling will likely identify some low-hanging optimization fruit here, too.&lt;/p&gt;
+
+&lt;p&gt;Need to inspect triangulated curves when done.&lt;/p&gt;
+
+&lt;p&gt;Need to see if background subtraction classifier will help prune.&lt;/p&gt;
 
 &lt;hr /&gt;
 
-&lt;p&gt;Running on the WACV dataset is giving bad results.&lt;/p&gt;
+&lt;p&gt;Oops, spoke too soon.  Crash at about 75% completion.&lt;/p&gt;
 
-&lt;p&gt;Looks like the covariance matrix is different from the one in the reference implementation.&lt;/p&gt;
-
-&lt;p&gt;TODO:&lt;/p&gt;
+&lt;p&gt;Random bug in candidate-proposal generator.  wasn't handling the &quot;no candidates&quot; case, resulted in index-out-of-bounds error.&lt;/p&gt;
+</description>
+				<pubDate>Thu, 26 Sep 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/26/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/26/work-log</guid>
+			</item>
+		
+			<item>
+				<title>todo</title>
+				<description>&lt;ul&gt;
+&lt;li&gt;TESTS
 
 &lt;ul&gt;
-&lt;li&gt;Need to convert from &quot;index of branch index&quot; to simply &quot;branch index&quot;.&lt;/li&gt;
-&lt;li&gt;More debugging.&lt;/li&gt;
+&lt;li&gt;Three levels of branching
+
+&lt;ul&gt;
+&lt;li&gt;visual test: reconstruction&lt;/li&gt;
+&lt;li&gt;numeric test: fast ML vs reference&lt;/li&gt;
+&lt;li&gt;numeric test: fast Covariance matrix vs. reference&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Finish ground truthing&lt;/li&gt;
+&lt;li&gt;implement recursive update&lt;/li&gt;
+&lt;li&gt;end-to-end sampler
+
+&lt;ul&gt;
+&lt;li&gt;test birth/death move&lt;/li&gt;
+&lt;li&gt;finish swap move&lt;/li&gt;
+&lt;li&gt;implement attachment moves&lt;/li&gt;
+&lt;li&gt;re-order move (see &lt;a href=&quot;/ksimek/research/2013/09/24/todo/&quot;&gt;here&lt;/a&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;evaluation&lt;/li&gt;
 &lt;/ul&gt;
 
 </description>
-				<pubDate>Thu, 12 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/12/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/12/work-log</guid>
+				<pubDate>Thu, 26 Sep 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/26/todo</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/26/todo</guid>
+			</item>
+		
+			<item>
+				<title>Track stages</title>
+				<description>&lt;p&gt;A track's &quot;stage&quot; is a description of where it is in the processing pipeline.&lt;/p&gt;
+
+&lt;p&gt;Each stage has one or more track fields associated with it.  No stage may modify fields from the previous stages.&lt;/p&gt;
+
+&lt;h2&gt;Stage 0&lt;/h2&gt;
+
+&lt;p&gt;Track is ready to be processed.   At this stage, the only valid fields are those set by the user, namely:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Track.assoc
+Track.reversed
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To construct a stage-zero track:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;init_track
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Stage 1&lt;/h2&gt;
+
+&lt;p&gt;A stage 1 track has passed the correspondence stage.&lt;/p&gt;
+
+&lt;p&gt;Three functions can prepare a track for stage 1:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;init_trivial_track
+merge_correspondence
+build_full_correspondence
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Associated fields are:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;corr
+means
+precisions
+cov_error
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Stage 2:&lt;/h2&gt;
+
+&lt;p&gt;In stage 2, raw curve likelihood fields have been constructed, and are ready for post-processing.&lt;/p&gt;
+
+&lt;p&gt;The transition from stage 1 to stage 2 is relatively expensive, as every point requires backprojection, a pass of dynamic time warping, and a few iterations newton's method to find the index set.&lt;/p&gt;
+
+&lt;p&gt;Associated fields&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ll_means
+ll_precisions
+ll_distances
+sm_lambda
+curve_sm
+curve_sm_t
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Associated functions&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;corr_to_likelihood
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Stage 3&lt;/h2&gt;
+
+&lt;p&gt;Stage three consists of inexpensive post-processing of the likelihood fields.  Curve reversal is handled here; flattening and sorting is lumped into this stage too.  Reversing and re-evaluating curves is a common use-case, and this can be done efficiently by keeping stage 3 separate from stage 2.&lt;/p&gt;
+
+&lt;p&gt;This is also where the likelihood covariance blocks are computed; since this is somewhat time-costly, it may be moved into stage 2 in the future.&lt;/p&gt;
+
+&lt;p&gt;Associated fields&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ll_views_flat
+ll_means_flat
+ll_precisions_flat
+ll_distances_flat
+ll_S
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Associated functions&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;flatten_sort_and_reverse
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Stage 4: Attachment&lt;/h2&gt;
+
+&lt;p&gt;Stage 4 is where topology is handled.  The predictive distribution of the branch point is computed and stored for efficient computation of the marginal likelihood later.&lt;/p&gt;
+
+&lt;p&gt;Stage 4 needs to be applied recursively to all children.&lt;/p&gt;
+
+&lt;p&gt;Associated fields&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;parent_ci
+start_index
+prior_K
+branch_distance
+mu_b
+Sigma_b
+branch_mu
+branch_K
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Associated functions&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;attach
+detach
+att_set_branch_distance (called from attach)
+att_set_start_index (called from attach/detach)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Stage 5&lt;/h2&gt;
+
+&lt;p&gt;Marginal likelihood has been computed for this track, conditioned on its parent.&lt;/p&gt;
+
+&lt;p&gt;Note: in the current implementation, ml field is not set, and curve_ml simply returns the ml value.  This will change in the near future to comply with the multi-stage model described in this post.&lt;/p&gt;
+
+&lt;p&gt;Associated fields&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ml
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Associated function&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;curve_ml
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Running all stages&lt;/h2&gt;
+
+&lt;p&gt;In many cases, it's not necessary to construct tracks from scratch.   Reversing a curve only requires re-running stages 3 through 5.  Attaching or detaching a curve only requires re-running Stages 4 and 5.&lt;/p&gt;
+
+&lt;p&gt;However, some cases require a full end-to-end running of stages 1 through 5.  The function that does this is:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;build_track
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This function is also a nice reference of how to run each stage.&lt;/p&gt;
+</description>
+				<pubDate>Thu, 26 Sep 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/26/reference</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/26/reference</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Coding swap and birth/death moves.&lt;/p&gt;
+
+&lt;p&gt;Lots of refactoring.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;new function &lt;code&gt;attachment/detach.m&lt;/code&gt;; moved some code from attach to detach function.&lt;/li&gt;
+&lt;li&gt;Reworked &lt;code&gt;kernel/&lt;/code&gt; directory.
+
+&lt;ul&gt;
+&lt;li&gt;added function: &lt;code&gt;kernel/get_base_covariance.m&lt;/code&gt;.  Used to implement detach.&lt;/li&gt;
+&lt;li&gt;new function: &lt;code&gt;kernel/get_model_temporal_kernel.m&lt;/code&gt;.  Returns ind, ou, or sqexp kernel&lt;/li&gt;
+&lt;li&gt;Eliminated &lt;code&gt;kernel/*_perturb_model.m&lt;/code&gt;.  &lt;code&gt;Get_model_kernel&lt;/code&gt; now constructs these directly using &lt;code&gt;get_model_temporal_kernel&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Reworked &lt;code&gt;kernel/get_model_kernel.m&lt;/code&gt; to use get_model_temporal_kernel.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Birth/Death Move&lt;/h2&gt;
+
+&lt;p&gt;Implemented birth/death move.  New concept: birth and death candidate sets; on birth, candidate is moved from one to the other.&lt;/p&gt;
+
+&lt;h2&gt;Migrating legacy sampling code&lt;/h2&gt;
+
+&lt;p&gt;Reworking old sampler code&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&quot;sampling context&quot; object; (see &lt;code&gt;inference/ctx_*&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;offline construction of curve-pair (see &lt;code&gt;inference/offline_*&lt;/code&gt;);&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Refactoring Tracks (previously Corrs)&lt;/h2&gt;
+
+&lt;p&gt;Continuing to update the codebase to use the new &quot;Tracks&quot; structure instead  of &quot;Corrs&quot;.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;New function &lt;code&gt;correspondence/build_empty_curveset.m&lt;/code&gt;.  This is useful in two ways: (a) constructing an initial object before sampling begins, and (b) constructing a single track, which is now defined as a trackset of length 1.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;To be continued...&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;need to test &lt;code&gt;mcmc_birth_death.m&lt;/code&gt;.
+
+&lt;ul&gt;
+&lt;li&gt;need to construct context &lt;code&gt;ctx_init.m&lt;/code&gt;
+
+&lt;ul&gt;
+&lt;li&gt;need to construct offline pair candidates: &lt;code&gt;offline_pair_candidates_2&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Current task: constructing offline pair candidates.  Command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;data_2 = offline_pair_candidates_2(data_, params, 0, 1, 3);
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+				<pubDate>Wed, 25 Sep 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/25/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/25/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Struggling with re-assigning associations.&lt;/p&gt;
+
+&lt;p&gt;Yesterday, I was planning to re-sample attachments after every change to association.  The bookkeeping necessary to ensure reversibility of this is proving to be a nightmare, and it's questionable whether it actually improves results.  The counter-argument is that MH moves should be cheap to propose, but re-sampling attachments has significant cost.  All that cost is wasted if the proposed move is a bad one, which it often will be.  Also, most curves only change slightly when association changes, so changing the branching is probably a bad idea.&lt;/p&gt;
+
+&lt;p&gt;Two special cases need to be handled.  First is when a change to association causes a curve to become shorter, and an attachment point disappears.  In this case, we allow it, but during evaluation, clamp to the endpoint.&lt;/p&gt;
+
+&lt;p&gt;However, when birth/death occurs, re-doing attachment is absolutely necessary.  In this case, we take a simpler apprach than yesterday's strategy:  on death, child curves become root curves; on birth, new curve gathers children from root curves.  Or alternatively, birth/death is illegal if curve has children.&lt;/p&gt;
+
+&lt;p&gt;The preceeding dicusson about avoiding re-attachment is only valid for re-assignment moves.  For split/merge moves, we must update attachment.  But this is easy too: on merge, child sets are merged; on split, sample A vs. B based on distance.&lt;/p&gt;
+
+&lt;h2&gt;Approach #2&lt;/h2&gt;
+
+&lt;p&gt;When re-assigning associations, if it results in a dangling curve, reject&lt;/p&gt;
+</description>
+				<pubDate>Tue, 24 Sep 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/24/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/24/work-log</guid>
 			</item>
 		
 	</channel>

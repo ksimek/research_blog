@@ -86,7 +86,7 @@
         [Work Log] Work Log
     </h1>
 
-  <div class="date emphnext">September 23, 2013</div>
+  <div class="date emphnext">October 02, 2013</div>
     
 
 
@@ -120,20 +120,105 @@
 </div>
 
 
-<h2>Updating data structures to Version 2</h2>
+<p>Debugging split/merge toy sampler.</p>
 
-<pre><code>* Refactored several variable names, some functions may need updating.
-* Corrs was changed from cell-of-structs to a cell-array.  Some functions may still need updating.
-* Removed old, unused variables
+<p>Split from 5 to 6 groups:</p>
+
+<pre><code> split_alpha = -p_merge + p_split - q_split + q_merge - log(psplitmv) + log(0.5);
+ K&gt;&gt; p_merge
+
+ p_merge =
+
+   -1.4437e+03
 </code></pre>
 
-<h2>Thinking on sampling</h2>
+<ul>
+<li><p>-1.4437e+03 + -1.6060e+03 - -125.6828 + -2.7081</p>
 
-<p>Did a writeup on MCMCDA with attachments, see associated "strategy" entry</p>
+<pre><code> K&gt;&gt; p_split
 
-<h2>Thinking on priors</h2>
+ p_split =
 
-<p>Did a writeup on association priors, see associated "reference" entry</p>
+   -1.6060e+03
+
+   K&gt;&gt; q_split
+
+   q_split =
+
+    -125.6828
+
+    K&gt;&gt; q_merge
+
+    q_merge =
+
+       -2.7081
+
+       K&gt;&gt; log(psplitmv)
+
+  ans =
+
+     -0.6931
+
+     K&gt;&gt; log(0.5)
+
+  ans =
+
+     -0.6931
+
+     K&gt;&gt; 
+</code></pre></li>
+</ul>
+
+
+<p>Merge from 6 to 5 groups:</p>
+
+<pre><code>merge_alpha = p_merge - p_split + q_split - q_merge - pmergemv + psplitmv ;
+K&gt;&gt; p_merge
+
+p_merge =
+
+  -1.4437e+03
+
+K&gt;&gt; p_split
+
+p_split =
+
+  -1.6060e+03
+
+K&gt;&gt; q_split
+
+q_split =
+
+ -208.8604
+
+K&gt;&gt; q_merge
+
+q_merge =
+
+   -2.7081
+
+K&gt;&gt; pmergemv
+
+pmergemv =
+
+   -0.6931
+
+K&gt;&gt; psplitmv
+
+psplitmv =
+
+   -0.6931
+</code></pre>
+
+<p>Note that q_split doesn't match between the two moves.</p>
+
+<hr />
+
+<p>After reflection, this shouldn't match, because we're comparing two different cases.  Specifically, the post-split results in two small groups, where as the pre-merge model has 6 groups of equal size.  Smaller groups have smaller number of ways to split, so the proposal probability is higher.</p>
+
+<hr />
+
+<p>Killed myself today thinking about this problem and getting exactly nowhere.</p>
 
       <address class="signature">
         Posted by
@@ -145,10 +230,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/09/24/todo" class="next" title="todo">todo &rarr;</a>
+    <a href="/ksimek/research/2013/10/03/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/09/23/splitmerge-moves-and-association-priors" class="prev" title="Split/Merge moves and Association Priors">&larr; Split/Merge moves and Association Priors</a>
+    <a href="/ksimek/research/2013/09/30/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>
