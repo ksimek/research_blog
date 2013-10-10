@@ -86,7 +86,7 @@
         [Work Log] Work Log
     </h1>
 
-  <div class="date emphnext">October 08, 2013</div>
+  <div class="date emphnext">October 09, 2013</div>
     
 
 
@@ -120,78 +120,43 @@
 </div>
 
 
-<p>Working on compiling render server.</p>
+<p>Spent most of the day finishing coding and compiling likelihood server.</p>
 
-<p>Do I want to compute likelihood in C++ too?</p>
+<p>Next:
+* build config file and make first run.</p>
 
-<p>Code exists for it.  Maybe best to just re-use code from curve_sampling.cpp and abandon render server.</p>
-
-<p>Lets do that.</p>
-
-<h2>Reviewing old curve sampling code</h2>
+<pre><code>* build camera files
+</code></pre>
 
 <ul>
-<li>Pixel store</li>
-<li>renderer</li>
-<li>multi-view likelihood</li>
-<li>pixel likelihood</li>
+<li>write matlab TCP client mex code</li>
+<li>send ground truth model from matlab to server</li>
+<li>debug:
+
+<ul>
+<li>check rendering: silhouettes look okay?</li>
+<li>check y-axis flipping issue</li>
+<li>check likelihood vs. perturbed model vs. null model vs. overexpressive model</li>
+</ul>
+</li>
 </ul>
 
 
-<p>Pixel likelihood receives a pointer to linear array of reals that represent the pixel matrix.</p>
+<h2>Issue: stem radius</h2>
 
-<p>Multi-view likelihood receives a renderable and handles all the rendering and pixel-retreival, and dispatches to pixel likelihood objects for computing.  is constructed with one or more cameras.  On evaluation it receives a renderable object, projects it under each camera, retreives the pixels, and passes to a pixel likelihood.</p>
+<p>Until now, our model and data have been infinitesimally thin curve (medial axis).</p>
 
-<p><strong>Refactor</strong>: Separate rendering into a "renderer" object, which can be split into its own process if needed.  It will also make leapfrog pixel-reading simpler.</p>
-
-<p>End product will</p>
+<p>Need to consider how to add width.  Options:</p>
 
 <ol>
-<li>receive message from matlab containing curves</li>
-<li>decode curves into vectors</li>
-<li>convert into gl_curves (renderables)</li>
-<li>pass to likelihood object</li>
-<li>convert log-posterior to message</li>
-<li>transmit back to matlab</li>
+<li>Train?</li>
+<li>Fixed?  (pass as CLI parameter to server)</li>
+<li>Marginalize over?</li>
+<li>Optimize?</li>
 </ol>
 
 
-<p>all functionality is already implemented, just need to weed out code rot and put it together.</p>
-
-<hr />
-
-<p>Getting weird link errors.  For some reason, the build system is using gcc instead of g++ to link my main program.  Will try re-running kjb_add_makefiles
-<strong>Refactor</strong>: specify all parameters at command-line (width, height, cameras, etc)</p>
-
-<hr />
-
-<p>Meanwhile, I'm planning the program</p>
-
-<p>inputs:</p>
-
-<pre><code>* dimensions
-* cameras
-* likelihood parameters
-* 
-</code></pre>
-
-<p>Steps</p>
-
-<pre><code>* initialize likelihood
-* initialize TCP server
-</code></pre>
-
-<hr />
-
-<p>Abandoning GL_context from sampler_cpp.  writing one-off offscreen-buffer class.  writing new GL_context struct with just the stuff we need</p>
-
-<hr />
-
-<p>Reducing dependence on perspective_camera object in favor of using modelview and projection matrices.  We'll be working with matrices from matlab.</p>
-
-<p>Updated Camera_render_wrapper to use matrices instead of camera.</p>
-
-<p>Updated Abstract_mv_likelihood to use matrices in addition to cameras (for backward compatibility).</p>
+<p>Since we're on short time, I'm leaning toward 2 for simplicity.</p>
 
       <address class="signature">
         Posted by
@@ -202,11 +167,8 @@
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/10/09/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/10/03/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/10/08/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>

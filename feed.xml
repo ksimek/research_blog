@@ -37,6 +37,80 @@
 &lt;/div&gt;
 
 
+&lt;p&gt;Spent most of the day finishing coding and compiling likelihood server.&lt;/p&gt;
+
+&lt;p&gt;Next:
+* build config file and make first run.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;* build camera files
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;write matlab TCP client mex code&lt;/li&gt;
+&lt;li&gt;send ground truth model from matlab to server&lt;/li&gt;
+&lt;li&gt;debug:
+
+&lt;ul&gt;
+&lt;li&gt;check rendering: silhouettes look okay?&lt;/li&gt;
+&lt;li&gt;check y-axis flipping issue&lt;/li&gt;
+&lt;li&gt;check likelihood vs. perturbed model vs. null model vs. overexpressive model&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Issue: stem radius&lt;/h2&gt;
+
+&lt;p&gt;Until now, our model and data have been infinitesimally thin curve (medial axis).&lt;/p&gt;
+
+&lt;p&gt;Need to consider how to add width.  Options:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Train?&lt;/li&gt;
+&lt;li&gt;Fixed?  (pass as CLI parameter to server)&lt;/li&gt;
+&lt;li&gt;Marginalize over?&lt;/li&gt;
+&lt;li&gt;Optimize?&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Since we're on short time, I'm leaning toward 2 for simplicity.&lt;/p&gt;
+</description>
+				<pubDate>Wed, 09 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/09/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/09/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Likelihood Server&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;likelihood_server&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
 &lt;p&gt;Working on compiling render server.&lt;/p&gt;
 
 &lt;p&gt;Do I want to compute likelihood in C++ too?&lt;/p&gt;
@@ -100,7 +174,15 @@
 
 &lt;hr /&gt;
 
-&lt;p&gt;Abandoning GL_context from sampler_cpp&lt;/p&gt;
+&lt;p&gt;Abandoning GL_context from sampler_cpp.  writing one-off offscreen-buffer class.  writing new GL_context struct with just the stuff we need&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Reducing dependence on perspective_camera object in favor of using modelview and projection matrices.  We'll be working with matrices from matlab.&lt;/p&gt;
+
+&lt;p&gt;Updated Camera_render_wrapper to use matrices instead of camera.&lt;/p&gt;
+
+&lt;p&gt;Updated Abstract_mv_likelihood to use matrices in addition to cameras (for backward compatibility).&lt;/p&gt;
 </description>
 				<pubDate>Tue, 08 Oct 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/08/work-log</link>
@@ -911,56 +993,6 @@ att_set_start_index (called from attach/detach)
 				<pubDate>Wed, 25 Sep 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/25/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/25/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15229&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Struggling with re-assigning associations.&lt;/p&gt;
-
-&lt;p&gt;Yesterday, I was planning to re-sample attachments after every change to association.  The bookkeeping necessary to ensure reversibility of this is proving to be a nightmare, and it's questionable whether it actually improves results.  The counter-argument is that MH moves should be cheap to propose, but re-sampling attachments has significant cost.  All that cost is wasted if the proposed move is a bad one, which it often will be.  Also, most curves only change slightly when association changes, so changing the branching is probably a bad idea.&lt;/p&gt;
-
-&lt;p&gt;Two special cases need to be handled.  First is when a change to association causes a curve to become shorter, and an attachment point disappears.  In this case, we allow it, but during evaluation, clamp to the endpoint.&lt;/p&gt;
-
-&lt;p&gt;However, when birth/death occurs, re-doing attachment is absolutely necessary.  In this case, we take a simpler apprach than yesterday's strategy:  on death, child curves become root curves; on birth, new curve gathers children from root curves.  Or alternatively, birth/death is illegal if curve has children.&lt;/p&gt;
-
-&lt;p&gt;The preceeding dicusson about avoiding re-attachment is only valid for re-assignment moves.  For split/merge moves, we must update attachment.  But this is easy too: on merge, child sets are merged; on split, sample A vs. B based on distance.&lt;/p&gt;
-
-&lt;h2&gt;Approach #2&lt;/h2&gt;
-
-&lt;p&gt;When re-assigning associations, if it results in a dangling curve, reject&lt;/p&gt;
-</description>
-				<pubDate>Tue, 24 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/24/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/24/work-log</guid>
 			</item>
 		
 	</channel>

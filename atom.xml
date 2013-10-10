@@ -4,13 +4,87 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-10-09T14:41:45-07:00</updated>
+ <updated>2013-10-09T17:26:54-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/10/09/work-log"/>
+   <updated>2013-10-09T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/10/09/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Likelihood Server&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;likelihood_server&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Spent most of the day finishing coding and compiling likelihood server.&lt;/p&gt;
+
+&lt;p&gt;Next:
+* build config file and make first run.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;* build camera files
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;write matlab TCP client mex code&lt;/li&gt;
+&lt;li&gt;send ground truth model from matlab to server&lt;/li&gt;
+&lt;li&gt;debug:
+
+&lt;ul&gt;
+&lt;li&gt;check rendering: silhouettes look okay?&lt;/li&gt;
+&lt;li&gt;check y-axis flipping issue&lt;/li&gt;
+&lt;li&gt;check likelihood vs. perturbed model vs. null model vs. overexpressive model&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Issue: stem radius&lt;/h2&gt;
+
+&lt;p&gt;Until now, our model and data have been infinitesimally thin curve (medial axis).&lt;/p&gt;
+
+&lt;p&gt;Need to consider how to add width.  Options:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Train?&lt;/li&gt;
+&lt;li&gt;Fixed?  (pass as CLI parameter to server)&lt;/li&gt;
+&lt;li&gt;Marginalize over?&lt;/li&gt;
+&lt;li&gt;Optimize?&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Since we're on short time, I'm leaning toward 2 for simplicity.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Work Log</title>
@@ -109,7 +183,15 @@
 
 &lt;hr /&gt;
 
-&lt;p&gt;Abandoning GL_context from sampler_cpp&lt;/p&gt;
+&lt;p&gt;Abandoning GL_context from sampler_cpp.  writing one-off offscreen-buffer class.  writing new GL_context struct with just the stuff we need&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Reducing dependence on perspective_camera object in favor of using modelview and projection matrices.  We'll be working with matrices from matlab.&lt;/p&gt;
+
+&lt;p&gt;Updated Camera_render_wrapper to use matrices instead of camera.&lt;/p&gt;
+
+&lt;p&gt;Updated Abstract_mv_likelihood to use matrices in addition to cameras (for backward compatibility).&lt;/p&gt;
 </content>
  </entry>
  
