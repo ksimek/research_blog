@@ -37,6 +37,242 @@
 &lt;/div&gt;
 
 
+&lt;h2&gt;Status&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Server is now running, connecting, receiving and decoding messages successfully.&lt;/li&gt;
+&lt;li&gt;Matlab client is constructing, sending messages, and destroying successfully.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Since we've sent our first message and saved it to a file, we no longer need matlab to debug the server, using the --dbg-load-message flag.&lt;/p&gt;
+
+&lt;h2&gt;OpenGL crashing &lt;/h2&gt;
+
+&lt;p&gt;In render_util.cpp -&gt; render_silhouettes(), crash is occurring somewhere in these lines.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;39      GLenum draw_buffers[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+(gdb) list
+40      glDrawBuffers(2, draw_buffers);
+41
+42      glClearColor(0.0,0.0,0.0,0.0);
+43      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+44      glEnable(GL_DEPTH_TEST);
+45      DBG_GL_ETX();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The dreaded &quot;invalid operation&quot;&lt;/p&gt;
+
+&lt;p&gt;I'm guessing opengl isn't in a valid rendering state yet; we may not have bound the fbo, or forgot to enable a rendering program.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;yep, fbo wasn't bound.&lt;/p&gt;
+
+&lt;p&gt;now running to completion, but result is NaN.&lt;/p&gt;
+
+&lt;p&gt;Probably because we're using random numbers for our curves.  Lets grab some real curve data and re-run.  We'll probably need to visualize the silhouette output soon.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;added function &lt;code&gt;wacv-2012/get_wacv_result.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Code to get curves and send them to server:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;tmp = get_wacv_result(2);
+tmp = cellfun(@(x) [x; ones(1,size(x,2))], tmp, 'UniformOutput', false);
+socket = construct_render_client('localhost', '12345')'
+send_curves(socket, tmp);
+result = send_curves(socket, tmp);
+destroy_render_client(socket)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Got first dumps.  issues&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;all black, no content&lt;/li&gt;
+&lt;li&gt;reversed wrong aspect ratio&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Possible causees for 1.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;bad camera files&lt;/li&gt;
+&lt;li&gt;bad code for converting intrinsic matrix to opengl&lt;/li&gt;
+&lt;li&gt;bad curves?&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;2 seems most likely.  Can debug 1 and 2 by trying old camera object and see if they work;  if so, compare matrices with new matrices.&lt;/p&gt;
+
+&lt;h2&gt;Possibly the mods I made to the multi-view likelihoods are the culprit.  I'm using raw matrices now instead of cmara objects in obj.add_view() and Camera_view_wrapper.&lt;/h2&gt;
+
+&lt;p&gt;Added command-line option &quot;--dbg-save-frames&quot;.  Writes all rendered views to disk as &quot;dump_1.png, dump_2.png,...&quot;.  Only the most recent 10 are kept at any time.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;re-running using turntable camera; passing intrinsic and extrinsic matrices to likelihood.&lt;/p&gt;
+
+&lt;p&gt;Renders are still black.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Forgot to set white color?&lt;/p&gt;
+
+&lt;p&gt;No; its in the render_silhouette function.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Found something: wacv results were aritficially centered on zero.  fixed.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Did matlab test on modelview and projection matrices and curve points -- z coordinate falls outside of [-1 1].  Beyond far plane.&lt;/p&gt;
+
+&lt;p&gt;reason: not negating z-coordinate in test code.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;changing gears.  running matlab test on original input modelview and projection matrices.&lt;/p&gt;
+
+&lt;p&gt;Modelview looks okay. Projection is way off.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;intrinsic matrix?&lt;/li&gt;
+&lt;li&gt;NDC matrix?&lt;/li&gt;
+&lt;li&gt;bounds?&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Intrinsic looks reasonable.&lt;/p&gt;
+
+&lt;p&gt;probably NDC/bounds issue&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Bug in ndc math&lt;/p&gt;
+
+&lt;p&gt;projecting outside from far plane&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;needed to flip axes to handle convention mismatch.&lt;/p&gt;
+
+&lt;p&gt;Now getting something, but the positions are looking weird.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;was re-negating ppo; already flipped during convention resolution.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;now getting decent results, but off-center and smaller:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-12-dump_3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;rough original to rendering offsets:  up by 56, left by 115.&lt;/p&gt;
+
+&lt;h2&gt;non-uniform scaling; width is smaller than height.&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;Projecting plant base using
+(a) intrinsic and extrinsic matrices from matlab
+(b) modelview and projection matrices pulled from opengl
+
+results:
+(a) projects to the right place (tested using image and pixelstick)
+(b) NDC coordinates look okay.  I manually remapped (scale and offset), and they look okay.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Since NDC look okay, the remapping must be wrong.  glViewport issue?  I'm manually setting it, but maybe it needs to be set for each shader?&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Or maybe it's a geometry shader issue?  I'm using different modelview and projection matrices now.&lt;/p&gt;
+
+&lt;p&gt;=--&lt;/p&gt;
+
+&lt;p&gt;Found it (Sunday night) -- Somehow the viewport transformation is getting reset. Possibly viewport is a shader-specific state that needs to be set each time?&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;now centered, need to diagnose silhouette issues:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-13-dump_0.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;TODO (new)&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;rename matlab &quot;render_client&quot; code to &quot;likelihood_client&quot;&lt;/li&gt;
+&lt;li&gt;rename likelihood_server/sampler2.cpp to something not nonsense.&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Fri, 11 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/11/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/11/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Likelihood Server&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;likelihood_server&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
 &lt;p&gt;Spent most of the day finishing coding and compiling likelihood server.&lt;/p&gt;
 
 &lt;p&gt;Next:
@@ -74,6 +310,16 @@
 
 
 &lt;p&gt;Since we're on short time, I'm leaning toward 2 for simplicity.&lt;/p&gt;
+
+&lt;h2&gt;Building config file&lt;/h2&gt;
+
+&lt;p&gt;Done, but need to double-check which dataset we're using in matlab at the moment.&lt;/p&gt;
+
+&lt;h2&gt;Issues&lt;/h2&gt;
+
+&lt;p&gt;When running batches of several datasets, need a way to ensure matlab and likelihood server are running on the same dataset.&lt;/p&gt;
+
+&lt;p&gt;There are some obvious hacks, but&lt;/p&gt;
 </description>
 				<pubDate>Wed, 09 Oct 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/09/work-log</link>
@@ -894,105 +1140,6 @@ att_set_start_index (called from attach/detach)
 				<pubDate>Thu, 26 Sep 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/26/reference</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/26/reference</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15229&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Coding swap and birth/death moves.&lt;/p&gt;
-
-&lt;p&gt;Lots of refactoring.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;new function &lt;code&gt;attachment/detach.m&lt;/code&gt;; moved some code from attach to detach function.&lt;/li&gt;
-&lt;li&gt;Reworked &lt;code&gt;kernel/&lt;/code&gt; directory.
-
-&lt;ul&gt;
-&lt;li&gt;added function: &lt;code&gt;kernel/get_base_covariance.m&lt;/code&gt;.  Used to implement detach.&lt;/li&gt;
-&lt;li&gt;new function: &lt;code&gt;kernel/get_model_temporal_kernel.m&lt;/code&gt;.  Returns ind, ou, or sqexp kernel&lt;/li&gt;
-&lt;li&gt;Eliminated &lt;code&gt;kernel/*_perturb_model.m&lt;/code&gt;.  &lt;code&gt;Get_model_kernel&lt;/code&gt; now constructs these directly using &lt;code&gt;get_model_temporal_kernel&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;Reworked &lt;code&gt;kernel/get_model_kernel.m&lt;/code&gt; to use get_model_temporal_kernel.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;h2&gt;Birth/Death Move&lt;/h2&gt;
-
-&lt;p&gt;Implemented birth/death move.  New concept: birth and death candidate sets; on birth, candidate is moved from one to the other.&lt;/p&gt;
-
-&lt;h2&gt;Migrating legacy sampling code&lt;/h2&gt;
-
-&lt;p&gt;Reworking old sampler code&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&quot;sampling context&quot; object; (see &lt;code&gt;inference/ctx_*&lt;/code&gt;)&lt;/li&gt;
-&lt;li&gt;offline construction of curve-pair (see &lt;code&gt;inference/offline_*&lt;/code&gt;);&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;h2&gt;Refactoring Tracks (previously Corrs)&lt;/h2&gt;
-
-&lt;p&gt;Continuing to update the codebase to use the new &quot;Tracks&quot; structure instead  of &quot;Corrs&quot;.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;New function &lt;code&gt;correspondence/build_empty_curveset.m&lt;/code&gt;.  This is useful in two ways: (a) constructing an initial object before sampling begins, and (b) constructing a single track, which is now defined as a trackset of length 1.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;h2&gt;To be continued...&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;need to test &lt;code&gt;mcmc_birth_death.m&lt;/code&gt;.
-
-&lt;ul&gt;
-&lt;li&gt;need to construct context &lt;code&gt;ctx_init.m&lt;/code&gt;
-
-&lt;ul&gt;
-&lt;li&gt;need to construct offline pair candidates: &lt;code&gt;offline_pair_candidates_2&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Current task: constructing offline pair candidates.  Command:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;data_2 = offline_pair_candidates_2(data_, params, 0, 1, 3);
-&lt;/code&gt;&lt;/pre&gt;
-</description>
-				<pubDate>Wed, 25 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/25/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/25/work-log</guid>
 			</item>
 		
 	</channel>
