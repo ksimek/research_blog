@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-10-13T21:59:02-07:00</updated>
+ <updated>2013-10-13T22:00:45-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -13,7 +13,7 @@
 
  
  <entry>
-   <title>Work Log</title>
+   <title>Work Log - Four days of OpenGL Debugging</title>
    <link href="http://vision.sista.arizona.edu/ksimek/research/2013/10/11/work-log"/>
    <updated>2013-10-11T00:00:00-07:00</updated>
    <id>http://vision.sista.arizona.edu/ksimek/research/2013/10/11/work-log</id>
