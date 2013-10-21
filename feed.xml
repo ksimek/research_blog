@@ -7,6 +7,733 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Work Log - KJB EM GMM</title>
+				<description>&lt;p&gt;Still struggling with the EM GMM algorithm.  Found/fixed one bug where responsibilities aren't initialized if NULL is passed to the function.&lt;/p&gt;
+
+&lt;p&gt;Ran overnight and it hadn't finished at the end.  Found/fixed a bug where the entire @M element responsibility matrix is rescaled 2M times (once per point).&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Getting rank-deficient errors.  Looks like this is a result of the huge dataset; covariance matrix is divided by 1e6 (the number of soft-members of the cluster).&lt;/p&gt;
+
+&lt;p&gt;For now, hack by trying to thin the dataset.  Long-term, adding a minimum offset to the emperical covariance seems to be the common solution.&lt;/p&gt;
+
+&lt;p&gt;Possibly normalizing the data would be good.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Added offset to covariance (command-line options and file-static variable already existed, just needed to add it to the full_GMM logic).&lt;/p&gt;
+
+&lt;p&gt;Added &lt;code&gt;read_gmm.m&lt;/code&gt; matlab routine, and plotted along with scatter plot of data.  Results look pretty good:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-20-kjb-gmm-result.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Moving trained gmm to ~/data/arabidopsis/training/bd_likelihood_gmm/blur_2.0.gmm&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;increase spacing between reconstructed points&lt;/li&gt;
+&lt;li&gt;get this running on cuda server&lt;/li&gt;
+&lt;li&gt;re-train GMM on held-out dataset.&lt;/li&gt;
+&lt;li&gt;implement matlab likelihood sampling&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Open issues&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;how to sync datasets on matlab and c++ server?&lt;/li&gt;
+&lt;li&gt;Wacv multi-view reconstruction for training&lt;/li&gt;
+&lt;li&gt;saving wacv to files for training&lt;/li&gt;
+&lt;li&gt;fixing issues in wacv reconstructions&lt;/li&gt;
+&lt;li&gt;evaluation methodology&lt;/li&gt;
+&lt;li&gt;split/merge&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Sun, 20 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/20/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/20/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>&lt;h2&gt;Training likelihood&lt;/h2&gt;
+
+&lt;p&gt;Fitting a three-component GMM resulted in a null model having a higher likelihood than the ground truth model.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Spent a lot of time troubleshooting this and finally realized I had scaled all values up by 100x so Matlab wouldn't choke, but I wasn't accounting for this when evaluating.  Blame it on this blasted cold, killing my focus!&lt;/p&gt;
+
+&lt;p&gt;Ground truth model looks much better than null model now.&lt;/p&gt;
+
+&lt;p&gt;--&lt;/p&gt;
+
+&lt;p&gt;Trying different blurring levels.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;1.0 is to small.&lt;/li&gt;
+&lt;li&gt;2.0 seems okay&lt;/li&gt;
+&lt;li&gt;5.0 gives a wide variance for true-positives.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;In the end, running max likleihood on this will be best, but this gives us a ballpark.&lt;/p&gt;
+
+&lt;p&gt;--&lt;/p&gt;
+
+&lt;p&gt;Trying to get KJB EM algorithm working on my 2M element dataset.  Getting NaN errors at the moment.&lt;/p&gt;
+</description>
+				<pubDate>Sat, 19 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/19/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/19/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log - Uninformative likelihood?</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15701&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Likelihood sanity check (ctd)&lt;/h2&gt;
+
+&lt;p&gt;An empty model should have a significantly worse likelihood than the ground truth model.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ground truth model:  -3.38064e+08
+empty model: -3.28279e+08
+full model: -1.20572e+08
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Both empty and full are better than ground truth.  Why??&lt;/p&gt;
+
+&lt;p&gt;At least possiblities here:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Noise level is so high that fitting is impossible (remember the paper &quot;Fundamental limits of Bayesian Inference: Order Parameters and Phase Transitions for Road Tracking&quot;)&lt;/li&gt;
+&lt;li&gt;Bug.  maybe renderings are just waaaay off?&lt;/li&gt;
+&lt;li&gt;Bad calibration.  Looking at the GMM plot from yesterday (see below) it looks like the one-sigma contour is very very large.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-17-bd.gmm.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Case 1 is what's left over once 2 and 3 are ruled out.&lt;/p&gt;
+
+&lt;h2&gt;Rendering sanity check.&lt;/h2&gt;
+
+&lt;p&gt;This seems to be a culprit.&lt;/p&gt;
+
+&lt;p&gt;Here's first data view:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-17-data-view-1.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Not a good match to the actual first data image:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-17-ler_2_36_0.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;But a good match to the second data image:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-17-ler_2_36_1.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Must be an off-by-one error when reading data.&lt;/p&gt;
+
+&lt;p&gt;The cameras are not off-by one.  Here's the rendering of the model under the first camera:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-17-model-view-1.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Good match to the first data image above.&lt;/p&gt;
+
+&lt;p&gt;Bug is in the config file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;view-indices=1:4:36  # bug here
+view-indices=0:4:35  # should be this
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Good news, bad news.&lt;/p&gt;
+
+&lt;p&gt;Good news: after fixing config file, data and rendering look good (use slider to swap between images)&lt;/p&gt;
+
+&lt;script&gt;
+$(function(){
+    var urls = [
+        &quot;/ksimek/research/img/2013-10-17-data.jpg&quot;,
+        &quot;/ksimek/research/img/2013-10-17-model.jpg&quot;
+        ]
+
+    construct_animation($(&quot;#data-model-anim&quot;), urls);
+});
+&lt;/script&gt;
+
+
+&lt;div id=&quot;data-model-anim&quot; style=&quot;width:530px&quot;&gt; &lt;/div&gt;
+
+
+&lt;p&gt;Bad news: likelihood gets &lt;strong&gt;worse&lt;/strong&gt;!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;fixed likelhood: -3.38298e+08
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It looks like the rendered model is lighter than the data model.  This might account for the issues we're seeing.  We're in the region to the right of the diagonal &quot;true positive&quot; component in the GMM (see contour plot above).  In this region, the noise model has a stronger pull than the true positive model, which partially explains why we get better when fewer model pixels are on the screen.   It doesn't explain why the model gets better when we shift left and right -- maybe it fits better in the tails of the blurred data, but we'd expect it to eventually get worse.  Lets test it.&lt;/p&gt;
+
+&lt;p&gt;Recall that this GMM was trained on a manipulated version of the data image, not a rendered 3D model image.  The process taken was (a) removing all background pixels from the data image and (b) perturbing the foreground pixels. We may have removed a few foreground pixels to add false positives, but the amount was small, if memory serves.  Now we have far fewer model pixels, so we expect the &quot;true positive&quot; region to be slanted more upward.&lt;/p&gt;
+
+&lt;h2&gt;Optimality test (redux)&lt;/h2&gt;
+
+&lt;p&gt;Code:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;x_values=&quot;-80 -40 -20 -10 -5 -2 -1 0 1 2 5 10 20 40 80&quot;
+for x in $x_values; do
+    echo -n &quot;$x &quot;;
+    ./likelihood_server \
+        --config=test.conf  \
+        --image-bounds &quot;0 530 397 0 200 2000&quot;  \
+        --cam-convention &quot;1 0 0&quot;  \
+        --dbg_save_frames  \
+        --dbg_load_message  \
+        --dbg-ppo-x-offset=$x 2&amp;gt; /dev/null | grep ^3 | sed -e 's/3 //' -e 's/,//';
+done
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Output (delta-x vs log-likelihood):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;-80 -3.36866e+08
+-40 -3.36987e+08
+-20 -3.37434e+08
+-10 -3.37864e+08
+-5 -3.38169e+08
+-2 -3.38279e+08
+-1 -3.38294e+08
+0 -3.38298e+08
+1 -3.38292e+08
+2 -3.38275e+08
+5 -3.38172e+08
+10 -3.37912e+08
+20 -3.37479e+08
+40 -3.36958e+08
+80 -3.36991e+08
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Plot:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-17-likelihood_plot_vs_x.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;&quot;Full&quot; model issue&lt;/h2&gt;
+
+&lt;p&gt;One of the strangest things is the fact that a rendering full of &quot;1.0's&quot; performs far better than the ground truth or empty model.  This area lies along the x-axis in the GMM contour plot, where there is no support.&lt;/p&gt;
+
+&lt;p&gt;Lets debug this.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Found an insane bug.  Below is the loop that compares all the pixels of the data and rendered model:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    for(size_t i = 0; i &amp;lt;= size_; ++i)
+    {
+        kjb::Vector2 x;
+        x[0] = model[i];
+        x[1] = data_[i] + 1;
+
+        ...  // compute p(x[1] | x[0])
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I have no idea why we're adding 1.0 to &lt;code&gt;data_[i]&lt;/code&gt;, but this explains everything.  In the &quot;full&quot; model, it puts us right on the diagonal of the GMM.  In the empty model, we're right on the x-axis.  Both are well-supported regions.  In the ground truth model, we're lying between these extremes, which is a no-man's land of near-zero support.&lt;/p&gt;
+
+&lt;p&gt;Spending 5 minutes to determine how this got added...&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;It was added between November 11 and December 13 last year.   No obvious reason.  Oh well.&lt;/p&gt;
+
+&lt;p&gt;New sanity check numbers:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;full model -5.2217e+08
+ground truth model 4.03273e+06
+empty model: 4.01252e+06
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Much more sensible.  Missing data looks terrible, noise looks okay but not great,  ground truth looks best.  Lets do an offset plot just to be safe.&lt;/p&gt;
+
+&lt;h2&gt;Optimality test (redux&lt;sup&gt;2)&lt;/sup&gt;&lt;/h2&gt;
+
+&lt;p&gt;Results:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;-80 3.1039e+06
+-40 3.27557e+06
+-20 3.58156e+06
+-10 3.77333e+06
+-5 3.93159e+06
+-2 4.01459e+06
+-1 4.02845e+06
+0 4.03273e+06
+1 4.02704e+06
+2 4.01209e+06
+5 3.93021e+06
+10 3.78782e+06
+20 3.60557e+06
+40 3.26585e+06
+80 3.26894e+06
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Plot&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-17-likelihood_plot_vs_x_fixed.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Oh Yeah!!&lt;/p&gt;
+
+&lt;h2&gt;BD Likelihood Data Dump Mode.&lt;/h2&gt;
+
+&lt;p&gt;add a mode by which pixel likelihood will save pixel data to files for analysis or debugging&lt;/p&gt;
+
+&lt;p&gt;changes will appear in:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;lib/evaluate/bd_likelihood.h - Bd_pixel_likelihood_cpu&lt;/li&gt;
+&lt;li&gt;lib/evaluate/bd_likelihood.h - Bd_mv_likeliood_cpu&lt;/li&gt;
+&lt;li&gt;./likelihood_server.cpp - Options&lt;/li&gt;
+&lt;li&gt;./likelihood_server.cpp - main()&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;hr /&gt;
+
+&lt;p&gt;Added dump mode.  Probably should move this into a separate directory, or at least a different program, since it has almost nothing to do with the likleihood server.&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;rename matlab &quot;render_client&quot; code to &quot;likelihood_client&quot;&lt;/li&gt;
+&lt;li&gt;increase spacing between reconstructed points&lt;/li&gt;
+&lt;li&gt;remove edges around image border.&lt;/li&gt;
+&lt;li&gt;get this running on cuda server&lt;/li&gt;
+&lt;li&gt;train likelihood&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Open issues&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;how to sync datasets on matlab and c++ server?&lt;/li&gt;
+&lt;li&gt;Wacv multi-view reconstruction for training&lt;/li&gt;
+&lt;li&gt;saving wacv to files for training&lt;/li&gt;
+&lt;li&gt;fixing issues in wacv reconstructions&lt;/li&gt;
+&lt;li&gt;evaluation methodology&lt;/li&gt;
+&lt;li&gt;split/merge&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Thu, 17 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/17/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/17/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log - silhouettes, training likelihood, evaluating likelihood</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Likelihood Server&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;likelihood_server&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Enabled glPolygonOffset and it improved results somewhat.  Still getting stippling 10% of the time.&lt;/p&gt;
+
+&lt;p&gt;Adding edge-detection code to show stippled edges helps, but adds some internal edges for some reason.&lt;/p&gt;
+
+&lt;p&gt;Apparently, we have point spacing too close together.  This introduces lots of little ridges, which makes silhouette edges appear on the interior of the object incorrectly.  We should pro-process curves in matlab to force spacing to be greater than or equal to to the curve radius.&lt;/p&gt;
+
+&lt;h2&gt;Likelihood rendering bugs&lt;/h2&gt;
+
+&lt;p&gt;Image dumps from our likelihood show all edges are being rendered (not just silhouette edges).&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;seems to be an issue with Camera_render_wrapper.  Possibly the y-axis flipping?&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Yep.  Reverses the handedness of the projected model.&lt;/p&gt;
+
+&lt;p&gt;Shader assumes orientation of forward-facing triangles isn't affected by projection.  Thus, cross-product can be used to determine whether a face is forward-facing (a fundamental operation for classifying silhouette edges).&lt;/p&gt;
+
+&lt;p&gt;Can we solve by doing visibility test in world coordinates, which avoids the projection matrix altogether?&lt;/p&gt;
+
+&lt;p&gt;Yes, but there's a bug causing a few faulty silhouette edges to appear.  Why?&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;It turns out, we were assuming the normal vector of opposite faces are parallel, and used this to .  Apparently not always the case, especially when sharp corners occur (which happens routinely when point spacing is close).&lt;/p&gt;
+
+&lt;p&gt;During testing, we somehow corrupted the GPU's memory.  System sprites (e.g. cursor) are starting to be corrupted, and program keeps crashing  from GPU errors.  Probably constructed too many shaders in a single session.  Will reboot and continue.&lt;/p&gt;
+
+&lt;p&gt;Summary: found silhouette rendering bug caused by projection matrix that didn't preserve handedness.  Rewrote silhouette pass 2 geometry shader to handle this case better.  Now renders correctly in both cases.&lt;/p&gt;
+
+&lt;h2&gt;Next: determine cause of likleihood NaN's; train the likelihood.&lt;/h2&gt;
+
+&lt;h2&gt;Blurred-difference (bd) likelihood issues&lt;/h2&gt;
+
+&lt;p&gt;Getting &quot;NaN&quot; when evaluating.  Checking the result of blurring the model shows inf's everywhere.  Weird, because I can confirm that the input data is succesfully blurring:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-blurred_data.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Same blurrer is used for data and model&lt;/li&gt;
+&lt;li&gt;It isn't the input (tried substituting data in for model and still got corrupt stuff back).&lt;/li&gt;
+&lt;li&gt;re-initializing blurrer doesn't seem to help&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Stepping through in GDB...&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;After convolution, values are on the order of 1e+158...  clearly invalid.  Converting to float causes inf.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Aside:  the padding added before convolution isn't zeros!  Fixing bug in lib/evaluate/convolve.h:fftw_convolution class.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Aside:  Need to remove edges around image border:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-border_edges.jpg&quot; alt=&quot;border edges bug&quot; /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Aside: different blurrer for each view?  unnecessary!&lt;/p&gt;
+
+&lt;p&gt;Wrong, same blurrer, different internal buffers.  Caused by calling blurrer.init_fttw_method() every time we add a view to the multi-view likelihood.  Removed that call.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Apparently, calling blurrer_.init_fftw_method() is wreaking all kinds of havok on the blurring results.  I have idea why.  Possibly calling init_fftw_method() more than once is simply not supported.  But that call simply destroys and object and creates a new one, so why is that different from the first time we called it?&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Theory: fftw wisdom is messing with us?&lt;/p&gt;
+
+&lt;p&gt;Results: nope&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;We have a working case and a non-working case.  Can we walk from one case to the other and find the exact change that causes the error?&lt;/p&gt;
+
+&lt;p&gt;Aside: Here's a bizarre result wer'e getting during failure:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-weird_results.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Kind of cool!&lt;/p&gt;
+
+&lt;p&gt;Actually, there might be a hint here... Notice the eliptical shapes that are about the same size as the turntable, but shifted and screwed up.&lt;/p&gt;
+
+&lt;p&gt;It's possible what we're seeing is convolution with a random mask.  the two main ellipses we're seeing are two random bright pixels in the mask, and the miscellaneous roughness might be ca combinariton of small positive and negative values causing the texture we see.  Next step: inspect mask&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Bingo!  We're working with a random mask.&lt;/p&gt;
+
+&lt;p&gt;Let's step back to the original failing case and see if the mask is still random.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Confirmed.  Here's an eample mask:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-tmp.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Here it is dimmer:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-bunk_maks_dimmer.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Anything look familiar?  It's derived from our plant image (notice the ellipses from the turntable).&lt;/p&gt;
+
+&lt;p&gt;Theory: somehow the mask is getting overwritten with our blurred model.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Solved.  Simple bug but was obscured by several issues.&lt;/p&gt;
+
+&lt;p&gt;The fundamental issue was that when the blurring mask was being padded, the padding wasn't being filled with zeros.  Thus, the padded mask consisted of a small section of real mask, surrounded by huge amounts of uninitialized memory.&lt;/p&gt;
+
+&lt;p&gt;This was a bug that I discovered and fixed 12 months ago, but it got rolled back when Andrew revamped the FFTW convolution class.  Ultimately, I was able to restore my changes to the FFTW class without much trouble, but for the six hours that followed, these changes weren't being compiled, because they were in a header file, and the build system only rebuilds object files if the &quot;cpp&quot; file is changed.&lt;/p&gt;
+
+&lt;p&gt;Further, there was a red-herring that appeared as &quot;re-initializing the blurrer causes the errors&quot;.  While this was true, it was only because re-initializing also re-initialized the blurring mask, and it was only during re-initialization did the uninitialized mask padding have junk -- on the first initialization, the memory just happened to be blank.  Go figure.&lt;/p&gt;
+
+&lt;p&gt;This was an absolutely essential bug to find and fix.  Glad its fixed, just wish it hadn't regressed in the first place.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Okay time to reset.  Let's confirm that the rendered models are blurring correctly.  Then confirm non-zero log-likleihood result.    Then on to training.&lt;/p&gt;
+
+&lt;p&gt;Model blurring: CHECK
+Finite likelihood: CHECK  (result: -3.38064e+08)
+Likelihood is near-optimal: &lt;strong&gt;FAIL&lt;/strong&gt;. see below&lt;/p&gt;
+
+&lt;h2&gt;Optimality test&lt;/h2&gt;
+
+&lt;p&gt;Added debugging option to shift rendering left/right/up/down in the image: &lt;code&gt;--dbg-ppo-x-offset&lt;/code&gt; and &lt;code&gt;--dbg-ppo-y-offset&lt;/code&gt;.   Ideally, the likleihood should be optimized at zero offset&lt;/p&gt;
+
+&lt;p&gt;Log likelihood vs x-offset&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt; 0  -3.38064e+08
++1  -3.38069e+08
++2  -3.38068e+08
++5  -3.38033e+08
++10 -3.37881e+08
+-2  -3.38039e+08
+-5  -3.37968e+08
+-10 -3.37786e+08
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-likleihood_plot_vs_x.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Weird... Why is it at a local &lt;em&gt;minimum&lt;/em&gt; at the center?&lt;/p&gt;
+
+&lt;p&gt;Log likelihood vs y-offset&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt; 0  -3.38064e+08
+-2  -3.38062e+08
+-5  -3.38033e+08
+-10 -3.3789e+08
+-20 -3.37321e+08
+-40 -3.36139e+08
+-80 -3.33693e+08
+ 2  -3.38052e+08
+ 5  -3.38025e+08
+ 10 -3.37983e+08
+ 20 -3.37955e+08
+ 40 -3.3785e+08
+ 80 -3.37523e+08
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-likelihood_plot_vs_y.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Note that as y decreases, the top of the plant starts to fall off the screen. This suggests that having fewer model points might be over-preferred.  Need to sanity-check the GMM model we're using -- I trained it months ago and never really leaned on it hard, so it's the first place to look for problems.&lt;/p&gt;
+
+&lt;p&gt;Also, might be a scaling issue.  Double-check that blurred model and blurred data have similar scale.&lt;/p&gt;
+
+&lt;h2&gt;GMM sanity check&lt;/h2&gt;
+
+&lt;p&gt;Plotting first and second standard deviation of the joint distribution of model-pixel-intensity and data-pixel-intensity.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-17-bd.gmm.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This looks sensible.  The first component is the diagonal one, representing true postives (in the presence of random perturbations).&lt;/p&gt;
+
+&lt;p&gt;The second component is at the origin -- true negatives.&lt;/p&gt;
+
+&lt;p&gt;The third component is along the y-axis, representing false positives in the data, aka noise.&lt;/p&gt;
+
+&lt;p&gt;The first component has roughly 10x less weight than the second and third.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;No component for the false negatives (aka missing data).  As I recall, running EM on a GMM with four or more components always resulted in redundant components.  Possibly hand-initializing the components in each of the four positions might help.&lt;/p&gt;
+
+&lt;p&gt;I also recall some sort of GPU limitation that prevented me from evaluating more than three components in hardware.  That seems unusual though, and I may be misremembering.&lt;/p&gt;
+
+&lt;p&gt;Does this provide any insight as to why we prefer our model to drift off of the screen?  This introduces more &quot;negative&quot; model pixels, pushing toward the well-supported y-axis are of our model.  Possibly this is the result of poor calibration?  Or wrong blurring sigma?&lt;/p&gt;
+
+&lt;p&gt;TODO: re-run the x/y offset experiment with smaller blurring sigma.&lt;/p&gt;
+
+&lt;h2&gt;Data Sanity check&lt;/h2&gt;
+
+&lt;p&gt;To do.  Approach: instead of evaluating likelihood pixels against data, dump model/data pixel pairs into a list and (a) plot them or (b) train on them.  Maybe just dump to a file and do it in matlab?&lt;/p&gt;
+
+&lt;h2&gt;Blooper reel&lt;/h2&gt;
+
+&lt;p&gt;While writing miscellaneous blocks of memory to disk as images, got some interesting but totally wrong results.&lt;/p&gt;
+
+&lt;p&gt;The following is partially due to rendering an array of doubles as floats.  Interesting banding pattern.  A mini-Mondrian!&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-fun-mess-1.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The next is just uninitialized memory.  Iteresting patterns :-)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-fun-mess-2.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;TODO (new)&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;increase spacing between reconstructed points&lt;/li&gt;
+&lt;li&gt;remove edges around image border.&lt;/li&gt;
+&lt;li&gt;share blurrer between views&lt;/li&gt;
+&lt;li&gt;get this running on cuda server&lt;/li&gt;
+&lt;li&gt;why is it crashing on exit?&lt;/li&gt;
+&lt;li&gt;Data sanity check - does it roughly match the GMM's distribution?&lt;/li&gt;
+&lt;li&gt;train likelihood&lt;/li&gt;
+&lt;li&gt;add &quot;dump&quot; mode to bd-likelihood which saves all image pairs to disk for analysis or debugging.&lt;/li&gt;
+&lt;li&gt;test empty model likelihood&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Wed, 16 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/16/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/16/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log - Finishing Likelihood Server, integrating to sampling engine</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Likelihood Server&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;likelihood_server&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Old silhouette rendering technique is failing.  Point spacing is much tighter than before.  Our old algorithm relied on segment-ids matching between the first-pass and second pass to work.&lt;/p&gt;
+
+&lt;p&gt;Have a replacement algorithm that works reasonably well.  Basically edge-detection on the depth image.  The down side is we're getting double-edges in some areas, and you have to adjust a threshold.  It'll have to do for now, hopefully we can train a the likelihood to be robust to these issues.&lt;/p&gt;
+
+&lt;h2&gt;Training Bd_likelihood&lt;/h2&gt;
+
+&lt;p&gt;added 'train_bd_likelihood()' function to 'lib/evaluate/bd_likelihood.h'.  Uses 'kjb_c::get_full_GMM()'  to fit a three-component gaussian mixture model to model the relationship between model and data pixels.&lt;/p&gt;
+
+&lt;h2&gt;Refactoring&lt;/h2&gt;
+
+&lt;p&gt;Shader objects from './shader.h' are now in the project library, under 'lib/ogl/shader_2.h'.  Not the greatest name, but shader.h already exists and conflicts.  Consder refactoring them later.&lt;/p&gt;
+
+&lt;p&gt;Silhouetter rendering from './render_util.h' are now in 'lib/graphics/silhouette_renderer.h'.  Much better encapsulation now, so we can use it in other projects.&lt;/p&gt;
+
+&lt;p&gt;In the process of updating './likelihood_server.cpp' to reflect these changes.  At the moment, getting an &quot;invalid operation&quot; when rendering.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;It was a stray &lt;code&gt;glUseProgram(notzero)&lt;/code&gt; in the shader loading code.&lt;/p&gt;
+
+&lt;hr /&gt;
+</description>
+				<pubDate>Tue, 15 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/15/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/15/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log - Troubleshooting silhouette rendering</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Likelihood Server&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;likelihood_server&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Silhouettes are rendering badly&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-13-dump_0.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Looks like internal edges are rendering.  Likely an issue with shader_src/silhouette2.gs.glsl.&lt;/p&gt;
+
+&lt;p&gt;Need a quick way to tweak shader and re-run.&lt;/p&gt;
+
+&lt;h2&gt;Building shader debugging mode&lt;/h2&gt;
+
+&lt;p&gt;if enabled, results will display in viewer instead of being passed to likelihood.&lt;/p&gt;
+</description>
+				<pubDate>Mon, 14 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/14/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/14/work-log</guid>
+			</item>
+		
+			<item>
 				<title>Work Log - Four days of OpenGL Debugging</title>
 				<description>
 
@@ -275,13 +1002,15 @@ results:
 
 &lt;p&gt;Spent most of the day finishing coding and compiling likelihood server.&lt;/p&gt;
 
-&lt;p&gt;Next:
-* build config file and make first run.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;* build camera files
-&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Next:&lt;/p&gt;
 
 &lt;ul&gt;
+&lt;li&gt;build config file and make first run.
+
+&lt;ul&gt;
+&lt;li&gt;build camera files&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;li&gt;write matlab TCP client mex code&lt;/li&gt;
 &lt;li&gt;send ground truth model from matlab to server&lt;/li&gt;
 &lt;li&gt;debug:
@@ -318,8 +1047,6 @@ results:
 &lt;h2&gt;Issues&lt;/h2&gt;
 
 &lt;p&gt;When running batches of several datasets, need a way to ensure matlab and likelihood server are running on the same dataset.&lt;/p&gt;
-
-&lt;p&gt;There are some obvious hacks, but&lt;/p&gt;
 </description>
 				<pubDate>Wed, 09 Oct 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/09/work-log</link>
@@ -485,661 +1212,6 @@ results:
 				<pubDate>Thu, 03 Oct 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/03/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/03/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15229&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Debugging split/merge toy sampler.&lt;/p&gt;
-
-&lt;p&gt;Split from 5 to 6 groups:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt; split_alpha = -p_merge + p_split - q_split + q_merge - log(psplitmv) + log(0.5);
- K&amp;gt;&amp;gt; p_merge
-
- p_merge =
-
-   -1.4437e+03
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;-1.4437e+03 + -1.6060e+03 - -125.6828 + -2.7081&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt; K&amp;gt;&amp;gt; p_split
-
- p_split =
-
-   -1.6060e+03
-
-   K&amp;gt;&amp;gt; q_split
-
-   q_split =
-
-    -125.6828
-
-    K&amp;gt;&amp;gt; q_merge
-
-    q_merge =
-
-       -2.7081
-
-       K&amp;gt;&amp;gt; log(psplitmv)
-
-  ans =
-
-     -0.6931
-
-     K&amp;gt;&amp;gt; log(0.5)
-
-  ans =
-
-     -0.6931
-
-     K&amp;gt;&amp;gt; 
-&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Merge from 6 to 5 groups:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;merge_alpha = p_merge - p_split + q_split - q_merge - pmergemv + psplitmv ;
-K&amp;gt;&amp;gt; p_merge
-
-p_merge =
-
-  -1.4437e+03
-
-K&amp;gt;&amp;gt; p_split
-
-p_split =
-
-  -1.6060e+03
-
-K&amp;gt;&amp;gt; q_split
-
-q_split =
-
- -208.8604
-
-K&amp;gt;&amp;gt; q_merge
-
-q_merge =
-
-   -2.7081
-
-K&amp;gt;&amp;gt; pmergemv
-
-pmergemv =
-
-   -0.6931
-
-K&amp;gt;&amp;gt; psplitmv
-
-psplitmv =
-
-   -0.6931
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Note that q_split doesn't match between the two moves.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;After reflection, this shouldn't match, because we're comparing two different cases.  Specifically, the post-split results in two small groups, where as the pre-merge model has 6 groups of equal size.  Smaller groups have smaller number of ways to split, so the proposal probability is higher.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Killed myself today thinking about this problem and getting exactly nowhere.&lt;/p&gt;
-</description>
-				<pubDate>Wed, 02 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/02/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/02/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15229&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Have some problems with offline correspondence pair_matching.&lt;/p&gt;
-
-&lt;p&gt;Is it a bug introduced in the reconstruction code?  Lots of refactors there, recently.&lt;/p&gt;
-
-&lt;p&gt;Test by re-running wacv results.&lt;/p&gt;
-
-&lt;h2&gt;WACV Reconstruction (revisited)&lt;/h2&gt;
-
-&lt;p&gt;Now that datasets six through eleven have been re-ground-truthed, should confirm them by running wacv reconstruction code on them.  Also this should confirm whether we've introduced any reconstruction bugs in the last week or two.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Problem with dataset six:  curve #4 isn't connected to its parent.&lt;/p&gt;
-
-&lt;p&gt;Problem with dataset 1: really crooked.  Inspecting the ground-truth doesn't show any obvious problems that would cause this.  Maybe reversed curves? (which should be handled, but maybe aren't)&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset1.png&quot; alt=&quot;Dataset 1&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Dataset 6: base curve attaches from wrong side (red curve below):&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset6.png&quot; alt=&quot;Dataset 6&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Dataset 7: Wacky top curves, missing connections at top, no base curves:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset7.png&quot; alt=&quot;Dataset 7&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Dataset 8: missed connections, bad top curves&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset8.png&quot; alt=&quot;Dataset 8&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Dataset 9: problems...&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset9.png&quot; alt=&quot;Dataset 9&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Datset 10:  Good!&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset10.png&quot; alt=&quot;Dataset 10&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Datset 11: Bad top-curve associations&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-09-30-dataset11.png&quot; alt=&quot;Dataset 11&quot; /&gt;&lt;/p&gt;
-
-&lt;h2&gt;Revenge of the Pre-curves&lt;/h2&gt;
-
-&lt;p&gt;When investigating issues from dataset 6, discovered that results improved when ensuring that lateral curves don't go past the parent curve.  For example&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;   |   /      |   /     |   /
-   |  /       |  /      |  /
-   | /        |_/      _|_/
-   |          |         |
-   |          |         |
-   |          |         |
- Good       Best       Bad
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2&gt;Priors and proposal distributions&lt;/h2&gt;
-
-&lt;p&gt;Thinking about split proposal distributions.&lt;/p&gt;
-
-&lt;p&gt;I've been thinking about the combinitorics of partitions and realized I'v been counting wrong.  Given M curves and N observations, I was counting the number of partitions as \(M&lt;sup&gt;N\).&lt;/sup&gt;  This doesn't account for the fact that order of cluster id's doesn't matter, so a better count would be \(M&lt;sup&gt;N&lt;/sup&gt; / N! \), which divides by the number of permutations of the cluster id's.    However, this is still wrong, because it counts assignments with empty clusters (which is indistinquishible from a model with N-1 clusters.  The real number of partitions is given by &lt;a href=&quot;http://en.wikipedia.org/wiki/Stirling_number_of_the_second_kind&quot;&gt;Stirling numbers of the second kind&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;The same goes for the partitioning that occurs during a split move.&lt;/p&gt;
-
-&lt;p&gt;Implemented &lt;code&gt;tools/build_stirling2.m&lt;/code&gt;, which builds an NxN matrix of the log of Stirling numbers of the second kind.&lt;/p&gt;
-
-&lt;p&gt;Want to know that probability of accepting a merge move in various configurations, assuming the likelihood is constant.  Here's the test code:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;% number of observations: 918
-% number of tracks: n
-% number of observations in track i: k_i
-
-p_merged  = @(n,k) -sm(918,n-1);
-p_split = @(n,k) -sm(918,n);
-q_split = @(n,k) log(1/(n-1)) - sm(k, 2);
-q_merge = @(n,k) -log(nchoosek(n, 2));
-alpha = @(n,k) p_merged(n,k) - p_split(n,k) + q_split(n,k) - q_merge(n,k);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Running in several scenarios from plant-modelling problem:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;% small number of curves; L,M,S number of observations
-&amp;gt;&amp;gt; alpha(5, 50)
-
-ans =
-
-  169.0363
-
-&amp;gt;&amp;gt; alpha(5, 20)
-
-ans =
-
-  189.8307
-
-&amp;gt;&amp;gt;  alpha(5, 5)
-
-ans =
-
-  200.2747
-
-% medium number of curves; L,M,S number of observations
-&amp;gt;&amp;gt; alpha(10, 50)
-
-ans =
-
-   60.8395
-
-&amp;gt;&amp;gt; alpha(10, 20)
-
-ans =
-
-   81.6339
-
-&amp;gt;&amp;gt; alpha(10, 5)
-
-ans =
-
-   92.0779
-
-% huge number of curves; L,M,S number of observations
-&amp;gt;&amp;gt; alpha(100, 50)
-
-ans =
-
-  -26.7355
-
-&amp;gt;&amp;gt; alpha(100, 20)
-
-ans =
-
-   -5.9411
-
-&amp;gt;&amp;gt; alpha(100, 5)
-
-ans =
-
-    4.5029
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;&lt;p&gt;&lt;em&gt;Update&lt;/em&gt;: These numbers are slightly off, due to a bug in the stirling number computation (now fixed).  The resulting alphas aren't substantially different.&lt;/p&gt;&lt;/blockquote&gt;
-
-&lt;p&gt;In most realistic-model scenarios, the probability of accepting a merge move (ignoring the likelihood; assuming constant) is 100% (i.e. positive alpha).&lt;/p&gt;
-
-&lt;p&gt;When the number of curves is huge (e.g. early in the sampler, when we need merges the most), the probability of acceptance is non-negligible only if the number of observations in the resulting curve is relatively small.  This is usually the case, and continuously merging short curves will result the acceptance probability getting larger and larger.&lt;/p&gt;
-
-&lt;p&gt;It is interesting that in the presence of a constant likelihood, the sampler would ever prever fewer tracks to more.&lt;/p&gt;
-
-&lt;p&gt;In these cases, the sampler is preferring to split up curves with abnormally large number of observations (compared to other pertitions).&lt;/p&gt;
-
-&lt;p&gt;Would it be interesting to sample over partitions and see how the partition numbers and sizes evolve over time?  Heck yes!&lt;/p&gt;
-
-&lt;h1&gt;Toy problem: sampling partitions&lt;/h1&gt;
-
-&lt;p&gt;Prior: Uniform over number of groups.  Given a group, uniform over partitions.&lt;/p&gt;
-
-&lt;p&gt;Likelihood: uniform.  For simplicity, I'd like the sampler's exploration to not be influenced by which split or merge we pick.&lt;/p&gt;
-
-&lt;p&gt;We implement a split-merge move.  When splitting, a group is picked at random, and its members are randomly split into two groups.  On merge, two groups are picked at random and merged.&lt;/p&gt;
-
-&lt;p&gt;The prior of a model with N observations and k groups is \(1/s(N,k)\) where s the number of ways to partition N into k groups.&lt;/p&gt;
-
-&lt;h2&gt;Results&lt;/h2&gt;
-
-&lt;p&gt;When initialized with a single monolithic group (k=1), the sampler jumps between k=1 and k=2, rejecting about 50% of the time.  &lt;strong&gt;The sampler never jumps to k=3.&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;This is a problem, because we'd expect to spend the same amount of time in the k=3 state as any other, since the target distribution is uniform over number of tracks.&lt;/p&gt;
-
-&lt;p&gt;Either this is a bug, a flaw in my assumptions, or &quot;simply&quot; a mixing problem (a huge practical issue, but theoretically still correct).&lt;/p&gt;
-
-&lt;p&gt;After exhausting myself bug-hunting, I decided to explore the mixing issue.&lt;/p&gt;
-
-&lt;p&gt;Instead of initializing to k=1, I initialized to k=3.  Both the split and merge move have an acceptance probability of exp(-51.0), meaning it accept once in every 7.1e23 samples.  This sampler &lt;strong&gt;definitely has bad mixing&lt;/strong&gt;.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Aside&lt;/em&gt;. It seemed notable that the split and merge move had the exact same acceptance probability for k=3.  At first this seems sensible, since the sampler should spend as much time in a two-group model as in a four-group. It turns out not to be true for any other \(k \neq 3\) I tried, but all exhibited poor mixing.  In fact, this asymmetry is natural, as the cardinality of the split proposals doesn't grow at exactly the same rate as the cardinality of the data-partitions.  This is balanced by the fact that you might transition to a lower model less often than the higher model, but you might spend more time in the lower model once you're there.&lt;/p&gt;
-
-&lt;p&gt;Note that although we've used a uniform likelihood, this mixing problem likely can't be fixed by using a different likelihood.  The likelihood could drive the sampler in a specific direction, but the reverse direction would be even harder to explore.  So the likelihood only makes matters worse.&lt;/p&gt;
-
-&lt;p&gt;Q: Can I compute the expected length spent in each state?&lt;/p&gt;
-
-&lt;p&gt;A: yes.  1/p_leave, where p_leave = (0.5 * split_alpha + 0.5 * merge_alpha)&lt;/p&gt;
-
-&lt;p&gt;Q: Can I compute the expected direction of transition between states?
-A: yes.  split_alpha / (split_alpha + merge_alpha);&lt;/p&gt;
-
-&lt;p&gt;Q: Can I compute the expected ratio between an N-group model and an N+1 group model?
-A: Do MCMC sampling.  When you reach a state, add its expected number of rejected samples to its tally, then transition up or down according to the direction distribution.&lt;/p&gt;
-
-&lt;h2&gt;New toy sampler: Expected ratio between model probabilities&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code&gt;% compute expected samples
-% compute up probability
-% (state, tallies)
-% random walk between states, 
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2&gt;TODO&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Fix dataset six: connect curve 4 to parent&lt;/li&gt;
-&lt;li&gt;Add confirmation code to check for multiple connected components in ground truth.&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Mon, 30 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/30/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/30/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15229&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Finished re-doing Liu's ground-truth.&lt;/p&gt;
-</description>
-				<pubDate>Sat, 28 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/28/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/28/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15229&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Problem with revamped index-estimation code:  it fails miserably on poorly-triangulatable hypotheses.&lt;/p&gt;
-
-&lt;p&gt;The heuristic triangulation explodes in size, probably because triangulated points are all over the map (need to confirm this).&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Adding error codes; if any part of the pipeline can't complete for any reason, set error code and return.  On error, the MCMC move will simply reject the proposal.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Issue with &lt;code&gt;build_full_correspondence&lt;/code&gt;: input track is destroyed and replaced.&lt;/p&gt;
-
-&lt;p&gt;Refactored to replace make_correspondence with init_track.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;make_correspondence -&amp;gt; init_track
-make_trivial_correspondence -&amp;gt; init_trivial_corespondence
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Running &lt;code&gt;offline_pair_candidates_2&lt;/code&gt;.  Seems to be running without crashing.&lt;/p&gt;
-
-&lt;p&gt;Takes about 10 minutes;  seems fast considering all the new logic we've added (re-triangulation, 2D DTW). Probably the mex'd DTW is helping.  Some profiling will likely identify some low-hanging optimization fruit here, too.&lt;/p&gt;
-
-&lt;p&gt;Need to inspect triangulated curves when done.&lt;/p&gt;
-
-&lt;p&gt;Need to see if background subtraction classifier will help prune.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Oops, spoke too soon.  Crash at about 75% completion.&lt;/p&gt;
-
-&lt;p&gt;Random bug in candidate-proposal generator.  wasn't handling the &quot;no candidates&quot; case, resulted in index-out-of-bounds error.&lt;/p&gt;
-</description>
-				<pubDate>Thu, 26 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/26/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/26/work-log</guid>
-			</item>
-		
-			<item>
-				<title>todo</title>
-				<description>&lt;ul&gt;
-&lt;li&gt;TESTS
-
-&lt;ul&gt;
-&lt;li&gt;Three levels of branching
-
-&lt;ul&gt;
-&lt;li&gt;visual test: reconstruction&lt;/li&gt;
-&lt;li&gt;numeric test: fast ML vs reference&lt;/li&gt;
-&lt;li&gt;numeric test: fast Covariance matrix vs. reference&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Finish ground truthing&lt;/li&gt;
-&lt;li&gt;implement recursive update&lt;/li&gt;
-&lt;li&gt;end-to-end sampler
-
-&lt;ul&gt;
-&lt;li&gt;test birth/death move&lt;/li&gt;
-&lt;li&gt;finish swap move&lt;/li&gt;
-&lt;li&gt;implement attachment moves&lt;/li&gt;
-&lt;li&gt;re-order move (see &lt;a href=&quot;/ksimek/research/2013/09/24/todo/&quot;&gt;here&lt;/a&gt;)&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;evaluation&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Thu, 26 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/26/todo</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/26/todo</guid>
-			</item>
-		
-			<item>
-				<title>Track stages</title>
-				<description>&lt;p&gt;A track's &quot;stage&quot; is a description of where it is in the processing pipeline.&lt;/p&gt;
-
-&lt;p&gt;Each stage has one or more track fields associated with it.  No stage may modify fields from the previous stages.&lt;/p&gt;
-
-&lt;h2&gt;Stage 0&lt;/h2&gt;
-
-&lt;p&gt;Track is ready to be processed.   At this stage, the only valid fields are those set by the user, namely:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Track.assoc
-Track.reversed
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To construct a stage-zero track:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;init_track
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2&gt;Stage 1&lt;/h2&gt;
-
-&lt;p&gt;A stage 1 track has passed the correspondence stage.&lt;/p&gt;
-
-&lt;p&gt;Three functions can prepare a track for stage 1:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;init_trivial_track
-merge_correspondence
-build_full_correspondence
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Associated fields are:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;corr
-means
-precisions
-cov_error
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2&gt;Stage 2:&lt;/h2&gt;
-
-&lt;p&gt;In stage 2, raw curve likelihood fields have been constructed, and are ready for post-processing.&lt;/p&gt;
-
-&lt;p&gt;The transition from stage 1 to stage 2 is relatively expensive, as every point requires backprojection, a pass of dynamic time warping, and a few iterations newton's method to find the index set.&lt;/p&gt;
-
-&lt;p&gt;Associated fields&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;ll_means
-ll_precisions
-ll_distances
-sm_lambda
-curve_sm
-curve_sm_t
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Associated functions&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;corr_to_likelihood
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2&gt;Stage 3&lt;/h2&gt;
-
-&lt;p&gt;Stage three consists of inexpensive post-processing of the likelihood fields.  Curve reversal is handled here; flattening and sorting is lumped into this stage too.  Reversing and re-evaluating curves is a common use-case, and this can be done efficiently by keeping stage 3 separate from stage 2.&lt;/p&gt;
-
-&lt;p&gt;This is also where the likelihood covariance blocks are computed; since this is somewhat time-costly, it may be moved into stage 2 in the future.&lt;/p&gt;
-
-&lt;p&gt;Associated fields&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;ll_views_flat
-ll_means_flat
-ll_precisions_flat
-ll_distances_flat
-ll_S
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Associated functions&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;flatten_sort_and_reverse
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2&gt;Stage 4: Attachment&lt;/h2&gt;
-
-&lt;p&gt;Stage 4 is where topology is handled.  The predictive distribution of the branch point is computed and stored for efficient computation of the marginal likelihood later.&lt;/p&gt;
-
-&lt;p&gt;Stage 4 needs to be applied recursively to all children.&lt;/p&gt;
-
-&lt;p&gt;Associated fields&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;parent_ci
-start_index
-prior_K
-branch_distance
-mu_b
-Sigma_b
-branch_mu
-branch_K
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Associated functions&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;attach
-detach
-att_set_branch_distance (called from attach)
-att_set_start_index (called from attach/detach)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2&gt;Stage 5&lt;/h2&gt;
-
-&lt;p&gt;Marginal likelihood has been computed for this track, conditioned on its parent.&lt;/p&gt;
-
-&lt;p&gt;Note: in the current implementation, ml field is not set, and curve_ml simply returns the ml value.  This will change in the near future to comply with the multi-stage model described in this post.&lt;/p&gt;
-
-&lt;p&gt;Associated fields&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;ml
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Associated function&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;curve_ml
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2&gt;Running all stages&lt;/h2&gt;
-
-&lt;p&gt;In many cases, it's not necessary to construct tracks from scratch.   Reversing a curve only requires re-running stages 3 through 5.  Attaching or detaching a curve only requires re-running Stages 4 and 5.&lt;/p&gt;
-
-&lt;p&gt;However, some cases require a full end-to-end running of stages 1 through 5.  The function that does this is:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;build_track
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This function is also a nice reference of how to run each stage.&lt;/p&gt;
-</description>
-				<pubDate>Thu, 26 Sep 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/09/26/reference</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/09/26/reference</guid>
 			</item>
 		
 	</channel>

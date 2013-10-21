@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log - Four days of OpenGL Debugging &larr; </title>
+   <title>Work Log - KJB EM GMM &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -83,240 +83,59 @@
 
 
   <h1 class="title">
-        [Work Log] Work Log - Four days of OpenGL Debugging
+        [Work Log] Work Log - KJB EM GMM
     </h1>
 
-  <div class="date emphnext">October 11, 2013</div>
+  <div class="date emphnext">October 20, 2013</div>
     
 
 
   
-    
+    <p>Still struggling with the EM GMM algorithm.  Found/fixed one bug where responsibilities aren't initialized if NULL is passed to the function.</p>
 
-<div class="meta-info">
-<table>
-    <tr>
-        <th>Project</th>
-        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
-    </tr>
-    <tr>
-        <th>Subproject</th>
-        <td>Likelihood Server</td>
-    </tr>
-    <tr>
-        <th>Working path</th>
-        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;likelihood_server</td>
-    </tr>
+<p>Ran overnight and it hadn't finished at the end.  Found/fixed a bug where the entire @M element responsibility matrix is rescaled 2M times (once per point).</p>
 
-    <tr>
-        <th>SVN Revision</th>
-        <td>15229</td>
-    </tr>
+<hr />
 
+<p>Getting rank-deficient errors.  Looks like this is a result of the huge dataset; covariance matrix is divided by 1e6 (the number of soft-members of the cluster).</p>
 
-</table>
+<p>For now, hack by trying to thin the dataset.  Long-term, adding a minimum offset to the emperical covariance seems to be the common solution.</p>
 
-    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
-</div>
+<p>Possibly normalizing the data would be good.</p>
 
+<hr />
 
-<h2>Status</h2>
+<p>Added offset to covariance (command-line options and file-static variable already existed, just needed to add it to the full_GMM logic).</p>
+
+<p>Added <code>read_gmm.m</code> matlab routine, and plotted along with scatter plot of data.  Results look pretty good:</p>
+
+<p><img src="/ksimek/research/img/2013-10-20-kjb-gmm-result.png" alt="" /></p>
+
+<hr />
+
+<p>Moving trained gmm to ~/data/arabidopsis/training/bd_likelihood_gmm/blur_2.0.gmm</p>
+
+<hr />
+
+<h2>TODO</h2>
 
 <ul>
-<li>Server is now running, connecting, receiving and decoding messages successfully.</li>
-<li>Matlab client is constructing, sending messages, and destroying successfully.</li>
+<li>increase spacing between reconstructed points</li>
+<li>get this running on cuda server</li>
+<li>re-train GMM on held-out dataset.</li>
+<li>implement matlab likelihood sampling</li>
 </ul>
 
 
-<p>Since we've sent our first message and saved it to a file, we no longer need matlab to debug the server, using the --dbg-load-message flag.</p>
-
-<h2>OpenGL crashing </h2>
-
-<p>In render_util.cpp -> render_silhouettes(), crash is occurring somewhere in these lines.</p>
-
-<pre><code>39      GLenum draw_buffers[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-(gdb) list
-40      glDrawBuffers(2, draw_buffers);
-41
-42      glClearColor(0.0,0.0,0.0,0.0);
-43      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-44      glEnable(GL_DEPTH_TEST);
-45      DBG_GL_ETX();
-</code></pre>
-
-<p>The dreaded "invalid operation"</p>
-
-<p>I'm guessing opengl isn't in a valid rendering state yet; we may not have bound the fbo, or forgot to enable a rendering program.</p>
-
-<hr />
-
-<p>yep, fbo wasn't bound.</p>
-
-<p>now running to completion, but result is NaN.</p>
-
-<p>Probably because we're using random numbers for our curves.  Lets grab some real curve data and re-run.  We'll probably need to visualize the silhouette output soon.</p>
-
-<hr />
-
-<div class="meta-info">
-<table>
-    <tr>
-        <th>Project</th>
-        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
-    </tr>
-    <tr>
-        <th>Subproject</th>
-        <td>Data Association v3</td>
-    </tr>
-    <tr>
-        <th>Working path</th>
-        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
-    </tr>
-
-    <tr>
-        <th>SVN Revision</th>
-        <td>15229</td>
-    </tr>
-
-
-</table>
-
-    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
-</div>
-
-
-<p>added function <code>wacv-2012/get_wacv_result.m</code>.</p>
-
-<p>Code to get curves and send them to server:</p>
-
-<pre><code>tmp = get_wacv_result(2);
-tmp = cellfun(@(x) [x; ones(1,size(x,2))], tmp, 'UniformOutput', false);
-socket = construct_render_client('localhost', '12345')'
-send_curves(socket, tmp);
-result = send_curves(socket, tmp);
-destroy_render_client(socket)
-</code></pre>
-
-<hr />
-
-<p>Got first dumps.  issues</p>
-
-<ol>
-<li>all black, no content</li>
-<li>reversed wrong aspect ratio</li>
-</ol>
-
-
-<p>Possible causees for 1.</p>
-
-<ol>
-<li>bad camera files</li>
-<li>bad code for converting intrinsic matrix to opengl</li>
-<li>bad curves?</li>
-</ol>
-
-
-<p>2 seems most likely.  Can debug 1 and 2 by trying old camera object and see if they work;  if so, compare matrices with new matrices.</p>
-
-<h2>Possibly the mods I made to the multi-view likelihoods are the culprit.  I'm using raw matrices now instead of cmara objects in obj.add_view() and Camera_view_wrapper.</h2>
-
-<p>Added command-line option "--dbg-save-frames".  Writes all rendered views to disk as "dump_1.png, dump_2.png,...".  Only the most recent 10 are kept at any time.</p>
-
-<hr />
-
-<p>re-running using turntable camera; passing intrinsic and extrinsic matrices to likelihood.</p>
-
-<p>Renders are still black.</p>
-
-<hr />
-
-<p>Forgot to set white color?</p>
-
-<p>No; its in the render_silhouette function.</p>
-
-<hr />
-
-<p>Found something: wacv results were aritficially centered on zero.  fixed.</p>
-
-<hr />
-
-<p>Did matlab test on modelview and projection matrices and curve points -- z coordinate falls outside of [-1 1].  Beyond far plane.</p>
-
-<p>reason: not negating z-coordinate in test code.</p>
-
-<hr />
-
-<p>changing gears.  running matlab test on original input modelview and projection matrices.</p>
-
-<p>Modelview looks okay. Projection is way off.</p>
-
-<ol>
-<li>intrinsic matrix?</li>
-<li>NDC matrix?</li>
-<li>bounds?</li>
-</ol>
-
-
-<p>Intrinsic looks reasonable.</p>
-
-<p>probably NDC/bounds issue</p>
-
-<hr />
-
-<p>Bug in ndc math</p>
-
-<p>projecting outside from far plane</p>
-
-<hr />
-
-<p>needed to flip axes to handle convention mismatch.</p>
-
-<p>Now getting something, but the positions are looking weird.</p>
-
-<hr />
-
-<p>was re-negating ppo; already flipped during convention resolution.</p>
-
-<hr />
-
-<p>now getting decent results, but off-center and smaller:</p>
-
-<p><img src="/ksimek/research/img/2013-10-12-dump_3.png" alt="" /></p>
-
-<p>rough original to rendering offsets:  up by 56, left by 115.</p>
-
-<h2>non-uniform scaling; width is smaller than height.</h2>
-
-<pre><code>Projecting plant base using
-(a) intrinsic and extrinsic matrices from matlab
-(b) modelview and projection matrices pulled from opengl
-
-results:
-(a) projects to the right place (tested using image and pixelstick)
-(b) NDC coordinates look okay.  I manually remapped (scale and offset), and they look okay.
-</code></pre>
-
-<p>Since NDC look okay, the remapping must be wrong.  glViewport issue?  I'm manually setting it, but maybe it needs to be set for each shader?</p>
-
-<hr />
-
-<p>Or maybe it's a geometry shader issue?  I'm using different modelview and projection matrices now.</p>
-
-<p>=--</p>
-
-<p>Found it (Sunday night) -- Somehow the viewport transformation is getting reset. Possibly viewport is a shader-specific state that needs to be set each time?</p>
-
-<hr />
-
-<p>now centered, need to diagnose silhouette issues:</p>
-
-<p><img src="/ksimek/research/img/2013-10-13-dump_0.png" alt="" /></p>
-
-<h2>TODO (new)</h2>
+<h2>Open issues</h2>
 
 <ul>
-<li>rename matlab "render_client" code to "likelihood_client"</li>
-<li>rename likelihood_server/sampler2.cpp to something not nonsense.</li>
+<li>how to sync datasets on matlab and c++ server?</li>
+<li>Wacv multi-view reconstruction for training</li>
+<li>saving wacv to files for training</li>
+<li>fixing issues in wacv reconstructions</li>
+<li>evaluation methodology</li>
+<li>split/merge</li>
 </ul>
 
 
@@ -329,11 +148,8 @@ results:
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/10/14/work-log" class="next" title="Work Log - Troubleshooting silhouette rendering">Work Log - Troubleshooting silhouette rendering &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/10/09/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/10/19/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>
@@ -350,7 +166,7 @@ results:
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Four days of OpenGL Debugging" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - KJB EM GMM" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -398,7 +214,7 @@ results:
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log - Four days of OpenGL Debugging");
+                    + encodeURIComponent("Work Log - KJB EM GMM");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

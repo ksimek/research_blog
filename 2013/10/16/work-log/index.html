@@ -1,0 +1,523 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Work Log - silhouettes, training likelihood, evaluating likelihood &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Work Log - silhouettes, training likelihood, evaluating likelihood
+    </h1>
+
+  <div class="date emphnext">October 16, 2013</div>
+    
+
+
+  
+    
+
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Likelihood Server</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;likelihood_server</td>
+    </tr>
+
+    <tr>
+        <th>SVN Revision</th>
+        <td>15229</td>
+    </tr>
+
+
+</table>
+
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
+
+
+<p>Enabled glPolygonOffset and it improved results somewhat.  Still getting stippling 10% of the time.</p>
+
+<p>Adding edge-detection code to show stippled edges helps, but adds some internal edges for some reason.</p>
+
+<p>Apparently, we have point spacing too close together.  This introduces lots of little ridges, which makes silhouette edges appear on the interior of the object incorrectly.  We should pro-process curves in matlab to force spacing to be greater than or equal to to the curve radius.</p>
+
+<h2>Likelihood rendering bugs</h2>
+
+<p>Image dumps from our likelihood show all edges are being rendered (not just silhouette edges).</p>
+
+<hr />
+
+<p>seems to be an issue with Camera_render_wrapper.  Possibly the y-axis flipping?</p>
+
+<hr />
+
+<p>Yep.  Reverses the handedness of the projected model.</p>
+
+<p>Shader assumes orientation of forward-facing triangles isn't affected by projection.  Thus, cross-product can be used to determine whether a face is forward-facing (a fundamental operation for classifying silhouette edges).</p>
+
+<p>Can we solve by doing visibility test in world coordinates, which avoids the projection matrix altogether?</p>
+
+<p>Yes, but there's a bug causing a few faulty silhouette edges to appear.  Why?</p>
+
+<hr />
+
+<p>It turns out, we were assuming the normal vector of opposite faces are parallel, and used this to .  Apparently not always the case, especially when sharp corners occur (which happens routinely when point spacing is close).</p>
+
+<p>During testing, we somehow corrupted the GPU's memory.  System sprites (e.g. cursor) are starting to be corrupted, and program keeps crashing  from GPU errors.  Probably constructed too many shaders in a single session.  Will reboot and continue.</p>
+
+<p>Summary: found silhouette rendering bug caused by projection matrix that didn't preserve handedness.  Rewrote silhouette pass 2 geometry shader to handle this case better.  Now renders correctly in both cases.</p>
+
+<h2>Next: determine cause of likleihood NaN's; train the likelihood.</h2>
+
+<h2>Blurred-difference (bd) likelihood issues</h2>
+
+<p>Getting "NaN" when evaluating.  Checking the result of blurring the model shows inf's everywhere.  Weird, because I can confirm that the input data is succesfully blurring:</p>
+
+<p><img src="/ksimek/research/img/2013-10-16-blurred_data.jpg" alt="" /></p>
+
+<ul>
+<li>Same blurrer is used for data and model</li>
+<li>It isn't the input (tried substituting data in for model and still got corrupt stuff back).</li>
+<li>re-initializing blurrer doesn't seem to help</li>
+</ul>
+
+
+<p>Stepping through in GDB...</p>
+
+<hr />
+
+<p>After convolution, values are on the order of 1e+158...  clearly invalid.  Converting to float causes inf.</p>
+
+<hr />
+
+<p>Aside:  the padding added before convolution isn't zeros!  Fixing bug in lib/evaluate/convolve.h:fftw_convolution class.</p>
+
+<hr />
+
+<p>Aside:  Need to remove edges around image border:</p>
+
+<p><img src="/ksimek/research/img/2013-10-16-border_edges.jpg" alt="border edges bug" /></p>
+
+<hr />
+
+<p>Aside: different blurrer for each view?  unnecessary!</p>
+
+<p>Wrong, same blurrer, different internal buffers.  Caused by calling blurrer.init_fttw_method() every time we add a view to the multi-view likelihood.  Removed that call.</p>
+
+<hr />
+
+<p>Apparently, calling blurrer_.init_fftw_method() is wreaking all kinds of havok on the blurring results.  I have idea why.  Possibly calling init_fftw_method() more than once is simply not supported.  But that call simply destroys and object and creates a new one, so why is that different from the first time we called it?</p>
+
+<hr />
+
+<p>Theory: fftw wisdom is messing with us?</p>
+
+<p>Results: nope</p>
+
+<hr />
+
+<p>We have a working case and a non-working case.  Can we walk from one case to the other and find the exact change that causes the error?</p>
+
+<p>Aside: Here's a bizarre result wer'e getting during failure:</p>
+
+<p><img src="/ksimek/research/img/2013-10-16-weird_results.jpg" alt="" /></p>
+
+<p>Kind of cool!</p>
+
+<p>Actually, there might be a hint here... Notice the eliptical shapes that are about the same size as the turntable, but shifted and screwed up.</p>
+
+<p>It's possible what we're seeing is convolution with a random mask.  the two main ellipses we're seeing are two random bright pixels in the mask, and the miscellaneous roughness might be ca combinariton of small positive and negative values causing the texture we see.  Next step: inspect mask</p>
+
+<hr />
+
+<p>Bingo!  We're working with a random mask.</p>
+
+<p>Let's step back to the original failing case and see if the mask is still random.</p>
+
+<hr />
+
+<p>Confirmed.  Here's an eample mask:</p>
+
+<p><img src="/ksimek/research/img/2013-10-16-tmp.jpg" alt="" /></p>
+
+<p>Here it is dimmer:</p>
+
+<p><img src="/ksimek/research/img/2013-10-16-bunk_maks_dimmer.jpg" alt="" /></p>
+
+<p>Anything look familiar?  It's derived from our plant image (notice the ellipses from the turntable).</p>
+
+<p>Theory: somehow the mask is getting overwritten with our blurred model.</p>
+
+<hr />
+
+<p>Solved.  Simple bug but was obscured by several issues.</p>
+
+<p>The fundamental issue was that when the blurring mask was being padded, the padding wasn't being filled with zeros.  Thus, the padded mask consisted of a small section of real mask, surrounded by huge amounts of uninitialized memory.</p>
+
+<p>This was a bug that I discovered and fixed 12 months ago, but it got rolled back when Andrew revamped the FFTW convolution class.  Ultimately, I was able to restore my changes to the FFTW class without much trouble, but for the six hours that followed, these changes weren't being compiled, because they were in a header file, and the build system only rebuilds object files if the "cpp" file is changed.</p>
+
+<p>Further, there was a red-herring that appeared as "re-initializing the blurrer causes the errors".  While this was true, it was only because re-initializing also re-initialized the blurring mask, and it was only during re-initialization did the uninitialized mask padding have junk -- on the first initialization, the memory just happened to be blank.  Go figure.</p>
+
+<p>This was an absolutely essential bug to find and fix.  Glad its fixed, just wish it hadn't regressed in the first place.</p>
+
+<hr />
+
+<p>Okay time to reset.  Let's confirm that the rendered models are blurring correctly.  Then confirm non-zero log-likleihood result.    Then on to training.</p>
+
+<p>Model blurring: CHECK
+Finite likelihood: CHECK  (result: -3.38064e+08)
+Likelihood is near-optimal: <strong>FAIL</strong>. see below</p>
+
+<h2>Optimality test</h2>
+
+<p>Added debugging option to shift rendering left/right/up/down in the image: <code>--dbg-ppo-x-offset</code> and <code>--dbg-ppo-y-offset</code>.   Ideally, the likleihood should be optimized at zero offset</p>
+
+<p>Log likelihood vs x-offset</p>
+
+<pre><code> 0  -3.38064e+08
++1  -3.38069e+08
++2  -3.38068e+08
++5  -3.38033e+08
++10 -3.37881e+08
+-2  -3.38039e+08
+-5  -3.37968e+08
+-10 -3.37786e+08
+</code></pre>
+
+<p><img src="/ksimek/research/img/2013-10-16-likleihood_plot_vs_x.png" alt="" /></p>
+
+<p>Weird... Why is it at a local <em>minimum</em> at the center?</p>
+
+<p>Log likelihood vs y-offset</p>
+
+<pre><code> 0  -3.38064e+08
+-2  -3.38062e+08
+-5  -3.38033e+08
+-10 -3.3789e+08
+-20 -3.37321e+08
+-40 -3.36139e+08
+-80 -3.33693e+08
+ 2  -3.38052e+08
+ 5  -3.38025e+08
+ 10 -3.37983e+08
+ 20 -3.37955e+08
+ 40 -3.3785e+08
+ 80 -3.37523e+08
+</code></pre>
+
+<p><img src="/ksimek/research/img/2013-10-16-likelihood_plot_vs_y.png" alt="" /></p>
+
+<p>Note that as y decreases, the top of the plant starts to fall off the screen. This suggests that having fewer model points might be over-preferred.  Need to sanity-check the GMM model we're using -- I trained it months ago and never really leaned on it hard, so it's the first place to look for problems.</p>
+
+<p>Also, might be a scaling issue.  Double-check that blurred model and blurred data have similar scale.</p>
+
+<h2>GMM sanity check</h2>
+
+<p>Plotting first and second standard deviation of the joint distribution of model-pixel-intensity and data-pixel-intensity.</p>
+
+<p><img src="/ksimek/research/img/2013-10-17-bd.gmm.png" alt="" /></p>
+
+<p>This looks sensible.  The first component is the diagonal one, representing true postives (in the presence of random perturbations).</p>
+
+<p>The second component is at the origin -- true negatives.</p>
+
+<p>The third component is along the y-axis, representing false positives in the data, aka noise.</p>
+
+<p>The first component has roughly 10x less weight than the second and third.</p>
+
+<hr />
+
+<p>No component for the false negatives (aka missing data).  As I recall, running EM on a GMM with four or more components always resulted in redundant components.  Possibly hand-initializing the components in each of the four positions might help.</p>
+
+<p>I also recall some sort of GPU limitation that prevented me from evaluating more than three components in hardware.  That seems unusual though, and I may be misremembering.</p>
+
+<p>Does this provide any insight as to why we prefer our model to drift off of the screen?  This introduces more "negative" model pixels, pushing toward the well-supported y-axis are of our model.  Possibly this is the result of poor calibration?  Or wrong blurring sigma?</p>
+
+<p>TODO: re-run the x/y offset experiment with smaller blurring sigma.</p>
+
+<h2>Data Sanity check</h2>
+
+<p>To do.  Approach: instead of evaluating likelihood pixels against data, dump model/data pixel pairs into a list and (a) plot them or (b) train on them.  Maybe just dump to a file and do it in matlab?</p>
+
+<h2>Blooper reel</h2>
+
+<p>While writing miscellaneous blocks of memory to disk as images, got some interesting but totally wrong results.</p>
+
+<p>The following is partially due to rendering an array of doubles as floats.  Interesting banding pattern.  A mini-Mondrian!</p>
+
+<p><img src="/ksimek/research/img/2013-10-16-fun-mess-1.jpg" alt="" /></p>
+
+<p>The next is just uninitialized memory.  Iteresting patterns :-)</p>
+
+<p><img src="/ksimek/research/img/2013-10-16-fun-mess-2.jpg" alt="" /></p>
+
+<h2>TODO (new)</h2>
+
+<ul>
+<li>increase spacing between reconstructed points</li>
+<li>remove edges around image border.</li>
+<li>share blurrer between views</li>
+<li>get this running on cuda server</li>
+<li>why is it crashing on exit?</li>
+<li>Data sanity check - does it roughly match the GMM's distribution?</li>
+<li>train likelihood</li>
+<li>add "dump" mode to bd-likelihood which saves all image pairs to disk for analysis or debugging.</li>
+<li>test empty model likelihood</li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/10/17/work-log" class="next" title="Work Log - Uninformative likelihood?">Work Log - Uninformative likelihood? &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2013/10/15/work-log" class="prev" title="Work Log - Finishing Likelihood Server, integrating to sampling engine">&larr; Work Log - Finishing Likelihood Server, integrating to sampling engine</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+  
+  		<div id="fb-root"></div>
+
+<div class="post-share ulno mob">
+
+<!-- Hacker News -->
+<span class="hn"><span id="hnews"></span></span>
+
+<!-- Twitter -->
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - silhouettes, training likelihood, evaluating likelihood" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+
+<!-- Google+ -->
+<span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
+
+<!-- Facebook -->
+<!--
+<span class="fb"><div class="fb-like" data-send="false" data-layout="button_count" data-width="90" data-show-faces="false" data-font=""></div></span>
+-->
+
+<!-- Reddit -->
+<script type="text/javascript" src="http://www.reddit.com/static/button/button1.js"></script>
+</div>
+
+<script>
+  
+(function(doc, script) {
+ 	
+	//Async Social Buttons
+    var js, 
+        fjs = doc.getElementsByTagName(script)[0],
+        add = function(url, id) {
+            if (doc.getElementById(id)) {return;}
+            js = doc.createElement(script);
+            js.src = url;
+            id && (js.id = id);
+            fjs.parentNode.insertBefore(js, fjs);
+        };
+    
+    // Twitter SDK
+    add('//platform.twitter.com/widgets.js', 'twitter-wjs');
+
+    // Google+ button
+    add('https://apis.google.com/js/plusone.js');
+    
+    // Facebook SDK
+    add('//connect.facebook.net/en_GB/all.js#xfbml=1&appId=123', 'facebook-jssdk');
+    
+    //Hacker News Button 	
+ 	var hn_like = document.createElement('iframe');
+      hn_like.frameborder="no";
+      hn_like.scrolling="no";
+      hn_like.height="28px";
+      hn_like.width="110px";
+      hn_like.style="border:0px;";
+      hn_like.src = "http://hnlike.com/upvote.php?link="
+                    + encodeURIComponent(document.location)
+                    + "&title="
+                    + encodeURIComponent("Work Log - silhouettes, training likelihood, evaluating likelihood");
+      hn_like.innerHTML="iframes not supported by your browser";
+      
+      var where = document.getElementById("hnews");
+      where.parentNode.insertBefore(
+        hn_like,
+        where
+      );
+}(document, 'script'));
+
+</script>
+
+  
+
+
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

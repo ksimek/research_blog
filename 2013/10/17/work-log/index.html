@@ -1,0 +1,525 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Work Log - Uninformative likelihood? &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+        
+    <script src="/ksimek/research/js/png_animation.js"></script>
+        
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Work Log - Uninformative likelihood?
+    </h1>
+
+  <div class="date emphnext">October 17, 2013</div>
+    
+
+
+  
+    
+
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Data Association v3</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
+    </tr>
+
+    <tr>
+        <th>SVN Revision</th>
+        <td>15701</td>
+    </tr>
+
+
+</table>
+
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
+
+
+<h2>Likelihood sanity check (ctd)</h2>
+
+<p>An empty model should have a significantly worse likelihood than the ground truth model.</p>
+
+<pre><code>ground truth model:  -3.38064e+08
+empty model: -3.28279e+08
+full model: -1.20572e+08
+</code></pre>
+
+<p>Both empty and full are better than ground truth.  Why??</p>
+
+<p>At least possiblities here:</p>
+
+<ol>
+<li>Noise level is so high that fitting is impossible (remember the paper "Fundamental limits of Bayesian Inference: Order Parameters and Phase Transitions for Road Tracking")</li>
+<li>Bug.  maybe renderings are just waaaay off?</li>
+<li>Bad calibration.  Looking at the GMM plot from yesterday (see below) it looks like the one-sigma contour is very very large.</li>
+</ol>
+
+
+<p><img src="/ksimek/research/img/2013-10-17-bd.gmm.png" alt="" /></p>
+
+<p>Case 1 is what's left over once 2 and 3 are ruled out.</p>
+
+<h2>Rendering sanity check.</h2>
+
+<p>This seems to be a culprit.</p>
+
+<p>Here's first data view:</p>
+
+<p><img src="/ksimek/research/img/2013-10-17-data-view-1.jpg" alt="" /></p>
+
+<p>Not a good match to the actual first data image:</p>
+
+<p><img src="/ksimek/research/img/2013-10-17-ler_2_36_0.jpg" alt="" /></p>
+
+<p>But a good match to the second data image:</p>
+
+<p><img src="/ksimek/research/img/2013-10-17-ler_2_36_1.jpg" alt="" /></p>
+
+<p>Must be an off-by-one error when reading data.</p>
+
+<p>The cameras are not off-by one.  Here's the rendering of the model under the first camera:</p>
+
+<p><img src="/ksimek/research/img/2013-10-17-model-view-1.jpg" alt="" /></p>
+
+<p>Good match to the first data image above.</p>
+
+<p>Bug is in the config file:</p>
+
+<pre><code>view-indices=1:4:36  # bug here
+view-indices=0:4:35  # should be this
+</code></pre>
+
+<hr />
+
+<p>Good news, bad news.</p>
+
+<p>Good news: after fixing config file, data and rendering look good (use slider to swap between images)</p>
+
+<script>
+$(function(){
+    var urls = [
+        "/ksimek/research/img/2013-10-17-data.jpg",
+        "/ksimek/research/img/2013-10-17-model.jpg"
+        ]
+
+    construct_animation($("#data-model-anim"), urls);
+});
+</script>
+
+
+<div id="data-model-anim" style="width:530px"> </div>
+
+
+<p>Bad news: likelihood gets <strong>worse</strong>!</p>
+
+<pre><code>fixed likelhood: -3.38298e+08
+</code></pre>
+
+<p>It looks like the rendered model is lighter than the data model.  This might account for the issues we're seeing.  We're in the region to the right of the diagonal "true positive" component in the GMM (see contour plot above).  In this region, the noise model has a stronger pull than the true positive model, which partially explains why we get better when fewer model pixels are on the screen.   It doesn't explain why the model gets better when we shift left and right -- maybe it fits better in the tails of the blurred data, but we'd expect it to eventually get worse.  Lets test it.</p>
+
+<p>Recall that this GMM was trained on a manipulated version of the data image, not a rendered 3D model image.  The process taken was (a) removing all background pixels from the data image and (b) perturbing the foreground pixels. We may have removed a few foreground pixels to add false positives, but the amount was small, if memory serves.  Now we have far fewer model pixels, so we expect the "true positive" region to be slanted more upward.</p>
+
+<h2>Optimality test (redux)</h2>
+
+<p>Code:</p>
+
+<pre><code>x_values="-80 -40 -20 -10 -5 -2 -1 0 1 2 5 10 20 40 80"
+for x in $x_values; do
+    echo -n "$x ";
+    ./likelihood_server \
+        --config=test.conf  \
+        --image-bounds "0 530 397 0 200 2000"  \
+        --cam-convention "1 0 0"  \
+        --dbg_save_frames  \
+        --dbg_load_message  \
+        --dbg-ppo-x-offset=$x 2&gt; /dev/null | grep ^3 | sed -e 's/3 //' -e 's/,//';
+done
+</code></pre>
+
+<p>Output (delta-x vs log-likelihood):</p>
+
+<pre><code>-80 -3.36866e+08
+-40 -3.36987e+08
+-20 -3.37434e+08
+-10 -3.37864e+08
+-5 -3.38169e+08
+-2 -3.38279e+08
+-1 -3.38294e+08
+0 -3.38298e+08
+1 -3.38292e+08
+2 -3.38275e+08
+5 -3.38172e+08
+10 -3.37912e+08
+20 -3.37479e+08
+40 -3.36958e+08
+80 -3.36991e+08
+</code></pre>
+
+<p>Plot:</p>
+
+<p><img src="/ksimek/research/img/2013-10-17-likelihood_plot_vs_x.png" alt="" /></p>
+
+<h2>"Full" model issue</h2>
+
+<p>One of the strangest things is the fact that a rendering full of "1.0's" performs far better than the ground truth or empty model.  This area lies along the x-axis in the GMM contour plot, where there is no support.</p>
+
+<p>Lets debug this.</p>
+
+<hr />
+
+<p>Found an insane bug.  Below is the loop that compares all the pixels of the data and rendered model:</p>
+
+<pre><code>    for(size_t i = 0; i &lt;= size_; ++i)
+    {
+        kjb::Vector2 x;
+        x[0] = model[i];
+        x[1] = data_[i] + 1;
+
+        ...  // compute p(x[1] | x[0])
+    }
+</code></pre>
+
+<p>I have no idea why we're adding 1.0 to <code>data_[i]</code>, but this explains everything.  In the "full" model, it puts us right on the diagonal of the GMM.  In the empty model, we're right on the x-axis.  Both are well-supported regions.  In the ground truth model, we're lying between these extremes, which is a no-man's land of near-zero support.</p>
+
+<p>Spending 5 minutes to determine how this got added...</p>
+
+<p>...</p>
+
+<p>It was added between November 11 and December 13 last year.   No obvious reason.  Oh well.</p>
+
+<p>New sanity check numbers:</p>
+
+<pre><code>full model -5.2217e+08
+ground truth model 4.03273e+06
+empty model: 4.01252e+06
+</code></pre>
+
+<p>Much more sensible.  Missing data looks terrible, noise looks okay but not great,  ground truth looks best.  Lets do an offset plot just to be safe.</p>
+
+<h2>Optimality test (redux<sup>2)</sup></h2>
+
+<p>Results:</p>
+
+<pre><code>-80 3.1039e+06
+-40 3.27557e+06
+-20 3.58156e+06
+-10 3.77333e+06
+-5 3.93159e+06
+-2 4.01459e+06
+-1 4.02845e+06
+0 4.03273e+06
+1 4.02704e+06
+2 4.01209e+06
+5 3.93021e+06
+10 3.78782e+06
+20 3.60557e+06
+40 3.26585e+06
+80 3.26894e+06
+</code></pre>
+
+<p>Plot</p>
+
+<p><img src="/ksimek/research/img/2013-10-17-likelihood_plot_vs_x_fixed.png" alt="" /></p>
+
+<p>Oh Yeah!!</p>
+
+<h2>BD Likelihood Data Dump Mode.</h2>
+
+<p>add a mode by which pixel likelihood will save pixel data to files for analysis or debugging</p>
+
+<p>changes will appear in:</p>
+
+<ol>
+<li>lib/evaluate/bd_likelihood.h - Bd_pixel_likelihood_cpu</li>
+<li>lib/evaluate/bd_likelihood.h - Bd_mv_likeliood_cpu</li>
+<li>./likelihood_server.cpp - Options</li>
+<li>./likelihood_server.cpp - main()</li>
+</ol>
+
+
+<hr />
+
+<p>Added dump mode.  Probably should move this into a separate directory, or at least a different program, since it has almost nothing to do with the likleihood server.</p>
+
+<h2>TODO</h2>
+
+<ul>
+<li>rename matlab "render_client" code to "likelihood_client"</li>
+<li>increase spacing between reconstructed points</li>
+<li>remove edges around image border.</li>
+<li>get this running on cuda server</li>
+<li>train likelihood</li>
+</ul>
+
+
+<h2>Open issues</h2>
+
+<ul>
+<li>how to sync datasets on matlab and c++ server?</li>
+<li>Wacv multi-view reconstruction for training</li>
+<li>saving wacv to files for training</li>
+<li>fixing issues in wacv reconstructions</li>
+<li>evaluation methodology</li>
+<li>split/merge</li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/10/19/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2013/10/16/work-log" class="prev" title="Work Log - silhouettes, training likelihood, evaluating likelihood">&larr; Work Log - silhouettes, training likelihood, evaluating likelihood</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+  
+  		<div id="fb-root"></div>
+
+<div class="post-share ulno mob">
+
+<!-- Hacker News -->
+<span class="hn"><span id="hnews"></span></span>
+
+<!-- Twitter -->
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Uninformative likelihood?" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+
+<!-- Google+ -->
+<span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
+
+<!-- Facebook -->
+<!--
+<span class="fb"><div class="fb-like" data-send="false" data-layout="button_count" data-width="90" data-show-faces="false" data-font=""></div></span>
+-->
+
+<!-- Reddit -->
+<script type="text/javascript" src="http://www.reddit.com/static/button/button1.js"></script>
+</div>
+
+<script>
+  
+(function(doc, script) {
+ 	
+	//Async Social Buttons
+    var js, 
+        fjs = doc.getElementsByTagName(script)[0],
+        add = function(url, id) {
+            if (doc.getElementById(id)) {return;}
+            js = doc.createElement(script);
+            js.src = url;
+            id && (js.id = id);
+            fjs.parentNode.insertBefore(js, fjs);
+        };
+    
+    // Twitter SDK
+    add('//platform.twitter.com/widgets.js', 'twitter-wjs');
+
+    // Google+ button
+    add('https://apis.google.com/js/plusone.js');
+    
+    // Facebook SDK
+    add('//connect.facebook.net/en_GB/all.js#xfbml=1&appId=123', 'facebook-jssdk');
+    
+    //Hacker News Button 	
+ 	var hn_like = document.createElement('iframe');
+      hn_like.frameborder="no";
+      hn_like.scrolling="no";
+      hn_like.height="28px";
+      hn_like.width="110px";
+      hn_like.style="border:0px;";
+      hn_like.src = "http://hnlike.com/upvote.php?link="
+                    + encodeURIComponent(document.location)
+                    + "&title="
+                    + encodeURIComponent("Work Log - Uninformative likelihood?");
+      hn_like.innerHTML="iframes not supported by your browser";
+      
+      var where = document.getElementById("hnews");
+      where.parentNode.insertBefore(
+        hn_like,
+        where
+      );
+}(document, 'script'));
+
+</script>
+
+  
+
+
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+
