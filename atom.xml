@@ -4,13 +4,370 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-10-21T09:16:03-07:00</updated>
+ <updated>2013-10-23T18:29:58-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log - Implementing Two-term likelihood</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/10/23/work-log"/>
+   <updated>2013-10-23T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/10/23/work-log</id>
+   <content type="html">&lt;p&gt;Working on Matlab integration.&lt;/p&gt;
+
+&lt;p&gt;Quick test shows we can get about 20 evaluations per second.  Not bad, considering each evaluation consists of 9 image likleihoods.  There's some room for improvement here, but probably not worth pursuing at the moment:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;leapfrog rendering: render (a) while evaluating on (b).&lt;/li&gt;
+&lt;li&gt;cleaning up geometry and fragment shaders (fewer branches, less storage)&lt;/li&gt;
+&lt;li&gt;try other GPU blurring routines.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h1&gt;New Likelihood&lt;/h1&gt;
+
+&lt;p&gt;Scenario: we have a decent likelihood that is linear-gaussian (and a gaussian prior), so we can compute the marginal likelihood in closed-form.  However, we'd like to incorporate additional sources of evidence whose likelihoods aren't gaussian.  We'll see how we can estimate the joint marginal likelihood with simple Monte-Carlo sampling (no MCMC needed, no gradient).&lt;/p&gt;
+
+&lt;h2&gt;Derivation&lt;/h2&gt;
+
+&lt;p&gt;The old marginal likelihood looked like this:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+p(D_1) &amp;= \int p(x) p(D_1 | x) dx
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;After introducing the extra likelihood term, the joint probability is no longer linear-gaussian, so the exact marginal likelihood involves an intractible integral.  However, by  re-arranging, we see we can get a good monte-carlo approximation:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+p(D_1, D_2) &amp;= \int p(x) p(D_1 | x) p(D_2 | x) dx \\
+p(D_1, D_2) &amp;= \int p(x | D_1) p(D_1) p(D_2 | x) dx &amp; \left(\text{Bayes thm (see below)}\right) \\
+p(D_1, D_2) &amp;= p(D_1) \int p(x | D_1) p(D_2 | x) dx \\
+p(D_1, D_2) &amp;= p(D_1) /N \sum p\left(D_2 | x^{(*)}\right) &amp; \text{(Monte Carlo)}
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;In the second line, I've replaced the first two terms using Bayes theorem.  In the last line, the x-stars are samples from \(p(x | D_1)\), which we have in closed-form due to linear-Gaussian prior and likelihood for \(D_1\).&lt;/p&gt;
+
+&lt;p&gt;Thus, we see if at least one source of data yields a linear-gaussian likelihood, we can incorporate additional data with arbitrary likelihoods  in a principled way.  In many cases, \(p(x | D_1) \) has low variance, so a small number of Monte-Carlo samples are sufficient for a good estimate, even one.  Even if the estimates are bad, they are unbiased, so any MCMC involving the marginal likelihood will converge to the target distribution.&lt;/p&gt;
+
+&lt;h2&gt;Importance Sampling version&lt;/h2&gt;
+
+&lt;p&gt;We can alternatively derive this in terms of importance sampling, setting the proposal probability q(x) to \(p(x | D_1) \):&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+p(D_1, D_2) &amp;\approx 1/N \sum p(x) p(D_1 | x)p(D_2 | x) \frac{1}{q(x)} \\
+            &amp;= 1/N \sum p(x) p(D_1 | x)p(D_2 | x) \frac{p(D_1)}{p(x) p(D_1 | x)} \\
+            &amp;= 1/N \sum p(D_2 | x) p(D_1) \\
+            &amp;= p(D_1)/N \sum p(D_2 | x) 
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Implementation&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;File:&lt;/strong&gt; curve_tree_ml_2.m&lt;/p&gt;
+
+&lt;p&gt;Basic idea&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;construct a thinned output index set (optional, but smart)&lt;/li&gt;
+&lt;li&gt;construct a posterior distribution over the thinned set&lt;/li&gt;
+&lt;li&gt;Add perturbation variance to the posterior&lt;/li&gt;
+&lt;li&gt;take average over n trials: sample curveset and evaluate pixel likelihood&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Step 2 required updating to construct_attachment_covariance, which only constructs symmetric covariance matrices.  We need the covariance between indices with observations and the desired output indices.  Fully refactored that function into &lt;code&gt;construct_attacment_covariance_2.m&lt;/code&gt;; confirmed correctenss in the case of the self-covariance by using an existing test for version 1 of that function.  If non-symmetric, the upper-triangular blocks are processed in a second pass, swapping indices so we can re-use existing code.&lt;/p&gt;
+
+&lt;p&gt;Need to try view-specific sampling, i.e. sample 9 different curves from 9 different views.  This refactor affects likelihood server, client, and message format.  I'm worried about the performance hit, but probably not worth worrying about (or futile).  Coarse sampling of indices could mitigate.    In any case, view-specific sampling is probably necessary, because we're using such low blurring levels in the Bd_likelihood, so the reconstruction needs to fall near the data.  We've seen how plant motion and camera miscalibration cause &quot;good&quot; 3D curves to reproject up to 10 pixels away from the data in some views.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;strong&gt;Side-note&lt;/strong&gt; - the tcp connection is working very reliably so far!  Even after the machine sleeping/resuming several times, and suspending the server job for serveral hours, the socket is still valid and communicating flawlessly!&lt;/p&gt;
+
+&lt;h2&gt;TODO (new)&lt;/h2&gt;
+
+&lt;p&gt;Some protocol for starting and loading the likelihood server from matlab code&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/10/22/work-log"/>
+   <updated>2013-10-22T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/10/22/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15229&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Still searching for inf bug in libcudcvt blurred_difference_likelihood.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Found it:  my GPU-based log_sum routine had a bug.  instead of subtracting the maximum value before exp-summing, it subtracted an arbitrary value.  The find-max loop looked like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Real pi = v[0];
+
+#pragma unroll
+for(unsigned int i = 1; i &amp;lt; N; ++i)
+{
+    pi = pi &amp;lt; v[0] ? v[0] : pi;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Obviously, the zeros should be i's.&lt;/p&gt;
+
+&lt;p&gt;A great bug to have found and fixed, but really frustrating that I let it slip through in the first place.  So stupid!  But it didn't affect correctness in the common case, so my tests didn't catch it.  It makes a good case for randomized testing (as if a good argument was lacking...).&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;(semi-obvious) note to self: conditional gaussian mixture is not equal to mixture of conditional gaussians!&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;okay, a few more cleanup tasks, then on to real goals:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;cleanup and commit version 0.1 of the likelihood server -- done&lt;/li&gt;
+&lt;li&gt;split training into it's own directory. -- done&lt;/li&gt;
+&lt;li&gt;Get likelihood server connecting reliably with matlab on different computers.&lt;/li&gt;
+&lt;li&gt;implement likelihood importance sampling into maltlab's curve_ml procedure&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;hr /&gt;
+
+&lt;p&gt;Thought some on birth moves.  It seems like there are some possibilities for births larget than two by using the adjacency graph created by pair candidates.&lt;/p&gt;
+
+&lt;p&gt;for now, start with greedy&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log - Linux NVidia/Cuda/X11 erorrs; Cuda server; matlab integration</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/10/21/work-log"/>
+   <updated>2013-10-21T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/10/21/work-log</id>
+   <content type="html">&lt;p&gt;Getting my (cuda-equipped) desktop system running with likelihod_server.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Trouble building makefiles. Csh issue with new makefiles.  Kobus fixed&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Still can't build makefiles. Probilems in the ./lib subdirectory is apparently blocking kjb_add_makefiles from finishing&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Some makefiles were missing in ./lib.  Adding them was problematic, because (like before) kjb_add_makefiles wasn't finishing, because dependency directories were missing makefiles.  Also had some issues in kjb /lib, out of date from svn and some compile bugs I introduced in my last commit.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Compiling now, but shader is giving errors at runtime (opengl can't compile it, but no error message is given.&lt;/p&gt;
+
+&lt;p&gt;Rebooting...&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;No desktop.  Missing disk issue?  Tweaked fstab, still no X11.  Must be a driver issue.  Couldn't find driver from NVidia's I downloaded from web site months ago.  Using driver &quot;Ubuntu-X&quot; PPA.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Still no X.  /var/log/Xorg.0.log says driver and client have different versions.  Got a tip online:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo dpkg --get-selections | grep nvidia
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Lots of extra crap there (old versions, experimental drivers, etc).  'sudo apt-get purged' all the non-essentials.  Now we're getting to login screen, but login is failing (simply returns to login screen).&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Found solution:&lt;/p&gt;
+
+&lt;p&gt;   sudo  rm ~/.Xauthority&lt;/p&gt;
+
+&lt;p&gt;Booting successfully.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Running likelihood_server...  shader is now compiling successfully!   Previous issues must have been driver issues as a result of the recent 'sudo apt-get upgrade' without restart.&lt;/p&gt;
+
+&lt;p&gt;Getting segfault when dumping pixels, though.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Caused by trying to read from cuda memory as if it were main memory.  Should be dumping if we're using GPU (or use a different dump function).&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Fixed;  if using gpu, copy from cuda to temp buffer, then call normal routine.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Getting nan's from likelihood.  Need to dump from GPU likleihood, which means digging into libcudcvt.  Got some build errors resulting from a boost bug from 8 months ago (which arose because I updated GCC).&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;cudcvt updated to grab blurred frames for (some method names changed to better match the analogous CPU likelihood in KJB.).&lt;/p&gt;
+
+&lt;p&gt;Moved &quot;dump&quot; routines from Bd_mv_likelihood_cpu to the base class Bd_mv_likelihood as pure virtual function, and implemented a version in Bd_mv_likelihood_gpu to call cudcvt's new frame-grabbing code.  So &quot;dump&quot; mode now works on both cpu and gpu version.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Dumped data from CUDA likelihood; looks fine.  So I'm still clueless why we're getting nan values.&lt;/p&gt;
+
+&lt;p&gt;Sanity check -- check that tests in libcudcvt are still passing&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;test is failing on an assert.  Looks like an overzealous assert with a low percent-error threshold.&lt;/p&gt;
+
+&lt;p&gt;Lowered threshold, test finished; GMM model doesn't match between gpu and cpu versions...&lt;/p&gt;
+
+&lt;p&gt;what's changed?  Rolling back to first releast to see if tests pass.  Is it possible I never validated this?  Or maybe different GGM's being used between cpu and gpu?&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Old version crashed and burned hard.  GPU is returning 'inf'.  No help here...&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Oops, svn version has lots of uncommitted changes, including bugfixes.  No wonder it was no help.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;found issue: introduced a regression when troubleshooting last bug.  Grrr.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Still getting 'inf'.  Checked:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;GPU buffers contain valid data for data and model&lt;/li&gt;
+&lt;li&gt;CPU version gives finite results.&lt;/li&gt;
+&lt;li&gt;GPU can give finite results (e.g. in test application)&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;hr /&gt;
+
+&lt;p&gt;Modified libcudcvt test to receive arbitrary data and model images.  It's giving finite results, so it must be something about how I'm calling it in the likelihood server program.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;strong&gt;issue:&lt;/strong&gt; Bd likelihood in GMM mode gives lower values for ground truth model than random model.&lt;/p&gt;
+
+&lt;p&gt;Bug. fixed.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Digging deeper into 'inf' issue.&lt;/p&gt;
+
+&lt;p&gt;Dug all the way into the thrust::inner_product call.  Probed both buffers -- look okay.  mixture components look okay&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;strong&gt;Got it!&lt;/strong&gt;  Was able to reproduce the 'inf's in the likelihood test program in libcudcpp.  It was so hard to reproduce because it only occurred when&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;old GMM values were used&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;unblurred&lt;/em&gt; model &lt;em&gt;and&lt;/em&gt; data were used&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Regarding 2, previosuly I just used the unblurred model, since it was at hand from a cuda dump, but used the blurred data from a training dump.&lt;/p&gt;
+
+&lt;p&gt;Blurring doesn't seem to matter; both 2.0 and 5.0 give inf.&lt;/p&gt;
+
+&lt;p&gt;Interestingly, the perfect model doesn't oveflow, but the random (almost null) model does.&lt;/p&gt;
+
+&lt;p&gt;Also, for all the 'inf' cases, the cpu results aren't terribly high, so float overflow seems unlikely.&lt;/p&gt;
+
+&lt;p&gt;Most likely it's the conditioning, where the joint pdf is divided by the marginal.  Maybe we're getting some bizzare model values that are off the charts?  But using the model image with the blurred data image is no problem, so that suggests the model values aren't a problem.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;strong&gt;Interesting:&lt;/strong&gt; Tried removing border edges and the problem disappeared.  Is it possible that the blurring routine is not robust to near-edge pixels?&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;idea: dump image after scale-offset, but before reduce&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Results:&lt;/p&gt;
+
+&lt;p&gt;Probability maps look sensible when a 2-pixel margin is added (--data-margin=2).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-22-gmm_pdf_2.tiff.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;(above: 2.0 blurring, 2 pixel margin)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-22-gmm_pdf.tiff.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;(above: 5.0 blurring, 2 pixel margin)&lt;/p&gt;
+
+&lt;p&gt;Notice what happens when we disable the data margin (rendered dimmer and with blue padding to emphasize effect):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-22-gmm_pdf_no_margin.tiff.jpg&quot; alt=&quot;&quot; /&gt;
+(2.0 blurring, 0 pixel margin)&lt;/p&gt;
+
+&lt;p&gt;Notice the white pixels around the border, which presumably correspond to inf values.&lt;/p&gt;
+
+&lt;p&gt;Inspecting the blurred data image, it looks like these pixels are, indeed, the brightest in the image.  It's possible we were lucky enough to have found the maximum range of this gmm.&lt;/p&gt;
+
+&lt;p&gt;It looks like evaluating the bivariate normal is underflowing.  It could have been brought back down to size during conditioning, but we never made it that far.  could refactor by computing conditional covariance matrix beforehand, instaed of taking a ratio of computed values&lt;/p&gt;
+
+&lt;h2&gt;TODO (new)&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Pre-test all incoming data images: evaluate against an empty image and a full image and check for NaN and inf.&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Work Log - KJB EM GMM</title>

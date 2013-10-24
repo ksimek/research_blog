@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log - KJB EM GMM &larr; </title>
+   <title>Work Log &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -83,61 +83,83 @@
 
 
   <h1 class="title">
-        [Work Log] Work Log - KJB EM GMM
+        [Work Log] Work Log
     </h1>
 
-  <div class="date emphnext">October 20, 2013</div>
+  <div class="date emphnext">October 22, 2013</div>
     
 
 
   
-    <p>Still struggling with the EM GMM algorithm.  Found/fixed one bug where responsibilities aren't initialized if NULL is passed to the function.</p>
+    
 
-<p>Ran overnight and it hadn't finished at the end.  Found/fixed a bug where the entire @M element responsibility matrix is rescaled 2M times (once per point).</p>
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Data Association v3</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
+    </tr>
+
+    <tr>
+        <th>SVN Revision</th>
+        <td>15229</td>
+    </tr>
+
+
+</table>
+
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
+
+
+<p>Still searching for inf bug in libcudcvt blurred_difference_likelihood.</p>
 
 <hr />
 
-<p>Getting rank-deficient errors.  Looks like this is a result of the huge dataset; covariance matrix is divided by 1e6 (the number of soft-members of the cluster).</p>
+<p>Found it:  my GPU-based log_sum routine had a bug.  instead of subtracting the maximum value before exp-summing, it subtracted an arbitrary value.  The find-max loop looked like this:</p>
 
-<p>For now, hack by trying to thin the dataset.  Long-term, adding a minimum offset to the emperical covariance seems to be the common solution.</p>
+<pre><code>Real pi = v[0];
 
-<p>Possibly normalizing the data would be good.</p>
+#pragma unroll
+for(unsigned int i = 1; i &lt; N; ++i)
+{
+    pi = pi &lt; v[0] ? v[0] : pi;
+}
+</code></pre>
 
-<hr />
+<p>Obviously, the zeros should be i's.</p>
 
-<p>Added offset to covariance (command-line options and file-static variable already existed, just needed to add it to the full_GMM logic).</p>
-
-<p>Added <code>read_gmm.m</code> matlab routine, and plotted along with scatter plot of data.  Results look pretty good:</p>
-
-<p><img src="/ksimek/research/img/2013-10-20-kjb-gmm-result.png" alt="" /></p>
-
-<hr />
-
-<p>Moving trained gmm to ~/data/arabidopsis/training/bd_likelihood_gmm/blur_2.0.gmm</p>
+<p>A great bug to have found and fixed, but really frustrating that I let it slip through in the first place.  So stupid!  But it didn't affect correctness in the common case, so my tests didn't catch it.  It makes a good case for randomized testing (as if a good argument was lacking...).</p>
 
 <hr />
 
-<h2>TODO</h2>
+<p>(semi-obvious) note to self: conditional gaussian mixture is not equal to mixture of conditional gaussians!</p>
+
+<hr />
+
+<p>okay, a few more cleanup tasks, then on to real goals:</p>
 
 <ul>
-<li>increase spacing between reconstructed points</li>
-<li>get this running on cuda server</li>
-<li>re-train GMM on held-out dataset.</li>
-<li>implement matlab likelihood sampling</li>
+<li>cleanup and commit version 0.1 of the likelihood server -- done</li>
+<li>split training into it's own directory. -- done</li>
+<li>Get likelihood server connecting reliably with matlab on different computers.</li>
+<li>implement likelihood importance sampling into maltlab's curve_ml procedure</li>
 </ul>
 
 
-<h2>Open issues</h2>
+<hr />
 
-<ul>
-<li>how to sync datasets on matlab and c++ server?</li>
-<li>Wacv multi-view reconstruction for training</li>
-<li>saving wacv to files for training</li>
-<li>fixing issues in wacv reconstructions</li>
-<li>evaluation methodology</li>
-<li>split/merge</li>
-</ul>
+<p>Thought some on birth moves.  It seems like there are some possibilities for births larget than two by using the adjacency graph created by pair candidates.</p>
 
+<p>for now, start with greedy</p>
 
       <address class="signature">
         Posted by
@@ -149,10 +171,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/10/21/work-log" class="next" title="Work Log - Linux NVidia/Cuda/X11 erorrs; Cuda server; matlab integration">Work Log - Linux NVidia/Cuda/X11 erorrs; Cuda server; matlab integration &rarr;</a>
+    <a href="/ksimek/research/2013/10/23/work-log" class="next" title="Work Log - Implementing Two-term likelihood">Work Log - Implementing Two-term likelihood &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/10/19/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/10/21/work-log" class="prev" title="Work Log - Linux NVidia/Cuda/X11 erorrs; Cuda server; matlab integration">&larr; Work Log - Linux NVidia/Cuda/X11 erorrs; Cuda server; matlab integration</a>
   
   </div>
   <div class="clearer"> </div>
@@ -169,7 +191,7 @@
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - KJB EM GMM" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -217,7 +239,7 @@
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log - KJB EM GMM");
+                    + encodeURIComponent("Work Log");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");

@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log - KJB EM GMM &larr; </title>
+   <title>Work Log - Implementing Two-term likelihood &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -83,61 +83,101 @@
 
 
   <h1 class="title">
-        [Work Log] Work Log - KJB EM GMM
+        [Work Log] Work Log - Implementing Two-term likelihood
     </h1>
 
-  <div class="date emphnext">October 20, 2013</div>
+  <div class="date emphnext">October 23, 2013</div>
     
 
 
   
-    <p>Still struggling with the EM GMM algorithm.  Found/fixed one bug where responsibilities aren't initialized if NULL is passed to the function.</p>
+    <p>Working on Matlab integration.</p>
 
-<p>Ran overnight and it hadn't finished at the end.  Found/fixed a bug where the entire @M element responsibility matrix is rescaled 2M times (once per point).</p>
-
-<hr />
-
-<p>Getting rank-deficient errors.  Looks like this is a result of the huge dataset; covariance matrix is divided by 1e6 (the number of soft-members of the cluster).</p>
-
-<p>For now, hack by trying to thin the dataset.  Long-term, adding a minimum offset to the emperical covariance seems to be the common solution.</p>
-
-<p>Possibly normalizing the data would be good.</p>
-
-<hr />
-
-<p>Added offset to covariance (command-line options and file-static variable already existed, just needed to add it to the full_GMM logic).</p>
-
-<p>Added <code>read_gmm.m</code> matlab routine, and plotted along with scatter plot of data.  Results look pretty good:</p>
-
-<p><img src="/ksimek/research/img/2013-10-20-kjb-gmm-result.png" alt="" /></p>
-
-<hr />
-
-<p>Moving trained gmm to ~/data/arabidopsis/training/bd_likelihood_gmm/blur_2.0.gmm</p>
-
-<hr />
-
-<h2>TODO</h2>
+<p>Quick test shows we can get about 20 evaluations per second.  Not bad, considering each evaluation consists of 9 image likleihoods.  There's some room for improvement here, but probably not worth pursuing at the moment:</p>
 
 <ul>
-<li>increase spacing between reconstructed points</li>
-<li>get this running on cuda server</li>
-<li>re-train GMM on held-out dataset.</li>
-<li>implement matlab likelihood sampling</li>
+<li>leapfrog rendering: render (a) while evaluating on (b).</li>
+<li>cleaning up geometry and fragment shaders (fewer branches, less storage)</li>
+<li>try other GPU blurring routines.</li>
 </ul>
 
 
-<h2>Open issues</h2>
+<h1>New Likelihood</h1>
 
-<ul>
-<li>how to sync datasets on matlab and c++ server?</li>
-<li>Wacv multi-view reconstruction for training</li>
-<li>saving wacv to files for training</li>
-<li>fixing issues in wacv reconstructions</li>
-<li>evaluation methodology</li>
-<li>split/merge</li>
-</ul>
+<p>Scenario: we have a decent likelihood that is linear-gaussian (and a gaussian prior), so we can compute the marginal likelihood in closed-form.  However, we'd like to incorporate additional sources of evidence whose likelihoods aren't gaussian.  We'll see how we can estimate the joint marginal likelihood with simple Monte-Carlo sampling (no MCMC needed, no gradient).</p>
 
+<h2>Derivation</h2>
+
+<p>The old marginal likelihood looked like this:</p>
+
+<div>
+\[
+\begin{align}
+p(D_1) &= \int p(x) p(D_1 | x) dx
+\end{align}
+\]
+</div>
+
+
+<p>After introducing the extra likelihood term, the joint probability is no longer linear-gaussian, so the exact marginal likelihood involves an intractible integral.  However, by  re-arranging, we see we can get a good monte-carlo approximation:</p>
+
+<div>
+\[
+\begin{align}
+p(D_1, D_2) &= \int p(x) p(D_1 | x) p(D_2 | x) dx \\
+p(D_1, D_2) &= \int p(x | D_1) p(D_1) p(D_2 | x) dx & \left(\text{Bayes thm (see below)}\right) \\
+p(D_1, D_2) &= p(D_1) \int p(x | D_1) p(D_2 | x) dx \\
+p(D_1, D_2) &= p(D_1) /N \sum p\left(D_2 | x^{(*)}\right) & \text{(Monte Carlo)}
+\end{align}
+\]
+</div>
+
+
+<p>In the second line, I've replaced the first two terms using Bayes theorem.  In the last line, the x-stars are samples from \(p(x | D_1)\), which we have in closed-form due to linear-Gaussian prior and likelihood for \(D_1\).</p>
+
+<p>Thus, we see if at least one source of data yields a linear-gaussian likelihood, we can incorporate additional data with arbitrary likelihoods  in a principled way.  In many cases, \(p(x | D_1) \) has low variance, so a small number of Monte-Carlo samples are sufficient for a good estimate, even one.  Even if the estimates are bad, they are unbiased, so any MCMC involving the marginal likelihood will converge to the target distribution.</p>
+
+<h2>Importance Sampling version</h2>
+
+<p>We can alternatively derive this in terms of importance sampling, setting the proposal probability q(x) to \(p(x | D_1) \):</p>
+
+<div>
+\[
+\begin{align}
+p(D_1, D_2) &\approx 1/N \sum p(x) p(D_1 | x)p(D_2 | x) \frac{1}{q(x)} \\
+            &= 1/N \sum p(x) p(D_1 | x)p(D_2 | x) \frac{p(D_1)}{p(x) p(D_1 | x)} \\
+            &= 1/N \sum p(D_2 | x) p(D_1) \\
+            &= p(D_1)/N \sum p(D_2 | x) 
+\end{align}
+\]
+</div>
+
+
+<p><strong>Implementation</strong></p>
+
+<p><strong>File:</strong> curve_tree_ml_2.m</p>
+
+<p>Basic idea</p>
+
+<ol>
+<li>construct a thinned output index set (optional, but smart)</li>
+<li>construct a posterior distribution over the thinned set</li>
+<li>Add perturbation variance to the posterior</li>
+<li>take average over n trials: sample curveset and evaluate pixel likelihood</li>
+</ol>
+
+
+<p>Step 2 required updating to construct_attachment_covariance, which only constructs symmetric covariance matrices.  We need the covariance between indices with observations and the desired output indices.  Fully refactored that function into <code>construct_attacment_covariance_2.m</code>; confirmed correctenss in the case of the self-covariance by using an existing test for version 1 of that function.  If non-symmetric, the upper-triangular blocks are processed in a second pass, swapping indices so we can re-use existing code.</p>
+
+<p>Need to try view-specific sampling, i.e. sample 9 different curves from 9 different views.  This refactor affects likelihood server, client, and message format.  I'm worried about the performance hit, but probably not worth worrying about (or futile).  Coarse sampling of indices could mitigate.    In any case, view-specific sampling is probably necessary, because we're using such low blurring levels in the Bd_likelihood, so the reconstruction needs to fall near the data.  We've seen how plant motion and camera miscalibration cause "good" 3D curves to reproject up to 10 pixels away from the data in some views.</p>
+
+<hr />
+
+<p><strong>Side-note</strong> - the tcp connection is working very reliably so far!  Even after the machine sleeping/resuming several times, and suspending the server job for serveral hours, the socket is still valid and communicating flawlessly!</p>
+
+<h2>TODO (new)</h2>
+
+<p>Some protocol for starting and loading the likelihood server from matlab code</p>
 
       <address class="signature">
         Posted by
@@ -148,11 +188,8 @@
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/10/21/work-log" class="next" title="Work Log - Linux NVidia/Cuda/X11 erorrs; Cuda server; matlab integration">Work Log - Linux NVidia/Cuda/X11 erorrs; Cuda server; matlab integration &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/10/19/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/10/22/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>
@@ -169,7 +206,7 @@
 <span class="hn"><span id="hnews"></span></span>
 
 <!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - KJB EM GMM" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
+<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Implementing Two-term likelihood" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
 
 <!-- Google+ -->
 <span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
@@ -217,7 +254,7 @@
       hn_like.src = "http://hnlike.com/upvote.php?link="
                     + encodeURIComponent(document.location)
                     + "&title="
-                    + encodeURIComponent("Work Log - KJB EM GMM");
+                    + encodeURIComponent("Work Log - Implementing Two-term likelihood");
       hn_like.innerHTML="iframes not supported by your browser";
       
       var where = document.getElementById("hnews");
