@@ -127,7 +127,7 @@ p(D_1) &= \int p(x) p(D_1 | x) dx
 p(D_1, D_2) &= \int p(x) p(D_1 | x) p(D_2 | x) dx \\
 p(D_1, D_2) &= \int p(x | D_1) p(D_1) p(D_2 | x) dx & \left(\text{Bayes thm (see below)}\right) \\
 p(D_1, D_2) &= p(D_1) \int p(x | D_1) p(D_2 | x) dx \\
-p(D_1, D_2) &= p(D_1) /N \sum p\left(D_2 | x^{(*)}\right) & \text{(Monte Carlo)}
+p(D_1, D_2) &= p(D_1) \frac{1}{N} \sum p\left(D_2 | x^{(*)}\right) & \text{(Monte Carlo)}
 \end{align}
 \]
 </div>
@@ -135,7 +135,7 @@ p(D_1, D_2) &= p(D_1) /N \sum p\left(D_2 | x^{(*)}\right) & \text{(Monte Carlo)}
 
 <p>In the second line, I've replaced the first two terms using Bayes theorem.  In the last line, the x-stars are samples from \(p(x | D_1)\), which we have in closed-form due to linear-Gaussian prior and likelihood for \(D_1\).</p>
 
-<p>Thus, we see if at least one source of data yields a linear-gaussian likelihood, we can incorporate additional data with arbitrary likelihoods  in a principled way.  In many cases, \(p(x | D_1) \) has low variance, so a small number of Monte-Carlo samples are sufficient for a good estimate, even one.  Even if the estimates are bad, they are unbiased, so any MCMC involving the marginal likelihood will converge to the target distribution.</p>
+<p>Thus, we see if at least one source of data yields a linear-gaussian likelihood, we can incorporate additional data with arbitrary likelihoods  in a principled way.  In many cases, \(p(x | D_1) \) has low variance, so a small number of Monte-Carlo samples are sufficient for a good estimate -- even a single sample could suffice.  Even if the estimates are bad, they are unbiased, so any MCMC involving the marginal likelihood will converge to the target distribution.</p>
 
 <h2>Importance Sampling version</h2>
 
@@ -147,7 +147,7 @@ p(D_1, D_2) &= p(D_1) /N \sum p\left(D_2 | x^{(*)}\right) & \text{(Monte Carlo)}
 p(D_1, D_2) &\approx 1/N \sum p(x) p(D_1 | x)p(D_2 | x) \frac{1}{q(x)} \\
             &= 1/N \sum p(x) p(D_1 | x)p(D_2 | x) \frac{p(D_1)}{p(x) p(D_1 | x)} \\
             &= 1/N \sum p(D_2 | x) p(D_1) \\
-            &= p(D_1)/N \sum p(D_2 | x) 
+            &= p(D_1) 1/N \sum p(D_2 | x) 
 \end{align}
 \]
 </div>
