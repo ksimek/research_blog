@@ -4,6 +4,7 @@ http://vision.sista.arizona.edu/ksimek/research/archive.html
 http://vision.sista.arizona.edu/ksimek/research/atom.xml
 http://vision.sista.arizona.edu/ksimek/research/categories.html
 http://vision.sista.arizona.edu/ksimek/research/contact.html
+http://vision.sista.arizona.edu/ksimek/research/CVPR2014/params.html
 http://vision.sista.arizona.edu/ksimek/research/feed.xml
 http://vision.sista.arizona.edu/ksimek/research/feeds.html
 http://vision.sista.arizona.edu/ksimek/research/index.html
@@ -22,6 +23,9 @@ http://vision.sista.arizona.edu/ksimek/research/page7/index.html
 http://vision.sista.arizona.edu/ksimek/research/page8/index.html
 http://vision.sista.arizona.edu/ksimek/research/page9/index.html
 
+http://vision.sista.arizona.edu/ksimek/research/2013/10/26/work-log
+http://vision.sista.arizona.edu/ksimek/research/2013/10/26/params-cvpr-2014
+http://vision.sista.arizona.edu/ksimek/research/2013/10/24/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/10/23/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/10/22/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/10/21/work-log

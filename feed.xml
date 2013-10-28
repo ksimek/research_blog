@@ -7,6 +7,257 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Work Log - Testing likelihood #2 (2-day)</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Client send/receive timeout &lt;/h2&gt;
+
+&lt;p&gt;Tried to get send/receive to timeout if the server didn't respond.  It turns out, although this feature exists in native Unix sockets, the boost library abstractions render them useless.  To get this, I'll need to use asynchronous IO, which I'm not ready to jump to, yet (also not sure if callbacks will work in mex, since the callback code might not exist after the constructor function returns).&lt;/p&gt;
+
+&lt;p&gt;Let's just take the approach that the server must always respond quickly or disconnect.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2&gt;Testing &lt;code&gt;curve_tree_ml_2&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;Need a reliable way to get a testing Trackset.  Write something for wacv -- &lt;code&gt;get_wacv_trackset&lt;/code&gt;.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Modified run_all_wacv to save Tracks;  re-running on all datasets.  &lt;code&gt;get_wacv_results&lt;/code&gt; now returns Tracks as well as means.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Tweaked semantics&lt;/strong&gt; so this now &lt;em&gt;only&lt;/em&gt; computes the pixel likelihood.  The full likelihood is the sum of this and &lt;code&gt;curve_tree_ml&lt;/code&gt;.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Tweaked &lt;code&gt;construct_attachment_covariance_2.m&lt;/code&gt; so the self-covariance matrices are computed in the function (if needed) instead of being passed in.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Spin-off &lt;code&gt;construct_attachment_covariance_3.m&lt;/code&gt; a fully general version that receives input and output indices, and optionally a pre-computed self-covariance.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;TODO: &lt;/strong&gt; make this the &quot;official&quot;/dispatch version, make other versions call this (or eliminate altogether)&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;strong&gt;Performance&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;data matrix is HUGE.  8913 dimensions.  Is this right?  Also, we can move inversion outside of the loop (maybe).&lt;/p&gt;
+
+&lt;p&gt;Consider 'subset of data' method, or other dimensionality-reduction method&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2&gt;&lt;strong&gt;Issue&lt;/strong&gt;: Can't do cholesky decomposition, because points branching from the base are redundant.  Using SVD instead.&lt;/h2&gt;
+
+&lt;p&gt;Okay, it appears to be successfully running end-to-end.  Haven't confirmed results yet, but one thing is clear... its REALLLLLY slow (3 minutes and counting)&lt;/p&gt;
+
+&lt;p&gt;Can do ancenstral sampling to exploit tree structure to speed it up.  can further use markov property to break up curves.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Oops, not quite end-to-end success.  Some indexing, reshaping issues.   Other bugs found&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;wasn't adding posterior mean to sampled results&lt;/li&gt;
+&lt;li&gt;missing transpose in posterior covariance equation.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Debugging sampled curves&lt;/h2&gt;
+
+&lt;p&gt;Message looks okay under inspection, but getting -inf (due to exception).  Dumping...&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Found a recent bug in code that builds the Gl_curve.  When I chnaged an assert to an if/throw, I forgot to negate the conditional.&lt;/p&gt;
+
+&lt;p&gt;Getting finite values now.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Result looks in the ballpark, but some perturbations look questionable (considering the tight constraints on the WACV dataset).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-27-perturb-comparison.png&quot; alt=&quot;perturbed vs. original&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Doind a full dump-mode run...&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Found a bug in a recent refactor of dump-mode, causing segfaults.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2&gt;All views drift very far from their true values.  Possibly a math bug in the magnitude of the posterior covariance?&lt;/h2&gt;
+
+&lt;p&gt;Refactored server's &quot;dump mode&quot;  to continuously dump each message as it's received, instead of running in offline mode and dumping only the passed-in model.&lt;/p&gt;
+
+&lt;p&gt;Trying method2.  Got similar results, qualitatively; per-view curves still have some bizzarre features.  Interestingly, the perturbations between successive samples of method 2 (and between method2 and method 1) are relatively small, suggesting this is an issue with the mean, not the variance.&lt;/p&gt;
+
+&lt;p&gt;Recall that we only tested the no-perturb model for wacv reconstruction; not the per-view reconstruction.&lt;/p&gt;
+
+&lt;p&gt;Re-running WACV dataset 2 with OU-perturb model.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Looks sensible.  So that rules out the parameter settings causing bad mu's.  We should be getting exactly WACV results;  can we get there?&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;use K_star = K&lt;/li&gt;
+&lt;li&gt;use zero covariance matrix (always sample at the mean)&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Running...  (slow, because matrix multiplication is so much larger)&lt;/p&gt;
+
+&lt;p&gt;I'm guessing the bug is in the full-tree covariance .&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Getting &quot;degenerate curve&quot; error.  Thinning points fixed.&lt;/p&gt;
+
+&lt;p&gt;Dumped results look good.  This suggests that mean math is likely correct, as long as K_star is okay.  So K_star math is probably wrong.&lt;/p&gt;
+
+&lt;p&gt;Need to write a test to confirm and start debugging.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Done. Results match on symmetric and non-symmetric index sets.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2&gt;Covariance matrix Rank-reduction&lt;/h2&gt;
+
+&lt;p&gt;While previous test was running, read-up on reduced-rank approximations to K.  Nystrom method seems sensible to speed up matrix inversion.  Doesn't avoid the matrix multiplication  with K_star, or cholesky decomposition of the posterior covariance...  but using a smaller output index set seems like a reasonable approach to mitigating both of those.&lt;/p&gt;
+
+&lt;p&gt;Curious how many non-negligible eigenvalues we have; how many data points we should use.  Recalling a plot of eignevalues from a few days ago, it looked like less than 0.1% of the dimensions are significant, but need to get a concrete number.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Running wacv&lt;/p&gt;
+
+&lt;h2&gt;Efficient sampling implementation&lt;/h2&gt;
+
+&lt;p&gt;Lets do a decomposed implementation, and compare the results to this naive implementation.  This should resolve whether the aforementioned issue is a bug in implementation or in theory.  We need the efficient implementation anyway, and having it should help debugging faster.&lt;/p&gt;
+
+&lt;p&gt;Next:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;get likelihood from multiple samples -- what is the variance of the MC estimator?&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Sat, 26 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/26/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/26/work-log</guid>
+			</item>
+		
+			<item>
+				<title>params, CVPR 2014</title>
+				<description>&lt;p&gt;&lt;a href=&quot;/ksimek/research/CVPR2014/params.html&quot;&gt;See CVPR 2014 parameters page&lt;/a&gt;&lt;/p&gt;
+</description>
+				<pubDate>Sat, 26 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/26/params-cvpr-2014</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/26/params-cvpr-2014</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>&lt;p&gt;Implementing one-object-per-view in likelihood_server&lt;/p&gt;
+
+&lt;p&gt;Overloaded bd_mv_likelihood' evaluate and dump  functions to receive a sequence of renderables.&lt;/p&gt;
+
+&lt;p&gt;Write a &quot;wrap_all_As_silhouette&quot; to, well, wrap all renderables in silhouette renderers.&lt;/p&gt;
+
+&lt;p&gt;re-wrote message-to-curve function to decode the message to a vector-vector-vector, and convert that to a vector-of-gl_curves.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Compiling work from last 24 hours.&lt;/p&gt;
+
+&lt;p&gt;Done.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Generate a multi-model message from matlab (dummy)&lt;/li&gt;
+&lt;li&gt;test message in likelihood_server_2.cpp
+
+&lt;ol&gt;
+&lt;li&gt;generate random samples from wacv data.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;hr /&gt;
+
+&lt;p&gt;Doing dummy message test.&lt;/p&gt;
+
+&lt;p&gt;At first, accidentally sent to old implementation... and it didn't barf!  This is unsettling, because the message format has changed significantly.  Did I ever recompile the mex files?&lt;/p&gt;
+
+&lt;p&gt;Nope.  got some mex compile errors to deal with.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;strong&gt;Friday&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;okay, sending a random model using the new one-per-view message system isn't crashing.&lt;/p&gt;
+
+&lt;p&gt;Questions&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;the likelihood looks high, considering it's a ranomd model .  is a null model better?  is the ground-truth model better?&lt;/li&gt;
+&lt;li&gt;visualize the received message;  is each view different?&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Trying the null model from 1., the mex file crashed matlab.  Empty curvesset isn't handled.&lt;/p&gt;
+
+&lt;p&gt;trying all-zeros.  Server crashed -- coincident points aren't handled gracefully.  Fixed (now it returns -inf for log likelihood).&lt;/p&gt;
+
+&lt;p&gt;issues
+server: error creating gl_curves causes client disconnect. fix exception handling
+client: doesn't handle server crashes gracefully.  adding timeout
+client: doesn't handle empty curveset&lt;/p&gt;
+
+&lt;p&gt;Next:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;random sample from multi-view posterior (instead of single max posterior)&lt;/li&gt;
+&lt;li&gt;get likelihood from multiple samples -- what is the variance of the MC estimator?&lt;/li&gt;
+&lt;li&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Thu, 24 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/24/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/24/work-log</guid>
+			</item>
+		
+			<item>
 				<title>Work Log - Implementing Two-term likelihood</title>
 				<description>&lt;p&gt;Working on Matlab integration.&lt;/p&gt;
 
@@ -92,9 +343,28 @@ p(D_1, D_2) &amp;\approx 1/N \sum p(x) p(D_1 | x)p(D_2 | x) \frac{1}{q(x)} \\
 
 &lt;p&gt;&lt;strong&gt;Side-note&lt;/strong&gt; - the tcp connection is working very reliably so far!  Even after the machine sleeping/resuming several times, and suspending the server job for serveral hours, the socket is still valid and communicating flawlessly!&lt;/p&gt;
 
+&lt;hr /&gt;
+
+&lt;h2&gt;Implementing per-view sampling&lt;/h2&gt;
+
+&lt;p&gt;need to refactor send_curves.m to send &lt;code&gt;num_views&lt;/code&gt; curves instead of one.&lt;/p&gt;
+
+&lt;p&gt;Now receive as num_curves x num_views cell array.&lt;/p&gt;
+
+&lt;p&gt;Coded vector&lt;sup&gt;3&lt;/sup&gt; to/from message.&lt;/p&gt;
+
+&lt;p&gt;todo: rewrite likelihood server to receive vector3, somehow pass per-view models to likelihood&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;multi-view likelihood is out - it's one-model, multi-view.  We need multi-model, multi-view.
+
+no, MV likelihood is okay, just add an extra operator() that receives a sequence of renderables 
+whose size is equal to the number of views
+&lt;/code&gt;&lt;/pre&gt;
+
 &lt;h2&gt;TODO (new)&lt;/h2&gt;
 
-&lt;p&gt;Some protocol for starting and loading the likelihood server from matlab code&lt;/p&gt;
+&lt;p&gt;Some protocol for starting and loading the likelihood server from matlab code
+Stress test likelihood server&lt;/p&gt;
 </description>
 				<pubDate>Wed, 23 Oct 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/23/work-log</link>
@@ -982,348 +1252,6 @@ Likelihood is near-optimal: &lt;strong&gt;FAIL&lt;/strong&gt;. see below&lt;/p&g
 				<pubDate>Wed, 16 Oct 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/16/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/16/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log - Finishing Likelihood Server, integrating to sampling engine</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Likelihood Server&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;likelihood_server&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15229&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Old silhouette rendering technique is failing.  Point spacing is much tighter than before.  Our old algorithm relied on segment-ids matching between the first-pass and second pass to work.&lt;/p&gt;
-
-&lt;p&gt;Have a replacement algorithm that works reasonably well.  Basically edge-detection on the depth image.  The down side is we're getting double-edges in some areas, and you have to adjust a threshold.  It'll have to do for now, hopefully we can train a the likelihood to be robust to these issues.&lt;/p&gt;
-
-&lt;h2&gt;Training Bd_likelihood&lt;/h2&gt;
-
-&lt;p&gt;added 'train_bd_likelihood()' function to 'lib/evaluate/bd_likelihood.h'.  Uses 'kjb_c::get_full_GMM()'  to fit a three-component gaussian mixture model to model the relationship between model and data pixels.&lt;/p&gt;
-
-&lt;h2&gt;Refactoring&lt;/h2&gt;
-
-&lt;p&gt;Shader objects from './shader.h' are now in the project library, under 'lib/ogl/shader_2.h'.  Not the greatest name, but shader.h already exists and conflicts.  Consder refactoring them later.&lt;/p&gt;
-
-&lt;p&gt;Silhouetter rendering from './render_util.h' are now in 'lib/graphics/silhouette_renderer.h'.  Much better encapsulation now, so we can use it in other projects.&lt;/p&gt;
-
-&lt;p&gt;In the process of updating './likelihood_server.cpp' to reflect these changes.  At the moment, getting an &quot;invalid operation&quot; when rendering.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;It was a stray &lt;code&gt;glUseProgram(notzero)&lt;/code&gt; in the shader loading code.&lt;/p&gt;
-
-&lt;hr /&gt;
-</description>
-				<pubDate>Tue, 15 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/15/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/15/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log - Troubleshooting silhouette rendering</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Likelihood Server&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;likelihood_server&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15229&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Silhouettes are rendering badly&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-13-dump_0.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Looks like internal edges are rendering.  Likely an issue with shader_src/silhouette2.gs.glsl.&lt;/p&gt;
-
-&lt;p&gt;Need a quick way to tweak shader and re-run.&lt;/p&gt;
-
-&lt;h2&gt;Building shader debugging mode&lt;/h2&gt;
-
-&lt;p&gt;if enabled, results will display in viewer instead of being passed to likelihood.&lt;/p&gt;
-</description>
-				<pubDate>Mon, 14 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/14/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/14/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log - Four days of OpenGL Debugging</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Likelihood Server&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;likelihood_server&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15229&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;h2&gt;Status&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Server is now running, connecting, receiving and decoding messages successfully.&lt;/li&gt;
-&lt;li&gt;Matlab client is constructing, sending messages, and destroying successfully.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Since we've sent our first message and saved it to a file, we no longer need matlab to debug the server, using the --dbg-load-message flag.&lt;/p&gt;
-
-&lt;h2&gt;OpenGL crashing &lt;/h2&gt;
-
-&lt;p&gt;In render_util.cpp -&gt; render_silhouettes(), crash is occurring somewhere in these lines.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;39      GLenum draw_buffers[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-(gdb) list
-40      glDrawBuffers(2, draw_buffers);
-41
-42      glClearColor(0.0,0.0,0.0,0.0);
-43      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-44      glEnable(GL_DEPTH_TEST);
-45      DBG_GL_ETX();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The dreaded &quot;invalid operation&quot;&lt;/p&gt;
-
-&lt;p&gt;I'm guessing opengl isn't in a valid rendering state yet; we may not have bound the fbo, or forgot to enable a rendering program.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;yep, fbo wasn't bound.&lt;/p&gt;
-
-&lt;p&gt;now running to completion, but result is NaN.&lt;/p&gt;
-
-&lt;p&gt;Probably because we're using random numbers for our curves.  Lets grab some real curve data and re-run.  We'll probably need to visualize the silhouette output soon.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15229&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;added function &lt;code&gt;wacv-2012/get_wacv_result.m&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;Code to get curves and send them to server:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;tmp = get_wacv_result(2);
-tmp = cellfun(@(x) [x; ones(1,size(x,2))], tmp, 'UniformOutput', false);
-socket = construct_render_client('localhost', '12345')'
-send_curves(socket, tmp);
-result = send_curves(socket, tmp);
-destroy_render_client(socket)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Got first dumps.  issues&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;all black, no content&lt;/li&gt;
-&lt;li&gt;reversed wrong aspect ratio&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;p&gt;Possible causees for 1.&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;bad camera files&lt;/li&gt;
-&lt;li&gt;bad code for converting intrinsic matrix to opengl&lt;/li&gt;
-&lt;li&gt;bad curves?&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;p&gt;2 seems most likely.  Can debug 1 and 2 by trying old camera object and see if they work;  if so, compare matrices with new matrices.&lt;/p&gt;
-
-&lt;h2&gt;Possibly the mods I made to the multi-view likelihoods are the culprit.  I'm using raw matrices now instead of cmara objects in obj.add_view() and Camera_view_wrapper.&lt;/h2&gt;
-
-&lt;p&gt;Added command-line option &quot;--dbg-save-frames&quot;.  Writes all rendered views to disk as &quot;dump_1.png, dump_2.png,...&quot;.  Only the most recent 10 are kept at any time.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;re-running using turntable camera; passing intrinsic and extrinsic matrices to likelihood.&lt;/p&gt;
-
-&lt;p&gt;Renders are still black.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Forgot to set white color?&lt;/p&gt;
-
-&lt;p&gt;No; its in the render_silhouette function.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Found something: wacv results were aritficially centered on zero.  fixed.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Did matlab test on modelview and projection matrices and curve points -- z coordinate falls outside of [-1 1].  Beyond far plane.&lt;/p&gt;
-
-&lt;p&gt;reason: not negating z-coordinate in test code.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;changing gears.  running matlab test on original input modelview and projection matrices.&lt;/p&gt;
-
-&lt;p&gt;Modelview looks okay. Projection is way off.&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;intrinsic matrix?&lt;/li&gt;
-&lt;li&gt;NDC matrix?&lt;/li&gt;
-&lt;li&gt;bounds?&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;p&gt;Intrinsic looks reasonable.&lt;/p&gt;
-
-&lt;p&gt;probably NDC/bounds issue&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Bug in ndc math&lt;/p&gt;
-
-&lt;p&gt;projecting outside from far plane&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;needed to flip axes to handle convention mismatch.&lt;/p&gt;
-
-&lt;p&gt;Now getting something, but the positions are looking weird.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;was re-negating ppo; already flipped during convention resolution.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;now getting decent results, but off-center and smaller:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-12-dump_3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;rough original to rendering offsets:  up by 56, left by 115.&lt;/p&gt;
-
-&lt;h2&gt;non-uniform scaling; width is smaller than height.&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code&gt;Projecting plant base using
-(a) intrinsic and extrinsic matrices from matlab
-(b) modelview and projection matrices pulled from opengl
-
-results:
-(a) projects to the right place (tested using image and pixelstick)
-(b) NDC coordinates look okay.  I manually remapped (scale and offset), and they look okay.
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Since NDC look okay, the remapping must be wrong.  glViewport issue?  I'm manually setting it, but maybe it needs to be set for each shader?&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Or maybe it's a geometry shader issue?  I'm using different modelview and projection matrices now.&lt;/p&gt;
-
-&lt;p&gt;=--&lt;/p&gt;
-
-&lt;p&gt;Found it (Sunday night) -- Somehow the viewport transformation is getting reset. Possibly viewport is a shader-specific state that needs to be set each time?&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;now centered, need to diagnose silhouette issues:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-13-dump_0.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2&gt;TODO (new)&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;rename matlab &quot;render_client&quot; code to &quot;likelihood_client&quot;&lt;/li&gt;
-&lt;li&gt;rename likelihood_server/sampler2.cpp to something not nonsense.&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Fri, 11 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/11/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/11/work-log</guid>
 			</item>
 		
 	</channel>

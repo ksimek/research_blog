@@ -175,9 +175,28 @@ p(D_1, D_2) &\approx 1/N \sum p(x) p(D_1 | x)p(D_2 | x) \frac{1}{q(x)} \\
 
 <p><strong>Side-note</strong> - the tcp connection is working very reliably so far!  Even after the machine sleeping/resuming several times, and suspending the server job for serveral hours, the socket is still valid and communicating flawlessly!</p>
 
+<hr />
+
+<h2>Implementing per-view sampling</h2>
+
+<p>need to refactor send_curves.m to send <code>num_views</code> curves instead of one.</p>
+
+<p>Now receive as num_curves x num_views cell array.</p>
+
+<p>Coded vector<sup>3</sup> to/from message.</p>
+
+<p>todo: rewrite likelihood server to receive vector3, somehow pass per-view models to likelihood</p>
+
+<pre><code>multi-view likelihood is out - it's one-model, multi-view.  We need multi-model, multi-view.
+
+no, MV likelihood is okay, just add an extra operator() that receives a sequence of renderables 
+whose size is equal to the number of views
+</code></pre>
+
 <h2>TODO (new)</h2>
 
-<p>Some protocol for starting and loading the likelihood server from matlab code</p>
+<p>Some protocol for starting and loading the likelihood server from matlab code
+Stress test likelihood server</p>
 
       <address class="signature">
         Posted by
@@ -188,6 +207,9 @@ p(D_1, D_2) &\approx 1/N \sum p(x) p(D_1 | x)p(D_2 | x) \frac{1}{q(x)} \\
 
   
   
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/10/24/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+  
   
     <a href="/ksimek/research/2013/10/22/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
@@ -196,79 +218,6 @@ p(D_1, D_2) &\approx 1/N \sum p(x) p(D_1 | x)p(D_2 | x) \frac{1}{q(x)} \\
 
 <div class="post-sharing">
  
-
-  
-  		<div id="fb-root"></div>
-
-<div class="post-share ulno mob">
-
-<!-- Hacker News -->
-<span class="hn"><span id="hnews"></span></span>
-
-<!-- Twitter -->
-<span class="tw"><a href="https://twitter.com/share" class="twitter-share-button" data-text="Work Log - Implementing Two-term likelihood" data-via="" data-related="" data-count="" data-size="">Tweet</a></span>
-
-<!-- Google+ -->
-<span class="gp"><div class="g-plusone" data-size="medium" data-annotation="bubble" data-width=""></div></span>
-
-<!-- Facebook -->
-<!--
-<span class="fb"><div class="fb-like" data-send="false" data-layout="button_count" data-width="90" data-show-faces="false" data-font=""></div></span>
--->
-
-<!-- Reddit -->
-<script type="text/javascript" src="http://www.reddit.com/static/button/button1.js"></script>
-</div>
-
-<script>
-  
-(function(doc, script) {
- 	
-	//Async Social Buttons
-    var js, 
-        fjs = doc.getElementsByTagName(script)[0],
-        add = function(url, id) {
-            if (doc.getElementById(id)) {return;}
-            js = doc.createElement(script);
-            js.src = url;
-            id && (js.id = id);
-            fjs.parentNode.insertBefore(js, fjs);
-        };
-    
-    // Twitter SDK
-    add('//platform.twitter.com/widgets.js', 'twitter-wjs');
-
-    // Google+ button
-    add('https://apis.google.com/js/plusone.js');
-    
-    // Facebook SDK
-    add('//connect.facebook.net/en_GB/all.js#xfbml=1&appId=123', 'facebook-jssdk');
-    
-    //Hacker News Button 	
- 	var hn_like = document.createElement('iframe');
-      hn_like.frameborder="no";
-      hn_like.scrolling="no";
-      hn_like.height="28px";
-      hn_like.width="110px";
-      hn_like.style="border:0px;";
-      hn_like.src = "http://hnlike.com/upvote.php?link="
-                    + encodeURIComponent(document.location)
-                    + "&title="
-                    + encodeURIComponent("Work Log - Implementing Two-term likelihood");
-      hn_like.innerHTML="iframes not supported by your browser";
-      
-      var where = document.getElementById("hnews");
-      where.parentNode.insertBefore(
-        hn_like,
-        where
-      );
-}(document, 'script'));
-
-</script>
-
-  
-
-
 
 </div>
 
