@@ -4,13 +4,147 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-10-27T23:00:23-07:00</updated>
+ <updated>2013-10-28T20:58:52-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/10/28/work-log"/>
+   <updated>2013-10-28T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/10/28/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Re-ran with method 2.  Still getting negative eigenvalues.&lt;/p&gt;
+
+&lt;p&gt;Possibly non-symmetry issue.&lt;/p&gt;
+
+&lt;p&gt;Change gears -- work on fast implementation, then resume debugging.&lt;/p&gt;
+
+&lt;h2&gt;Reduced rank approximation of data-covariance&lt;/h2&gt;
+
+&lt;div&gt;
+&lt;p&gt;
+Goal: approximate \(\left(K + \Sigma_D \right)^{-1}\), using a low-rank approximation of K;  where \(\Sigma_D\) is the likelihood covariance.
+&lt;/p&gt;&lt;p&gt;
+In our case \(\Sigma_D\) has infinite covariance, so this inverse doesn't exist. However, if we work with precision matrix \(\Lambda = \Sigma_D^{-1}\), and use the decomposition \( S' S = \Lambda \) we can replace this expression with the equivalent
+
+\[
+    S' \left( S K S' + I \right)^{-1} S
+\]
+
+Even though S is rank-deficient, the inverse in this expression does exist, thanks to the finite positive values being added to the diagonal.  
+&lt;/p&gt;&lt;p&gt;
+We approximate the above expression as follows.  Let \(K\) be an \(N\) by \(N\) matrix. We can take the eigendecomposition \(K = V D V'\) and approximate it with \(\tilde K = \tilde V \tilde D \tilde V'\), where \(\tilde V\) and \(\tilde D\) consist of the first \(n\) eigenvalues and eigenvectors of \(K\) respectively.   We can use this low-rank approximation with the [Woodbury matrix identity](http://en.wikipedia.org/wiki/Woodbury_matrix_identity) to approximate the above inverse in \(O(n^3)\) time, rather than \(O(N^3)\).  The Woodbury identity is
+        
+\[
+    (A + U C V )^{-1} = A^{-1} - A^{-1} U (C^{-1} + V A^{-1} U)^{-1} V A^{-1}
+\]
+
+Setting \(A = I\), \(U = V' = S \tilde V \) and \(C = \tilde D \), we get:
+    
+\[
+    \left( S K S' + I \right)^{-1} = I - S \tilde V (\tilde D^{-1} + \tilde V' S' S \tilde V)^{-1} \tilde V' S'
+\]
+&lt;/p&gt;&lt;p&gt;
+It remains to find \(\tilde V\) and \(\tilde D\) efficiently.  Naive eigenvalue decomposition takes \(O(N^3)\) time, which isn't any better than direct inversion.  Sections 4.3.2 and 8.1 of Williams and Rasmussen show how to approximate \(n\) eigenfunctions and eigenvalues from \(n\) data points in \(O(n^3)\) time.  Eigenvectors \(\tilde V\) arise by evaluating the approximate eigenfunctions at the appropriate indices.
+&lt;/p&gt;
+&lt;p&gt;
+
+Substitutuing back into the original expression by surrounding with (\(S'\) and \(S\)), we get the final expression:
+    
+\[
+\begin{align}
+    \approx &amp; S' \left ( I - S \tilde V (\tilde D^{-1} + \tilde V' S' S \tilde V)^{-1} \tilde V' S' \right) S \\
+    =&amp;\Lambda - \Lambda \tilde V (\tilde D^{-1} + \tilde V' \Lambda \tilde V)^{-1} \tilde V' \Lambda
+    \end{align}
+
+\]
+&lt;/p&gt;
+&lt;/div&gt;
+
+
+&lt;h2&gt;Work log&lt;/h2&gt;
+
+&lt;p&gt;Implemented two different implementations of &quot;nystrom solve&quot; (&lt;code&gt;tools/nystrom_solve.m&lt;/code&gt;).  Crude testing shows big speedup, but stalling on a big eigenvalue decomposition.  Replacing with a call to &quot;chol&quot;, waiting on visual results.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;&quot;chol&quot; gives much faster results. (no need to symmetrize)  But results are junk -- blank screen.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Oops, bug in call to chol; fixed.&lt;/p&gt;
+
+&lt;p&gt;still getting black.  Posterior covariance is not positive definite; eigenvalues are negative.&lt;/p&gt;
+
+&lt;p&gt;When I force covariacne to zero (to view the mean value), it's still in the ballpark but wonky (same as before).&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;strong&gt;Clue&lt;/strong&gt;:   When re-using (thinned) input covariance matrix and indices, result looks sensible.  Clearly, we have a problem with how K_star is computed (and likelihood K_star_star, too).&lt;/p&gt;
+
+&lt;p&gt;Comparing different K_star's...&lt;/p&gt;
+
+&lt;p&gt;Looks like on-diagonal elements differ, off-diagonals are okay.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Got it!  Wacv was trained using no-perturb model, but is being tested with OU-perturb.&lt;/p&gt;
+
+&lt;p&gt;TODO: edit get_all_Wacv and/or get_wacv_result to receive a model-type... done.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;reducing test to block (1,1)&lt;/p&gt;
+
+&lt;p&gt;possible sources of disparity: indices, function&lt;/p&gt;
+
+&lt;p&gt;checked indices -- same.&lt;/p&gt;
+
+&lt;p&gt;check params -- model-type doesnt match.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;First view now looks good in matlab.&lt;/p&gt;
+
+&lt;p&gt;Running all views in likelihood_server.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Means look great!.  Now on to random perturbed.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Cholesky claims posterior covariance isn't positive definite.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Work Log - Testing likelihood #2 (2-day)</title>
@@ -119,7 +253,9 @@
 
 &lt;hr /&gt;
 
-&lt;h2&gt;All views drift very far from their true values.  Possibly a math bug in the magnitude of the posterior covariance?&lt;/h2&gt;
+&lt;p&gt;All views drift very far from their true values.  Possibly a math bug in the magnitude of the posterior covariance?&lt;/p&gt;
+
+&lt;hr /&gt;
 
 &lt;p&gt;Refactored server's &quot;dump mode&quot;  to continuously dump each message as it's received, instead of running in offline mode and dumping only the passed-in model.&lt;/p&gt;
 
@@ -153,9 +289,13 @@
 
 &lt;p&gt;...&lt;/p&gt;
 
-&lt;p&gt;Done. Results match on symmetric and non-symmetric index sets.&lt;/p&gt;
+&lt;p&gt;Done. Results match on symmetric and non-symmetric index sets. Which means no progress made on this bug...&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Re-ran, but using non-zero Sigma.  Resulting covariance was not positive definite; SVD was complex-valued.&lt;/p&gt;
+
+&lt;p&gt;Possibly this is a result of the same bug?&lt;/p&gt;
 
 &lt;h2&gt;Covariance matrix Rank-reduction&lt;/h2&gt;
 
@@ -163,18 +303,21 @@
 
 &lt;p&gt;Curious how many non-negligible eigenvalues we have; how many data points we should use.  Recalling a plot of eignevalues from a few days ago, it looked like less than 0.1% of the dimensions are significant, but need to get a concrete number.&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;p&gt;Alternative approach is to use the problem's unique markov structure to sample each section piecewise.  Needs some thought for how to do in the case of the posterior; probably need to estimate a markov blanket for each, along with sampling each branch point and conditioning on it.  Upside: better chance at asymtotic running time improvement. Down-side: not general, not as re-usable within the project.&lt;/p&gt;
 
-&lt;p&gt;Running wacv&lt;/p&gt;
+&lt;h2&gt;To Be Continued&lt;/h2&gt;
 
-&lt;h2&gt;Efficient sampling implementation&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Bug:&lt;/strong&gt; Samples generated from &lt;code&gt;curve_tree_ml_2_debug.m&lt;/code&gt; are wonky.
+&lt;strong&gt;Theory&lt;/strong&gt;: Bug is related to posterior covariance.  Posterior mean looks sensible.
+&lt;strong&gt;File&lt;/strong&gt;: &lt;code&gt;curve_tree_ml_2_debug.m&lt;/code&gt; &amp;lt;-- alternative version, where K is used for K_star and K_star_star.  Currently giving non-positive-definite results for posterior covariance using method 1.  Currently Stumped&lt;/p&gt;
 
-&lt;p&gt;Lets do a decomposed implementation, and compare the results to this naive implementation.  This should resolve whether the aforementioned issue is a bug in implementation or in theory.  We need the efficient implementation anyway, and having it should help debugging faster.&lt;/p&gt;
+&lt;p&gt;Fix sampling sigma bug.&lt;/p&gt;
 
-&lt;p&gt;Next:&lt;/p&gt;
+&lt;h2&gt;TODO (new)&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;get likelihood from multiple samples -- what is the variance of the MC estimator?&lt;/li&gt;
+&lt;li&gt;re-run wacv with multi-view data, but no-perturb output&lt;/li&gt;
 &lt;/ul&gt;
 
 </content>

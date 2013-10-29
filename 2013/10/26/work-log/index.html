@@ -193,7 +193,9 @@
 
 <hr />
 
-<h2>All views drift very far from their true values.  Possibly a math bug in the magnitude of the posterior covariance?</h2>
+<p>All views drift very far from their true values.  Possibly a math bug in the magnitude of the posterior covariance?</p>
+
+<hr />
 
 <p>Refactored server's "dump mode"  to continuously dump each message as it's received, instead of running in offline mode and dumping only the passed-in model.</p>
 
@@ -227,9 +229,13 @@
 
 <p>...</p>
 
-<p>Done. Results match on symmetric and non-symmetric index sets.</p>
+<p>Done. Results match on symmetric and non-symmetric index sets. Which means no progress made on this bug...</p>
 
-<hr />
+<p>...</p>
+
+<p>Re-ran, but using non-zero Sigma.  Resulting covariance was not positive definite; SVD was complex-valued.</p>
+
+<p>Possibly this is a result of the same bug?</p>
 
 <h2>Covariance matrix Rank-reduction</h2>
 
@@ -237,18 +243,21 @@
 
 <p>Curious how many non-negligible eigenvalues we have; how many data points we should use.  Recalling a plot of eignevalues from a few days ago, it looked like less than 0.1% of the dimensions are significant, but need to get a concrete number.</p>
 
-<hr />
+<p>Alternative approach is to use the problem's unique markov structure to sample each section piecewise.  Needs some thought for how to do in the case of the posterior; probably need to estimate a markov blanket for each, along with sampling each branch point and conditioning on it.  Upside: better chance at asymtotic running time improvement. Down-side: not general, not as re-usable within the project.</p>
 
-<p>Running wacv</p>
+<h2>To Be Continued</h2>
 
-<h2>Efficient sampling implementation</h2>
+<p><strong>Bug:</strong> Samples generated from <code>curve_tree_ml_2_debug.m</code> are wonky.
+<strong>Theory</strong>: Bug is related to posterior covariance.  Posterior mean looks sensible.
+<strong>File</strong>: <code>curve_tree_ml_2_debug.m</code> &lt;-- alternative version, where K is used for K_star and K_star_star.  Currently giving non-positive-definite results for posterior covariance using method 1.  Currently Stumped</p>
 
-<p>Lets do a decomposed implementation, and compare the results to this naive implementation.  This should resolve whether the aforementioned issue is a bug in implementation or in theory.  We need the efficient implementation anyway, and having it should help debugging faster.</p>
+<p>Fix sampling sigma bug.</p>
 
-<p>Next:</p>
+<h2>TODO (new)</h2>
 
 <ul>
 <li>get likelihood from multiple samples -- what is the variance of the MC estimator?</li>
+<li>re-run wacv with multi-view data, but no-perturb output</li>
 </ul>
 
 
@@ -260,6 +269,9 @@
 
 
   
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/10/28/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
   
     <a href="/ksimek/research/2013/10/26/params-cvpr-2014" class="prev" title="params, CVPR 2014">&larr; params, CVPR 2014</a>

@@ -1,0 +1,314 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Work Log &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Work Log
+    </h1>
+
+  <div class="date emphnext">October 28, 2013</div>
+    
+
+
+  
+    
+
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Data Association v3</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
+    </tr>
+
+
+</table>
+
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
+
+
+<p>Re-ran with method 2.  Still getting negative eigenvalues.</p>
+
+<p>Possibly non-symmetry issue.</p>
+
+<p>Change gears -- work on fast implementation, then resume debugging.</p>
+
+<h2>Reduced rank approximation of data-covariance</h2>
+
+<div>
+<p>
+Goal: approximate \(\left(K + \Sigma_D \right)^{-1}\), using a low-rank approximation of K;  where \(\Sigma_D\) is the likelihood covariance.
+</p><p>
+In our case \(\Sigma_D\) has infinite covariance, so this inverse doesn't exist. However, if we work with precision matrix \(\Lambda = \Sigma_D^{-1}\), and use the decomposition \( S' S = \Lambda \) we can replace this expression with the equivalent
+
+\[
+    S' \left( S K S' + I \right)^{-1} S
+\]
+
+Even though S is rank-deficient, the inverse in this expression does exist, thanks to the finite positive values being added to the diagonal.  
+</p><p>
+We approximate the above expression as follows.  Let \(K\) be an \(N\) by \(N\) matrix. We can take the eigendecomposition \(K = V D V'\) and approximate it with \(\tilde K = \tilde V \tilde D \tilde V'\), where \(\tilde V\) and \(\tilde D\) consist of the first \(n\) eigenvalues and eigenvectors of \(K\) respectively.   We can use this low-rank approximation with the [Woodbury matrix identity](http://en.wikipedia.org/wiki/Woodbury_matrix_identity) to approximate the above inverse in \(O(n^3)\) time, rather than \(O(N^3)\).  The Woodbury identity is
+        
+\[
+    (A + U C V )^{-1} = A^{-1} - A^{-1} U (C^{-1} + V A^{-1} U)^{-1} V A^{-1}
+\]
+
+Setting \(A = I\), \(U = V' = S \tilde V \) and \(C = \tilde D \), we get:
+    
+\[
+    \left( S K S' + I \right)^{-1} = I - S \tilde V (\tilde D^{-1} + \tilde V' S' S \tilde V)^{-1} \tilde V' S'
+\]
+</p><p>
+It remains to find \(\tilde V\) and \(\tilde D\) efficiently.  Naive eigenvalue decomposition takes \(O(N^3)\) time, which isn't any better than direct inversion.  Sections 4.3.2 and 8.1 of Williams and Rasmussen show how to approximate \(n\) eigenfunctions and eigenvalues from \(n\) data points in \(O(n^3)\) time.  Eigenvectors \(\tilde V\) arise by evaluating the approximate eigenfunctions at the appropriate indices.
+</p>
+<p>
+
+Substitutuing back into the original expression by surrounding with (\(S'\) and \(S\)), we get the final expression:
+    
+\[
+\begin{align}
+    \approx & S' \left ( I - S \tilde V (\tilde D^{-1} + \tilde V' S' S \tilde V)^{-1} \tilde V' S' \right) S \\
+    =&\Lambda - \Lambda \tilde V (\tilde D^{-1} + \tilde V' \Lambda \tilde V)^{-1} \tilde V' \Lambda
+    \end{align}
+
+\]
+</p>
+</div>
+
+
+<h2>Work log</h2>
+
+<p>Implemented two different implementations of "nystrom solve" (<code>tools/nystrom_solve.m</code>).  Crude testing shows big speedup, but stalling on a big eigenvalue decomposition.  Replacing with a call to "chol", waiting on visual results.</p>
+
+<p>...</p>
+
+<p>"chol" gives much faster results. (no need to symmetrize)  But results are junk -- blank screen.</p>
+
+<hr />
+
+<p>Oops, bug in call to chol; fixed.</p>
+
+<p>still getting black.  Posterior covariance is not positive definite; eigenvalues are negative.</p>
+
+<p>When I force covariacne to zero (to view the mean value), it's still in the ballpark but wonky (same as before).</p>
+
+<hr />
+
+<p><strong>Clue</strong>:   When re-using (thinned) input covariance matrix and indices, result looks sensible.  Clearly, we have a problem with how K_star is computed (and likelihood K_star_star, too).</p>
+
+<p>Comparing different K_star's...</p>
+
+<p>Looks like on-diagonal elements differ, off-diagonals are okay.</p>
+
+<p>...</p>
+
+<p>Got it!  Wacv was trained using no-perturb model, but is being tested with OU-perturb.</p>
+
+<p>TODO: edit get_all_Wacv and/or get_wacv_result to receive a model-type... done.</p>
+
+<hr />
+
+<p>reducing test to block (1,1)</p>
+
+<p>possible sources of disparity: indices, function</p>
+
+<p>checked indices -- same.</p>
+
+<p>check params -- model-type doesnt match.</p>
+
+<hr />
+
+<p>First view now looks good in matlab.</p>
+
+<p>Running all views in likelihood_server.</p>
+
+<p>...</p>
+
+<p>Means look great!.  Now on to random perturbed.</p>
+
+<p>...</p>
+
+<p>Cholesky claims posterior covariance isn't positive definite.</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  
+    <a href="/ksimek/research/2013/10/26/work-log" class="prev" title="Work Log - Testing likelihood #2 (2-day)">&larr; Work Log - Testing likelihood #2 (2-day)</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

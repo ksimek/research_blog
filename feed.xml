@@ -7,6 +7,140 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Re-ran with method 2.  Still getting negative eigenvalues.&lt;/p&gt;
+
+&lt;p&gt;Possibly non-symmetry issue.&lt;/p&gt;
+
+&lt;p&gt;Change gears -- work on fast implementation, then resume debugging.&lt;/p&gt;
+
+&lt;h2&gt;Reduced rank approximation of data-covariance&lt;/h2&gt;
+
+&lt;div&gt;
+&lt;p&gt;
+Goal: approximate \(\left(K + \Sigma_D \right)^{-1}\), using a low-rank approximation of K;  where \(\Sigma_D\) is the likelihood covariance.
+&lt;/p&gt;&lt;p&gt;
+In our case \(\Sigma_D\) has infinite covariance, so this inverse doesn't exist. However, if we work with precision matrix \(\Lambda = \Sigma_D^{-1}\), and use the decomposition \( S' S = \Lambda \) we can replace this expression with the equivalent
+
+\[
+    S' \left( S K S' + I \right)^{-1} S
+\]
+
+Even though S is rank-deficient, the inverse in this expression does exist, thanks to the finite positive values being added to the diagonal.  
+&lt;/p&gt;&lt;p&gt;
+We approximate the above expression as follows.  Let \(K\) be an \(N\) by \(N\) matrix. We can take the eigendecomposition \(K = V D V'\) and approximate it with \(\tilde K = \tilde V \tilde D \tilde V'\), where \(\tilde V\) and \(\tilde D\) consist of the first \(n\) eigenvalues and eigenvectors of \(K\) respectively.   We can use this low-rank approximation with the [Woodbury matrix identity](http://en.wikipedia.org/wiki/Woodbury_matrix_identity) to approximate the above inverse in \(O(n^3)\) time, rather than \(O(N^3)\).  The Woodbury identity is
+        
+\[
+    (A + U C V )^{-1} = A^{-1} - A^{-1} U (C^{-1} + V A^{-1} U)^{-1} V A^{-1}
+\]
+
+Setting \(A = I\), \(U = V' = S \tilde V \) and \(C = \tilde D \), we get:
+    
+\[
+    \left( S K S' + I \right)^{-1} = I - S \tilde V (\tilde D^{-1} + \tilde V' S' S \tilde V)^{-1} \tilde V' S'
+\]
+&lt;/p&gt;&lt;p&gt;
+It remains to find \(\tilde V\) and \(\tilde D\) efficiently.  Naive eigenvalue decomposition takes \(O(N^3)\) time, which isn't any better than direct inversion.  Sections 4.3.2 and 8.1 of Williams and Rasmussen show how to approximate \(n\) eigenfunctions and eigenvalues from \(n\) data points in \(O(n^3)\) time.  Eigenvectors \(\tilde V\) arise by evaluating the approximate eigenfunctions at the appropriate indices.
+&lt;/p&gt;
+&lt;p&gt;
+
+Substitutuing back into the original expression by surrounding with (\(S'\) and \(S\)), we get the final expression:
+    
+\[
+\begin{align}
+    \approx &amp; S' \left ( I - S \tilde V (\tilde D^{-1} + \tilde V' S' S \tilde V)^{-1} \tilde V' S' \right) S \\
+    =&amp;\Lambda - \Lambda \tilde V (\tilde D^{-1} + \tilde V' \Lambda \tilde V)^{-1} \tilde V' \Lambda
+    \end{align}
+
+\]
+&lt;/p&gt;
+&lt;/div&gt;
+
+
+&lt;h2&gt;Work log&lt;/h2&gt;
+
+&lt;p&gt;Implemented two different implementations of &quot;nystrom solve&quot; (&lt;code&gt;tools/nystrom_solve.m&lt;/code&gt;).  Crude testing shows big speedup, but stalling on a big eigenvalue decomposition.  Replacing with a call to &quot;chol&quot;, waiting on visual results.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;&quot;chol&quot; gives much faster results. (no need to symmetrize)  But results are junk -- blank screen.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Oops, bug in call to chol; fixed.&lt;/p&gt;
+
+&lt;p&gt;still getting black.  Posterior covariance is not positive definite; eigenvalues are negative.&lt;/p&gt;
+
+&lt;p&gt;When I force covariacne to zero (to view the mean value), it's still in the ballpark but wonky (same as before).&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;strong&gt;Clue&lt;/strong&gt;:   When re-using (thinned) input covariance matrix and indices, result looks sensible.  Clearly, we have a problem with how K_star is computed (and likelihood K_star_star, too).&lt;/p&gt;
+
+&lt;p&gt;Comparing different K_star's...&lt;/p&gt;
+
+&lt;p&gt;Looks like on-diagonal elements differ, off-diagonals are okay.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Got it!  Wacv was trained using no-perturb model, but is being tested with OU-perturb.&lt;/p&gt;
+
+&lt;p&gt;TODO: edit get_all_Wacv and/or get_wacv_result to receive a model-type... done.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;reducing test to block (1,1)&lt;/p&gt;
+
+&lt;p&gt;possible sources of disparity: indices, function&lt;/p&gt;
+
+&lt;p&gt;checked indices -- same.&lt;/p&gt;
+
+&lt;p&gt;check params -- model-type doesnt match.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;First view now looks good in matlab.&lt;/p&gt;
+
+&lt;p&gt;Running all views in likelihood_server.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Means look great!.  Now on to random perturbed.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Cholesky claims posterior covariance isn't positive definite.&lt;/p&gt;
+</description>
+				<pubDate>Mon, 28 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/28/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/28/work-log</guid>
+			</item>
+		
+			<item>
 				<title>Work Log - Testing likelihood #2 (2-day)</title>
 				<description>
 
@@ -110,7 +244,9 @@
 
 &lt;hr /&gt;
 
-&lt;h2&gt;All views drift very far from their true values.  Possibly a math bug in the magnitude of the posterior covariance?&lt;/h2&gt;
+&lt;p&gt;All views drift very far from their true values.  Possibly a math bug in the magnitude of the posterior covariance?&lt;/p&gt;
+
+&lt;hr /&gt;
 
 &lt;p&gt;Refactored server's &quot;dump mode&quot;  to continuously dump each message as it's received, instead of running in offline mode and dumping only the passed-in model.&lt;/p&gt;
 
@@ -144,9 +280,13 @@
 
 &lt;p&gt;...&lt;/p&gt;
 
-&lt;p&gt;Done. Results match on symmetric and non-symmetric index sets.&lt;/p&gt;
+&lt;p&gt;Done. Results match on symmetric and non-symmetric index sets. Which means no progress made on this bug...&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Re-ran, but using non-zero Sigma.  Resulting covariance was not positive definite; SVD was complex-valued.&lt;/p&gt;
+
+&lt;p&gt;Possibly this is a result of the same bug?&lt;/p&gt;
 
 &lt;h2&gt;Covariance matrix Rank-reduction&lt;/h2&gt;
 
@@ -154,18 +294,21 @@
 
 &lt;p&gt;Curious how many non-negligible eigenvalues we have; how many data points we should use.  Recalling a plot of eignevalues from a few days ago, it looked like less than 0.1% of the dimensions are significant, but need to get a concrete number.&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;p&gt;Alternative approach is to use the problem's unique markov structure to sample each section piecewise.  Needs some thought for how to do in the case of the posterior; probably need to estimate a markov blanket for each, along with sampling each branch point and conditioning on it.  Upside: better chance at asymtotic running time improvement. Down-side: not general, not as re-usable within the project.&lt;/p&gt;
 
-&lt;p&gt;Running wacv&lt;/p&gt;
+&lt;h2&gt;To Be Continued&lt;/h2&gt;
 
-&lt;h2&gt;Efficient sampling implementation&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Bug:&lt;/strong&gt; Samples generated from &lt;code&gt;curve_tree_ml_2_debug.m&lt;/code&gt; are wonky.
+&lt;strong&gt;Theory&lt;/strong&gt;: Bug is related to posterior covariance.  Posterior mean looks sensible.
+&lt;strong&gt;File&lt;/strong&gt;: &lt;code&gt;curve_tree_ml_2_debug.m&lt;/code&gt; &amp;lt;-- alternative version, where K is used for K_star and K_star_star.  Currently giving non-positive-definite results for posterior covariance using method 1.  Currently Stumped&lt;/p&gt;
 
-&lt;p&gt;Lets do a decomposed implementation, and compare the results to this naive implementation.  This should resolve whether the aforementioned issue is a bug in implementation or in theory.  We need the efficient implementation anyway, and having it should help debugging faster.&lt;/p&gt;
+&lt;p&gt;Fix sampling sigma bug.&lt;/p&gt;
 
-&lt;p&gt;Next:&lt;/p&gt;
+&lt;h2&gt;TODO (new)&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;get likelihood from multiple samples -- what is the variance of the MC estimator?&lt;/li&gt;
+&lt;li&gt;re-run wacv with multi-view data, but no-perturb output&lt;/li&gt;
 &lt;/ul&gt;
 
 </description>
@@ -985,273 +1128,6 @@ empty model: 4.01252e+06
 				<pubDate>Thu, 17 Oct 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/17/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/17/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log - silhouettes, training likelihood, evaluating likelihood</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Likelihood Server&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;likelihood_server&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15229&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Enabled glPolygonOffset and it improved results somewhat.  Still getting stippling 10% of the time.&lt;/p&gt;
-
-&lt;p&gt;Adding edge-detection code to show stippled edges helps, but adds some internal edges for some reason.&lt;/p&gt;
-
-&lt;p&gt;Apparently, we have point spacing too close together.  This introduces lots of little ridges, which makes silhouette edges appear on the interior of the object incorrectly.  We should pro-process curves in matlab to force spacing to be greater than or equal to to the curve radius.&lt;/p&gt;
-
-&lt;h2&gt;Likelihood rendering bugs&lt;/h2&gt;
-
-&lt;p&gt;Image dumps from our likelihood show all edges are being rendered (not just silhouette edges).&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;seems to be an issue with Camera_render_wrapper.  Possibly the y-axis flipping?&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Yep.  Reverses the handedness of the projected model.&lt;/p&gt;
-
-&lt;p&gt;Shader assumes orientation of forward-facing triangles isn't affected by projection.  Thus, cross-product can be used to determine whether a face is forward-facing (a fundamental operation for classifying silhouette edges).&lt;/p&gt;
-
-&lt;p&gt;Can we solve by doing visibility test in world coordinates, which avoids the projection matrix altogether?&lt;/p&gt;
-
-&lt;p&gt;Yes, but there's a bug causing a few faulty silhouette edges to appear.  Why?&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;It turns out, we were assuming the normal vector of opposite faces are parallel, and used this to .  Apparently not always the case, especially when sharp corners occur (which happens routinely when point spacing is close).&lt;/p&gt;
-
-&lt;p&gt;During testing, we somehow corrupted the GPU's memory.  System sprites (e.g. cursor) are starting to be corrupted, and program keeps crashing  from GPU errors.  Probably constructed too many shaders in a single session.  Will reboot and continue.&lt;/p&gt;
-
-&lt;p&gt;Summary: found silhouette rendering bug caused by projection matrix that didn't preserve handedness.  Rewrote silhouette pass 2 geometry shader to handle this case better.  Now renders correctly in both cases.&lt;/p&gt;
-
-&lt;h2&gt;Next: determine cause of likleihood NaN's; train the likelihood.&lt;/h2&gt;
-
-&lt;h2&gt;Blurred-difference (bd) likelihood issues&lt;/h2&gt;
-
-&lt;p&gt;Getting &quot;NaN&quot; when evaluating.  Checking the result of blurring the model shows inf's everywhere.  Weird, because I can confirm that the input data is succesfully blurring:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-blurred_data.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Same blurrer is used for data and model&lt;/li&gt;
-&lt;li&gt;It isn't the input (tried substituting data in for model and still got corrupt stuff back).&lt;/li&gt;
-&lt;li&gt;re-initializing blurrer doesn't seem to help&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Stepping through in GDB...&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;After convolution, values are on the order of 1e+158...  clearly invalid.  Converting to float causes inf.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Aside:  the padding added before convolution isn't zeros!  Fixing bug in lib/evaluate/convolve.h:fftw_convolution class.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Aside:  Need to remove edges around image border:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-border_edges.jpg&quot; alt=&quot;border edges bug&quot; /&gt;&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Aside: different blurrer for each view?  unnecessary!&lt;/p&gt;
-
-&lt;p&gt;Wrong, same blurrer, different internal buffers.  Caused by calling blurrer.init_fttw_method() every time we add a view to the multi-view likelihood.  Removed that call.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Apparently, calling blurrer_.init_fftw_method() is wreaking all kinds of havok on the blurring results.  I have idea why.  Possibly calling init_fftw_method() more than once is simply not supported.  But that call simply destroys and object and creates a new one, so why is that different from the first time we called it?&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Theory: fftw wisdom is messing with us?&lt;/p&gt;
-
-&lt;p&gt;Results: nope&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;We have a working case and a non-working case.  Can we walk from one case to the other and find the exact change that causes the error?&lt;/p&gt;
-
-&lt;p&gt;Aside: Here's a bizarre result wer'e getting during failure:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-weird_results.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Kind of cool!&lt;/p&gt;
-
-&lt;p&gt;Actually, there might be a hint here... Notice the eliptical shapes that are about the same size as the turntable, but shifted and screwed up.&lt;/p&gt;
-
-&lt;p&gt;It's possible what we're seeing is convolution with a random mask.  the two main ellipses we're seeing are two random bright pixels in the mask, and the miscellaneous roughness might be ca combinariton of small positive and negative values causing the texture we see.  Next step: inspect mask&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Bingo!  We're working with a random mask.&lt;/p&gt;
-
-&lt;p&gt;Let's step back to the original failing case and see if the mask is still random.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Confirmed.  Here's an eample mask:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-tmp.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Here it is dimmer:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-bunk_maks_dimmer.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Anything look familiar?  It's derived from our plant image (notice the ellipses from the turntable).&lt;/p&gt;
-
-&lt;p&gt;Theory: somehow the mask is getting overwritten with our blurred model.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Solved.  Simple bug but was obscured by several issues.&lt;/p&gt;
-
-&lt;p&gt;The fundamental issue was that when the blurring mask was being padded, the padding wasn't being filled with zeros.  Thus, the padded mask consisted of a small section of real mask, surrounded by huge amounts of uninitialized memory.&lt;/p&gt;
-
-&lt;p&gt;This was a bug that I discovered and fixed 12 months ago, but it got rolled back when Andrew revamped the FFTW convolution class.  Ultimately, I was able to restore my changes to the FFTW class without much trouble, but for the six hours that followed, these changes weren't being compiled, because they were in a header file, and the build system only rebuilds object files if the &quot;cpp&quot; file is changed.&lt;/p&gt;
-
-&lt;p&gt;Further, there was a red-herring that appeared as &quot;re-initializing the blurrer causes the errors&quot;.  While this was true, it was only because re-initializing also re-initialized the blurring mask, and it was only during re-initialization did the uninitialized mask padding have junk -- on the first initialization, the memory just happened to be blank.  Go figure.&lt;/p&gt;
-
-&lt;p&gt;This was an absolutely essential bug to find and fix.  Glad its fixed, just wish it hadn't regressed in the first place.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Okay time to reset.  Let's confirm that the rendered models are blurring correctly.  Then confirm non-zero log-likleihood result.    Then on to training.&lt;/p&gt;
-
-&lt;p&gt;Model blurring: CHECK
-Finite likelihood: CHECK  (result: -3.38064e+08)
-Likelihood is near-optimal: &lt;strong&gt;FAIL&lt;/strong&gt;. see below&lt;/p&gt;
-
-&lt;h2&gt;Optimality test&lt;/h2&gt;
-
-&lt;p&gt;Added debugging option to shift rendering left/right/up/down in the image: &lt;code&gt;--dbg-ppo-x-offset&lt;/code&gt; and &lt;code&gt;--dbg-ppo-y-offset&lt;/code&gt;.   Ideally, the likleihood should be optimized at zero offset&lt;/p&gt;
-
-&lt;p&gt;Log likelihood vs x-offset&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt; 0  -3.38064e+08
-+1  -3.38069e+08
-+2  -3.38068e+08
-+5  -3.38033e+08
-+10 -3.37881e+08
--2  -3.38039e+08
--5  -3.37968e+08
--10 -3.37786e+08
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-likleihood_plot_vs_x.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Weird... Why is it at a local &lt;em&gt;minimum&lt;/em&gt; at the center?&lt;/p&gt;
-
-&lt;p&gt;Log likelihood vs y-offset&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt; 0  -3.38064e+08
--2  -3.38062e+08
--5  -3.38033e+08
--10 -3.3789e+08
--20 -3.37321e+08
--40 -3.36139e+08
--80 -3.33693e+08
- 2  -3.38052e+08
- 5  -3.38025e+08
- 10 -3.37983e+08
- 20 -3.37955e+08
- 40 -3.3785e+08
- 80 -3.37523e+08
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-likelihood_plot_vs_y.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Note that as y decreases, the top of the plant starts to fall off the screen. This suggests that having fewer model points might be over-preferred.  Need to sanity-check the GMM model we're using -- I trained it months ago and never really leaned on it hard, so it's the first place to look for problems.&lt;/p&gt;
-
-&lt;p&gt;Also, might be a scaling issue.  Double-check that blurred model and blurred data have similar scale.&lt;/p&gt;
-
-&lt;h2&gt;GMM sanity check&lt;/h2&gt;
-
-&lt;p&gt;Plotting first and second standard deviation of the joint distribution of model-pixel-intensity and data-pixel-intensity.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-17-bd.gmm.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;This looks sensible.  The first component is the diagonal one, representing true postives (in the presence of random perturbations).&lt;/p&gt;
-
-&lt;p&gt;The second component is at the origin -- true negatives.&lt;/p&gt;
-
-&lt;p&gt;The third component is along the y-axis, representing false positives in the data, aka noise.&lt;/p&gt;
-
-&lt;p&gt;The first component has roughly 10x less weight than the second and third.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;No component for the false negatives (aka missing data).  As I recall, running EM on a GMM with four or more components always resulted in redundant components.  Possibly hand-initializing the components in each of the four positions might help.&lt;/p&gt;
-
-&lt;p&gt;I also recall some sort of GPU limitation that prevented me from evaluating more than three components in hardware.  That seems unusual though, and I may be misremembering.&lt;/p&gt;
-
-&lt;p&gt;Does this provide any insight as to why we prefer our model to drift off of the screen?  This introduces more &quot;negative&quot; model pixels, pushing toward the well-supported y-axis are of our model.  Possibly this is the result of poor calibration?  Or wrong blurring sigma?&lt;/p&gt;
-
-&lt;p&gt;TODO: re-run the x/y offset experiment with smaller blurring sigma.&lt;/p&gt;
-
-&lt;h2&gt;Data Sanity check&lt;/h2&gt;
-
-&lt;p&gt;To do.  Approach: instead of evaluating likelihood pixels against data, dump model/data pixel pairs into a list and (a) plot them or (b) train on them.  Maybe just dump to a file and do it in matlab?&lt;/p&gt;
-
-&lt;h2&gt;Blooper reel&lt;/h2&gt;
-
-&lt;p&gt;While writing miscellaneous blocks of memory to disk as images, got some interesting but totally wrong results.&lt;/p&gt;
-
-&lt;p&gt;The following is partially due to rendering an array of doubles as floats.  Interesting banding pattern.  A mini-Mondrian!&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-fun-mess-1.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;The next is just uninitialized memory.  Iteresting patterns :-)&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-16-fun-mess-2.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2&gt;TODO (new)&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;increase spacing between reconstructed points&lt;/li&gt;
-&lt;li&gt;remove edges around image border.&lt;/li&gt;
-&lt;li&gt;share blurrer between views&lt;/li&gt;
-&lt;li&gt;get this running on cuda server&lt;/li&gt;
-&lt;li&gt;why is it crashing on exit?&lt;/li&gt;
-&lt;li&gt;Data sanity check - does it roughly match the GMM's distribution?&lt;/li&gt;
-&lt;li&gt;train likelihood&lt;/li&gt;
-&lt;li&gt;add &quot;dump&quot; mode to bd-likelihood which saves all image pairs to disk for analysis or debugging.&lt;/li&gt;
-&lt;li&gt;test empty model likelihood&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Wed, 16 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/16/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/16/work-log</guid>
 			</item>
 		
 	</channel>
