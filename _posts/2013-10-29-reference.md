@@ -60,4 +60,10 @@ Without loss of generality, assume zero-noise observations appear after noisy ob
 
 We can implement this by slightly modifying our code for the precision-matrix formulation of posterior.  First, give all noise-free values a precision of 1.0 in \\(\Lambda\\), and then modify the \\(I\\) inside the parentheses by zeroing-out elements corresponding to noise-free values.
 
+<div>
+\[
+    \mu = K_* \left[ \Lambda^* K + I^* \right]^{-1} \Lambda^* y
+\]
+</div>
+
 The expression for posterior covariance is derived in the same way, and has similar form.
