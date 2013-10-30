@@ -62,7 +62,7 @@ We can implement this by slightly modifying our code for the precision-matrix fo
 
 <div>
 \[
-    \mu = K_* \left[ \Lambda^* K + I^* \right]^{-1} \Lambda^' y
+    \mu = K_* \left[ \Lambda' K + I' \right]^{-1} \Lambda' y
 \]
 </div>
 
