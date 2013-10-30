@@ -19,7 +19,7 @@ Recall the standard formulation for the posterior mean:
 \]
 </div>
 
-Without loss of generality, assume zero-noise observations appear after noisy observations last.  We can rewrite the posterior in terms of the precision matrix \\(\Lambda\\) of the noisy values:
+Without loss of generality, assume zero-noise observations appear after noisy observations.  We can rewrite the posterior in terms of the precision matrix \\(\Lambda\\) of the noisy values:
 
 <div>
 \[
@@ -58,6 +58,6 @@ Without loss of generality, assume zero-noise observations appear after noisy ob
 \]
 </div>
 
-We can implement by slightly modifying our code for the precision-matrix formulation of posterior.  First, give all noise-free values a precision of 1.0 in \\(\Lambda\\), and then modifying the \\(I\\) inside the parentheses by zeroing-out elements corresponding to noise-free values.
+We can implement this by slightly modifying our code for the precision-matrix formulation of posterior.  First, give all noise-free values a precision of 1.0 in \\(\Lambda\\), and then modify the \\(I\\) inside the parentheses by zeroing-out elements corresponding to noise-free values.
 
 The expression for posterior covariance is derived in the same way, and has similar form.
