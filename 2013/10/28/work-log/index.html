@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log &larr; </title>
+   <title>Implementing Nystrom method; bugs in posterior sampling code &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -83,7 +83,7 @@
 
 
   <h1 class="title">
-        [Work Log] Work Log
+        [Work Log] Implementing Nystrom method; bugs in posterior sampling code
     </h1>
 
   <div class="date emphnext">October 28, 2013</div>
@@ -178,7 +178,7 @@ Substitutuing back into the original expression by surrounding with (\(S'\) and 
 
 <p>still getting black.  Posterior covariance is not positive definite; eigenvalues are negative.</p>
 
-<p>When I force covariacne to zero (to view the mean value), it's still in the ballpark but wonky (same as before).</p>
+<p>When I force covariance to zero (to view the mean value), it's still in the ballpark but wonky (same as before).</p>
 
 <hr />
 
@@ -218,6 +218,59 @@ Substitutuing back into the original expression by surrounding with (\(S'\) and 
 
 <p>Cholesky claims posterior covariance isn't positive definite.</p>
 
+<p>Possibly a bug in construct_attachment_covariance_3?</p>
+
+<p>Re-running with K_star_star from original covariance matrix.  Still gives "not positive definite" errors.</p>
+
+<p>Resorting to eigenvalue decomposition method.</p>
+
+<p>Results look good!  perturbation from mode is <em>TINY</em>, at least in the ground truthed WACV dataset.  If this is true for hyptoheses in the full system, we can probably get away with simply taking the mean and saving significant computation of the covariacne matrix.</p>
+
+<h2>Tuning Nystrom factor</h2>
+
+<p>nystrom factor: 50</p>
+
+<p><img src="/ksimek/research/img/2013-10-28-nystrom_50.png" alt="nystrom factor = 50" /></p>
+
+<p>nystrom factor: 20</p>
+
+<p><img src="/ksimek/research/img/2013-10-28-nystrom_20.png" alt="nystrom factor = 20" /></p>
+
+<p>nystrom factor: 10</p>
+
+<p><img src="/ksimek/research/img/2013-10-28-nystrom_10.png" alt="nystrom factor = 10" /></p>
+
+<p>Nystrom factor apparently has a huge affect on reconstruction quality.  Possibly better choice of thinned index set (compared to uniform sampling) will improve sensitivity, but a brief attempt at this (grouping xyz indices ) had net negative effect.</p>
+
+<p>Needs more thought, possibly should resort to subset of data (SD) or subset of regressors (SR) method, or exploit markov structure.</p>
+
+<h2>Summary</h2>
+
+<ul>
+<li>Nystrom method is implemented and provides huge speedups without obvious in rendered results.</li>
+<li>Spent many hours debugging issues with covariance matrix.  Turned out to not be bug in theory or implementation of the math, but from an unexpected hard-coded value in wacvin wacv results.</li>
+</ul>
+
+
+<p>Nystrom thinning: 10
+ll2 spacing: 3
+Unclear</p>
+
+<ul>
+<li>what is best thinning amount for Nystrom method?</li>
+<li>what is best spacing for output index set</li>
+<li>are perturbations always virtually nil?</li>
+</ul>
+
+
+<h2>TODO (new)</h2>
+
+<ul>
+<li>refactor construct_attachment_covariance_* into a single implementation.</li>
+<li>optimize <code>curve_tree_ml_2.m</code></li>
+</ul>
+
+
       <address class="signature">
         Posted by
         <a class="author" href="/ksimek/research/">Kyle Simek</a> 
@@ -226,6 +279,9 @@ Substitutuing back into the original expression by surrounding with (\(S'\) and 
 
 
   
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/10/29/reference" class="next" title="Mixing Noisy and Noise-free values in GP Posterior">Mixing Noisy and Noise-free values in GP Posterior &rarr;</a>
   
   
     <a href="/ksimek/research/2013/10/26/work-log" class="prev" title="Work Log - Testing likelihood #2 (2-day)">&larr; Work Log - Testing likelihood #2 (2-day)</a>

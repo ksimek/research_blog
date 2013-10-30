@@ -7,7 +7,190 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
-				<title>Work Log</title>
+				<title>Ancestral Sampling from poserior (Markov-aware sampling)</title>
+				<description>&lt;p&gt;Realization: nystrom may be tricky, because the same thinning factor probably won't be appropriate for all scenarios (e.g. short curves).&lt;/p&gt;
+
+&lt;p&gt;Possible approach: always take first and last inidices of a curve; thin longer curves more aggressively.&lt;/p&gt;
+
+&lt;p&gt;Better idea: use markov structure.&lt;/p&gt;
+
+&lt;h2&gt;Exploiting Markov structure for Sampling plants &lt;/h2&gt;
+
+&lt;p&gt;Main ideas: Use inheritence sampling to sample fully tree.  Two rules (1) Parent curve posterior should only depend on it's observed points and a small number of points on its children.  (2) Child curves depend also on the sampled parent points.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Parent points&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The main question here is how many and which observed points of  child-curves should be included to compute posterior?  Heuristic approach: start with child points nearest to branch-point and work outward until information gain is negligible.&lt;/p&gt;
+
+&lt;p&gt;Information gain is the change in entropy of the branch-point posterior, conditioned on the active set.  Entropy is proportional to the determinant of the covariance matrix.&lt;/p&gt;
+
+&lt;p&gt;Let bp be the branch point, and I be the active set.&lt;/p&gt;
+
+&lt;div&gt;
+\[
+Entropy(bp | I) \propto K(bp, bp) - K(bp, np) [K(np, np)  + \Sigma_y(np)]^{-1} K(np, bp)
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Where Sigma_y is the observation covariance.  We may choose to use the prior conditional entropy, which is a simpler stand-in for the posterior conditional entropy.&lt;/p&gt;
+
+&lt;div&gt;
+\[
+Entropy(bp | I) \propto K(bp, bp) - K(bp, np) [K(np, np)]^{-1} K(np, bp)
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Note that the entropy is now only a function of the indices of the observations, not the observations themselves.  Thus, each observation only contribues one dimension to the matrix inversion, instead of three, making the computation 3&lt;sup&gt;3&lt;/sup&gt; times faster.  This is only sensible if the observation variance is relatively uniform between observations, which isn't necessarilly true, but it may be servicable heuristic if thresholds are set appropriately high.&lt;/p&gt;
+
+&lt;p&gt;Opportunities exist to do rank-one updates to inverse, but probably not necessary, as the matrices should be small.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Child curves&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Note that child-curves can also be parent-curves, so the previous approach for determining the active set should be followed.&lt;/p&gt;
+
+&lt;p&gt;We need to estimate the conditional prior probability for the curve, conditioned on its sampled parent.  If the sampled parent contains the branch point, bp, the conditional prior covariance is already available in the track's pre-computed prior_K field, and the mean is bp.  In general, bp isn't sampled, so we must use the nearby points on the parent to find the conditional prior of bp first and sample it explicitly.&lt;/p&gt;
+
+&lt;p&gt;Let bp be a branch point, cp be the child point, and nbp be the &quot;neighbors&quot; of bp on the parent curve, i.e. the markov blanket of bp on the parent.&lt;/p&gt;
+
+&lt;p&gt;Given bp, the child points are distributed by&lt;/p&gt;
+
+&lt;div&gt;
+\[
+cp \mid bp \sim \mathcal{N}(bp, K_{prior})
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;The branch point is distributed by&lt;/p&gt;
+
+&lt;div&gt;
+\[
+bp \mid pnp \sim \mathcal{N}(\mu, \Sigma)
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;where&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\mu = k(bp, nbp) k(nbp, nbp)^{-1} nbp \\
+\Sigma = k(bp, bp) - k(bp, pnp) K(pnp, pnp)^{-1} K(pnp, bp)
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;The a neighborhood size of four points around bp should be sufficient, since this model is piecewise cubic, but it may be worthwhile to experiment with more, since we aren't in bottleneck territory.&lt;/p&gt;
+
+&lt;p&gt;Now that we have conditional priors, we can construct the conditional posterior using the standard formula.&lt;/p&gt;
+
+&lt;h2&gt;Mixing noisy and noise-free data in Posterior&lt;/h2&gt;
+
+&lt;p&gt;Ran into a snag when trying to incorporate the noise-free conditional values that arise during ancestral sampling.  Derived an elegant solution; see the &lt;a href=&quot;/ksimek/research/2013/10/29/reference&quot;&gt;writeup here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2&gt;Implementing markov-aware pixel likelihood&lt;/h2&gt;
+
+&lt;p&gt;For now, using a constant number of points on parent, instead of using the entropy method above.  Could add later; basic approach: precompute all covariances and add/remove one at a time.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Seems to be working, but slow as hell (slower than nystrom method). profiling&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Construct_attachment_covariance_3 is called 486 times!&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Construct non view-specific matrices outside of view loop.&lt;/li&gt;
+&lt;li&gt;nystrom for large curves?&lt;/li&gt;
+&lt;li&gt;do all covariances at once?  saves the computation of sibling and parent objecst?&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;hr /&gt;
+
+&lt;p&gt;implemented a first attempt at speedup; producing faulty results.&lt;/p&gt;
+
+&lt;h2&gt;TODO (new)&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Finish optimized ancestral sampling&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Tue, 29 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/29/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/29/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Mixing Noisy and Noise-free values in GP Posterior</title>
+				<description>&lt;p&gt;When doing ancestral sampling of the posterior, each curve's conditional posterior depends on (a) it's relevant (noisy) observation and (b) the sampled (noise-free) values of the parent.  We can incorporate both in the posterior by treating the noise-free values as observations with zero variance in the likelihood.&lt;/p&gt;
+
+&lt;p&gt;In practice, theres a minor issue implementing this.  Recall that because 3D observations are degenerate in one direction (namely the backprojection direction), we prefer to work with the precision matrix, \(\Lambda\), instead of a covariance matrix.  Under this representation, noise-free values have infinite precision, so operations on \(\Lambda\) are invalid.  Instead, we take a hybrid appraoch, using both precisions and covariances.&lt;/p&gt;
+
+&lt;p&gt;Recall the standard formulation for the posterior mean:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    \mu = K_* \left[ K + \Sigma \right]^{-1} y
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Without loss of generality, assume zero-noise observations appear after noisy observations last.  We can rewrite the posterior in terms of the precision matrix \(\Lambda\) of the noisy values:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    \mu &amp;= K_* \left[ K + \left( 
+                \begin{array}{cc}
+                    \Lambda^{-1} &amp; 0 \\
+                    0 &amp; 0
+                \end{array}
+            \right) \right]^{-1} y \\
+        &amp;= K_* \left[
+        
+            \left( 
+                \begin{array}{cc}
+                    \Lambda &amp; 0 \\
+                    0 &amp; I
+                \end{array}
+             \right) 
+        K + 
+            \left( 
+                \begin{array}{cc}
+                    I &amp; 0 \\
+                    0 &amp; 0
+                \end{array}
+             \right) 
+
+            \right]^{-1} 
+            \left( 
+                \begin{array}{cc}
+                    \Lambda &amp; 0 \\
+                    0 &amp; I
+                \end{array}
+             \right) 
+            y \\
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;We can implement by slightly modifying our code for the precision-matrix formulation of posterior.  First, give all noise-free values a precision of 1.0 in \(\Lambda\), and then modifying the \(I\) inside the parentheses by zeroing-out elements corresponding to noise-free values.&lt;/p&gt;
+
+&lt;p&gt;The expression for posterior covariance is derived in the same way, and has similar form.&lt;/p&gt;
+</description>
+				<pubDate>Tue, 29 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/29/reference</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/29/reference</guid>
+			</item>
+		
+			<item>
+				<title>Implementing Nystrom method; bugs in posterior sampling code</title>
 				<description>
 
 &lt;div class=&quot;meta-info&quot;&gt;
@@ -95,7 +278,7 @@ Substitutuing back into the original expression by surrounding with (\(S'\) and 
 
 &lt;p&gt;still getting black.  Posterior covariance is not positive definite; eigenvalues are negative.&lt;/p&gt;
 
-&lt;p&gt;When I force covariacne to zero (to view the mean value), it's still in the ballpark but wonky (same as before).&lt;/p&gt;
+&lt;p&gt;When I force covariance to zero (to view the mean value), it's still in the ballpark but wonky (same as before).&lt;/p&gt;
 
 &lt;hr /&gt;
 
@@ -134,6 +317,59 @@ Substitutuing back into the original expression by surrounding with (\(S'\) and 
 &lt;p&gt;...&lt;/p&gt;
 
 &lt;p&gt;Cholesky claims posterior covariance isn't positive definite.&lt;/p&gt;
+
+&lt;p&gt;Possibly a bug in construct_attachment_covariance_3?&lt;/p&gt;
+
+&lt;p&gt;Re-running with K_star_star from original covariance matrix.  Still gives &quot;not positive definite&quot; errors.&lt;/p&gt;
+
+&lt;p&gt;Resorting to eigenvalue decomposition method.&lt;/p&gt;
+
+&lt;p&gt;Results look good!  perturbation from mode is &lt;em&gt;TINY&lt;/em&gt;, at least in the ground truthed WACV dataset.  If this is true for hyptoheses in the full system, we can probably get away with simply taking the mean and saving significant computation of the covariacne matrix.&lt;/p&gt;
+
+&lt;h2&gt;Tuning Nystrom factor&lt;/h2&gt;
+
+&lt;p&gt;nystrom factor: 50&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-28-nystrom_50.png&quot; alt=&quot;nystrom factor = 50&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;nystrom factor: 20&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-28-nystrom_20.png&quot; alt=&quot;nystrom factor = 20&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;nystrom factor: 10&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-28-nystrom_10.png&quot; alt=&quot;nystrom factor = 10&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Nystrom factor apparently has a huge affect on reconstruction quality.  Possibly better choice of thinned index set (compared to uniform sampling) will improve sensitivity, but a brief attempt at this (grouping xyz indices ) had net negative effect.&lt;/p&gt;
+
+&lt;p&gt;Needs more thought, possibly should resort to subset of data (SD) or subset of regressors (SR) method, or exploit markov structure.&lt;/p&gt;
+
+&lt;h2&gt;Summary&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Nystrom method is implemented and provides huge speedups without obvious in rendered results.&lt;/li&gt;
+&lt;li&gt;Spent many hours debugging issues with covariance matrix.  Turned out to not be bug in theory or implementation of the math, but from an unexpected hard-coded value in wacvin wacv results.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Nystrom thinning: 10
+ll2 spacing: 3
+Unclear&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;what is best thinning amount for Nystrom method?&lt;/li&gt;
+&lt;li&gt;what is best spacing for output index set&lt;/li&gt;
+&lt;li&gt;are perturbations always virtually nil?&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;TODO (new)&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;refactor construct_attachment_covariance_* into a single implementation.&lt;/li&gt;
+&lt;li&gt;optimize &lt;code&gt;curve_tree_ml_2.m&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
 </description>
 				<pubDate>Mon, 28 Oct 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/28/work-log</link>
@@ -829,305 +1065,6 @@ for(unsigned int i = 1; i &amp;lt; N; ++i)
 				<pubDate>Sun, 20 Oct 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/20/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/20/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>&lt;h2&gt;Training likelihood&lt;/h2&gt;
-
-&lt;p&gt;Fitting a three-component GMM resulted in a null model having a higher likelihood than the ground truth model.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Spent a lot of time troubleshooting this and finally realized I had scaled all values up by 100x so Matlab wouldn't choke, but I wasn't accounting for this when evaluating.  Blame it on this blasted cold, killing my focus!&lt;/p&gt;
-
-&lt;p&gt;Ground truth model looks much better than null model now.&lt;/p&gt;
-
-&lt;p&gt;--&lt;/p&gt;
-
-&lt;p&gt;Trying different blurring levels.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;1.0 is to small.&lt;/li&gt;
-&lt;li&gt;2.0 seems okay&lt;/li&gt;
-&lt;li&gt;5.0 gives a wide variance for true-positives.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;In the end, running max likleihood on this will be best, but this gives us a ballpark.&lt;/p&gt;
-
-&lt;p&gt;--&lt;/p&gt;
-
-&lt;p&gt;Trying to get KJB EM algorithm working on my 2M element dataset.  Getting NaN errors at the moment.&lt;/p&gt;
-</description>
-				<pubDate>Sat, 19 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/19/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/19/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log - Uninformative likelihood?</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15701&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;h2&gt;Likelihood sanity check (ctd)&lt;/h2&gt;
-
-&lt;p&gt;An empty model should have a significantly worse likelihood than the ground truth model.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;ground truth model:  -3.38064e+08
-empty model: -3.28279e+08
-full model: -1.20572e+08
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Both empty and full are better than ground truth.  Why??&lt;/p&gt;
-
-&lt;p&gt;At least possiblities here:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Noise level is so high that fitting is impossible (remember the paper &quot;Fundamental limits of Bayesian Inference: Order Parameters and Phase Transitions for Road Tracking&quot;)&lt;/li&gt;
-&lt;li&gt;Bug.  maybe renderings are just waaaay off?&lt;/li&gt;
-&lt;li&gt;Bad calibration.  Looking at the GMM plot from yesterday (see below) it looks like the one-sigma contour is very very large.&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-17-bd.gmm.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Case 1 is what's left over once 2 and 3 are ruled out.&lt;/p&gt;
-
-&lt;h2&gt;Rendering sanity check.&lt;/h2&gt;
-
-&lt;p&gt;This seems to be a culprit.&lt;/p&gt;
-
-&lt;p&gt;Here's first data view:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-17-data-view-1.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Not a good match to the actual first data image:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-17-ler_2_36_0.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;But a good match to the second data image:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-17-ler_2_36_1.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Must be an off-by-one error when reading data.&lt;/p&gt;
-
-&lt;p&gt;The cameras are not off-by one.  Here's the rendering of the model under the first camera:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-17-model-view-1.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Good match to the first data image above.&lt;/p&gt;
-
-&lt;p&gt;Bug is in the config file:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;view-indices=1:4:36  # bug here
-view-indices=0:4:35  # should be this
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Good news, bad news.&lt;/p&gt;
-
-&lt;p&gt;Good news: after fixing config file, data and rendering look good (use slider to swap between images)&lt;/p&gt;
-
-&lt;script&gt;
-$(function(){
-    var urls = [
-        &quot;/ksimek/research/img/2013-10-17-data.jpg&quot;,
-        &quot;/ksimek/research/img/2013-10-17-model.jpg&quot;
-        ]
-
-    construct_animation($(&quot;#data-model-anim&quot;), urls);
-});
-&lt;/script&gt;
-
-
-&lt;div id=&quot;data-model-anim&quot; style=&quot;width:530px&quot;&gt; &lt;/div&gt;
-
-
-&lt;p&gt;Bad news: likelihood gets &lt;strong&gt;worse&lt;/strong&gt;!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;fixed likelhood: -3.38298e+08
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;It looks like the rendered model is lighter than the data model.  This might account for the issues we're seeing.  We're in the region to the right of the diagonal &quot;true positive&quot; component in the GMM (see contour plot above).  In this region, the noise model has a stronger pull than the true positive model, which partially explains why we get better when fewer model pixels are on the screen.   It doesn't explain why the model gets better when we shift left and right -- maybe it fits better in the tails of the blurred data, but we'd expect it to eventually get worse.  Lets test it.&lt;/p&gt;
-
-&lt;p&gt;Recall that this GMM was trained on a manipulated version of the data image, not a rendered 3D model image.  The process taken was (a) removing all background pixels from the data image and (b) perturbing the foreground pixels. We may have removed a few foreground pixels to add false positives, but the amount was small, if memory serves.  Now we have far fewer model pixels, so we expect the &quot;true positive&quot; region to be slanted more upward.&lt;/p&gt;
-
-&lt;h2&gt;Optimality test (redux)&lt;/h2&gt;
-
-&lt;p&gt;Code:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;x_values=&quot;-80 -40 -20 -10 -5 -2 -1 0 1 2 5 10 20 40 80&quot;
-for x in $x_values; do
-    echo -n &quot;$x &quot;;
-    ./likelihood_server \
-        --config=test.conf  \
-        --image-bounds &quot;0 530 397 0 200 2000&quot;  \
-        --cam-convention &quot;1 0 0&quot;  \
-        --dbg_save_frames  \
-        --dbg_load_message  \
-        --dbg-ppo-x-offset=$x 2&amp;gt; /dev/null | grep ^3 | sed -e 's/3 //' -e 's/,//';
-done
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Output (delta-x vs log-likelihood):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;-80 -3.36866e+08
--40 -3.36987e+08
--20 -3.37434e+08
--10 -3.37864e+08
--5 -3.38169e+08
--2 -3.38279e+08
--1 -3.38294e+08
-0 -3.38298e+08
-1 -3.38292e+08
-2 -3.38275e+08
-5 -3.38172e+08
-10 -3.37912e+08
-20 -3.37479e+08
-40 -3.36958e+08
-80 -3.36991e+08
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Plot:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-17-likelihood_plot_vs_x.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2&gt;&quot;Full&quot; model issue&lt;/h2&gt;
-
-&lt;p&gt;One of the strangest things is the fact that a rendering full of &quot;1.0's&quot; performs far better than the ground truth or empty model.  This area lies along the x-axis in the GMM contour plot, where there is no support.&lt;/p&gt;
-
-&lt;p&gt;Lets debug this.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Found an insane bug.  Below is the loop that compares all the pixels of the data and rendered model:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;    for(size_t i = 0; i &amp;lt;= size_; ++i)
-    {
-        kjb::Vector2 x;
-        x[0] = model[i];
-        x[1] = data_[i] + 1;
-
-        ...  // compute p(x[1] | x[0])
-    }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I have no idea why we're adding 1.0 to &lt;code&gt;data_[i]&lt;/code&gt;, but this explains everything.  In the &quot;full&quot; model, it puts us right on the diagonal of the GMM.  In the empty model, we're right on the x-axis.  Both are well-supported regions.  In the ground truth model, we're lying between these extremes, which is a no-man's land of near-zero support.&lt;/p&gt;
-
-&lt;p&gt;Spending 5 minutes to determine how this got added...&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;It was added between November 11 and December 13 last year.   No obvious reason.  Oh well.&lt;/p&gt;
-
-&lt;p&gt;New sanity check numbers:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;full model -5.2217e+08
-ground truth model 4.03273e+06
-empty model: 4.01252e+06
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Much more sensible.  Missing data looks terrible, noise looks okay but not great,  ground truth looks best.  Lets do an offset plot just to be safe.&lt;/p&gt;
-
-&lt;h2&gt;Optimality test (redux&lt;sup&gt;2)&lt;/sup&gt;&lt;/h2&gt;
-
-&lt;p&gt;Results:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;-80 3.1039e+06
--40 3.27557e+06
--20 3.58156e+06
--10 3.77333e+06
--5 3.93159e+06
--2 4.01459e+06
--1 4.02845e+06
-0 4.03273e+06
-1 4.02704e+06
-2 4.01209e+06
-5 3.93021e+06
-10 3.78782e+06
-20 3.60557e+06
-40 3.26585e+06
-80 3.26894e+06
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Plot&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-17-likelihood_plot_vs_x_fixed.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Oh Yeah!!&lt;/p&gt;
-
-&lt;h2&gt;BD Likelihood Data Dump Mode.&lt;/h2&gt;
-
-&lt;p&gt;add a mode by which pixel likelihood will save pixel data to files for analysis or debugging&lt;/p&gt;
-
-&lt;p&gt;changes will appear in:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;lib/evaluate/bd_likelihood.h - Bd_pixel_likelihood_cpu&lt;/li&gt;
-&lt;li&gt;lib/evaluate/bd_likelihood.h - Bd_mv_likeliood_cpu&lt;/li&gt;
-&lt;li&gt;./likelihood_server.cpp - Options&lt;/li&gt;
-&lt;li&gt;./likelihood_server.cpp - main()&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;hr /&gt;
-
-&lt;p&gt;Added dump mode.  Probably should move this into a separate directory, or at least a different program, since it has almost nothing to do with the likleihood server.&lt;/p&gt;
-
-&lt;h2&gt;TODO&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;rename matlab &quot;render_client&quot; code to &quot;likelihood_client&quot;&lt;/li&gt;
-&lt;li&gt;increase spacing between reconstructed points&lt;/li&gt;
-&lt;li&gt;remove edges around image border.&lt;/li&gt;
-&lt;li&gt;get this running on cuda server&lt;/li&gt;
-&lt;li&gt;train likelihood&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;h2&gt;Open issues&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;how to sync datasets on matlab and c++ server?&lt;/li&gt;
-&lt;li&gt;Wacv multi-view reconstruction for training&lt;/li&gt;
-&lt;li&gt;saving wacv to files for training&lt;/li&gt;
-&lt;li&gt;fixing issues in wacv reconstructions&lt;/li&gt;
-&lt;li&gt;evaluation methodology&lt;/li&gt;
-&lt;li&gt;split/merge&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Thu, 17 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/17/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/17/work-log</guid>
 			</item>
 		
 	</channel>

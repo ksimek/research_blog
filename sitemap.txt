@@ -23,6 +23,8 @@ http://vision.sista.arizona.edu/ksimek/research/page7/index.html
 http://vision.sista.arizona.edu/ksimek/research/page8/index.html
 http://vision.sista.arizona.edu/ksimek/research/page9/index.html
 
+http://vision.sista.arizona.edu/ksimek/research/2013/10/29/work-log
+http://vision.sista.arizona.edu/ksimek/research/2013/10/29/reference
 http://vision.sista.arizona.edu/ksimek/research/2013/10/28/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/10/26/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/10/26/params-cvpr-2014

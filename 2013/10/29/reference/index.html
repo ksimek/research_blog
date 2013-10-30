@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>KLS Research Blog &larr; Kyle Simek</title>
+   <title>Mixing Noisy and Noise-free values in GP Posterior &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -75,228 +75,126 @@
 
 
   
-
-<div id="page">
+<div id="page" class="article">
 	
-
-        
-        
-    
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/12/marginal-likelihood">
-      <li class="title">Direct Evaluation of the Marginal Likelihood</li>
-      </a>
-      <div class="date emphnext">July 12, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/11/work-log">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">July 11, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/08/work-log">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">July 08, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/05/work-log">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">July 05, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/04/work-log">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">July 04, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/03/work-log">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">July 03, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/02/work-log">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">July 02, 2013</div>
-</ul>
-
-        
-        
-    
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/02/rethinking-covariance-functions">
-      <li class="title">Rethinking covariance functions</li>
-      </a>
-      <div class="date emphnext">July 02, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/01/work-log">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">July 01, 2013</div>
-</ul>
-
-        
-        
-    
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/01/foreground-curve-models">
-      <li class="title">Foreground Curve Models as Gaussian Process Covariance Function</li>
-      </a>
-      <div class="date emphnext">July 01, 2013</div>
-</ul>
-
-
-<!-- Pagination links -->
-<div class="pagination">
-  
-    <a href="/ksimek/research/page7" class="previous">&lt;&lt; Read Newer Posts</a>
   
   
-    |
+    
+
+
+  <h1 class="title">
+        [Reference] Mixing Noisy and Noise-free values in GP Posterior
+    </h1>
+
+  <div class="date emphnext">October 29, 2013</div>
+    
+
+
   
-  
-    <a href="/ksimek/research/page9" class="next ">Read Older Posts &gt;&gt;</a>
-  
+    <p>When doing ancestral sampling of the posterior, each curve's conditional posterior depends on (a) it's relevant (noisy) observation and (b) the sampled (noise-free) values of the parent.  We can incorporate both in the posterior by treating the noise-free values as observations with zero variance in the likelihood.</p>
+
+<p>In practice, theres a minor issue implementing this.  Recall that because 3D observations are degenerate in one direction (namely the backprojection direction), we prefer to work with the precision matrix, \(\Lambda\), instead of a covariance matrix.  Under this representation, noise-free values have infinite precision, so operations on \(\Lambda\) are invalid.  Instead, we take a hybrid appraoch, using both precisions and covariances.</p>
+
+<p>Recall the standard formulation for the posterior mean:</p>
+
+<div>
+\[
+    \mu = K_* \left[ K + \Sigma \right]^{-1} y
+\]
 </div>
 
 
+<p>Without loss of generality, assume zero-noise observations appear after noisy observations last.  We can rewrite the posterior in terms of the precision matrix \(\Lambda\) of the noisy values:</p>
+
+<div>
+\[
+\begin{align}
+    \mu &= K_* \left[ K + \left( 
+                \begin{array}{cc}
+                    \Lambda^{-1} & 0 \\
+                    0 & 0
+                \end{array}
+            \right) \right]^{-1} y \\
+        &= K_* \left[
+        
+            \left( 
+                \begin{array}{cc}
+                    \Lambda & 0 \\
+                    0 & I
+                \end{array}
+             \right) 
+        K + 
+            \left( 
+                \begin{array}{cc}
+                    I & 0 \\
+                    0 & 0
+                \end{array}
+             \right) 
+
+            \right]^{-1} 
+            \left( 
+                \begin{array}{cc}
+                    \Lambda & 0 \\
+                    0 & I
+                \end{array}
+             \right) 
+            y \\
+\end{align}
+\]
+</div>
+
+
+<p>We can implement by slightly modifying our code for the precision-matrix formulation of posterior.  First, give all noise-free values a precision of 1.0 in \(\Lambda\), and then modifying the \(I\) inside the parentheses by zeroing-out elements corresponding to noise-free values.</p>
+
+<p>The expression for posterior covariance is derived in the same way, and has similar form.</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/10/29/work-log" class="next" title="Ancestral Sampling from poserior (Markov-aware sampling)">Ancestral Sampling from poserior (Markov-aware sampling) &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2013/10/28/work-log" class="prev" title="Implementing Nystrom method; bugs in posterior sampling code">&larr; Implementing Nystrom method; bugs in posterior sampling code</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
 </div><!-- End Page -->
+
 
 
   

@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-10-28T20:59:22-07:00</updated>
+ <updated>2013-10-30T00:16:30-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -13,7 +13,190 @@
 
  
  <entry>
-   <title>Work Log</title>
+   <title>Ancestral Sampling from poserior (Markov-aware sampling)</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/10/29/work-log"/>
+   <updated>2013-10-29T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/10/29/work-log</id>
+   <content type="html">&lt;p&gt;Realization: nystrom may be tricky, because the same thinning factor probably won't be appropriate for all scenarios (e.g. short curves).&lt;/p&gt;
+
+&lt;p&gt;Possible approach: always take first and last inidices of a curve; thin longer curves more aggressively.&lt;/p&gt;
+
+&lt;p&gt;Better idea: use markov structure.&lt;/p&gt;
+
+&lt;h2&gt;Exploiting Markov structure for Sampling plants &lt;/h2&gt;
+
+&lt;p&gt;Main ideas: Use inheritence sampling to sample fully tree.  Two rules (1) Parent curve posterior should only depend on it's observed points and a small number of points on its children.  (2) Child curves depend also on the sampled parent points.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Parent points&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The main question here is how many and which observed points of  child-curves should be included to compute posterior?  Heuristic approach: start with child points nearest to branch-point and work outward until information gain is negligible.&lt;/p&gt;
+
+&lt;p&gt;Information gain is the change in entropy of the branch-point posterior, conditioned on the active set.  Entropy is proportional to the determinant of the covariance matrix.&lt;/p&gt;
+
+&lt;p&gt;Let bp be the branch point, and I be the active set.&lt;/p&gt;
+
+&lt;div&gt;
+\[
+Entropy(bp | I) \propto K(bp, bp) - K(bp, np) [K(np, np)  + \Sigma_y(np)]^{-1} K(np, bp)
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Where Sigma_y is the observation covariance.  We may choose to use the prior conditional entropy, which is a simpler stand-in for the posterior conditional entropy.&lt;/p&gt;
+
+&lt;div&gt;
+\[
+Entropy(bp | I) \propto K(bp, bp) - K(bp, np) [K(np, np)]^{-1} K(np, bp)
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Note that the entropy is now only a function of the indices of the observations, not the observations themselves.  Thus, each observation only contribues one dimension to the matrix inversion, instead of three, making the computation 3&lt;sup&gt;3&lt;/sup&gt; times faster.  This is only sensible if the observation variance is relatively uniform between observations, which isn't necessarilly true, but it may be servicable heuristic if thresholds are set appropriately high.&lt;/p&gt;
+
+&lt;p&gt;Opportunities exist to do rank-one updates to inverse, but probably not necessary, as the matrices should be small.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Child curves&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Note that child-curves can also be parent-curves, so the previous approach for determining the active set should be followed.&lt;/p&gt;
+
+&lt;p&gt;We need to estimate the conditional prior probability for the curve, conditioned on its sampled parent.  If the sampled parent contains the branch point, bp, the conditional prior covariance is already available in the track's pre-computed prior_K field, and the mean is bp.  In general, bp isn't sampled, so we must use the nearby points on the parent to find the conditional prior of bp first and sample it explicitly.&lt;/p&gt;
+
+&lt;p&gt;Let bp be a branch point, cp be the child point, and nbp be the &quot;neighbors&quot; of bp on the parent curve, i.e. the markov blanket of bp on the parent.&lt;/p&gt;
+
+&lt;p&gt;Given bp, the child points are distributed by&lt;/p&gt;
+
+&lt;div&gt;
+\[
+cp \mid bp \sim \mathcal{N}(bp, K_{prior})
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;The branch point is distributed by&lt;/p&gt;
+
+&lt;div&gt;
+\[
+bp \mid pnp \sim \mathcal{N}(\mu, \Sigma)
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;where&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\mu = k(bp, nbp) k(nbp, nbp)^{-1} nbp \\
+\Sigma = k(bp, bp) - k(bp, pnp) K(pnp, pnp)^{-1} K(pnp, bp)
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;The a neighborhood size of four points around bp should be sufficient, since this model is piecewise cubic, but it may be worthwhile to experiment with more, since we aren't in bottleneck territory.&lt;/p&gt;
+
+&lt;p&gt;Now that we have conditional priors, we can construct the conditional posterior using the standard formula.&lt;/p&gt;
+
+&lt;h2&gt;Mixing noisy and noise-free data in Posterior&lt;/h2&gt;
+
+&lt;p&gt;Ran into a snag when trying to incorporate the noise-free conditional values that arise during ancestral sampling.  Derived an elegant solution; see the &lt;a href=&quot;/ksimek/research/2013/10/29/reference&quot;&gt;writeup here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2&gt;Implementing markov-aware pixel likelihood&lt;/h2&gt;
+
+&lt;p&gt;For now, using a constant number of points on parent, instead of using the entropy method above.  Could add later; basic approach: precompute all covariances and add/remove one at a time.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Seems to be working, but slow as hell (slower than nystrom method). profiling&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Construct_attachment_covariance_3 is called 486 times!&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Construct non view-specific matrices outside of view loop.&lt;/li&gt;
+&lt;li&gt;nystrom for large curves?&lt;/li&gt;
+&lt;li&gt;do all covariances at once?  saves the computation of sibling and parent objecst?&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;hr /&gt;
+
+&lt;p&gt;implemented a first attempt at speedup; producing faulty results.&lt;/p&gt;
+
+&lt;h2&gt;TODO (new)&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Finish optimized ancestral sampling&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Mixing Noisy and Noise-free values in GP Posterior</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/10/29/reference"/>
+   <updated>2013-10-29T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/10/29/reference</id>
+   <content type="html">&lt;p&gt;When doing ancestral sampling of the posterior, each curve's conditional posterior depends on (a) it's relevant (noisy) observation and (b) the sampled (noise-free) values of the parent.  We can incorporate both in the posterior by treating the noise-free values as observations with zero variance in the likelihood.&lt;/p&gt;
+
+&lt;p&gt;In practice, theres a minor issue implementing this.  Recall that because 3D observations are degenerate in one direction (namely the backprojection direction), we prefer to work with the precision matrix, \(\Lambda\), instead of a covariance matrix.  Under this representation, noise-free values have infinite precision, so operations on \(\Lambda\) are invalid.  Instead, we take a hybrid appraoch, using both precisions and covariances.&lt;/p&gt;
+
+&lt;p&gt;Recall the standard formulation for the posterior mean:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    \mu = K_* \left[ K + \Sigma \right]^{-1} y
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Without loss of generality, assume zero-noise observations appear after noisy observations last.  We can rewrite the posterior in terms of the precision matrix \(\Lambda\) of the noisy values:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    \mu &amp;= K_* \left[ K + \left( 
+                \begin{array}{cc}
+                    \Lambda^{-1} &amp; 0 \\
+                    0 &amp; 0
+                \end{array}
+            \right) \right]^{-1} y \\
+        &amp;= K_* \left[
+        
+            \left( 
+                \begin{array}{cc}
+                    \Lambda &amp; 0 \\
+                    0 &amp; I
+                \end{array}
+             \right) 
+        K + 
+            \left( 
+                \begin{array}{cc}
+                    I &amp; 0 \\
+                    0 &amp; 0
+                \end{array}
+             \right) 
+
+            \right]^{-1} 
+            \left( 
+                \begin{array}{cc}
+                    \Lambda &amp; 0 \\
+                    0 &amp; I
+                \end{array}
+             \right) 
+            y \\
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;We can implement by slightly modifying our code for the precision-matrix formulation of posterior.  First, give all noise-free values a precision of 1.0 in \(\Lambda\), and then modifying the \(I\) inside the parentheses by zeroing-out elements corresponding to noise-free values.&lt;/p&gt;
+
+&lt;p&gt;The expression for posterior covariance is derived in the same way, and has similar form.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Implementing Nystrom method; bugs in posterior sampling code</title>
    <link href="http://vision.sista.arizona.edu/ksimek/research/2013/10/28/work-log"/>
    <updated>2013-10-28T00:00:00-07:00</updated>
    <id>http://vision.sista.arizona.edu/ksimek/research/2013/10/28/work-log</id>
@@ -104,7 +287,7 @@ Substitutuing back into the original expression by surrounding with (\(S'\) and 
 
 &lt;p&gt;still getting black.  Posterior covariance is not positive definite; eigenvalues are negative.&lt;/p&gt;
 
-&lt;p&gt;When I force covariacne to zero (to view the mean value), it's still in the ballpark but wonky (same as before).&lt;/p&gt;
+&lt;p&gt;When I force covariance to zero (to view the mean value), it's still in the ballpark but wonky (same as before).&lt;/p&gt;
 
 &lt;hr /&gt;
 
@@ -143,6 +326,59 @@ Substitutuing back into the original expression by surrounding with (\(S'\) and 
 &lt;p&gt;...&lt;/p&gt;
 
 &lt;p&gt;Cholesky claims posterior covariance isn't positive definite.&lt;/p&gt;
+
+&lt;p&gt;Possibly a bug in construct_attachment_covariance_3?&lt;/p&gt;
+
+&lt;p&gt;Re-running with K_star_star from original covariance matrix.  Still gives &quot;not positive definite&quot; errors.&lt;/p&gt;
+
+&lt;p&gt;Resorting to eigenvalue decomposition method.&lt;/p&gt;
+
+&lt;p&gt;Results look good!  perturbation from mode is &lt;em&gt;TINY&lt;/em&gt;, at least in the ground truthed WACV dataset.  If this is true for hyptoheses in the full system, we can probably get away with simply taking the mean and saving significant computation of the covariacne matrix.&lt;/p&gt;
+
+&lt;h2&gt;Tuning Nystrom factor&lt;/h2&gt;
+
+&lt;p&gt;nystrom factor: 50&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-28-nystrom_50.png&quot; alt=&quot;nystrom factor = 50&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;nystrom factor: 20&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-28-nystrom_20.png&quot; alt=&quot;nystrom factor = 20&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;nystrom factor: 10&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-28-nystrom_10.png&quot; alt=&quot;nystrom factor = 10&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Nystrom factor apparently has a huge affect on reconstruction quality.  Possibly better choice of thinned index set (compared to uniform sampling) will improve sensitivity, but a brief attempt at this (grouping xyz indices ) had net negative effect.&lt;/p&gt;
+
+&lt;p&gt;Needs more thought, possibly should resort to subset of data (SD) or subset of regressors (SR) method, or exploit markov structure.&lt;/p&gt;
+
+&lt;h2&gt;Summary&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Nystrom method is implemented and provides huge speedups without obvious in rendered results.&lt;/li&gt;
+&lt;li&gt;Spent many hours debugging issues with covariance matrix.  Turned out to not be bug in theory or implementation of the math, but from an unexpected hard-coded value in wacvin wacv results.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Nystrom thinning: 10
+ll2 spacing: 3
+Unclear&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;what is best thinning amount for Nystrom method?&lt;/li&gt;
+&lt;li&gt;what is best spacing for output index set&lt;/li&gt;
+&lt;li&gt;are perturbations always virtually nil?&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;TODO (new)&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;refactor construct_attachment_covariance_* into a single implementation.&lt;/li&gt;
+&lt;li&gt;optimize &lt;code&gt;curve_tree_ml_2.m&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
 </content>
  </entry>
  

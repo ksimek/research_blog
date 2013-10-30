@@ -1,0 +1,299 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Ancestral Sampling from poserior (Markov-aware sampling) &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Ancestral Sampling from poserior (Markov-aware sampling)
+    </h1>
+
+  <div class="date emphnext">October 29, 2013</div>
+    
+
+
+  
+    <p>Realization: nystrom may be tricky, because the same thinning factor probably won't be appropriate for all scenarios (e.g. short curves).</p>
+
+<p>Possible approach: always take first and last inidices of a curve; thin longer curves more aggressively.</p>
+
+<p>Better idea: use markov structure.</p>
+
+<h2>Exploiting Markov structure for Sampling plants </h2>
+
+<p>Main ideas: Use inheritence sampling to sample fully tree.  Two rules (1) Parent curve posterior should only depend on it's observed points and a small number of points on its children.  (2) Child curves depend also on the sampled parent points.</p>
+
+<p><strong>Parent points</strong></p>
+
+<p>The main question here is how many and which observed points of  child-curves should be included to compute posterior?  Heuristic approach: start with child points nearest to branch-point and work outward until information gain is negligible.</p>
+
+<p>Information gain is the change in entropy of the branch-point posterior, conditioned on the active set.  Entropy is proportional to the determinant of the covariance matrix.</p>
+
+<p>Let bp be the branch point, and I be the active set.</p>
+
+<div>
+\[
+Entropy(bp | I) \propto K(bp, bp) - K(bp, np) [K(np, np)  + \Sigma_y(np)]^{-1} K(np, bp)
+\]
+</div>
+
+
+<p>Where Sigma_y is the observation covariance.  We may choose to use the prior conditional entropy, which is a simpler stand-in for the posterior conditional entropy.</p>
+
+<div>
+\[
+Entropy(bp | I) \propto K(bp, bp) - K(bp, np) [K(np, np)]^{-1} K(np, bp)
+\]
+</div>
+
+
+<p>Note that the entropy is now only a function of the indices of the observations, not the observations themselves.  Thus, each observation only contribues one dimension to the matrix inversion, instead of three, making the computation 3<sup>3</sup> times faster.  This is only sensible if the observation variance is relatively uniform between observations, which isn't necessarilly true, but it may be servicable heuristic if thresholds are set appropriately high.</p>
+
+<p>Opportunities exist to do rank-one updates to inverse, but probably not necessary, as the matrices should be small.</p>
+
+<p><strong>Child curves</strong></p>
+
+<p>Note that child-curves can also be parent-curves, so the previous approach for determining the active set should be followed.</p>
+
+<p>We need to estimate the conditional prior probability for the curve, conditioned on its sampled parent.  If the sampled parent contains the branch point, bp, the conditional prior covariance is already available in the track's pre-computed prior_K field, and the mean is bp.  In general, bp isn't sampled, so we must use the nearby points on the parent to find the conditional prior of bp first and sample it explicitly.</p>
+
+<p>Let bp be a branch point, cp be the child point, and nbp be the "neighbors" of bp on the parent curve, i.e. the markov blanket of bp on the parent.</p>
+
+<p>Given bp, the child points are distributed by</p>
+
+<div>
+\[
+cp \mid bp \sim \mathcal{N}(bp, K_{prior})
+\]
+</div>
+
+
+<p>The branch point is distributed by</p>
+
+<div>
+\[
+bp \mid pnp \sim \mathcal{N}(\mu, \Sigma)
+\]
+</div>
+
+
+<p>where</p>
+
+<div>
+\[
+\mu = k(bp, nbp) k(nbp, nbp)^{-1} nbp \\
+\Sigma = k(bp, bp) - k(bp, pnp) K(pnp, pnp)^{-1} K(pnp, bp)
+\]
+</div>
+
+
+<p>The a neighborhood size of four points around bp should be sufficient, since this model is piecewise cubic, but it may be worthwhile to experiment with more, since we aren't in bottleneck territory.</p>
+
+<p>Now that we have conditional priors, we can construct the conditional posterior using the standard formula.</p>
+
+<h2>Mixing noisy and noise-free data in Posterior</h2>
+
+<p>Ran into a snag when trying to incorporate the noise-free conditional values that arise during ancestral sampling.  Derived an elegant solution; see the <a href="/ksimek/research/2013/10/29/reference">writeup here</a>.</p>
+
+<h2>Implementing markov-aware pixel likelihood</h2>
+
+<p>For now, using a constant number of points on parent, instead of using the entropy method above.  Could add later; basic approach: precompute all covariances and add/remove one at a time.</p>
+
+<p>...</p>
+
+<p>Seems to be working, but slow as hell (slower than nystrom method). profiling</p>
+
+<p>...</p>
+
+<p>Construct_attachment_covariance_3 is called 486 times!</p>
+
+<ol>
+<li>Construct non view-specific matrices outside of view loop.</li>
+<li>nystrom for large curves?</li>
+<li>do all covariances at once?  saves the computation of sibling and parent objecst?</li>
+</ol>
+
+
+<hr />
+
+<p>implemented a first attempt at speedup; producing faulty results.</p>
+
+<h2>TODO (new)</h2>
+
+<ul>
+<li>Finish optimized ancestral sampling</li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  
+    <a href="/ksimek/research/2013/10/29/reference" class="prev" title="Mixing Noisy and Noise-free values in GP Posterior">&larr; Mixing Noisy and Noise-free values in GP Posterior</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+
