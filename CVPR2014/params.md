@@ -36,8 +36,10 @@ Any changes to the matlab parameters need to be updated here, with a correspondi
                          num_views: 9
                      ml_block_size: 1000
                    ml_markov_order: 1000
-                      ll2_spacing: 2
+                      ll2_spacing: 4
                        tube_radius: 1
+            posterior_markov_order: 10
+              posterior_block_size: 100
 
 
 
@@ -45,6 +47,16 @@ Changelog
 ============
 
 Most recent items first.
+
+2013-11-01
+------------
+
+ll2_spacing: 2 -> 4.   Changed during an attempt to speed up posterior sampling.  Didn't have much affect, positive or negative, because the bottleneck was the size of the data, not the output indices.  Still some room for experimenting here...
+
+posterior_markov_order (new): 10.    Set heuristically.  Incurs some error, unclear if significant, but I'm feeling optimistic at the mmoment.  Slightly better than zero; need around 500 for error to decrease to zero (possibly no markov benefit at this size).  
+
+posterior_block_size (new): 100.  Did grid search from 10 to 1000.  Roughly optimal speed-wise; better than 80 or 120.
+
 
 2013-10-26
 ------------
