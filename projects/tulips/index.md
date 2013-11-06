@@ -5,7 +5,7 @@ description: ""
 ---
 {% include JB/setup %}
 
-<div class="project-preamble">
+<div class="meta-info">
 <table>
     <tr>
     <th>Project</th>
@@ -22,6 +22,15 @@ The TULIPS project is an effort to reconstruct 3D models of biological structure
 
 The project originated with Joseph Schelcht's work on reconstructing fungus from microscopic image stacks.  Currently we are focusing on reconstructing branching plants using calibrated cameras.
 
+Project Links
+==================
+Miscellaneous TULIPS-related pages
+
+* [CVPR2014 page]({{site.baseurl}}/events/CVPR2014)
+
+
+Project Overview
+===================
 Related Areas
 ----------------
 
