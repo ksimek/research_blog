@@ -2,7 +2,7 @@
 layout: post
 title: "Foreground Curve Models as Gaussian Process Covariance Function"
 description: ""
-category: 
+category: "Work Log"
 tags: []
 ---
 {% include JB/setup %}

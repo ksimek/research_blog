@@ -2,7 +2,7 @@
 layout: post
 title: "Work summary"
 description: ""
-category: 
+category: "Work Log"
 tags: []
 ---
 {% include JB/setup %}

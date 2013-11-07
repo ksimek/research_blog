@@ -2,7 +2,7 @@
 layout: post
 title: "Rethinking Likelihood"
 description: ""
-category: 
+category: "Work Log"
 tags: []
 ---
 {% include JB/setup %}

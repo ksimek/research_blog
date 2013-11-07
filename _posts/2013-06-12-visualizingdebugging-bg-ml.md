@@ -2,7 +2,7 @@
 layout: post
 title: "Visualizing/Debugging BG ML"
 description: ""
-category: 
+category: "Work Log"
 tags: []
 ---
 {% include JB/setup %}

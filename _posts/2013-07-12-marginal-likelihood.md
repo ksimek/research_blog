@@ -2,7 +2,7 @@
 layout: post
 title: "Direct Evaluation of the Marginal Likelihood"
 description: ""
-category: 
+category: "Work Log"
 tags: []
 ---
 {% include JB/setup %}

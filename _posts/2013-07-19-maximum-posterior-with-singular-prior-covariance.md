@@ -2,7 +2,7 @@
 layout: post
 title: "Maximum posterior with singular prior covariance"
 description: ""
-category: 
+category: "Work Log"
 tags: []
 ---
 {% include JB/setup %}

@@ -2,7 +2,7 @@
 layout: post
 title: "Rethinking covariance functions"
 description: ""
-category: 
+category: "Work Log"
 tags: []
 ---
 {% include JB/setup %}
