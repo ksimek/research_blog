@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-11-08T12:27:56-07:00</updated>
+ <updated>2013-11-08T12:29:32-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -14,9 +14,9 @@
  
  <entry>
    <title>iPlant Literature Review Planning Meetings</title>
-   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/08/work-log"/>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/08/meeting-notes"/>
    <updated>2013-11-08T00:00:00-07:00</updated>
-   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/08/work-log</id>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/08/meeting-notes</id>
    <content type="html">&lt;h2&gt;Document discussion&lt;/h2&gt;
 
 &lt;p&gt;Some random notes about issues to bring up in the final document.&lt;/p&gt;
