@@ -7,6 +7,103 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>iPlant Literature Review Planning Meetings</title>
+				<description>&lt;h2&gt;Document discussion&lt;/h2&gt;
+
+&lt;p&gt;Some random notes about issues to bring up in the final document.&lt;/p&gt;
+
+&lt;p&gt;Talk about representation vs. &quot;features&quot; (characteristics).  Clarify &quot;features&quot;, don't use indescriminitively (call them high-level features, topological features, as opposed to image features).&lt;/p&gt;
+
+&lt;p&gt;Two ways to go about finding &quot;features&quot;:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&quot;look directly for charactersitics/features&quot;&lt;/li&gt;
+&lt;li&gt;&quot;look for model, find the other stuff&quot;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;i.e. looking for representations vs. characteristics&lt;/p&gt;
+
+&lt;p&gt;Bisque vs. Nonbisque?  Unclear what the final application will be, but if Bisque is the goal, some discussion of it's feasibility is probably warranted.  For example, interactive systems like the Clark paper might not be feasible for Bisque.&lt;/p&gt;
+
+&lt;h2&gt;Taxonomy of curve-extraction&lt;/h2&gt;
+
+&lt;p&gt;Kobus mentioned the different &quot;dimensions&quot;  that the problem can be split into.  Some might be&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;3D vs 2D&lt;/li&gt;
+&lt;li&gt;imaging system type (microscope, MRI, camera, etc)&lt;/li&gt;
+&lt;li&gt;temporal vs. nontemporal&lt;/li&gt;
+&lt;li&gt;branching vs non branching&lt;/li&gt;
+&lt;li&gt;biological vs. nonbiological&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Research Topics&lt;/h2&gt;
+
+&lt;p&gt;Recommend splitting time between bio literature and CV literature.&lt;/p&gt;
+
+&lt;p&gt;Several topics to look into&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Image Processing&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&quot;snakes&quot; - active contours&lt;/li&gt;
+&lt;li&gt;Medial axis filtering&lt;/li&gt;
+&lt;li&gt;curve modelling (GP,&lt;/li&gt;
+&lt;li&gt;finding branches&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Applications&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;pollen tube tracking&lt;/li&gt;
+&lt;li&gt;root tracking&lt;/li&gt;
+&lt;li&gt;Blood vessel literature / vascular segmentation&lt;/li&gt;
+&lt;li&gt;Neuron tracing&lt;/li&gt;
+&lt;li&gt;Alternaria / Fungus?&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Data Inventory &lt;/h2&gt;
+
+&lt;p&gt;We currently have data sets from a handful of different applications/domains.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Pollen tubes&lt;/li&gt;
+&lt;li&gt;&quot;Clark&quot; root image (2D, one image)&lt;/li&gt;
+&lt;li&gt;&quot;Max Plank&quot; root images&lt;/li&gt;
+&lt;li&gt;Neurons&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Other stuff&lt;/h2&gt;
+
+&lt;p&gt;Other topics that might be worth looking into, but maybe of speculative value.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Rhizotron - nondestructive underground root imaging system&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Next steps&lt;/h2&gt;
+
+&lt;p&gt;Any questions for Martha?&lt;/p&gt;
+
+&lt;p&gt;Reading for next week:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;* citations from Clark and Hypotrace
+    * related work
+    * image processing
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+				<pubDate>Fri, 08 Nov 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/11/08/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/11/08/work-log</guid>
+			</item>
+		
+			<item>
 				<title>WACV reconstruction (revisited)</title>
 				<description>&lt;p&gt;Addressing issues that came up last time we ran WACV.&lt;/p&gt;
 
@@ -862,183 +959,6 @@ Unclear&lt;/p&gt;
 				<pubDate>Mon, 28 Oct 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/28/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/28/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Testing likelihood #2 (2-day)</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;h2&gt;Client send/receive timeout &lt;/h2&gt;
-
-&lt;p&gt;Tried to get send/receive to timeout if the server didn't respond.  It turns out, although this feature exists in native Unix sockets, the boost library abstractions render them useless.  To get this, I'll need to use asynchronous IO, which I'm not ready to jump to, yet (also not sure if callbacks will work in mex, since the callback code might not exist after the constructor function returns).&lt;/p&gt;
-
-&lt;p&gt;Let's just take the approach that the server must always respond quickly or disconnect.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;h2&gt;Testing &lt;code&gt;curve_tree_ml_2&lt;/code&gt;&lt;/h2&gt;
-
-&lt;p&gt;Need a reliable way to get a testing Trackset.  Write something for wacv -- &lt;code&gt;get_wacv_trackset&lt;/code&gt;.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Modified run_all_wacv to save Tracks;  re-running on all datasets.  &lt;code&gt;get_wacv_results&lt;/code&gt; now returns Tracks as well as means.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Tweaked semantics&lt;/strong&gt; so this now &lt;em&gt;only&lt;/em&gt; computes the pixel likelihood.  The full likelihood is the sum of this and &lt;code&gt;curve_tree_ml&lt;/code&gt;.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Tweaked &lt;code&gt;construct_attachment_covariance_2.m&lt;/code&gt; so the self-covariance matrices are computed in the function (if needed) instead of being passed in.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Spin-off &lt;code&gt;construct_attachment_covariance_3.m&lt;/code&gt; a fully general version that receives input and output indices, and optionally a pre-computed self-covariance.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;TODO: &lt;/strong&gt; make this the &quot;official&quot;/dispatch version, make other versions call this (or eliminate altogether)&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;&lt;strong&gt;Performance&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;data matrix is HUGE.  8913 dimensions.  Is this right?  Also, we can move inversion outside of the loop (maybe).&lt;/p&gt;
-
-&lt;p&gt;Consider 'subset of data' method, or other dimensionality-reduction method&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;h2&gt;&lt;strong&gt;Issue&lt;/strong&gt;: Can't do cholesky decomposition, because points branching from the base are redundant.  Using SVD instead.&lt;/h2&gt;
-
-&lt;p&gt;Okay, it appears to be successfully running end-to-end.  Haven't confirmed results yet, but one thing is clear... its REALLLLLY slow (3 minutes and counting)&lt;/p&gt;
-
-&lt;p&gt;Can do ancenstral sampling to exploit tree structure to speed it up.  can further use markov property to break up curves.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Oops, not quite end-to-end success.  Some indexing, reshaping issues.   Other bugs found&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;wasn't adding posterior mean to sampled results&lt;/li&gt;
-&lt;li&gt;missing transpose in posterior covariance equation.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;h2&gt;Debugging sampled curves&lt;/h2&gt;
-
-&lt;p&gt;Message looks okay under inspection, but getting -inf (due to exception).  Dumping...&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Found a recent bug in code that builds the Gl_curve.  When I chnaged an assert to an if/throw, I forgot to negate the conditional.&lt;/p&gt;
-
-&lt;p&gt;Getting finite values now.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Result looks in the ballpark, but some perturbations look questionable (considering the tight constraints on the WACV dataset).&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-27-perturb-comparison.png&quot; alt=&quot;perturbed vs. original&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Doind a full dump-mode run...&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Found a bug in a recent refactor of dump-mode, causing segfaults.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;All views drift very far from their true values.  Possibly a math bug in the magnitude of the posterior covariance?&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Refactored server's &quot;dump mode&quot;  to continuously dump each message as it's received, instead of running in offline mode and dumping only the passed-in model.&lt;/p&gt;
-
-&lt;p&gt;Trying method2.  Got similar results, qualitatively; per-view curves still have some bizzarre features.  Interestingly, the perturbations between successive samples of method 2 (and between method2 and method 1) are relatively small, suggesting this is an issue with the mean, not the variance.&lt;/p&gt;
-
-&lt;p&gt;Recall that we only tested the no-perturb model for wacv reconstruction; not the per-view reconstruction.&lt;/p&gt;
-
-&lt;p&gt;Re-running WACV dataset 2 with OU-perturb model.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Looks sensible.  So that rules out the parameter settings causing bad mu's.  We should be getting exactly WACV results;  can we get there?&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;use K_star = K&lt;/li&gt;
-&lt;li&gt;use zero covariance matrix (always sample at the mean)&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Running...  (slow, because matrix multiplication is so much larger)&lt;/p&gt;
-
-&lt;p&gt;I'm guessing the bug is in the full-tree covariance .&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Getting &quot;degenerate curve&quot; error.  Thinning points fixed.&lt;/p&gt;
-
-&lt;p&gt;Dumped results look good.  This suggests that mean math is likely correct, as long as K_star is okay.  So K_star math is probably wrong.&lt;/p&gt;
-
-&lt;p&gt;Need to write a test to confirm and start debugging.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Done. Results match on symmetric and non-symmetric index sets. Which means no progress made on this bug...&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Re-ran, but using non-zero Sigma.  Resulting covariance was not positive definite; SVD was complex-valued.&lt;/p&gt;
-
-&lt;p&gt;Possibly this is a result of the same bug?&lt;/p&gt;
-
-&lt;h2&gt;Covariance matrix Rank-reduction&lt;/h2&gt;
-
-&lt;p&gt;While previous test was running, read-up on reduced-rank approximations to K.  Nystrom method seems sensible to speed up matrix inversion.  Doesn't avoid the matrix multiplication  with K_star, or cholesky decomposition of the posterior covariance...  but using a smaller output index set seems like a reasonable approach to mitigating both of those.&lt;/p&gt;
-
-&lt;p&gt;Curious how many non-negligible eigenvalues we have; how many data points we should use.  Recalling a plot of eignevalues from a few days ago, it looked like less than 0.1% of the dimensions are significant, but need to get a concrete number.&lt;/p&gt;
-
-&lt;p&gt;Alternative approach is to use the problem's unique markov structure to sample each section piecewise.  Needs some thought for how to do in the case of the posterior; probably need to estimate a markov blanket for each, along with sampling each branch point and conditioning on it.  Upside: better chance at asymtotic running time improvement. Down-side: not general, not as re-usable within the project.&lt;/p&gt;
-
-&lt;h2&gt;To Be Continued&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;Bug:&lt;/strong&gt; Samples generated from &lt;code&gt;curve_tree_ml_2_debug.m&lt;/code&gt; are wonky.
-&lt;strong&gt;Theory&lt;/strong&gt;: Bug is related to posterior covariance.  Posterior mean looks sensible.
-&lt;strong&gt;File&lt;/strong&gt;: &lt;code&gt;curve_tree_ml_2_debug.m&lt;/code&gt; &amp;lt;-- alternative version, where K is used for K_star and K_star_star.  Currently giving non-positive-definite results for posterior covariance using method 1.  Currently Stumped&lt;/p&gt;
-
-&lt;p&gt;Fix sampling sigma bug.&lt;/p&gt;
-
-&lt;h2&gt;TODO (new)&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;get likelihood from multiple samples -- what is the variance of the MC estimator?&lt;/li&gt;
-&lt;li&gt;re-run wacv with multi-view data, but no-perturb output&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Sat, 26 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/26/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/26/work-log</guid>
 			</item>
 		
 	</channel>

@@ -4,13 +4,110 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-11-08T00:14:00-07:00</updated>
+ <updated>2013-11-08T12:19:00-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>iPlant Literature Review Planning Meetings</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/08/work-log"/>
+   <updated>2013-11-08T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/08/work-log</id>
+   <content type="html">&lt;h2&gt;Document discussion&lt;/h2&gt;
+
+&lt;p&gt;Some random notes about issues to bring up in the final document.&lt;/p&gt;
+
+&lt;p&gt;Talk about representation vs. &quot;features&quot; (characteristics).  Clarify &quot;features&quot;, don't use indescriminitively (call them high-level features, topological features, as opposed to image features).&lt;/p&gt;
+
+&lt;p&gt;Two ways to go about finding &quot;features&quot;:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&quot;look directly for charactersitics/features&quot;&lt;/li&gt;
+&lt;li&gt;&quot;look for model, find the other stuff&quot;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;i.e. looking for representations vs. characteristics&lt;/p&gt;
+
+&lt;p&gt;Bisque vs. Nonbisque?  Unclear what the final application will be, but if Bisque is the goal, some discussion of it's feasibility is probably warranted.  For example, interactive systems like the Clark paper might not be feasible for Bisque.&lt;/p&gt;
+
+&lt;h2&gt;Taxonomy of curve-extraction&lt;/h2&gt;
+
+&lt;p&gt;Kobus mentioned the different &quot;dimensions&quot;  that the problem can be split into.  Some might be&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;3D vs 2D&lt;/li&gt;
+&lt;li&gt;imaging system type (microscope, MRI, camera, etc)&lt;/li&gt;
+&lt;li&gt;temporal vs. nontemporal&lt;/li&gt;
+&lt;li&gt;branching vs non branching&lt;/li&gt;
+&lt;li&gt;biological vs. nonbiological&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Research Topics&lt;/h2&gt;
+
+&lt;p&gt;Recommend splitting time between bio literature and CV literature.&lt;/p&gt;
+
+&lt;p&gt;Several topics to look into&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Image Processing&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&quot;snakes&quot; - active contours&lt;/li&gt;
+&lt;li&gt;Medial axis filtering&lt;/li&gt;
+&lt;li&gt;curve modelling (GP,&lt;/li&gt;
+&lt;li&gt;finding branches&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Applications&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;pollen tube tracking&lt;/li&gt;
+&lt;li&gt;root tracking&lt;/li&gt;
+&lt;li&gt;Blood vessel literature / vascular segmentation&lt;/li&gt;
+&lt;li&gt;Neuron tracing&lt;/li&gt;
+&lt;li&gt;Alternaria / Fungus?&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Data Inventory &lt;/h2&gt;
+
+&lt;p&gt;We currently have data sets from a handful of different applications/domains.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Pollen tubes&lt;/li&gt;
+&lt;li&gt;&quot;Clark&quot; root image (2D, one image)&lt;/li&gt;
+&lt;li&gt;&quot;Max Plank&quot; root images&lt;/li&gt;
+&lt;li&gt;Neurons&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Other stuff&lt;/h2&gt;
+
+&lt;p&gt;Other topics that might be worth looking into, but maybe of speculative value.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Rhizotron - nondestructive underground root imaging system&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Next steps&lt;/h2&gt;
+
+&lt;p&gt;Any questions for Martha?&lt;/p&gt;
+
+&lt;p&gt;Reading for next week:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;* citations from Clark and Hypotrace
+    * related work
+    * image processing
+&lt;/code&gt;&lt;/pre&gt;
+</content>
+ </entry>
  
  <entry>
    <title>WACV reconstruction (revisited)</title>
