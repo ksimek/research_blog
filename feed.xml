@@ -26,7 +26,7 @@
 
 &lt;p&gt;Bisque vs. Nonbisque?  Unclear what the final application will be, but if Bisque is the goal, some discussion of it's feasibility is probably warranted.  For example, interactive systems like the Clark paper might not be feasible for Bisque.&lt;/p&gt;
 
-&lt;h2&gt;Taxonomy of curve-extraction&lt;/h2&gt;
+&lt;h2&gt;Taxonomy of curve-extraction methods&lt;/h2&gt;
 
 &lt;p&gt;Kobus mentioned the different &quot;dimensions&quot;  that the problem can be split into.  Some might be&lt;/p&gt;
 
@@ -41,21 +41,20 @@
 
 &lt;h2&gt;Research Topics&lt;/h2&gt;
 
-&lt;p&gt;Recommend splitting time between bio literature and CV literature.&lt;/p&gt;
+&lt;p&gt;We can split the background reading into several areas, both in image processing/CV and biological application.
+Kobus recommended splitting time between these broad areas.&lt;/p&gt;
 
-&lt;p&gt;Several topics to look into&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Image Processing&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Image Processing Topics&lt;/em&gt;&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&quot;snakes&quot; - active contours&lt;/li&gt;
 &lt;li&gt;Medial axis filtering&lt;/li&gt;
-&lt;li&gt;curve modelling (GP,&lt;/li&gt;
+&lt;li&gt;curve modelling (polynomial/splines, GP, level-set methods)&lt;/li&gt;
 &lt;li&gt;finding branches&lt;/li&gt;
 &lt;/ul&gt;
 
 
-&lt;p&gt;&lt;strong&gt;Applications&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Application Areas&lt;/em&gt;&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;pollen tube tracking&lt;/li&gt;
@@ -63,6 +62,15 @@
 &lt;li&gt;Blood vessel literature / vascular segmentation&lt;/li&gt;
 &lt;li&gt;Neuron tracing&lt;/li&gt;
 &lt;li&gt;Alternaria / Fungus?&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Other stuff&lt;/h2&gt;
+
+&lt;p&gt;Other topics that might be worth looking into, but maybe of speculative value.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Rhizotron - nondestructive underground root imaging system&lt;/li&gt;
 &lt;/ul&gt;
 
 
@@ -78,25 +86,20 @@
 &lt;/ul&gt;
 
 
-&lt;h2&gt;Other stuff&lt;/h2&gt;
-
-&lt;p&gt;Other topics that might be worth looking into, but maybe of speculative value.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Rhizotron - nondestructive underground root imaging system&lt;/li&gt;
-&lt;/ul&gt;
-
-
 &lt;h2&gt;Next steps&lt;/h2&gt;
 
 &lt;p&gt;Any questions for Martha?&lt;/p&gt;
 
-&lt;p&gt;Reading for next week:&lt;/p&gt;
+&lt;p&gt;Reading for next week: look into citations from Clark and Hypotrace&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;* citations from Clark and Hypotrace
-    * related work
-    * image processing
-&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;Kate - related work, Clark Paper&lt;/li&gt;
+&lt;li&gt;Andrew - related work, Hypotrace paper&lt;/li&gt;
+&lt;li&gt;Kyle image processing&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;As we read, lets try to place each paper somewhere in the &quot;Taxonomy&quot; above.&lt;/p&gt;
 </description>
 				<pubDate>Fri, 08 Nov 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/11/08/work-log</link>
