@@ -1,0 +1,378 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>(Two day) Markov Sampling (ctd).  Implementing, testing, optimizing &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] (Two day) Markov Sampling (ctd).  Implementing, testing, optimizing
+    </h1>
+
+  <div class="date emphnext">October 31, 2013</div>
+    
+
+
+  
+    <p>Note: changes to <a href="/ksimek/research/events/CVPR2014/params.html">params</a>.</p>
+
+<p>Resuming from yesterday's discussion about Markov sampling.  I was concerned about piecewise sampling of interpolated values with insufficient data being used.  After some thought, realized there's a better approach: construct blocks from input indices, not output indices.</p>
+
+<p>Secondly: only use the markov approach when there's too much data to eat at once.  Those cases are also the ones with the least probability of poor-data issues.</p>
+
+<hr />
+
+<p>Re-implemented (<code>curve_tree_ml_5.ml</code>), geting weird results.  Huge negative eigenvalues</p>
+
+<p>symptom: 30 output indices, 1000 output indices
+symptom: K has 26k elements!</p>
+
+<p>This code is a mess, proving hard to debug.  I'm going to roll back to version 4, use ideas developed in v5 to implement Markov sampling.</p>
+
+<hr />
+
+<p>Done.  No errors, but results aren't great.  Is it possible the markov blanket is wrong, or maybe we're misusing previous data?</p>
+
+<p>...</p>
+
+<p>I think I found it... wasn't conditioning on previous sampled values.</p>
+
+<p>Seems to be fixed now.  Next on to timing and tuning</p>
+
+<h2>Profiling / Optimizing</h2>
+
+<ol>
+<li>attachment covariance</li>
+<li>markov order</li>
+<li>block size</li>
+</ol>
+
+
+<p><strong>Constructing Attachment covariance</strong></p>
+
+<p>construct_attachment_covariance_3 is still a bottleneck.  Need to investigate some of the suggestions from a few days ago.</p>
+
+<p>Only computing <code>Cov_star_star</code> once (exploiting stationarity in temporal GP) helps somewhat.</p>
+
+<p>Grouping "sibling" object construction should help a lot too.</p>
+
+<p><strong>Markov order</strong></p>
+
+<p>Markov order as low as 10 doesn't seem to negatively affect results.</p>
+
+<p>Need to crop observations before the earliest sampled point we're conditioning on.</p>
+
+<pre><code>Timing
+Before: 17.0s (total,  7.5s on inversion)
+After: 16.5 (7.2s)
+</code></pre>
+
+<p>Tiny improvement, but at no cost so who's complaining?</p>
+
+<h2>Block Size</h2>
+
+<p>Not much to say here...  100 seems to be optimal.</p>
+
+<h2>Markov Order</h2>
+
+<p>Plotted maximum posterior for various markov orders to compare reconstruction quality.</p>
+
+<p><img src="/ksimek/research/img/2013-11-01-mls_vs_mo.png" alt="maximum liklehood vs. markov order" /></p>
+
+<pre><code>range: 1.40e3
+(unweighted) mean: 4.0156
+std deviation: 510.0
+</code></pre>
+
+<p>the mean should be taken with a grain of salt,
+Some chaos below 500, but the scale of the fluctuations is actually relatively small, 0.035%.  We should note that in MCMC, its the absolute fluctuations that are significant, so percent error can be deceptive.  But even so, I think these results are pretty good.</p>
+
+<p>It's interesting that markov order of 10 is only slightly better than markov order of zero!    Also surprising that between 10 and 500, error increases.</p>
+
+<p>Should compare variance here vs. variance of log-likelihood w.r.t. posterior.</p>
+
+<hr />
+
+<p>Result of 20 posterior samples (low markov order)</p>
+
+<pre><code>markov order = 10
+block size =  100
+ll std deviation = 2.33e3
+ll mean: 4.0153e6
+</code></pre>
+
+<p>Result of 20 posterior samples (high markov order)</p>
+
+<pre><code>markov order = 500
+block size =  100
+ll std deviation = 2.17e3
+ll mean: 4.0132e6
+</code></pre>
+
+<p>The log-likelihood standard deviation are high relative to the error range in the graph above.   This is weak evidence that the variance in the graph above is dues to small-scale instabilities in the pixel likelihood.  That is to say, tiny insignificant changes to the 3D model can cause noticible fluctuations to the pixel likelihod, due to it's nonlinearities.  To some extent, what we really want is the expected value of the likelihood over the entire set insignificant 3D perturbations.  So if the deviations we see due to markov-order are simply observations of this phenomenon, they can be safely ignored, because they are in any scenario.</p>
+
+<p>Let's test by re-running the low-markov order test with lots of samples (200 instead of 20) and see if the ll mean approaches that of the high-markov-order test.  This is also a decent stress test for the likelihood server.</p>
+
+<p>Result of 200 posterior samples (low markov order)</p>
+
+<pre><code>markov order = 10
+block size =  100
+ll std deviation = 2.5603e3
+ll mean: 4.0133e6
+</code></pre>
+
+<p>Yep, we're getting closer to the high markov order results for ll mean.  I think we can drop this issue for now and be okay with a markov order of 10-20.  It is still surprising that markov order of zero seems to work so well.  I guess future data doesn't add too much if the present data is sufficient.</p>
+
+<h2>Bottlenecks</h2>
+
+<p>Inversion: 7.1s
+buildling covariance:  2.5s
+one_d_to_three_d: 1.5s
+blkdiag: 1.2s
+other: ~3.5s</p>
+
+<p><strong>Inversion</strong></p>
+
+<p>Only need to invert once for all views... Actually, not true because inversion contains view-specific sample data.  But a large block of the matrix is unchanged between views.  Implementing optimization...</p>
+
+<p>...</p>
+
+<p>Down to <strong>14.7 seconds</strong>.</p>
+
+<p>...</p>
+
+<p>Using sparsity and suppressing output, down to <strong>11.5s</strong>. (8s when not in profile mode)</p>
+
+<p>However, getting some numerical issues (small-magnitude negative eigenvlaues); probably will do better if we use a symmetric equation and invert using cholesky.</p>
+
+<hr />
+
+<p>construct_attachment_covariance is now the bottlneck, taking a full 35% of run time.<br/>
+Some options:</p>
+
+<ol>
+<li>cache intermediate values here and return them as described in the previous post.</li>
+<li>group together calls to "build_sibling_object"</li>
+<li>avoid computing self-covariance when its available in prior_K</li>
+<li>implement one-pass version for symmetric matrices</li>
+<li>precompute self-covariance for all views in one call.</li>
+</ol>
+
+
+<p>Implemented 2, 3, and 4, reduced running time to <strong>8.7s</strong>.</p>
+
+<p>Implemented 1, reduced to  <strong>8.4s</strong>.</p>
+
+<p>Implemented 5, now construct_attachment_covariance is not a bottleneck.  <strong>8.3s</strong>.</p>
+
+<p>Not many strong bottlenecks now.  Some opportunities  to avoid build_cov_ and one_d_to_three_d like we did in <code>curve_tree_ml_5_bak</code>.  Also, using a symmetric formula for posterior might help here.</p>
+
+<p>Tweaked build_cov_ to skip an inner loop if it would be a no-op.  Down to <strong>7.8s</strong>.</p>
+
+<p>Set block size to 100 (had forgotten to change back yesterday, was 120)   <strong>7.6s</strong>.</p>
+
+<p>Rearranged matrix multiplication.  <strong>7.4s</strong></p>
+
+<p>Mex'd <code>one_d_to_three_d</code> utility function.  <strong>6.9s</strong></p>
+
+<hr />
+
+<p>Problem.  Samples look bad.  Overall shape is retained, but rough, with discontinuities.</p>
+
+<p>Switched off block matrix inversion, results look good, but back to <strong>8.3s</strong></p>
+
+<hr />
+
+<p>Found bug.  Indexing problem was causing previous samples to be ignored.  Fixed, and its better than before, but still getting some non-negligible eigenvalues and occasional discontinuities in samples.</p>
+
+<hr />
+
+<h2>Summary</h2>
+
+<p>Originally took 275s, now 8.3s in profile mode, 5.x s in regular mode.</p>
+
+<h2>TODO (new)</h2>
+
+<ul>
+<li>running time vs. number of samples to determine affect of likelihood server bottleneck (use GPU likelihood for real-world estimate)</li>
+<li>profile/optimize likelihood server directly?</li>
+<li>Symmetrize formula and use cholesky for inversion.</li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/11/04/work-log" class="next" title="Post-CVPR-deadline; 2-part likelihood efficiency, 2-pass sampling">Post-CVPR-deadline; 2-part likelihood efficiency, 2-pass sampling &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2013/10/30/work-log" class="prev" title="Optimizing posterior-sampling for pixel likelihood">&larr; Optimizing posterior-sampling for pixel likelihood</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

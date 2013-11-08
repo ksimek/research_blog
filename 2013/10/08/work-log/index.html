@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log &larr; </title>
+   <title>New undertaking: C++ render server, pixel-based likelihood &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -68,6 +68,8 @@
       <li><a href="/ksimek/research/contact.html">Contact</a></li>
       <li><a  href="/ksimek/research/archive.html">Archive</a></li>
       <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
       <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
 
     </ul>
@@ -83,7 +85,7 @@
 
 
   <h1 class="title">
-        [Work Log] Work Log
+        [Work Log] New undertaking: C++ render server, pixel-based likelihood
     </h1>
 
   <div class="date emphnext">October 08, 2013</div>
@@ -119,6 +121,10 @@
     Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
 </div>
 
+
+<blockquote><p>Note on November 6, 2013: During the 5-day gap from the previous entry, I decided to go with "Option 1" proposed that day, namely construct a pixel likelihood that uses the rendered model, which should rule out bad candidates by penalizing missing data.  Since OpenGL rendering this isn't possible  in Matlab, realized I will need to implement rendering in C++ and somehow communicate to Matlab using some inter-process communication.   To minimize latency, avoid polling, deciced on using synchronous TCP over localhost.  Boost makes this pretty easy, and have implemented a proof of concept both in MEX and in KJB.   The Matlab/MEX version constructs a socket on the heap, and returns its address as a <code>uint64</code> to matlab.</p>
+
+<p>At the point when the following was written, I had just begun implementing a render-server in opengl, which would receive a curve-tree and return the rendered pixels.  I would later abandon this approach in favor of computing an edge-based likelihood in C++ and return the log-likelihood value to matlab.</p></blockquote>
 
 <p>Working on compiling render server.</p>
 
@@ -203,7 +209,7 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/10/09/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+    <a href="/ksimek/research/2013/10/09/work-log" class="next" title="Implementing Likelihood server ">Implementing Likelihood server  &rarr;</a>
   
   
     <a href="/ksimek/research/2013/10/03/work-log" class="prev" title="Work Log">&larr; Work Log</a>

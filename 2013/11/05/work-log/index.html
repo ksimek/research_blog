@@ -1,0 +1,249 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>iPlant  &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] iPlant 
+    </h1>
+
+  <div class="date emphnext">November 05, 2013</div>
+    
+
+
+  
+    <p>Doing background research inre: forwarded email from Kobus, "Fwd: What we really need from your students".</p>
+
+<h1>Literature review</h1>
+
+<p><strong>Paper 1:</strong> <em>Three-Dimensional root Phenotyping with a Novel Imaging and Software Platform</em>, by Clark, et. al.</p>
+
+<p>Introduces a semi-automated method for semantic reconstruction of root structures from turntable images, using our lab's definition of semantic reconstruction, i.e. 3D curves with topology and part labels.  It looks like they're using standard voxel-carving to identify foreground and background voxels (i.e. root and non-root voxels).  This approach uses calibrated cameras  to backproject silhouette images and take the intersection--in other words, visual hull but with voxels instead of polygonal meshes.   Then the skeleton of the foreground voxels is extracted using a median filter method to extract 3D curves.  Skeleton branches are then manually labeled by domain experts as one of several root types.  There also seems to be some functionality to manually correct errors during backprojection and skeleton extraction phase.</p>
+
+<p>They key contribution seems to be a list of 27 features derived from the resulting 3D data.  Bushiness, centroid and volume distribution seem to be discriminative for classifying a specimen between the two different species under study.    They also  measure the amount of helical curvature and how much gravity affects growth, which has apparently not been studied in rice plants prior to this?.</p>
+
+<p>Extracting most of the interesting features requires full semantic reconstruction, which is very difficult to obtain using known fully-automatic methods.  Further, this approach requires a calibrated camera, which likely precludes us from using it for post-hoc analysis of existing datasets that might exist in Bisque, unless calibration data is available.</p>
+
+<p>The "Clark Rice root" image provided on the wiki is a high resolution 2D image, which appears to be different from those used in the Clark paper, so it's unclear what its relevance is in this context.</p>
+
+<p><em>Other notes</em></p>
+
+<p>Its unclear how silhouettes are extracted, but likely just intensity thresholding with manually-chosen threshold value.  They're using a lightbox background, so this approach seems sensible.   There's probably some tunable parameters for the skeleton-extraction phase, but these aren't discussed.</p>
+
+<!--
+Bisque thoughts
+===================
+
+* 3D approaches might be unrealistic in Bisque
+    1. Most datasets won't have calibrated cameras.
+        * Could try auto-calibration, but I double their effectiveness in the wild.
+        * Could have user click corresponding points, between views, but this leads us to...
+    2. Most datasets won't have multiple views.
+        * could try bayesian approaches to solving the inverse problem, but this is an open research problem.
+
+    3. If 1. and 2. are satisfied, we still need significant user interaction to implement Clarke; unlikely to be possible in Bisque?
+        * Maybe Bisque could receive the files output by Clarke's software?  But at that point, the analysis is already done, what is Bisque being used for?
+* Most effective 3D systems will collect data under a process specifically tailored to 3D data.  How does Bisque fit into this scenario?
+
+
+
+
+iPlant recognizes that most image-processing software developed by biologists is heavily tuned to a specific application, and doesn't generalize to other datasets.  This is a problem endemic to the entire field of computer vision; even today many approaches work well on the dataset they were trained on and fail on others.  Even the Deva/Feltzenswalb human detectors--arguably one of the most robust object detectors in the field -- performs poorly on new datasets, as we saw when we applied it to Mind's Eye.  Only after rescaling images, tuning thresholds, and retraining did we get reasonable performance.
+
+This highlights a very CV-centric mindset, which I claim hinders the progress toward the goal of obtaining the best possible plant informatics.  The problem is a misalignment of goals.  For CV researchers, the goal is to do the best CV possible with as little human interaction possible.     In contrast, biologists' goals are to do the best biology possible, which hinges on obtaining the best possible data at the least possible cost. As a result, CV researchers judge our algorithms on "percent correct" assuming zero human interaction, whereas biologists are more likely to judge an approach by the number of human-hours needed to get to 100% accuracy or close to it.   The Clark paper is a good example, where humans manually make corrections to the computer vision algorithm and manually label the parts of a model; only then do they obtain the 27 features of plant roots that make their research novel.  We should recognize that our roles as iPLant "consultants" may conflict with our natural instincts as CV researchers and try to embrace strategies that leverage our CV expertise but ultimately serve the goals of biologists.
+
+One such strategy is to relax the "fully automatic" constraint and look toward semi-automatic systems that use human input to improve robustness and achieve broad applicability across datasets.  Clark is a perfect example of such a method that uses some human interaction in exchange for drastically better results.  I've seen similar successes in the area of plant modeling, where interactive CAD interfaces are combined with CV algorithms from 20 years ago (e.g. snakes) to create a method that is efficient and provides precise models.
+
+This not to say that advanced CV methods have not place in iPlant, but if Martha says our current charges is to make recommendations as to broadly-applicable methods that are currently "doable," my answer is "semi-automatic methods".  Putting this in the context of CV, even the best fully automatic methods aren't really fully automatic, because they require training on the part of the user, which requires some form of interactive system.
+
+So the overall theme of my argument is using CV to construct better interactive GUIs.  At the moment, the greatest challenge to this strategy are the constraints posed by the current Bisque system, which provides only a minimal amount of HTML-esqe interactivity (e.g. click points, type in "tags"), in a painfully "modal" framework (e.g. submit user's response to server, wait for server do some analysis, repeat).  One solution is to push hard in improviing the Bisque framework, for example exploiting HTML5 and javascript to provide rich client-side user interfaces.  However, not only would this be an expensive undertaking, but the most effective GUIs will need to be specific to the task at hand, and building an interactive system for building interactive system would be a herculean task in both design and implementation.  
+
+Maybe the answer lies outside of Bisque itself.  Bisque's real value is as a database of images and metadata.  Let's recognize this and push more toward promoting scientists adding Bisque-compatible "export" functionality to existing data-analysis systems (like Clark, et al.), so Bisque can become the world-standard repository for rich image metadata.  
+
+Alternatively, if iPlant wants to continue to push in the direction of performing analysis inside the system, it needs to put significant effort into interfaces that are dynamic, responsive, and powerful.  This means leaning heavily on javascript, using canvas, webGL, and client-side image analysis so users can respond in real-time to the results of their interactions.  For example, imagine an interface in which users can "paint" some foregound and background pixels to train a classifier, quickly see the result of the classifier, and re-train by painting misclassified pixels.   Or an automatic curve-tracing algorithm where users can drag incorrect curves onto their correct path.  These are approaches that are proven and can provide excellent results, but require human-hours to get there.  Minimizing human hours will be a combination of good UI to fix CV errors quickly and good CV to minimize the UI time.  
+
+
+
+The alternative is to focus on the features we can extract in the absence of near 100% accuracy.  
+
+-->
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/11/06/work-log" class="next" title="CVPR cleanup, documentation">CVPR cleanup, documentation &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2013/11/04/work-log" class="prev" title="Post-CVPR-deadline; 2-part likelihood efficiency, 2-pass sampling">&larr; Post-CVPR-deadline; 2-part likelihood efficiency, 2-pass sampling</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

@@ -7,6 +7,487 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>WACV reconstruction (revisited)</title>
+				<description>&lt;p&gt;Addressing issues that came up last time we ran WACV.&lt;/p&gt;
+
+&lt;p&gt;Currently working on dataset #8, which has some real problems.&lt;/p&gt;
+
+&lt;p&gt;Spent some time tweaking the ground truth, adding missing curves, and correcting one or two obvious mistakes.&lt;/p&gt;
+
+&lt;p&gt;Still getting terrible results; one problem might be the &quot;rough&quot; reconstruction, which doesn't take into account anisotropic data uncertainty.  Fixed.&lt;/p&gt;
+
+&lt;p&gt;False-positive reversal has been corrected, but still getting terrible results; it seems like the camera calibration is waaaay off.&lt;/p&gt;
+
+&lt;p&gt;I dont have the calibration data for this dataset available, locally re-syncing full dataset.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Are these calibrated cameras ordered in counter-clockwise direction? No.  but the calibration_data.mat file in for this dataset is.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Inspected correspondence diagrams.  Possibly some of the ground truth curves are reversed?  Dataset #8, curve #7, view #9, only corresponds to very end of other points:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-11-07-bad_correspondence.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Tweaking ground truth tracing program to show start-point of curves.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Ground truth program doesn't compile.  Clang++ for mountain lion is complaining.&lt;/p&gt;
+
+&lt;p&gt;Apparently clang no longer uses gnu stdc++ library, and some library components use proprietary gnu symbols (I admit, it was my code).  Fixed.&lt;/p&gt;
+
+&lt;p&gt;Getting some new errors regarding some forward declarations of STL pair.  Was hard to debug, because errors weren't local to the problematic code, and errors were cryptic.  Removed forward declarations; fixed.&lt;/p&gt;
+
+&lt;p&gt;Found a template function I hand't ported from my experimental branch of KJB.&lt;/p&gt;
+
+&lt;p&gt;Linker errors -- libXmu and libXi not found.  Tweaked init_compile's logic for OpenGL on Macs. Hopefully I didn't break anyone else's builds...&lt;/p&gt;
+
+&lt;p&gt;More linker errors. Apparently i need to recompile &lt;strong&gt;everything&lt;/strong&gt; to use clang's c++ libraries?? rebuilt boost, next is casadi, but I can't find the source on my machine.&lt;/p&gt;
+
+&lt;h2&gt;TODO (new)&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;recalibrate cameras&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Thu, 07 Nov 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/11/07/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/11/07/work-log</guid>
+			</item>
+		
+			<item>
+				<title>CVPR cleanup, documentation</title>
+				<description>&lt;p&gt;Cleaned up blog, added &lt;a href=&quot;/ksimek/research/projects&quot;&gt;project pages&lt;/a&gt;, &lt;a href=&quot;/ksimek/research/events&quot;&gt;events page&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Added to &lt;a href=&quot;/ksimek/research/events/CVPR2014/&quot;&gt;CVPR 2012 page&lt;/a&gt;, created &lt;a href=&quot;/ksimek/research/events/CVPR2014/summary.html&quot;&gt;summary of &quot;done&quot; and &quot;TODO&quot;&lt;/a&gt; post-CVPR.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;WACV - extend to multi-view/tracking; fix reconstruction errors.&lt;/p&gt;
+
+&lt;p&gt;Working, but need to remove translation and scale perturb component.&lt;/p&gt;
+
+&lt;h2&gt;Testing branch index and start index&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;negative start index causes gaps&lt;/li&gt;
+&lt;li&gt;positive start index causes overshot (pre-tails)&lt;/li&gt;
+&lt;li&gt;tree base is shifting between view&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;TODO (new) &lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Testing branch index and start index, and reversal&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Wed, 06 Nov 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/11/06/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/11/06/work-log</guid>
+			</item>
+		
+			<item>
+				<title>iPlant </title>
+				<description>&lt;p&gt;Doing background research inre: forwarded email from Kobus, &quot;Fwd: What we really need from your students&quot;.&lt;/p&gt;
+
+&lt;h1&gt;Literature review&lt;/h1&gt;
+
+&lt;p&gt;&lt;strong&gt;Paper 1:&lt;/strong&gt; &lt;em&gt;Three-Dimensional root Phenotyping with a Novel Imaging and Software Platform&lt;/em&gt;, by Clark, et. al.&lt;/p&gt;
+
+&lt;p&gt;Introduces a semi-automated method for semantic reconstruction of root structures from turntable images, using our lab's definition of semantic reconstruction, i.e. 3D curves with topology and part labels.  It looks like they're using standard voxel-carving to identify foreground and background voxels (i.e. root and non-root voxels).  This approach uses calibrated cameras  to backproject silhouette images and take the intersection--in other words, visual hull but with voxels instead of polygonal meshes.   Then the skeleton of the foreground voxels is extracted using a median filter method to extract 3D curves.  Skeleton branches are then manually labeled by domain experts as one of several root types.  There also seems to be some functionality to manually correct errors during backprojection and skeleton extraction phase.&lt;/p&gt;
+
+&lt;p&gt;They key contribution seems to be a list of 27 features derived from the resulting 3D data.  Bushiness, centroid and volume distribution seem to be discriminative for classifying a specimen between the two different species under study.    They also  measure the amount of helical curvature and how much gravity affects growth, which has apparently not been studied in rice plants prior to this?.&lt;/p&gt;
+
+&lt;p&gt;Extracting most of the interesting features requires full semantic reconstruction, which is very difficult to obtain using known fully-automatic methods.  Further, this approach requires a calibrated camera, which likely precludes us from using it for post-hoc analysis of existing datasets that might exist in Bisque, unless calibration data is available.&lt;/p&gt;
+
+&lt;p&gt;The &quot;Clark Rice root&quot; image provided on the wiki is a high resolution 2D image, which appears to be different from those used in the Clark paper, so it's unclear what its relevance is in this context.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Other notes&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Its unclear how silhouettes are extracted, but likely just intensity thresholding with manually-chosen threshold value.  They're using a lightbox background, so this approach seems sensible.   There's probably some tunable parameters for the skeleton-extraction phase, but these aren't discussed.&lt;/p&gt;
+
+&lt;!--
+Bisque thoughts
+===================
+
+* 3D approaches might be unrealistic in Bisque
+    1. Most datasets won't have calibrated cameras.
+        * Could try auto-calibration, but I double their effectiveness in the wild.
+        * Could have user click corresponding points, between views, but this leads us to...
+    2. Most datasets won't have multiple views.
+        * could try bayesian approaches to solving the inverse problem, but this is an open research problem.
+
+    3. If 1. and 2. are satisfied, we still need significant user interaction to implement Clarke; unlikely to be possible in Bisque?
+        * Maybe Bisque could receive the files output by Clarke's software?  But at that point, the analysis is already done, what is Bisque being used for?
+* Most effective 3D systems will collect data under a process specifically tailored to 3D data.  How does Bisque fit into this scenario?
+
+
+
+
+iPlant recognizes that most image-processing software developed by biologists is heavily tuned to a specific application, and doesn't generalize to other datasets.  This is a problem endemic to the entire field of computer vision; even today many approaches work well on the dataset they were trained on and fail on others.  Even the Deva/Feltzenswalb human detectors--arguably one of the most robust object detectors in the field -- performs poorly on new datasets, as we saw when we applied it to Mind's Eye.  Only after rescaling images, tuning thresholds, and retraining did we get reasonable performance.
+
+This highlights a very CV-centric mindset, which I claim hinders the progress toward the goal of obtaining the best possible plant informatics.  The problem is a misalignment of goals.  For CV researchers, the goal is to do the best CV possible with as little human interaction possible.     In contrast, biologists' goals are to do the best biology possible, which hinges on obtaining the best possible data at the least possible cost. As a result, CV researchers judge our algorithms on &quot;percent correct&quot; assuming zero human interaction, whereas biologists are more likely to judge an approach by the number of human-hours needed to get to 100% accuracy or close to it.   The Clark paper is a good example, where humans manually make corrections to the computer vision algorithm and manually label the parts of a model; only then do they obtain the 27 features of plant roots that make their research novel.  We should recognize that our roles as iPLant &quot;consultants&quot; may conflict with our natural instincts as CV researchers and try to embrace strategies that leverage our CV expertise but ultimately serve the goals of biologists.
+
+One such strategy is to relax the &quot;fully automatic&quot; constraint and look toward semi-automatic systems that use human input to improve robustness and achieve broad applicability across datasets.  Clark is a perfect example of such a method that uses some human interaction in exchange for drastically better results.  I've seen similar successes in the area of plant modeling, where interactive CAD interfaces are combined with CV algorithms from 20 years ago (e.g. snakes) to create a method that is efficient and provides precise models.
+
+This not to say that advanced CV methods have not place in iPlant, but if Martha says our current charges is to make recommendations as to broadly-applicable methods that are currently &quot;doable,&quot; my answer is &quot;semi-automatic methods&quot;.  Putting this in the context of CV, even the best fully automatic methods aren't really fully automatic, because they require training on the part of the user, which requires some form of interactive system.
+
+So the overall theme of my argument is using CV to construct better interactive GUIs.  At the moment, the greatest challenge to this strategy are the constraints posed by the current Bisque system, which provides only a minimal amount of HTML-esqe interactivity (e.g. click points, type in &quot;tags&quot;), in a painfully &quot;modal&quot; framework (e.g. submit user's response to server, wait for server do some analysis, repeat).  One solution is to push hard in improviing the Bisque framework, for example exploiting HTML5 and javascript to provide rich client-side user interfaces.  However, not only would this be an expensive undertaking, but the most effective GUIs will need to be specific to the task at hand, and building an interactive system for building interactive system would be a herculean task in both design and implementation.  
+
+Maybe the answer lies outside of Bisque itself.  Bisque's real value is as a database of images and metadata.  Let's recognize this and push more toward promoting scientists adding Bisque-compatible &quot;export&quot; functionality to existing data-analysis systems (like Clark, et al.), so Bisque can become the world-standard repository for rich image metadata.  
+
+Alternatively, if iPlant wants to continue to push in the direction of performing analysis inside the system, it needs to put significant effort into interfaces that are dynamic, responsive, and powerful.  This means leaning heavily on javascript, using canvas, webGL, and client-side image analysis so users can respond in real-time to the results of their interactions.  For example, imagine an interface in which users can &quot;paint&quot; some foregound and background pixels to train a classifier, quickly see the result of the classifier, and re-train by painting misclassified pixels.   Or an automatic curve-tracing algorithm where users can drag incorrect curves onto their correct path.  These are approaches that are proven and can provide excellent results, but require human-hours to get there.  Minimizing human hours will be a combination of good UI to fix CV errors quickly and good CV to minimize the UI time.  
+
+
+
+The alternative is to focus on the features we can extract in the absence of near 100% accuracy.  
+
+--&gt;
+
+</description>
+				<pubDate>Tue, 05 Nov 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/11/05/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/11/05/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Post-CVPR-deadline; 2-part likelihood efficiency, 2-pass sampling</title>
+				<description>&lt;p&gt;First day after CVPR deadline.&lt;/p&gt;
+
+&lt;p&gt;Comp exam - committee, planning.&lt;/p&gt;
+
+&lt;p&gt;Computer issues - upgrade, crashing, keyboard?&lt;/p&gt;
+
+&lt;h1&gt;2-Pass sampling.&lt;/h1&gt;
+
+&lt;p&gt;Evaluating the second likelihood term is still very slow, even after a 100x speedup.&lt;/p&gt;
+
+&lt;p&gt;First do MH using single-term likelihood.  Then treat that as the proposal for the two-term likelihood.  Since the first step satisfies detailed balance, we have:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    \hat p(\theta) q(\theta' | \theta) &amp;=
+    \hat p(\theta') q(\theta | \theta') \\
+    \frac{\hat p(\theta)}{\hat p(\theta')} &amp;=
+    \frac{q(\theta | \theta')}{q(\theta' | \theta)} 
+\end{align}
+
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Where \(\hat p(\theta)\) is the surrogate posterior, using only the single-term likelihood.  Substituting this identity into the full MCMC acceptance term, we get:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+\alpha &amp;= \left \{ \frac{p(\theta') q(\theta | \theta')}{p(\theta)q(\theta' | \theta)}  \right \} \\
+    &amp;= \left \{ \frac{p(\theta') \hat p(\theta)}{p(\theta)\hat p(\theta')}  \right \} \\
+    &amp;= \frac{L_2(\theta')}{L_2(\theta)}
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;This obviously isn't applicable for traditional gibbs sampling, but gibbs could be used for proposal, and MH used to accept/reject&lt;/p&gt;
+</description>
+				<pubDate>Mon, 04 Nov 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/11/04/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/11/04/work-log</guid>
+			</item>
+		
+			<item>
+				<title>(Two day) Markov Sampling (ctd).  Implementing, testing, optimizing</title>
+				<description>&lt;p&gt;Note: changes to &lt;a href=&quot;/ksimek/research/events/CVPR2014/params.html&quot;&gt;params&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Resuming from yesterday's discussion about Markov sampling.  I was concerned about piecewise sampling of interpolated values with insufficient data being used.  After some thought, realized there's a better approach: construct blocks from input indices, not output indices.&lt;/p&gt;
+
+&lt;p&gt;Secondly: only use the markov approach when there's too much data to eat at once.  Those cases are also the ones with the least probability of poor-data issues.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Re-implemented (&lt;code&gt;curve_tree_ml_5.ml&lt;/code&gt;), geting weird results.  Huge negative eigenvalues&lt;/p&gt;
+
+&lt;p&gt;symptom: 30 output indices, 1000 output indices
+symptom: K has 26k elements!&lt;/p&gt;
+
+&lt;p&gt;This code is a mess, proving hard to debug.  I'm going to roll back to version 4, use ideas developed in v5 to implement Markov sampling.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Done.  No errors, but results aren't great.  Is it possible the markov blanket is wrong, or maybe we're misusing previous data?&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;I think I found it... wasn't conditioning on previous sampled values.&lt;/p&gt;
+
+&lt;p&gt;Seems to be fixed now.  Next on to timing and tuning&lt;/p&gt;
+
+&lt;h2&gt;Profiling / Optimizing&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;attachment covariance&lt;/li&gt;
+&lt;li&gt;markov order&lt;/li&gt;
+&lt;li&gt;block size&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Constructing Attachment covariance&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;construct_attachment_covariance_3 is still a bottleneck.  Need to investigate some of the suggestions from a few days ago.&lt;/p&gt;
+
+&lt;p&gt;Only computing &lt;code&gt;Cov_star_star&lt;/code&gt; once (exploiting stationarity in temporal GP) helps somewhat.&lt;/p&gt;
+
+&lt;p&gt;Grouping &quot;sibling&quot; object construction should help a lot too.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Markov order&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Markov order as low as 10 doesn't seem to negatively affect results.&lt;/p&gt;
+
+&lt;p&gt;Need to crop observations before the earliest sampled point we're conditioning on.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Timing
+Before: 17.0s (total,  7.5s on inversion)
+After: 16.5 (7.2s)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Tiny improvement, but at no cost so who's complaining?&lt;/p&gt;
+
+&lt;h2&gt;Block Size&lt;/h2&gt;
+
+&lt;p&gt;Not much to say here...  100 seems to be optimal.&lt;/p&gt;
+
+&lt;h2&gt;Markov Order&lt;/h2&gt;
+
+&lt;p&gt;Plotted maximum posterior for various markov orders to compare reconstruction quality.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-11-01-mls_vs_mo.png&quot; alt=&quot;maximum liklehood vs. markov order&quot; /&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;range: 1.40e3
+(unweighted) mean: 4.0156
+std deviation: 510.0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;the mean should be taken with a grain of salt,
+Some chaos below 500, but the scale of the fluctuations is actually relatively small, 0.035%.  We should note that in MCMC, its the absolute fluctuations that are significant, so percent error can be deceptive.  But even so, I think these results are pretty good.&lt;/p&gt;
+
+&lt;p&gt;It's interesting that markov order of 10 is only slightly better than markov order of zero!    Also surprising that between 10 and 500, error increases.&lt;/p&gt;
+
+&lt;p&gt;Should compare variance here vs. variance of log-likelihood w.r.t. posterior.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Result of 20 posterior samples (low markov order)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;markov order = 10
+block size =  100
+ll std deviation = 2.33e3
+ll mean: 4.0153e6
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Result of 20 posterior samples (high markov order)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;markov order = 500
+block size =  100
+ll std deviation = 2.17e3
+ll mean: 4.0132e6
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The log-likelihood standard deviation are high relative to the error range in the graph above.   This is weak evidence that the variance in the graph above is dues to small-scale instabilities in the pixel likelihood.  That is to say, tiny insignificant changes to the 3D model can cause noticible fluctuations to the pixel likelihod, due to it's nonlinearities.  To some extent, what we really want is the expected value of the likelihood over the entire set insignificant 3D perturbations.  So if the deviations we see due to markov-order are simply observations of this phenomenon, they can be safely ignored, because they are in any scenario.&lt;/p&gt;
+
+&lt;p&gt;Let's test by re-running the low-markov order test with lots of samples (200 instead of 20) and see if the ll mean approaches that of the high-markov-order test.  This is also a decent stress test for the likelihood server.&lt;/p&gt;
+
+&lt;p&gt;Result of 200 posterior samples (low markov order)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;markov order = 10
+block size =  100
+ll std deviation = 2.5603e3
+ll mean: 4.0133e6
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Yep, we're getting closer to the high markov order results for ll mean.  I think we can drop this issue for now and be okay with a markov order of 10-20.  It is still surprising that markov order of zero seems to work so well.  I guess future data doesn't add too much if the present data is sufficient.&lt;/p&gt;
+
+&lt;h2&gt;Bottlenecks&lt;/h2&gt;
+
+&lt;p&gt;Inversion: 7.1s
+buildling covariance:  2.5s
+one_d_to_three_d: 1.5s
+blkdiag: 1.2s
+other: ~3.5s&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Inversion&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Only need to invert once for all views... Actually, not true because inversion contains view-specific sample data.  But a large block of the matrix is unchanged between views.  Implementing optimization...&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Down to &lt;strong&gt;14.7 seconds&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Using sparsity and suppressing output, down to &lt;strong&gt;11.5s&lt;/strong&gt;. (8s when not in profile mode)&lt;/p&gt;
+
+&lt;p&gt;However, getting some numerical issues (small-magnitude negative eigenvlaues); probably will do better if we use a symmetric equation and invert using cholesky.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;construct_attachment_covariance is now the bottlneck, taking a full 35% of run time.&lt;br/&gt;
+Some options:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;cache intermediate values here and return them as described in the previous post.&lt;/li&gt;
+&lt;li&gt;group together calls to &quot;build_sibling_object&quot;&lt;/li&gt;
+&lt;li&gt;avoid computing self-covariance when its available in prior_K&lt;/li&gt;
+&lt;li&gt;implement one-pass version for symmetric matrices&lt;/li&gt;
+&lt;li&gt;precompute self-covariance for all views in one call.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Implemented 2, 3, and 4, reduced running time to &lt;strong&gt;8.7s&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Implemented 1, reduced to  &lt;strong&gt;8.4s&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Implemented 5, now construct_attachment_covariance is not a bottleneck.  &lt;strong&gt;8.3s&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Not many strong bottlenecks now.  Some opportunities  to avoid build_cov_ and one_d_to_three_d like we did in &lt;code&gt;curve_tree_ml_5_bak&lt;/code&gt;.  Also, using a symmetric formula for posterior might help here.&lt;/p&gt;
+
+&lt;p&gt;Tweaked build_cov_ to skip an inner loop if it would be a no-op.  Down to &lt;strong&gt;7.8s&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Set block size to 100 (had forgotten to change back yesterday, was 120)   &lt;strong&gt;7.6s&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Rearranged matrix multiplication.  &lt;strong&gt;7.4s&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Mex'd &lt;code&gt;one_d_to_three_d&lt;/code&gt; utility function.  &lt;strong&gt;6.9s&lt;/strong&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Problem.  Samples look bad.  Overall shape is retained, but rough, with discontinuities.&lt;/p&gt;
+
+&lt;p&gt;Switched off block matrix inversion, results look good, but back to &lt;strong&gt;8.3s&lt;/strong&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Found bug.  Indexing problem was causing previous samples to be ignored.  Fixed, and its better than before, but still getting some non-negligible eigenvalues and occasional discontinuities in samples.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;Originally took 275s, now 8.3s in profile mode, 5.x s in regular mode.&lt;/p&gt;
+
+&lt;h2&gt;TODO (new)&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;running time vs. number of samples to determine affect of likelihood server bottleneck (use GPU likelihood for real-world estimate)&lt;/li&gt;
+&lt;li&gt;profile/optimize likelihood server directly?&lt;/li&gt;
+&lt;li&gt;Symmetrize formula and use cholesky for inversion.&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Thu, 31 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/31/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/31/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Optimizing posterior-sampling for pixel likelihood</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Troubleshooting issues in &quot;optimized&quot; code in &lt;code&gt;curve_tree_ml_4&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Biggest change was in how K, K_star, K_star_star were computed.
+Comparing against the reference implementation &lt;code&gt;curve_tree_m_3&lt;/code&gt; shows the &quot;parent&quot; indices aren't correct.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Solved.  When incorporating noise-free sampled values, was using indices and covariance from noisy observed values.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Timing
+
+Old speed:    20.7 s
+New runtime:  75.7 s
+Speedup: 3.6x
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Still rendering black.  why?&lt;/p&gt;
+
+&lt;p&gt;Apparently this is an issue with OSX's AMD driver -- geometry shaders fail after returning from sleep.  Restarting program solves it.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;strong&gt;Profiling v4&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Only 19 calls to &lt;code&gt;construct_attachment_covariance_3&lt;/code&gt;, down from ~500.&lt;/p&gt;
+
+&lt;p&gt;78% bottleneck in matrix multiplication / inversion.&lt;/p&gt;
+
+&lt;p&gt;Main problem is the 2500x2500 matrix from the main stem.  Other curves are in the 200 to 500 dimension range, and are fairly fast.&lt;/p&gt;
+
+&lt;p&gt;Nystrom (2x) on curves with dimension greater than 1000 brings bottlenect from 18s to 11s, but as before, results are highly sensitive to the nystrom factor and using it without careful tuning / heursitics is risky.&lt;/p&gt;
+
+&lt;p&gt;Probably expoiting the Markov nature of the curve GP  is the answer.  Linear runtime vs. cubic.&lt;/p&gt;
+
+&lt;h2&gt;Markov within-curve sampling&lt;/h2&gt;
+
+&lt;p&gt;break output indices into blocks.  For each block, get observation markov blanket.  Combine observed data and ancestor data into covarance matrix and data vector, then sample.&lt;/p&gt;
+
+&lt;p&gt;Needed three covariance matrices: data vs. data, model vs. model, and model vs. data.&lt;/p&gt;
+
+&lt;p&gt;Opportunity for optimizing construct_attachment_covariance_3 - sample all simpling-pair covariances at once.  289 total combinations (i.e. calls to eval_kernel) per dataset, could reduce to one.&lt;/p&gt;
+
+&lt;p&gt;Seems like we can save computation in model covariance matrices by (a) exploiting the fact that it's always between points in the same view, and (b) only view changes between calls, spacial indices stay the same.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;(A) compute K_star_star only once.&lt;/li&gt;
+&lt;li&gt;(B) cache prior_K between constructions of K_star.&lt;/li&gt;
+&lt;li&gt;(*) Cache &lt;code&gt;obj&lt;/code&gt;s and 'status' between calls to construct_attachment_covariance.  K_star reuses the lower triangular elements of K, K_star_star simply mirrors the upper-triangular  elements of K_star.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;hr /&gt;
+
+&lt;p&gt;Implementing...&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Theoretical issues with the within-curve markov assumption.  If the markov blanket is chosen crudely, your samples could drift aimlessly until they reach observations in an unexpected place.  In other words, extrapolation, or sampling from weak data is a mistake.  Need a good criterion for when to stop takin on more evidence.&lt;/p&gt;
+</description>
+				<pubDate>Wed, 30 Oct 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/30/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/30/work-log</guid>
+			</item>
+		
+			<item>
 				<title>Ancestral Sampling from poserior (Markov-aware sampling)</title>
 				<description>&lt;p&gt;Realization: nystrom may be tricky, because the same thinning factor probably won't be appropriate for all scenarios (e.g. short curves).&lt;/p&gt;
 
@@ -140,7 +621,7 @@ bp \mid pnp \sim \mathcal{N}(\mu, \Sigma)
 &lt;/div&gt;
 
 
-&lt;p&gt;Without loss of generality, assume zero-noise observations appear after noisy observations last.  We can rewrite the posterior in terms of the precision matrix \(\Lambda\) of the noisy values:&lt;/p&gt;
+&lt;p&gt;Without loss of generality, assume zero-noise observations appear after noisy observations.  We can rewrite the posterior in terms of the precision matrix \(\Lambda\) of the noisy values:&lt;/p&gt;
 
 &lt;div&gt;
 \[
@@ -180,7 +661,14 @@ bp \mid pnp \sim \mathcal{N}(\mu, \Sigma)
 &lt;/div&gt;
 
 
-&lt;p&gt;We can implement by slightly modifying our code for the precision-matrix formulation of posterior.  First, give all noise-free values a precision of 1.0 in \(\Lambda\), and then modifying the \(I\) inside the parentheses by zeroing-out elements corresponding to noise-free values.&lt;/p&gt;
+&lt;p&gt;We can implement this by slightly modifying our code for the precision-matrix formulation of posterior.  First, give all noise-free values a precision of 1.0 in \(\Lambda\), and then modify the \(I\) inside the parentheses by zeroing-out elements corresponding to noise-free values.  Using prime symbol to denote the modified matricies, the result is&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    \mu = K_* \left[ \Lambda' K + I' \right]^{-1} \Lambda' y
+\]
+&lt;/div&gt;
+
 
 &lt;p&gt;The expression for posterior covariance is derived in the same way, and has similar form.&lt;/p&gt;
 </description>
@@ -377,7 +865,7 @@ Unclear&lt;/p&gt;
 			</item>
 		
 			<item>
-				<title>Work Log - Testing likelihood #2 (2-day)</title>
+				<title>Testing likelihood #2 (2-day)</title>
 				<description>
 
 &lt;div class=&quot;meta-info&quot;&gt;
@@ -551,520 +1039,6 @@ Unclear&lt;/p&gt;
 				<pubDate>Sat, 26 Oct 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/26/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/26/work-log</guid>
-			</item>
-		
-			<item>
-				<title>params, CVPR 2014</title>
-				<description>&lt;p&gt;&lt;a href=&quot;/ksimek/research/CVPR2014/params.html&quot;&gt;See CVPR 2014 parameters page&lt;/a&gt;&lt;/p&gt;
-</description>
-				<pubDate>Sat, 26 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/26/params-cvpr-2014</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/26/params-cvpr-2014</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>&lt;p&gt;Implementing one-object-per-view in likelihood_server&lt;/p&gt;
-
-&lt;p&gt;Overloaded bd_mv_likelihood' evaluate and dump  functions to receive a sequence of renderables.&lt;/p&gt;
-
-&lt;p&gt;Write a &quot;wrap_all_As_silhouette&quot; to, well, wrap all renderables in silhouette renderers.&lt;/p&gt;
-
-&lt;p&gt;re-wrote message-to-curve function to decode the message to a vector-vector-vector, and convert that to a vector-of-gl_curves.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Compiling work from last 24 hours.&lt;/p&gt;
-
-&lt;p&gt;Done.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Generate a multi-model message from matlab (dummy)&lt;/li&gt;
-&lt;li&gt;test message in likelihood_server_2.cpp
-
-&lt;ol&gt;
-&lt;li&gt;generate random samples from wacv data.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;hr /&gt;
-
-&lt;p&gt;Doing dummy message test.&lt;/p&gt;
-
-&lt;p&gt;At first, accidentally sent to old implementation... and it didn't barf!  This is unsettling, because the message format has changed significantly.  Did I ever recompile the mex files?&lt;/p&gt;
-
-&lt;p&gt;Nope.  got some mex compile errors to deal with.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;&lt;strong&gt;Friday&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;okay, sending a random model using the new one-per-view message system isn't crashing.&lt;/p&gt;
-
-&lt;p&gt;Questions&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;the likelihood looks high, considering it's a ranomd model .  is a null model better?  is the ground-truth model better?&lt;/li&gt;
-&lt;li&gt;visualize the received message;  is each view different?&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;p&gt;Trying the null model from 1., the mex file crashed matlab.  Empty curvesset isn't handled.&lt;/p&gt;
-
-&lt;p&gt;trying all-zeros.  Server crashed -- coincident points aren't handled gracefully.  Fixed (now it returns -inf for log likelihood).&lt;/p&gt;
-
-&lt;p&gt;issues
-server: error creating gl_curves causes client disconnect. fix exception handling
-client: doesn't handle server crashes gracefully.  adding timeout
-client: doesn't handle empty curveset&lt;/p&gt;
-
-&lt;p&gt;Next:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;random sample from multi-view posterior (instead of single max posterior)&lt;/li&gt;
-&lt;li&gt;get likelihood from multiple samples -- what is the variance of the MC estimator?&lt;/li&gt;
-&lt;li&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Thu, 24 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/24/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/24/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log - Implementing Two-term likelihood</title>
-				<description>&lt;p&gt;Working on Matlab integration.&lt;/p&gt;
-
-&lt;p&gt;Quick test shows we can get about 20 evaluations per second.  Not bad, considering each evaluation consists of 9 image likleihoods.  There's some room for improvement here, but probably not worth pursuing at the moment:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;leapfrog rendering: render (a) while evaluating on (b).&lt;/li&gt;
-&lt;li&gt;cleaning up geometry and fragment shaders (fewer branches, less storage)&lt;/li&gt;
-&lt;li&gt;try other GPU blurring routines.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;h1&gt;New Likelihood&lt;/h1&gt;
-
-&lt;p&gt;Scenario: we have a decent likelihood that is linear-gaussian (and a gaussian prior), so we can compute the marginal likelihood in closed-form.  However, we'd like to incorporate additional sources of evidence whose likelihoods aren't gaussian.  We'll see how we can estimate the joint marginal likelihood with simple Monte-Carlo sampling (no MCMC needed, no gradient).&lt;/p&gt;
-
-&lt;h2&gt;Derivation&lt;/h2&gt;
-
-&lt;p&gt;The old marginal likelihood looked like this:&lt;/p&gt;
-
-&lt;div&gt;
-\[
-\begin{align}
-p(D_1) &amp;= \int p(x) p(D_1 | x) dx
-\end{align}
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;After introducing the extra likelihood term, the joint probability is no longer linear-gaussian, so the exact marginal likelihood involves an intractible integral.  However, by  re-arranging, we see we can get a good monte-carlo approximation:&lt;/p&gt;
-
-&lt;div&gt;
-\[
-\begin{align}
-p(D_1, D_2) &amp;= \int p(x) p(D_1 | x) p(D_2 | x) dx \\
-p(D_1, D_2) &amp;= \int p(x | D_1) p(D_1) p(D_2 | x) dx &amp; \left(\text{Bayes thm (see below)}\right) \\
-p(D_1, D_2) &amp;= p(D_1) \int p(x | D_1) p(D_2 | x) dx \\
-p(D_1, D_2) &amp;= p(D_1) \frac{1}{N} \sum p\left(D_2 | x^{(*)}\right) &amp; \text{(Monte Carlo)}
-\end{align}
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;In the second line, I've replaced the first two terms using Bayes theorem.  In the last line, the x-stars are samples from \(p(x | D_1)\), which we have in closed-form due to linear-Gaussian prior and likelihood for \(D_1\).&lt;/p&gt;
-
-&lt;p&gt;Thus, we see if at least one source of data yields a linear-gaussian likelihood, we can incorporate additional data with arbitrary likelihoods  in a principled way.  In many cases, \(p(x | D_1) \) has low variance, so a small number of Monte-Carlo samples are sufficient for a good estimate -- even a single sample could suffice.  Even if the estimates are bad, they are unbiased, so any MCMC involving the marginal likelihood will converge to the target distribution.&lt;/p&gt;
-
-&lt;h2&gt;Importance Sampling version&lt;/h2&gt;
-
-&lt;p&gt;We can alternatively derive this in terms of importance sampling, setting the proposal probability q(x) to \(p(x | D_1) \):&lt;/p&gt;
-
-&lt;div&gt;
-\[
-\begin{align}
-p(D_1, D_2) &amp;\approx 1/N \sum p(x) p(D_1 | x)p(D_2 | x) \frac{1}{q(x)} \\
-            &amp;= 1/N \sum p(x) p(D_1 | x)p(D_2 | x) \frac{p(D_1)}{p(x) p(D_1 | x)} \\
-            &amp;= 1/N \sum p(D_2 | x) p(D_1) \\
-            &amp;= p(D_1) 1/N \sum p(D_2 | x) 
-\end{align}
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;&lt;strong&gt;Implementation&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;File:&lt;/strong&gt; curve_tree_ml_2.m&lt;/p&gt;
-
-&lt;p&gt;Basic idea&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;construct a thinned output index set (optional, but smart)&lt;/li&gt;
-&lt;li&gt;construct a posterior distribution over the thinned set&lt;/li&gt;
-&lt;li&gt;Add perturbation variance to the posterior&lt;/li&gt;
-&lt;li&gt;take average over n trials: sample curveset and evaluate pixel likelihood&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;p&gt;Step 2 required updating to construct_attachment_covariance, which only constructs symmetric covariance matrices.  We need the covariance between indices with observations and the desired output indices.  Fully refactored that function into &lt;code&gt;construct_attacment_covariance_2.m&lt;/code&gt;; confirmed correctenss in the case of the self-covariance by using an existing test for version 1 of that function.  If non-symmetric, the upper-triangular blocks are processed in a second pass, swapping indices so we can re-use existing code.&lt;/p&gt;
-
-&lt;p&gt;Need to try view-specific sampling, i.e. sample 9 different curves from 9 different views.  This refactor affects likelihood server, client, and message format.  I'm worried about the performance hit, but probably not worth worrying about (or futile).  Coarse sampling of indices could mitigate.    In any case, view-specific sampling is probably necessary, because we're using such low blurring levels in the Bd_likelihood, so the reconstruction needs to fall near the data.  We've seen how plant motion and camera miscalibration cause &quot;good&quot; 3D curves to reproject up to 10 pixels away from the data in some views.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;&lt;strong&gt;Side-note&lt;/strong&gt; - the tcp connection is working very reliably so far!  Even after the machine sleeping/resuming several times, and suspending the server job for serveral hours, the socket is still valid and communicating flawlessly!&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;h2&gt;Implementing per-view sampling&lt;/h2&gt;
-
-&lt;p&gt;need to refactor send_curves.m to send &lt;code&gt;num_views&lt;/code&gt; curves instead of one.&lt;/p&gt;
-
-&lt;p&gt;Now receive as num_curves x num_views cell array.&lt;/p&gt;
-
-&lt;p&gt;Coded vector&lt;sup&gt;3&lt;/sup&gt; to/from message.&lt;/p&gt;
-
-&lt;p&gt;todo: rewrite likelihood server to receive vector3, somehow pass per-view models to likelihood&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;multi-view likelihood is out - it's one-model, multi-view.  We need multi-model, multi-view.
-
-no, MV likelihood is okay, just add an extra operator() that receives a sequence of renderables 
-whose size is equal to the number of views
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2&gt;TODO (new)&lt;/h2&gt;
-
-&lt;p&gt;Some protocol for starting and loading the likelihood server from matlab code
-Stress test likelihood server&lt;/p&gt;
-</description>
-				<pubDate>Wed, 23 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/23/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/23/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15229&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Still searching for inf bug in libcudcvt blurred_difference_likelihood.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Found it:  my GPU-based log_sum routine had a bug.  instead of subtracting the maximum value before exp-summing, it subtracted an arbitrary value.  The find-max loop looked like this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Real pi = v[0];
-
-#pragma unroll
-for(unsigned int i = 1; i &amp;lt; N; ++i)
-{
-    pi = pi &amp;lt; v[0] ? v[0] : pi;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Obviously, the zeros should be i's.&lt;/p&gt;
-
-&lt;p&gt;A great bug to have found and fixed, but really frustrating that I let it slip through in the first place.  So stupid!  But it didn't affect correctness in the common case, so my tests didn't catch it.  It makes a good case for randomized testing (as if a good argument was lacking...).&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;(semi-obvious) note to self: conditional gaussian mixture is not equal to mixture of conditional gaussians!&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;okay, a few more cleanup tasks, then on to real goals:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;cleanup and commit version 0.1 of the likelihood server -- done&lt;/li&gt;
-&lt;li&gt;split training into it's own directory. -- done&lt;/li&gt;
-&lt;li&gt;Get likelihood server connecting reliably with matlab on different computers.&lt;/li&gt;
-&lt;li&gt;implement likelihood importance sampling into maltlab's curve_ml procedure&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;hr /&gt;
-
-&lt;p&gt;Thought some on birth moves.  It seems like there are some possibilities for births larget than two by using the adjacency graph created by pair candidates.&lt;/p&gt;
-
-&lt;p&gt;for now, start with greedy&lt;/p&gt;
-</description>
-				<pubDate>Tue, 22 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/22/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/22/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log - Linux NVidia/Cuda/X11 erorrs; Cuda server; matlab integration</title>
-				<description>&lt;p&gt;Getting my (cuda-equipped) desktop system running with likelihod_server.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Trouble building makefiles. Csh issue with new makefiles.  Kobus fixed&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Still can't build makefiles. Probilems in the ./lib subdirectory is apparently blocking kjb_add_makefiles from finishing&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Some makefiles were missing in ./lib.  Adding them was problematic, because (like before) kjb_add_makefiles wasn't finishing, because dependency directories were missing makefiles.  Also had some issues in kjb /lib, out of date from svn and some compile bugs I introduced in my last commit.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Compiling now, but shader is giving errors at runtime (opengl can't compile it, but no error message is given.&lt;/p&gt;
-
-&lt;p&gt;Rebooting...&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;No desktop.  Missing disk issue?  Tweaked fstab, still no X11.  Must be a driver issue.  Couldn't find driver from NVidia's I downloaded from web site months ago.  Using driver &quot;Ubuntu-X&quot; PPA.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Still no X.  /var/log/Xorg.0.log says driver and client have different versions.  Got a tip online:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;sudo dpkg --get-selections | grep nvidia
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Lots of extra crap there (old versions, experimental drivers, etc).  'sudo apt-get purged' all the non-essentials.  Now we're getting to login screen, but login is failing (simply returns to login screen).&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Found solution:&lt;/p&gt;
-
-&lt;p&gt;   sudo  rm ~/.Xauthority&lt;/p&gt;
-
-&lt;p&gt;Booting successfully.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Running likelihood_server...  shader is now compiling successfully!   Previous issues must have been driver issues as a result of the recent 'sudo apt-get upgrade' without restart.&lt;/p&gt;
-
-&lt;p&gt;Getting segfault when dumping pixels, though.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Caused by trying to read from cuda memory as if it were main memory.  Should be dumping if we're using GPU (or use a different dump function).&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Fixed;  if using gpu, copy from cuda to temp buffer, then call normal routine.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Getting nan's from likelihood.  Need to dump from GPU likleihood, which means digging into libcudcvt.  Got some build errors resulting from a boost bug from 8 months ago (which arose because I updated GCC).&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;cudcvt updated to grab blurred frames for (some method names changed to better match the analogous CPU likelihood in KJB.).&lt;/p&gt;
-
-&lt;p&gt;Moved &quot;dump&quot; routines from Bd_mv_likelihood_cpu to the base class Bd_mv_likelihood as pure virtual function, and implemented a version in Bd_mv_likelihood_gpu to call cudcvt's new frame-grabbing code.  So &quot;dump&quot; mode now works on both cpu and gpu version.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Dumped data from CUDA likelihood; looks fine.  So I'm still clueless why we're getting nan values.&lt;/p&gt;
-
-&lt;p&gt;Sanity check -- check that tests in libcudcvt are still passing&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;test is failing on an assert.  Looks like an overzealous assert with a low percent-error threshold.&lt;/p&gt;
-
-&lt;p&gt;Lowered threshold, test finished; GMM model doesn't match between gpu and cpu versions...&lt;/p&gt;
-
-&lt;p&gt;what's changed?  Rolling back to first releast to see if tests pass.  Is it possible I never validated this?  Or maybe different GGM's being used between cpu and gpu?&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Old version crashed and burned hard.  GPU is returning 'inf'.  No help here...&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Oops, svn version has lots of uncommitted changes, including bugfixes.  No wonder it was no help.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;found issue: introduced a regression when troubleshooting last bug.  Grrr.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Still getting 'inf'.  Checked:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;GPU buffers contain valid data for data and model&lt;/li&gt;
-&lt;li&gt;CPU version gives finite results.&lt;/li&gt;
-&lt;li&gt;GPU can give finite results (e.g. in test application)&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;hr /&gt;
-
-&lt;p&gt;Modified libcudcvt test to receive arbitrary data and model images.  It's giving finite results, so it must be something about how I'm calling it in the likelihood server program.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;&lt;strong&gt;issue:&lt;/strong&gt; Bd likelihood in GMM mode gives lower values for ground truth model than random model.&lt;/p&gt;
-
-&lt;p&gt;Bug. fixed.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Digging deeper into 'inf' issue.&lt;/p&gt;
-
-&lt;p&gt;Dug all the way into the thrust::inner_product call.  Probed both buffers -- look okay.  mixture components look okay&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;&lt;strong&gt;Got it!&lt;/strong&gt;  Was able to reproduce the 'inf's in the likelihood test program in libcudcpp.  It was so hard to reproduce because it only occurred when&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;old GMM values were used&lt;/li&gt;
-&lt;li&gt;&lt;em&gt;unblurred&lt;/em&gt; model &lt;em&gt;and&lt;/em&gt; data were used&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;p&gt;Regarding 2, previosuly I just used the unblurred model, since it was at hand from a cuda dump, but used the blurred data from a training dump.&lt;/p&gt;
-
-&lt;p&gt;Blurring doesn't seem to matter; both 2.0 and 5.0 give inf.&lt;/p&gt;
-
-&lt;p&gt;Interestingly, the perfect model doesn't oveflow, but the random (almost null) model does.&lt;/p&gt;
-
-&lt;p&gt;Also, for all the 'inf' cases, the cpu results aren't terribly high, so float overflow seems unlikely.&lt;/p&gt;
-
-&lt;p&gt;Most likely it's the conditioning, where the joint pdf is divided by the marginal.  Maybe we're getting some bizzare model values that are off the charts?  But using the model image with the blurred data image is no problem, so that suggests the model values aren't a problem.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;&lt;strong&gt;Interesting:&lt;/strong&gt; Tried removing border edges and the problem disappeared.  Is it possible that the blurring routine is not robust to near-edge pixels?&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;idea: dump image after scale-offset, but before reduce&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Results:&lt;/p&gt;
-
-&lt;p&gt;Probability maps look sensible when a 2-pixel margin is added (--data-margin=2).&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-22-gmm_pdf_2.tiff.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;(above: 2.0 blurring, 2 pixel margin)&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-22-gmm_pdf.tiff.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;(above: 5.0 blurring, 2 pixel margin)&lt;/p&gt;
-
-&lt;p&gt;Notice what happens when we disable the data margin (rendered dimmer and with blue padding to emphasize effect):&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-22-gmm_pdf_no_margin.tiff.jpg&quot; alt=&quot;&quot; /&gt;
-(2.0 blurring, 0 pixel margin)&lt;/p&gt;
-
-&lt;p&gt;Notice the white pixels around the border, which presumably correspond to inf values.&lt;/p&gt;
-
-&lt;p&gt;Inspecting the blurred data image, it looks like these pixels are, indeed, the brightest in the image.  It's possible we were lucky enough to have found the maximum range of this gmm.&lt;/p&gt;
-
-&lt;p&gt;It looks like evaluating the bivariate normal is underflowing.  It could have been brought back down to size during conditioning, but we never made it that far.  could refactor by computing conditional covariance matrix beforehand, instaed of taking a ratio of computed values&lt;/p&gt;
-
-&lt;h2&gt;TODO (new)&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Pre-test all incoming data images: evaluate against an empty image and a full image and check for NaN and inf.&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Mon, 21 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/21/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/21/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log - KJB EM GMM</title>
-				<description>&lt;p&gt;Still struggling with the EM GMM algorithm.  Found/fixed one bug where responsibilities aren't initialized if NULL is passed to the function.&lt;/p&gt;
-
-&lt;p&gt;Ran overnight and it hadn't finished at the end.  Found/fixed a bug where the entire @M element responsibility matrix is rescaled 2M times (once per point).&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Getting rank-deficient errors.  Looks like this is a result of the huge dataset; covariance matrix is divided by 1e6 (the number of soft-members of the cluster).&lt;/p&gt;
-
-&lt;p&gt;For now, hack by trying to thin the dataset.  Long-term, adding a minimum offset to the emperical covariance seems to be the common solution.&lt;/p&gt;
-
-&lt;p&gt;Possibly normalizing the data would be good.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Added offset to covariance (command-line options and file-static variable already existed, just needed to add it to the full_GMM logic).&lt;/p&gt;
-
-&lt;p&gt;Added &lt;code&gt;read_gmm.m&lt;/code&gt; matlab routine, and plotted along with scatter plot of data.  Results look pretty good:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-20-kjb-gmm-result.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Moving trained gmm to ~/data/arabidopsis/training/bd_likelihood_gmm/blur_2.0.gmm&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;h2&gt;TODO&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;increase spacing between reconstructed points&lt;/li&gt;
-&lt;li&gt;get this running on cuda server&lt;/li&gt;
-&lt;li&gt;re-train GMM on held-out dataset.&lt;/li&gt;
-&lt;li&gt;implement matlab likelihood sampling&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;h2&gt;Open issues&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;how to sync datasets on matlab and c++ server?&lt;/li&gt;
-&lt;li&gt;Wacv multi-view reconstruction for training&lt;/li&gt;
-&lt;li&gt;saving wacv to files for training&lt;/li&gt;
-&lt;li&gt;fixing issues in wacv reconstructions&lt;/li&gt;
-&lt;li&gt;evaluation methodology&lt;/li&gt;
-&lt;li&gt;split/merge&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Sun, 20 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/20/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/20/work-log</guid>
 			</item>
 		
 	</channel>

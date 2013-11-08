@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>CVPR 2014 System Parameters &larr; </title>
+   <title>KLS Research Blog &larr; Kyle Simek</title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -68,6 +68,8 @@
       <li><a href="/ksimek/research/contact.html">Contact</a></li>
       <li><a  href="/ksimek/research/archive.html">Archive</a></li>
       <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
       <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
 
     </ul>
@@ -75,65 +77,141 @@
 
 
   
+
 <div id="page">
 	
 
-<h1 class="emphnext">CVPR 2014 System Parameters</h1>
+        
+        
+    
+    
+        
+    
 
-<p>Official page for Matlab system parameters, CVPR 2014 (c. October 2014).</p>
+<ul class="firehose-post article">
+    <a href=""></a>
+    
+    
+    
+      <a class="title-link" href="/ksimek/research/2013/06/20/rethinking-likelihood">
+      <li class="title">
+            [Work log] Rethinking Likelihood
+        </li>
+      </a>
+      <div class="date emphnext">June 20, 2013</div>
+</ul>
 
-<p>Any changes to the matlab parameters need to be updated here, with a corresponding update to the changelog.</p>
+        
+        
+    
+    
+        
+    
 
-<h1><code>params</code></h1>
+<ul class="firehose-post article">
+    <a href=""></a>
+    
+    
+    
+      <a class="title-link" href="/ksimek/research/2013/06/17/work-log">
+      <li class="title">
+            [Work log] 
+            (No Title)
+        
+        </li>
+      </a>
+      <div class="date emphnext">June 17, 2013</div>
+</ul>
 
-<pre><code>params = 
+        
+        
+    
+    
+        
+    
 
-         smoothing_variance_2d: 0.0100
-             noise_variance_2d: 0.3480
-              position_mean_2d: [265 198.5000]
-          position_variance_2d: 15609
-              rate_variance_2d: 2.2500
-            smoothing_variance: 0.0035
-                noise_variance: 0.3480
-                 position_mean: [3x1 double]
-             position_variance: 1.2987e+03
-                 rate_variance: 0.2652
-                   index_delta: 2
-                index_delta_2d: 2
-    perturb_smoothing_variance: 2.7745e-06
-         perturb_rate_variance: 4.3973e-04
-     perturb_position_variance: 0.6356
-                 perturb_scale: 2.4900
-         markov_blanket_radius: 2000
-                    model_type: 3
-                     num_views: 9
-                 ml_block_size: 1000
-               ml_markov_order: 1000
-                  ll2_spacing: 2
-                   tube_radius: 1
-</code></pre>
+<ul class="firehose-post article">
+    <a href=""></a>
+    
+    
+    
+      <a class="title-link" href="/ksimek/research/2013/06/14/log-entry">
+      <li class="title">
+            [Work log] 
+            (No Title)
+        
+        </li>
+      </a>
+      <div class="date emphnext">June 14, 2013</div>
+</ul>
 
-<h1>Changelog</h1>
+        
+        
+    
+    
+        
+    
 
-<p>Most recent items first.</p>
+<ul class="firehose-post article">
+    <a href=""></a>
+    
+    
+    
+      <a class="title-link" href="/ksimek/research/2013/06/13/log">
+      <li class="title">
+            [Work log] 
+            (No Title)
+        
+        </li>
+      </a>
+      <div class="date emphnext">June 13, 2013</div>
+</ul>
 
-<h2>2013-10-26</h2>
+        
+        
+    
+    
+        
+    
 
-<p>Initial import.</p>
+<ul class="firehose-post article">
+    <a href=""></a>
+    
+    
+    
+      <a class="title-link" href="/ksimek/research/2013/06/12/visualizingdebugging-bg-ml">
+      <li class="title">
+            [Work log] Visualizing/Debugging BG ML
+        </li>
+      </a>
+      <div class="date emphnext">June 12, 2013</div>
+</ul>
 
-<p>Most prior parameters came from training on <a href="/ksimek/research/2013/08/16/work-log/">August 16, 2013</a>, with the exception of <code>position_variance</code>, which was modified when we added the position_mean parameter.  The old <code>position_variance</code> was derived from an assumed mean of (0,0,0); after learning a mean, the variance naturally dropped.  The perturb parameters are actually slightly different from the August 16 results; not sure how the deviation aros, but they're still in the ballpark.  Retrain soon.</p>
+        
+        
+    
+    
 
-<p><code>index_delta</code> and <code>index_delta_2d</code> were hand-set heuristically.</p>
+<ul class="firehose-post article">
+    <a href=""></a>
+    
+    
+    
+      <a class="title-link" href="/ksimek/research/2013/06/10/index-set-bug">
+      <li class="title">Index set bug fixed, marginal likelihood curves improved</li>
+      </a>
+      <div class="date emphnext">June 10, 2013</div>
+</ul>
 
-<p><code>markov_blanket_radius</code> is basically "infinity"; all parent points are used when computing branch point.  This is a good candidate for tuning; IIRC, I set it this high during testing and never changed it back.  Lowering should improve <code>attach()</code> runtimes.</p>
 
-<p><code>model_type</code> is OU-perturb-model (i.e. 3).</p>
-
-<p><code>ml_block_size</code> and <code>ml_markov_order</code> were hand-set heuristically to be a good balance between speed and approximation accuracy (IIRC).  Possibly some room for improvement here.</p>
-
-<p><code>ll2_spacing</code> is a new parameter, the sampling period when evaluating the "second" likelihood, i.e. the pixel likelihood.  Arbitrary, untested.</p>
-
-<p><code>tube_radius</code> also pertains to the pixel likelihood.  Its the radius of the tubes rendered by opengl.  Hand-picked, relatively untested (but qualitatively reasonable.).</p>
+<!-- Pagination links -->
+<div class="pagination">
+  
+    <a href="/ksimek/research/page9" class="previous">&lt;&lt; Read Newer Posts</a>
+  
+  
+  
+</div>
 
 
 </div><!-- End Page -->
