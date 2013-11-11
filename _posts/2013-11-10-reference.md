@@ -59,8 +59,11 @@ Expanding \(g'\) gives the final formula:
 
 Here, \(M = S^\top U^{-1} S \), (which is symmetric), and \(z = M y\).  
 
-This equation gives us a single element of the gradient, namely \(d/dx_i\).  However, once \(z\) is computed, we can recompute (1) for all other \(x_j\)'s at a cost of \(O(n^2)\), making the total gradient \(O(n^3)\), which is pretty good.  Also note that this equation isn't limited to axis-oriented directions, we can find the directional derivative for any direction \(v\), as long as we can find \(\frac{\partial K}{\partial v}\), which we'll cover next.  In this way, we can find the derivative in a small number of principal directions, k, resulting in an improved running time of \(O(n^2 k)\).  The hard part is picking a good set of principal directions; the eigenvectors of K might not be a bad choice, but computing them efficiently becomes the crux of the problem.
+This equation gives us a single element of the gradient, namely \(d/dx_i\).  However, once \(z\) is computed, we can recompute (1) for all other \(x_j\)'s at a cost of \(O(n^2)\), making the total gradient \(O(n^3)\), which is pretty good. (This assumes the K's can be computed efficiently, see below.)  Also note that this equation isn't limited to axis-oriented directions, we can find the directional derivative for any direction \(v\), as long as we can find \(\frac{\partial K}{\partial v}\), which we'll cover next.  In this way, we can find the derivative in a small number of principal directions, k, resulting in an improved running time of \(O(n^2 k)\).  The hard part is picking a good set of principal directions; the eigenvectors of K might not be a bad choice, but computing them efficiently becomes the crux of the problem.
 
 </div>
+
+Derivatives of K(x)
+-------------------
 
 
