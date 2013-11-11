@@ -7,7 +7,7 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
-				<title>iPlant Reading; Index optimization</title>
+				<title>WACV Reconstruction issues; iPlant Reading; Index optimization</title>
 				<description>&lt;h2&gt;WACV Reconstruction issues&lt;/h2&gt;
 
 &lt;p&gt;I've been struggling getting good results on the Columbia-strain images from the WACV dataset.  I was hoping that manually re-tracing the ground trough would improve results, but problems still remain.  MY current theory is that these datasets exhibit significant shifting of the plants over time.  This is causing the dynamic programming algorithm for finding point-correspondences to give bad correspondences, which are never fixed later in the pipeline.&lt;/p&gt;
@@ -208,7 +208,7 @@ Here, \(M = S^\top U^{-1} S \), (which is symmetric), and \(z = M y\).
 &lt;/p&gt;
 
 &lt;p&gt;
-This equation gives us a single element of the gradient, namely \(d g(x)/dx_i\).  However, once \(z\) is computed, we can recompute (1) for all other \(x_j\)'s at a cost of \(O(n^2)\), making the total gradient \(O(n^3)\), which is pretty good. (This assumes the K's can be computed efficiently, which is true; see below.)  However, we also observe that \(K'\) is sparse with size \(O(n)\), so we can do sparse multiplication to reduce the running time to linear, and **the full gradient takes \(O(n^2)\). ** Cool! 
+This equation gives us a single element of the gradient, namely \(d g(x)/dx_i\).  However, once \(z\) is computed, we can reuse it  when recomputing (1) for all other \(x_j\)'s.  The cost of each subsequent gradient element becomes \(O(n^2)\), making the total gradient \(O(n^3)\), which is pretty good. (This assumes the K's can be computed efficiently, which is true; see below.)  However, we also observe that \(K'\) is sparse with size \(O(n)\), so we can do sparse multiplication to reduce the running time to linear, and &lt;strong&gt;the full gradient takes \(O(n^2)\)&lt;/strong&gt;, assuming \(z\) is precomputed.  Cool! 
 &lt;/p&gt;
 
 &lt;/div&gt;

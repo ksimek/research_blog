@@ -147,7 +147,7 @@ Here, \(M = S^\top U^{-1} S \), (which is symmetric), and \(z = M y\).
 </p>
 
 <p>
-This equation gives us a single element of the gradient, namely \(d g(x)/dx_i\).  However, once \(z\) is computed, we can recompute (1) for all other \(x_j\)'s at a cost of \(O(n^2)\), making the total gradient \(O(n^3)\), which is pretty good. (This assumes the K's can be computed efficiently, which is true; see below.)  However, we also observe that \(K'\) is sparse with size \(O(n)\), so we can do sparse multiplication to reduce the running time to linear, and **the full gradient takes \(O(n^2)\). ** Cool! 
+This equation gives us a single element of the gradient, namely \(d g(x)/dx_i\).  However, once \(z\) is computed, we can reuse it  when recomputing (1) for all other \(x_j\)'s.  The cost of each subsequent gradient element becomes \(O(n^2)\), making the total gradient \(O(n^3)\), which is pretty good. (This assumes the K's can be computed efficiently, which is true; see below.)  However, we also observe that \(K'\) is sparse with size \(O(n)\), so we can do sparse multiplication to reduce the running time to linear, and <strong>the full gradient takes \(O(n^2)\)</strong>, assuming \(z\) is precomputed.  Cool! 
 </p>
 
 </div>
