@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-11-11T13:30:08-07:00</updated>
+ <updated>2013-11-11T13:31:30-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -52,7 +52,7 @@ index  2   | x x 1 1 ...  48 49 50 51 x  x  x  x  |
 
 &lt;p&gt;My current theory assumes this occurs because the point-correspondence algorithm optimizes a local score, not taking into account smoothness or per-view perturbations that our full model allows.  I'm working on implementing a post-processing step that does local optimization on the index set w.r.t. the full marginal likelihood, which I'm hoping will fix these problems when they occur.&lt;/p&gt;
 
-&lt;p&gt;I've derived an efficient method for computing the analytical gradient of the index set w.r.t. the marginal likelihood, which &lt;a href=&quot;{site.baseurl}}/2013/11/10/reference/&quot;&gt;I wrote up yesterday&lt;/a&gt;.  I've implemented some of the pieces, but finish the end-to-end code or test anything yet.&lt;/p&gt;
+&lt;p&gt;I've derived an efficient method for computing the analytical gradient of the index set w.r.t. the marginal likelihood, which &lt;a href=&quot;/ksimek/research/2013/11/10/reference/&quot;&gt;I wrote up yesterday&lt;/a&gt;.  I've implemented some of the pieces, but finish the end-to-end code or test anything yet.&lt;/p&gt;
 
 &lt;h2&gt;iPlant Reading&lt;/h2&gt;
 
