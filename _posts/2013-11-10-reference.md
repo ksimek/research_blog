@@ -57,13 +57,98 @@ Expanding \(g'\) gives the final formula:
 \end{align}
 \]
 
+<p>
 Here, \(M = S^\top U^{-1} S \), (which is symmetric), and \(z = M y\).  
+</p>
 
-This equation gives us a single element of the gradient, namely \(d/dx_i\).  However, once \(z\) is computed, we can recompute (1) for all other \(x_j\)'s at a cost of \(O(n^2)\), making the total gradient \(O(n^3)\), which is pretty good. (This assumes the K's can be computed efficiently, see below.)  Also note that this equation isn't limited to axis-oriented directions, we can find the directional derivative for any direction \(v\), as long as we can find \(\frac{\partial K}{\partial v}\), which we'll cover next.  In this way, we can find the derivative in a small number of principal directions, k, resulting in an improved running time of \(O(n^2 k)\).  The hard part is picking a good set of principal directions; the eigenvectors of K might not be a bad choice, but computing them efficiently becomes the crux of the problem.
+<p>
+This equation gives us a single element of the gradient, namely \(d g(x)/dx_i\).  However, once \(z\) is computed, we can recompute (1) for all other \(x_j\)'s at a cost of \(O(n^2)\), making the total gradient \(O(n^3)\), which is pretty good. (This assumes the K's can be computed efficiently, which is true; see below.)  However, we also observe that \(K'\) is sparse with size \(O(n)\), so we can do sparse multiplication to reduce the running time to linear, and **the full gradient takes \(O(n^2)\). ** Cool! 
+</p>
 
 </div>
+<p></p>
 
 Derivatives of K(x)
 -------------------
 
+The structure of \\(\frac{\partial K}{\partial x_i}\\) is sparse; only the i-th row and i-th column are nonzero. We can find the values of the nonzero elements by taking the derivative of the kernel function.
 
+** Cubic covariance **
+
+Recall the cubic covariance expression:
+    
+<div>
+\[
+k(x_1, x_2) = (x_a - x_b) x_b^2 / 2 + x_b^3/3
+\]
+
+Where \(x_b = min(x_1, x_2)\) and \(x_a = max(x_1, x_2)\).
+</div>
+
+Taking the derivative w.r.t. \(x_2\) gives:
+<div>
+\[
+k(x_1, x_2) = 
+    \begin{cases}
+         x_2^2 / 2 & \text{if } x_2 >= x_1 \\
+         x_1 x_2 - x_2^2/2 & \text{if } x_2 < x_1 
+    \end{cases}
+\]
+
+Or equivalently
+
+\[
+k(x_1, x_2) = 
+         x_2 \left [ \max(x_1,x_2)  - x_2/2 \right ]
+\]
+</div>
+
+** Linear Covariance **
+
+Recall the cubic covariance expression:
+    
+<div>
+\[
+k(x_1, x_2) = x_1 x_2
+\]
+
+The derivative w.r.t. \(x_2\) is simply \(x_1\).
+</div>
+
+** Offset Covariance **
+
+Recall the offset covariance expression:
+    
+<div>
+\[
+k(x_1, x_2) = k
+\]
+
+The derivative w.r.t. \(x_2\) is zero.
+</div>
+
+
+** Implementation **
+
+Implemented end-to-end version in `kernel/get_model_kernel_derivative.m`; see also components in `kernel/get_spacial_kernel_derivative.m` and `kernel/cubic_kernel_derivative.m`.
+
+These functions return all of the partial derivatives of the matrix with respect to the first input.   The i-th row of the result make up the nonzero values in \\(\frac{\partial K}{\partial x_i}\\).  Below is example code that computes all of the partial derivative matrices.
+
+    N = 100;
+    % construct indices
+    x = linspace(0, 10, N);
+    % construct derivative rows
+    d_kernel = get_model_kernel_derivative(...);
+    d_K = eval_kernel(d_kernel, x, x);
+    % construct dK/dx_i, for each i = 1..N
+    d_K_d_x = dcell(1,N);
+    for i = 1:N
+        tmp = sparse(N, N);
+        tmp(i,:) = d_K(i,:);
+        tmp(:,i) = d_K(i,:)';
+        d_K_d_x{i} = tmp;
+    end
+
+** Directional Derivatives **
+
+I think we can get directional derivatives of \\(K\\) by taking the weighted sum of partial derivatives, where the weights are the component lengths of the direction vector.  I have yet to confirm this beyond a hand-wavy hunch, and in practice, this might not even be needed, since computing the full gradient is so efficient.
