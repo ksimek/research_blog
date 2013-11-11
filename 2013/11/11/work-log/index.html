@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>iPlant Literature Review Planning Meetings &larr; </title>
+   <title>iPlant Reading; Index optimization &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -85,106 +85,100 @@
 
 
   <h1 class="title">
-        [Meeting Notes] iPlant Literature Review Planning Meetings
+        [Work Log] iPlant Reading; Index optimization
     </h1>
 
-  <div class="date emphnext">November 08, 2013</div>
+  <div class="date emphnext">November 11, 2013</div>
     
 
 
   
-    <h2>Document discussion</h2>
+    <h2>WACV Reconstruction issues</h2>
 
-<p>Some random notes about issues to bring up in the final document.</p>
+<p>I've been struggling getting good results on the Columbia-strain images from the WACV dataset.  I was hoping that manually re-tracing the ground trough would improve results, but problems still remain.  MY current theory is that these datasets exhibit significant shifting of the plants over time.  This is causing the dynamic programming algorithm for finding point-correspondences to give bad correspondences, which are never fixed later in the pipeline.</p>
 
-<p>Talk about representation vs. "features" (characteristics).  Clarify "features", don't use indescriminitively (call them high-level features, topological features, as opposed to image features).</p>
+<p>This is best illustrated using the point-correspondence tables below.  These tables describe the point-corerspondences between views of a curve.
+Each row represents a 2D curve from a different view; values in the table represent the index of a point along the 2D curve.
+Each column represents a position along the underlying 3D curve, and the values in a column are a set of corresponding 2D points from each view.
+An 'x' represents 'no match'; x's only occur at the beginning and end of a row.</p>
 
-<p>Two ways to go about finding "features":</p>
+<p>An ideal point-correspondence table looks like this:</p>
+
+<pre><code>              3D curve position
+           +--------------------+
+view   1   | 1 2 2 3 ...  50 50 |  
+index  2   | 1 1 2 2 ...  50 51 |
+      ...  |         ...        |
+       n-1 | 1 2 3 3 ...  48 48 |
+       n   | 1 1 1 2 ...  45 46 |
+</code></pre>
+
+<p>When the plant-stem exhibits drift over time, we get problems where each subsesquent curve is shifted left in the correspondence table:</p>
+
+<pre><code>                3D curve position
+           +--------------------------------------+
+view   1   | 1 2 2 3 ...  50 50 x  x  x  x  x  x  |  
+index  2   | x x 1 1 ...  48 49 50 51 x  x  x  x  |
+       ... |         ...                          |
+       n-1 | x x x x ...  45 46 47 47 48 48 x  x  |
+       n   | x x x x ...  43 43 44 44 45 45 46 47 |
+</code></pre>
+
+<p>As a result, we get 3D curves that are longer and tend to exhibit loopy curvature.</p>
+
+<p>My current theory assumes this occurs because the point-correspondence algorithm optimizes a local score, not taking into account smoothness or per-view perturbations that our full model allows.  I'm working on implementing a post-processing step that does local optimization on the index set w.r.t. the full marginal likelihood, which I'm hoping will fix these problems when they occur.</p>
+
+<p>I've derived an efficient method for computing the analytical gradient of the index set w.r.t. the marginal likelihood, which <a href="{site.baseurl}}/2013/11/10/reference/">I wrote up yesterday</a>.  I've implemented some of the pieces, but finish the end-to-end code or test anything yet.</p>
+
+<h2>iPlant Reading</h2>
+
+<p><strong>Hypocotyl Tracing</strong></p>
+
+<p>Read three papers on Hypocotyl tracing from plant biology.  Methods are mostly straighforward: threshold, extract curve using {distance transform, morphological skeleton, gaussian tracing}, terminate using hand-built criterion.</p>
 
 <ul>
-<li>"look directly for charactersitics/features"</li>
-<li>"look for model, find the other stuff"</li>
+<li>Hypotrace, Want et al.</li>
+<li>HyDE, Cole et al.</li>
+<li>Miller et al.</li>
 </ul>
 
 
-<p>i.e. looking for representations vs. characteristics</p>
+<p><strong>Root Tracing</strong></p>
 
-<p>Bisque vs. Nonbisque?  Unclear what the final application will be, but if Bisque is the goal, some discussion of it's feasibility is probably warranted.  For example, interactive systems like the Clark paper might not be feasible for Bisque.</p>
-
-<h2>Taxonomy of curve-extraction methods</h2>
-
-<p>Kobus mentioned the different "dimensions"  that the problem can be split into.  Some might be</p>
+<p>Read several papers on root tracing</p>
 
 <ul>
-<li>3D vs 2D</li>
-<li>imaging system type (microscope, MRI, camera, etc)</li>
-<li>temporal vs. nontemporal</li>
-<li>branching vs non branching</li>
-<li>biological vs. nonbiological</li>
+<li>"RootRead3D" Clark  et al. 2011
+
+<ul>
+<li>Zhu 2006 - hough-transform / space carving to find voxels; skeletonize using "minumum cross section",  fit with NURBS curve.</li>
+<li>"Smart-root" Lobet et. al 2011 - Most cited Clark descendant; Semi-auto, <strong>2D</strong>; hand-build algorithm, trace bright regions with consistent radius.  Seems tuned, nonrobust, relies on a strong GUI.  Naive?
+
+<ul>
+<li>"EZRhizo" Armengaud et al. 2009 - Manual tracing? (To Read)</li>
+<li>"DART" Le Bot et al., 2010 - Manual Tracing? (To read)</li>
+<li>Iyer-Pascuzzi et a., 2010 - Automatic.  Multiple angles, but <strong>2D analysis</strong>.  preprocess: Adaptive threshold.  Medial axis: distance transform</li>
+<li>"Root-trace" Nadeem et al. 2009 - auto; (To Download)</li>
+</ul>
+</li>
+<li>Fang et al. 2009  - Laser scanner, skeleton using hough transform method.</li>
+</ul>
+</li>
 </ul>
 
 
-<h2>Research Topics</h2>
+<p><strong>Neuron Analysis</strong></p>
 
-<p>We can split the background reading into several areas, both in image processing/CV and biological application.
-Kobus recommended splitting time between these broad areas.</p>
+<p>Reading papers of the <a href="http://diademchallenge.org/algorithms.html">teams that won the Diadam Challenge</a> for tracing neurons.  It seems that image processing used in these papers far surpasses those in the plant biology I've read.  Likely due to (a) better imaging systems and (b) much more ambiguity to deal with.</p>
 
-<p><em>Image Processing Topics</em></p>
+<p><strong>Wang et al. A Broadly Applicable 3-D Neuron Tracing Method Based on Open-Curve Snake</strong></p>
 
-<ul>
-<li>"snakes" - active contours</li>
-<li>Medial axis filtering</li>
-<li>curve modelling (polynomial/splines, GP, level-set methods)</li>
-<li>finding branches</li>
-</ul>
+<p>Preprocessing: eigenanalysis of image hessian, eigenvalues are used to determine "vesselness" of each pixel.
+Presegmentation: Graph cut on "vesselness image".  Actually "Vessel Cut";  "tubular structures are further enhanced and close-lying axons are thinned in the vesselness image".  A bit vague here.  See Freiman et al. (2009).</p>
 
+<p><strong>To Read:</strong></p>
 
-<p><em>Application Areas</em></p>
-
-<ul>
-<li>pollen tube tracking</li>
-<li>root tracking</li>
-<li>Blood vessel literature / vascular segmentation</li>
-<li>Neuron tracing</li>
-<li>Alternaria / Fungus?</li>
-</ul>
-
-
-<h2>Other stuff</h2>
-
-<p>Other topics that might be worth looking into, but maybe of speculative value.</p>
-
-<ul>
-<li>Rhizotron - nondestructive underground root imaging system</li>
-</ul>
-
-
-<h2>Data Inventory </h2>
-
-<p>We currently have data sets from a handful of different applications/domains.</p>
-
-<ul>
-<li>Pollen tubes</li>
-<li>"Clark" root image (2D, one image)</li>
-<li>"Max Plank" root images</li>
-<li>Neurons</li>
-</ul>
-
-
-<h2>Next steps</h2>
-
-<p>Any questions for Martha?</p>
-
-<p>Reading for next week: look into citations from Clark and Hypotrace</p>
-
-<ul>
-<li>Kate - related work, Clark Paper</li>
-<li>Andrew - related work, Hypotrace paper</li>
-<li>Kyle image processing</li>
-</ul>
-
-
-<p>As we read, lets try to place each paper somewhere in the "Taxonomy" above.</p>
+<p>Freiman et al. (2009).</p>
 
       <address class="signature">
         Posted by
@@ -195,11 +189,8 @@ Kobus recommended splitting time between these broad areas.</p>
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2013/11/10/reference" class="next" title="Gradient w.r.t. Indices">Gradient w.r.t. Indices &rarr;</a>
   
-  
-    <a href="/ksimek/research/2013/11/07/work-log" class="prev" title="WACV reconstruction (revisited)">&larr; WACV reconstruction (revisited)</a>
+    <a href="/ksimek/research/2013/11/10/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>

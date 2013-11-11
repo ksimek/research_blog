@@ -4,13 +4,318 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-11-08T12:29:32-07:00</updated>
+ <updated>2013-11-11T13:30:08-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>iPlant Reading; Index optimization</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/11/work-log"/>
+   <updated>2013-11-11T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/11/work-log</id>
+   <content type="html">&lt;h2&gt;WACV Reconstruction issues&lt;/h2&gt;
+
+&lt;p&gt;I've been struggling getting good results on the Columbia-strain images from the WACV dataset.  I was hoping that manually re-tracing the ground trough would improve results, but problems still remain.  MY current theory is that these datasets exhibit significant shifting of the plants over time.  This is causing the dynamic programming algorithm for finding point-correspondences to give bad correspondences, which are never fixed later in the pipeline.&lt;/p&gt;
+
+&lt;p&gt;This is best illustrated using the point-correspondence tables below.  These tables describe the point-corerspondences between views of a curve.
+Each row represents a 2D curve from a different view; values in the table represent the index of a point along the 2D curve.
+Each column represents a position along the underlying 3D curve, and the values in a column are a set of corresponding 2D points from each view.
+An 'x' represents 'no match'; x's only occur at the beginning and end of a row.&lt;/p&gt;
+
+&lt;p&gt;An ideal point-correspondence table looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;              3D curve position
+           +--------------------+
+view   1   | 1 2 2 3 ...  50 50 |  
+index  2   | 1 1 2 2 ...  50 51 |
+      ...  |         ...        |
+       n-1 | 1 2 3 3 ...  48 48 |
+       n   | 1 1 1 2 ...  45 46 |
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When the plant-stem exhibits drift over time, we get problems where each subsesquent curve is shifted left in the correspondence table:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;                3D curve position
+           +--------------------------------------+
+view   1   | 1 2 2 3 ...  50 50 x  x  x  x  x  x  |  
+index  2   | x x 1 1 ...  48 49 50 51 x  x  x  x  |
+       ... |         ...                          |
+       n-1 | x x x x ...  45 46 47 47 48 48 x  x  |
+       n   | x x x x ...  43 43 44 44 45 45 46 47 |
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;As a result, we get 3D curves that are longer and tend to exhibit loopy curvature.&lt;/p&gt;
+
+&lt;p&gt;My current theory assumes this occurs because the point-correspondence algorithm optimizes a local score, not taking into account smoothness or per-view perturbations that our full model allows.  I'm working on implementing a post-processing step that does local optimization on the index set w.r.t. the full marginal likelihood, which I'm hoping will fix these problems when they occur.&lt;/p&gt;
+
+&lt;p&gt;I've derived an efficient method for computing the analytical gradient of the index set w.r.t. the marginal likelihood, which &lt;a href=&quot;{site.baseurl}}/2013/11/10/reference/&quot;&gt;I wrote up yesterday&lt;/a&gt;.  I've implemented some of the pieces, but finish the end-to-end code or test anything yet.&lt;/p&gt;
+
+&lt;h2&gt;iPlant Reading&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Hypocotyl Tracing&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Read three papers on Hypocotyl tracing from plant biology.  Methods are mostly straighforward: threshold, extract curve using {distance transform, morphological skeleton, gaussian tracing}, terminate using hand-built criterion.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Hypotrace, Want et al.&lt;/li&gt;
+&lt;li&gt;HyDE, Cole et al.&lt;/li&gt;
+&lt;li&gt;Miller et al.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Root Tracing&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Read several papers on root tracing&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&quot;RootRead3D&quot; Clark  et al. 2011
+
+&lt;ul&gt;
+&lt;li&gt;Zhu 2006 - hough-transform / space carving to find voxels; skeletonize using &quot;minumum cross section&quot;,  fit with NURBS curve.&lt;/li&gt;
+&lt;li&gt;&quot;Smart-root&quot; Lobet et. al 2011 - Most cited Clark descendant; Semi-auto, &lt;strong&gt;2D&lt;/strong&gt;; hand-build algorithm, trace bright regions with consistent radius.  Seems tuned, nonrobust, relies on a strong GUI.  Naive?
+
+&lt;ul&gt;
+&lt;li&gt;&quot;EZRhizo&quot; Armengaud et al. 2009 - Manual tracing? (To Read)&lt;/li&gt;
+&lt;li&gt;&quot;DART&quot; Le Bot et al., 2010 - Manual Tracing? (To read)&lt;/li&gt;
+&lt;li&gt;Iyer-Pascuzzi et a., 2010 - Automatic.  Multiple angles, but &lt;strong&gt;2D analysis&lt;/strong&gt;.  preprocess: Adaptive threshold.  Medial axis: distance transform&lt;/li&gt;
+&lt;li&gt;&quot;Root-trace&quot; Nadeem et al. 2009 - auto; (To Download)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Fang et al. 2009  - Laser scanner, skeleton using hough transform method.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Neuron Analysis&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Reading papers of the &lt;a href=&quot;http://diademchallenge.org/algorithms.html&quot;&gt;teams that won the Diadam Challenge&lt;/a&gt; for tracing neurons.  It seems that image processing used in these papers far surpasses those in the plant biology I've read.  Likely due to (a) better imaging systems and (b) much more ambiguity to deal with.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Wang et al. A Broadly Applicable 3-D Neuron Tracing Method Based on Open-Curve Snake&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Preprocessing: eigenanalysis of image hessian, eigenvalues are used to determine &quot;vesselness&quot; of each pixel.
+Presegmentation: Graph cut on &quot;vesselness image&quot;.  Actually &quot;Vessel Cut&quot;;  &quot;tubular structures are further enhanced and close-lying axons are thinned in the vesselness image&quot;.  A bit vague here.  See Freiman et al. (2009).&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;To Read:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Freiman et al. (2009).&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/10/work-log"/>
+   <updated>2013-11-10T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/10/work-log</id>
+   <content type="html">&lt;h2&gt;Correspondence Misalignment&lt;/h2&gt;
+
+&lt;p&gt;WACV ground truth reconstruction errors are due to correpondence misalignment that occurs when different views don't line up (esp because of drift in the plant position over time).&lt;/p&gt;
+
+&lt;p&gt;Ultimately, this causes index set estimates to be suboptimal.  To correct this, we can either focus on fixing the point-correspondence stage, or fixing the index set directly, after the correspondence stage.&lt;/p&gt;
+
+&lt;p&gt;Two possible approaches come to mind.&lt;/p&gt;
+
+&lt;p&gt;The first approach attempts to fix the point correspondences.  Do some keypoint matching and use this to constrain certain parts of the correspondence-matching (i.e. force the dynamic programming to pass through certain entries in the cost matrix).  Currently unclear how to deal with incorrect keypoint matches, or many-to-many correspondenes.&lt;/p&gt;
+
+&lt;p&gt;The second approach is to do some optimization on the index points to improve the marginal likelihood.&lt;/p&gt;
+
+&lt;h2&gt;Optimizing index points&lt;/h2&gt;
+
+&lt;p&gt;The following assumes that the problem is the index set obtained by greedy point correspondence is sub-optimal under the marginal likelihood, and the indices at the true optimium would be immune to misalignment, because our kernel is robust to trnalsation and scaling errors.&lt;/p&gt;
+
+&lt;p&gt;Doing 350-dimensional optimization seems like a terrible pain, but we might be able to take some shortcuts.&lt;/p&gt;
+
+&lt;p&gt;First, we observe that the analytical derivative of the ML w.r.t. any change in the index set will require a computation on the same order as evaluating the marginal likelihood (nxn matrix inversion, multiplication of several nxn matrices).&lt;/p&gt;
+
+&lt;p&gt;However, if we cache some values, we can avoid matrix inversion when computing subsequent elements of the gradient.  This still leaves nxn matrix multilication, but this becomes sparse, since most elements of K don't change when a single index changes.&lt;/p&gt;
+
+&lt;p&gt;Alternatively, we can choose a few good directions and optimize in those directions only.  For example, when (a) all values are shifted together, (b) one endpoint is unchanged, and each subsequent index is changed more and (c) the complement of b.&lt;/p&gt;
+
+&lt;p&gt;Regardless of the gradient approach, we still have to do a matrix inverse at every iteration.  We might be able to do this blockwise and save computation for indices that don't change.  Are there other approximations that we can do?  This doesn't need to be exact, but good enough to improve the indices&lt;/p&gt;
+
+&lt;p&gt;Lets keep in mind, we're dealing with relatively small matrices, here.&lt;/p&gt;
+
+&lt;h2&gt;Other thoughts&lt;/h2&gt;
+
+&lt;p&gt;It's possible a long, curvy curve (like the one's we get when misalignment occurs) are actually the result best supported under the marginal likelihood.  In that case, we need to think more deeply about our overall approach.&lt;/p&gt;
+
+&lt;h2&gt;Camera calibration&lt;/h2&gt;
+
+&lt;p&gt;There is likely some room for improvement in the camera calibration.  Maybe this is the best approach overall?&lt;/p&gt;
+
+&lt;h2&gt;Tasks&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Improve camera calibration&lt;/li&gt;
+&lt;li&gt;Write function to get derivatives of covariance matrix.&lt;/li&gt;
+&lt;li&gt;Try index optimization.&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Gradient w.r.t. Indices</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/10/reference"/>
+   <updated>2013-11-10T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/10/reference</id>
+   <content type="html">&lt;p&gt;To optimize indices, we'll need to compute the derivative of the marginal log-likelihood w.r.t. changing indices.&lt;/p&gt;
+
+&lt;p&gt;I first tried to derive this using the generalization of the chain rule to matrix expressions (see matrix cookbook, section 2.8.1), but the computation exploded.  Since ultimately, the derivative is a simple single-input, single output function, we can use differentials to derive the solution.&lt;/p&gt;
+
+&lt;p&gt;Let the marginal likelihood as a function of indices be \(g(x)\):&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    \frac{\partial g(x)}{\partial x_i} = \frac{\partial}{\partial x_i} y^\top S^\top ( I + S K(x) S^\top)^{-1} S y
+\]
+
+Let \(U = I + S K(x) S^\top\), and \(V = U^{-1}\).  Working inside out, lets find \(\frac{\partial U}{\partial x_i}\).
+
+\[
+\begin{align}
+    U + dU  &amp;= I + S (K + dK) S ^\top \\
+            &amp;= I + S K S^\top + S dK S ^\top \\
+        dU  &amp;= S \, dK\, S^\top \\
+        U'  &amp;= S K' S^\top
+\end{align}
+\]
+
+Where \(M'\) is the derivative of the elements of \(M\) w.r.t. \(x_i\).  Next, \(\frac{\partial V}{\partial x_i}\), which comes from the matrix cookbook, equation (36).
+
+\[
+    dV = -U^{-1} \, dU \, U^{-1} \\
+    V' = -U^{-1} U' U^{-1}
+\]
+
+Finally,  \(\frac{\partial g(x)}{\partial x_i}\):
+    
+\[
+\begin{align}
+    g + dg  &amp;= y^\top S^\top (V + dV) S y \\
+    g + dg  &amp;= y^\top S^\top \, V \, S y + y^\top S^\top \,dV \,S y \\
+        dg  &amp;= y^\top S^\top \,dV \,S y \\
+        g'  &amp;= y^\top S^\top \, V' \,S y \\
+\end{align}
+\]
+
+Expanding \(g'\) gives the final formula:
+\[
+\begin{align}
+        g'  &amp;= y^\top S^\top U^{-1} S K' S^\top U^{-1} S y \\
+        g'  &amp;= y^\top M K' M y \\
+        g'  &amp;= z^\top K' z \tag{1}\\
+\end{align}
+\]
+
+&lt;p&gt;
+Here, \(M = S^\top U^{-1} S \), (which is symmetric), and \(z = M y\).  
+&lt;/p&gt;
+
+&lt;p&gt;
+This equation gives us a single element of the gradient, namely \(d g(x)/dx_i\).  However, once \(z\) is computed, we can recompute (1) for all other \(x_j\)'s at a cost of \(O(n^2)\), making the total gradient \(O(n^3)\), which is pretty good. (This assumes the K's can be computed efficiently, which is true; see below.)  However, we also observe that \(K'\) is sparse with size \(O(n)\), so we can do sparse multiplication to reduce the running time to linear, and **the full gradient takes \(O(n^2)\). ** Cool! 
+&lt;/p&gt;
+
+&lt;/div&gt;
+
+
+&lt;p&gt;&lt;/p&gt;
+
+
+&lt;h2&gt;Derivatives of K(x)&lt;/h2&gt;
+
+&lt;p&gt;The structure of \(\frac{\partial K}{\partial x_i}\) is sparse; only the i-th row and i-th column are nonzero. We can find the values of the nonzero elements by taking the derivative of the kernel function.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt; Cubic covariance &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Recall the cubic covariance expression:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+k(x_1, x_2) = (x_a - x_b) x_b^2 / 2 + x_b^3/3
+\]
+
+Where \(x_b = min(x_1, x_2)\) and \(x_a = max(x_1, x_2)\).
+&lt;/div&gt;
+
+
+&lt;p&gt;Taking the derivative w.r.t. (x_2) gives:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+k(x_1, x_2) = 
+    \begin{cases}
+         x_2^2 / 2 &amp; \text{if } x_2 &gt;= x_1 \\
+         x_1 x_2 - x_2^2/2 &amp; \text{if } x_2 &lt; x_1 
+    \end{cases}
+\]
+
+Or equivalently
+
+\[
+k(x_1, x_2) = 
+         x_2 \left [ \max(x_1,x_2)  - x_2/2 \right ]
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt; Linear Covariance &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Recall the cubic covariance expression:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+k(x_1, x_2) = x_1 x_2
+\]
+
+The derivative w.r.t. \(x_2\) is simply \(x_1\).
+&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt; Offset Covariance &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Recall the offset covariance expression:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+k(x_1, x_2) = k
+\]
+
+The derivative w.r.t. \(x_2\) is zero.
+&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt; Implementation &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Implemented end-to-end version in &lt;code&gt;kernel/get_model_kernel_derivative.m&lt;/code&gt;; see also components in &lt;code&gt;kernel/get_spacial_kernel_derivative.m&lt;/code&gt; and &lt;code&gt;kernel/cubic_kernel_derivative.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;These functions return all of the partial derivatives of the matrix with respect to the first input.   The i-th row of the result make up the nonzero values in \(\frac{\partial K}{\partial x_i}\).  Below is example code that computes all of the partial derivative matrices.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;N = 100;
+% construct indices
+x = linspace(0, 10, N);
+% construct derivative rows
+d_kernel = get_model_kernel_derivative(...);
+d_K = eval_kernel(d_kernel, x, x);
+% construct dK/dx_i, for each i = 1..N
+d_K_d_x = dcell(1,N);
+for i = 1:N
+    tmp = sparse(N, N);
+    tmp(i,:) = d_K(i,:);
+    tmp(:,i) = d_K(i,:)';
+    d_K_d_x{i} = tmp;
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt; Directional Derivatives &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;I think we can get directional derivatives of \(K\) by taking the weighted sum of partial derivatives, where the weights are the component lengths of the direction vector.  I have yet to confirm this beyond a hand-wavy hunch, and in practice, this might not even be needed, since computing the full gradient is so efficient.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>iPlant Literature Review Planning Meetings</title>

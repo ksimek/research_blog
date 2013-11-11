@@ -7,6 +7,311 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>iPlant Reading; Index optimization</title>
+				<description>&lt;h2&gt;WACV Reconstruction issues&lt;/h2&gt;
+
+&lt;p&gt;I've been struggling getting good results on the Columbia-strain images from the WACV dataset.  I was hoping that manually re-tracing the ground trough would improve results, but problems still remain.  MY current theory is that these datasets exhibit significant shifting of the plants over time.  This is causing the dynamic programming algorithm for finding point-correspondences to give bad correspondences, which are never fixed later in the pipeline.&lt;/p&gt;
+
+&lt;p&gt;This is best illustrated using the point-correspondence tables below.  These tables describe the point-corerspondences between views of a curve.
+Each row represents a 2D curve from a different view; values in the table represent the index of a point along the 2D curve.
+Each column represents a position along the underlying 3D curve, and the values in a column are a set of corresponding 2D points from each view.
+An 'x' represents 'no match'; x's only occur at the beginning and end of a row.&lt;/p&gt;
+
+&lt;p&gt;An ideal point-correspondence table looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;              3D curve position
+           +--------------------+
+view   1   | 1 2 2 3 ...  50 50 |  
+index  2   | 1 1 2 2 ...  50 51 |
+      ...  |         ...        |
+       n-1 | 1 2 3 3 ...  48 48 |
+       n   | 1 1 1 2 ...  45 46 |
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When the plant-stem exhibits drift over time, we get problems where each subsesquent curve is shifted left in the correspondence table:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;                3D curve position
+           +--------------------------------------+
+view   1   | 1 2 2 3 ...  50 50 x  x  x  x  x  x  |  
+index  2   | x x 1 1 ...  48 49 50 51 x  x  x  x  |
+       ... |         ...                          |
+       n-1 | x x x x ...  45 46 47 47 48 48 x  x  |
+       n   | x x x x ...  43 43 44 44 45 45 46 47 |
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;As a result, we get 3D curves that are longer and tend to exhibit loopy curvature.&lt;/p&gt;
+
+&lt;p&gt;My current theory assumes this occurs because the point-correspondence algorithm optimizes a local score, not taking into account smoothness or per-view perturbations that our full model allows.  I'm working on implementing a post-processing step that does local optimization on the index set w.r.t. the full marginal likelihood, which I'm hoping will fix these problems when they occur.&lt;/p&gt;
+
+&lt;p&gt;I've derived an efficient method for computing the analytical gradient of the index set w.r.t. the marginal likelihood, which &lt;a href=&quot;{site.baseurl}}/2013/11/10/reference/&quot;&gt;I wrote up yesterday&lt;/a&gt;.  I've implemented some of the pieces, but finish the end-to-end code or test anything yet.&lt;/p&gt;
+
+&lt;h2&gt;iPlant Reading&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Hypocotyl Tracing&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Read three papers on Hypocotyl tracing from plant biology.  Methods are mostly straighforward: threshold, extract curve using {distance transform, morphological skeleton, gaussian tracing}, terminate using hand-built criterion.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Hypotrace, Want et al.&lt;/li&gt;
+&lt;li&gt;HyDE, Cole et al.&lt;/li&gt;
+&lt;li&gt;Miller et al.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Root Tracing&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Read several papers on root tracing&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&quot;RootRead3D&quot; Clark  et al. 2011
+
+&lt;ul&gt;
+&lt;li&gt;Zhu 2006 - hough-transform / space carving to find voxels; skeletonize using &quot;minumum cross section&quot;,  fit with NURBS curve.&lt;/li&gt;
+&lt;li&gt;&quot;Smart-root&quot; Lobet et. al 2011 - Most cited Clark descendant; Semi-auto, &lt;strong&gt;2D&lt;/strong&gt;; hand-build algorithm, trace bright regions with consistent radius.  Seems tuned, nonrobust, relies on a strong GUI.  Naive?
+
+&lt;ul&gt;
+&lt;li&gt;&quot;EZRhizo&quot; Armengaud et al. 2009 - Manual tracing? (To Read)&lt;/li&gt;
+&lt;li&gt;&quot;DART&quot; Le Bot et al., 2010 - Manual Tracing? (To read)&lt;/li&gt;
+&lt;li&gt;Iyer-Pascuzzi et a., 2010 - Automatic.  Multiple angles, but &lt;strong&gt;2D analysis&lt;/strong&gt;.  preprocess: Adaptive threshold.  Medial axis: distance transform&lt;/li&gt;
+&lt;li&gt;&quot;Root-trace&quot; Nadeem et al. 2009 - auto; (To Download)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Fang et al. 2009  - Laser scanner, skeleton using hough transform method.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Neuron Analysis&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Reading papers of the &lt;a href=&quot;http://diademchallenge.org/algorithms.html&quot;&gt;teams that won the Diadam Challenge&lt;/a&gt; for tracing neurons.  It seems that image processing used in these papers far surpasses those in the plant biology I've read.  Likely due to (a) better imaging systems and (b) much more ambiguity to deal with.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Wang et al. A Broadly Applicable 3-D Neuron Tracing Method Based on Open-Curve Snake&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Preprocessing: eigenanalysis of image hessian, eigenvalues are used to determine &quot;vesselness&quot; of each pixel.
+Presegmentation: Graph cut on &quot;vesselness image&quot;.  Actually &quot;Vessel Cut&quot;;  &quot;tubular structures are further enhanced and close-lying axons are thinned in the vesselness image&quot;.  A bit vague here.  See Freiman et al. (2009).&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;To Read:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Freiman et al. (2009).&lt;/p&gt;
+</description>
+				<pubDate>Mon, 11 Nov 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/11/11/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/11/11/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>&lt;h2&gt;Correspondence Misalignment&lt;/h2&gt;
+
+&lt;p&gt;WACV ground truth reconstruction errors are due to correpondence misalignment that occurs when different views don't line up (esp because of drift in the plant position over time).&lt;/p&gt;
+
+&lt;p&gt;Ultimately, this causes index set estimates to be suboptimal.  To correct this, we can either focus on fixing the point-correspondence stage, or fixing the index set directly, after the correspondence stage.&lt;/p&gt;
+
+&lt;p&gt;Two possible approaches come to mind.&lt;/p&gt;
+
+&lt;p&gt;The first approach attempts to fix the point correspondences.  Do some keypoint matching and use this to constrain certain parts of the correspondence-matching (i.e. force the dynamic programming to pass through certain entries in the cost matrix).  Currently unclear how to deal with incorrect keypoint matches, or many-to-many correspondenes.&lt;/p&gt;
+
+&lt;p&gt;The second approach is to do some optimization on the index points to improve the marginal likelihood.&lt;/p&gt;
+
+&lt;h2&gt;Optimizing index points&lt;/h2&gt;
+
+&lt;p&gt;The following assumes that the problem is the index set obtained by greedy point correspondence is sub-optimal under the marginal likelihood, and the indices at the true optimium would be immune to misalignment, because our kernel is robust to trnalsation and scaling errors.&lt;/p&gt;
+
+&lt;p&gt;Doing 350-dimensional optimization seems like a terrible pain, but we might be able to take some shortcuts.&lt;/p&gt;
+
+&lt;p&gt;First, we observe that the analytical derivative of the ML w.r.t. any change in the index set will require a computation on the same order as evaluating the marginal likelihood (nxn matrix inversion, multiplication of several nxn matrices).&lt;/p&gt;
+
+&lt;p&gt;However, if we cache some values, we can avoid matrix inversion when computing subsequent elements of the gradient.  This still leaves nxn matrix multilication, but this becomes sparse, since most elements of K don't change when a single index changes.&lt;/p&gt;
+
+&lt;p&gt;Alternatively, we can choose a few good directions and optimize in those directions only.  For example, when (a) all values are shifted together, (b) one endpoint is unchanged, and each subsequent index is changed more and (c) the complement of b.&lt;/p&gt;
+
+&lt;p&gt;Regardless of the gradient approach, we still have to do a matrix inverse at every iteration.  We might be able to do this blockwise and save computation for indices that don't change.  Are there other approximations that we can do?  This doesn't need to be exact, but good enough to improve the indices&lt;/p&gt;
+
+&lt;p&gt;Lets keep in mind, we're dealing with relatively small matrices, here.&lt;/p&gt;
+
+&lt;h2&gt;Other thoughts&lt;/h2&gt;
+
+&lt;p&gt;It's possible a long, curvy curve (like the one's we get when misalignment occurs) are actually the result best supported under the marginal likelihood.  In that case, we need to think more deeply about our overall approach.&lt;/p&gt;
+
+&lt;h2&gt;Camera calibration&lt;/h2&gt;
+
+&lt;p&gt;There is likely some room for improvement in the camera calibration.  Maybe this is the best approach overall?&lt;/p&gt;
+
+&lt;h2&gt;Tasks&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Improve camera calibration&lt;/li&gt;
+&lt;li&gt;Write function to get derivatives of covariance matrix.&lt;/li&gt;
+&lt;li&gt;Try index optimization.&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Sun, 10 Nov 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/11/10/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/11/10/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Gradient w.r.t. Indices</title>
+				<description>&lt;p&gt;To optimize indices, we'll need to compute the derivative of the marginal log-likelihood w.r.t. changing indices.&lt;/p&gt;
+
+&lt;p&gt;I first tried to derive this using the generalization of the chain rule to matrix expressions (see matrix cookbook, section 2.8.1), but the computation exploded.  Since ultimately, the derivative is a simple single-input, single output function, we can use differentials to derive the solution.&lt;/p&gt;
+
+&lt;p&gt;Let the marginal likelihood as a function of indices be \(g(x)\):&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    \frac{\partial g(x)}{\partial x_i} = \frac{\partial}{\partial x_i} y^\top S^\top ( I + S K(x) S^\top)^{-1} S y
+\]
+
+Let \(U = I + S K(x) S^\top\), and \(V = U^{-1}\).  Working inside out, lets find \(\frac{\partial U}{\partial x_i}\).
+
+\[
+\begin{align}
+    U + dU  &amp;= I + S (K + dK) S ^\top \\
+            &amp;= I + S K S^\top + S dK S ^\top \\
+        dU  &amp;= S \, dK\, S^\top \\
+        U'  &amp;= S K' S^\top
+\end{align}
+\]
+
+Where \(M'\) is the derivative of the elements of \(M\) w.r.t. \(x_i\).  Next, \(\frac{\partial V}{\partial x_i}\), which comes from the matrix cookbook, equation (36).
+
+\[
+    dV = -U^{-1} \, dU \, U^{-1} \\
+    V' = -U^{-1} U' U^{-1}
+\]
+
+Finally,  \(\frac{\partial g(x)}{\partial x_i}\):
+    
+\[
+\begin{align}
+    g + dg  &amp;= y^\top S^\top (V + dV) S y \\
+    g + dg  &amp;= y^\top S^\top \, V \, S y + y^\top S^\top \,dV \,S y \\
+        dg  &amp;= y^\top S^\top \,dV \,S y \\
+        g'  &amp;= y^\top S^\top \, V' \,S y \\
+\end{align}
+\]
+
+Expanding \(g'\) gives the final formula:
+\[
+\begin{align}
+        g'  &amp;= y^\top S^\top U^{-1} S K' S^\top U^{-1} S y \\
+        g'  &amp;= y^\top M K' M y \\
+        g'  &amp;= z^\top K' z \tag{1}\\
+\end{align}
+\]
+
+&lt;p&gt;
+Here, \(M = S^\top U^{-1} S \), (which is symmetric), and \(z = M y\).  
+&lt;/p&gt;
+
+&lt;p&gt;
+This equation gives us a single element of the gradient, namely \(d g(x)/dx_i\).  However, once \(z\) is computed, we can recompute (1) for all other \(x_j\)'s at a cost of \(O(n^2)\), making the total gradient \(O(n^3)\), which is pretty good. (This assumes the K's can be computed efficiently, which is true; see below.)  However, we also observe that \(K'\) is sparse with size \(O(n)\), so we can do sparse multiplication to reduce the running time to linear, and **the full gradient takes \(O(n^2)\). ** Cool! 
+&lt;/p&gt;
+
+&lt;/div&gt;
+
+
+&lt;p&gt;&lt;/p&gt;
+
+
+&lt;h2&gt;Derivatives of K(x)&lt;/h2&gt;
+
+&lt;p&gt;The structure of \(\frac{\partial K}{\partial x_i}\) is sparse; only the i-th row and i-th column are nonzero. We can find the values of the nonzero elements by taking the derivative of the kernel function.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt; Cubic covariance &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Recall the cubic covariance expression:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+k(x_1, x_2) = (x_a - x_b) x_b^2 / 2 + x_b^3/3
+\]
+
+Where \(x_b = min(x_1, x_2)\) and \(x_a = max(x_1, x_2)\).
+&lt;/div&gt;
+
+
+&lt;p&gt;Taking the derivative w.r.t. (x_2) gives:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+k(x_1, x_2) = 
+    \begin{cases}
+         x_2^2 / 2 &amp; \text{if } x_2 &gt;= x_1 \\
+         x_1 x_2 - x_2^2/2 &amp; \text{if } x_2 &lt; x_1 
+    \end{cases}
+\]
+
+Or equivalently
+
+\[
+k(x_1, x_2) = 
+         x_2 \left [ \max(x_1,x_2)  - x_2/2 \right ]
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt; Linear Covariance &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Recall the cubic covariance expression:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+k(x_1, x_2) = x_1 x_2
+\]
+
+The derivative w.r.t. \(x_2\) is simply \(x_1\).
+&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt; Offset Covariance &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Recall the offset covariance expression:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+k(x_1, x_2) = k
+\]
+
+The derivative w.r.t. \(x_2\) is zero.
+&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt; Implementation &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Implemented end-to-end version in &lt;code&gt;kernel/get_model_kernel_derivative.m&lt;/code&gt;; see also components in &lt;code&gt;kernel/get_spacial_kernel_derivative.m&lt;/code&gt; and &lt;code&gt;kernel/cubic_kernel_derivative.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;These functions return all of the partial derivatives of the matrix with respect to the first input.   The i-th row of the result make up the nonzero values in \(\frac{\partial K}{\partial x_i}\).  Below is example code that computes all of the partial derivative matrices.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;N = 100;
+% construct indices
+x = linspace(0, 10, N);
+% construct derivative rows
+d_kernel = get_model_kernel_derivative(...);
+d_K = eval_kernel(d_kernel, x, x);
+% construct dK/dx_i, for each i = 1..N
+d_K_d_x = dcell(1,N);
+for i = 1:N
+    tmp = sparse(N, N);
+    tmp(i,:) = d_K(i,:);
+    tmp(:,i) = d_K(i,:)';
+    d_K_d_x{i} = tmp;
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt; Directional Derivatives &lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;I think we can get directional derivatives of \(K\) by taking the weighted sum of partial derivatives, where the weights are the component lengths of the direction vector.  I have yet to confirm this beyond a hand-wavy hunch, and in practice, this might not even be needed, since computing the full gradient is so efficient.&lt;/p&gt;
+</description>
+				<pubDate>Sun, 10 Nov 2013 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2013/11/10/reference</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/11/10/reference</guid>
+			</item>
+		
+			<item>
 				<title>iPlant Literature Review Planning Meetings</title>
 				<description>&lt;h2&gt;Document discussion&lt;/h2&gt;
 
@@ -585,383 +890,6 @@ Speedup: 3.6x
 				<pubDate>Wed, 30 Oct 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/30/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/30/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Ancestral Sampling from poserior (Markov-aware sampling)</title>
-				<description>&lt;p&gt;Realization: nystrom may be tricky, because the same thinning factor probably won't be appropriate for all scenarios (e.g. short curves).&lt;/p&gt;
-
-&lt;p&gt;Possible approach: always take first and last inidices of a curve; thin longer curves more aggressively.&lt;/p&gt;
-
-&lt;p&gt;Better idea: use markov structure.&lt;/p&gt;
-
-&lt;h2&gt;Exploiting Markov structure for Sampling plants &lt;/h2&gt;
-
-&lt;p&gt;Main ideas: Use inheritence sampling to sample fully tree.  Two rules (1) Parent curve posterior should only depend on it's observed points and a small number of points on its children.  (2) Child curves depend also on the sampled parent points.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Parent points&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;The main question here is how many and which observed points of  child-curves should be included to compute posterior?  Heuristic approach: start with child points nearest to branch-point and work outward until information gain is negligible.&lt;/p&gt;
-
-&lt;p&gt;Information gain is the change in entropy of the branch-point posterior, conditioned on the active set.  Entropy is proportional to the determinant of the covariance matrix.&lt;/p&gt;
-
-&lt;p&gt;Let bp be the branch point, and I be the active set.&lt;/p&gt;
-
-&lt;div&gt;
-\[
-Entropy(bp | I) \propto K(bp, bp) - K(bp, np) [K(np, np)  + \Sigma_y(np)]^{-1} K(np, bp)
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;Where Sigma_y is the observation covariance.  We may choose to use the prior conditional entropy, which is a simpler stand-in for the posterior conditional entropy.&lt;/p&gt;
-
-&lt;div&gt;
-\[
-Entropy(bp | I) \propto K(bp, bp) - K(bp, np) [K(np, np)]^{-1} K(np, bp)
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;Note that the entropy is now only a function of the indices of the observations, not the observations themselves.  Thus, each observation only contribues one dimension to the matrix inversion, instead of three, making the computation 3&lt;sup&gt;3&lt;/sup&gt; times faster.  This is only sensible if the observation variance is relatively uniform between observations, which isn't necessarilly true, but it may be servicable heuristic if thresholds are set appropriately high.&lt;/p&gt;
-
-&lt;p&gt;Opportunities exist to do rank-one updates to inverse, but probably not necessary, as the matrices should be small.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Child curves&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Note that child-curves can also be parent-curves, so the previous approach for determining the active set should be followed.&lt;/p&gt;
-
-&lt;p&gt;We need to estimate the conditional prior probability for the curve, conditioned on its sampled parent.  If the sampled parent contains the branch point, bp, the conditional prior covariance is already available in the track's pre-computed prior_K field, and the mean is bp.  In general, bp isn't sampled, so we must use the nearby points on the parent to find the conditional prior of bp first and sample it explicitly.&lt;/p&gt;
-
-&lt;p&gt;Let bp be a branch point, cp be the child point, and nbp be the &quot;neighbors&quot; of bp on the parent curve, i.e. the markov blanket of bp on the parent.&lt;/p&gt;
-
-&lt;p&gt;Given bp, the child points are distributed by&lt;/p&gt;
-
-&lt;div&gt;
-\[
-cp \mid bp \sim \mathcal{N}(bp, K_{prior})
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;The branch point is distributed by&lt;/p&gt;
-
-&lt;div&gt;
-\[
-bp \mid pnp \sim \mathcal{N}(\mu, \Sigma)
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;where&lt;/p&gt;
-
-&lt;div&gt;
-\[
-\mu = k(bp, nbp) k(nbp, nbp)^{-1} nbp \\
-\Sigma = k(bp, bp) - k(bp, pnp) K(pnp, pnp)^{-1} K(pnp, bp)
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;The a neighborhood size of four points around bp should be sufficient, since this model is piecewise cubic, but it may be worthwhile to experiment with more, since we aren't in bottleneck territory.&lt;/p&gt;
-
-&lt;p&gt;Now that we have conditional priors, we can construct the conditional posterior using the standard formula.&lt;/p&gt;
-
-&lt;h2&gt;Mixing noisy and noise-free data in Posterior&lt;/h2&gt;
-
-&lt;p&gt;Ran into a snag when trying to incorporate the noise-free conditional values that arise during ancestral sampling.  Derived an elegant solution; see the &lt;a href=&quot;/ksimek/research/2013/10/29/reference&quot;&gt;writeup here&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2&gt;Implementing markov-aware pixel likelihood&lt;/h2&gt;
-
-&lt;p&gt;For now, using a constant number of points on parent, instead of using the entropy method above.  Could add later; basic approach: precompute all covariances and add/remove one at a time.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Seems to be working, but slow as hell (slower than nystrom method). profiling&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Construct_attachment_covariance_3 is called 486 times!&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Construct non view-specific matrices outside of view loop.&lt;/li&gt;
-&lt;li&gt;nystrom for large curves?&lt;/li&gt;
-&lt;li&gt;do all covariances at once?  saves the computation of sibling and parent objecst?&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;hr /&gt;
-
-&lt;p&gt;implemented a first attempt at speedup; producing faulty results.&lt;/p&gt;
-
-&lt;h2&gt;TODO (new)&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Finish optimized ancestral sampling&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Tue, 29 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/29/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/29/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Mixing Noisy and Noise-free values in GP Posterior</title>
-				<description>&lt;p&gt;When doing ancestral sampling of the posterior, each curve's conditional posterior depends on (a) it's relevant (noisy) observation and (b) the sampled (noise-free) values of the parent.  We can incorporate both in the posterior by treating the noise-free values as observations with zero variance in the likelihood.&lt;/p&gt;
-
-&lt;p&gt;In practice, theres a minor issue implementing this.  Recall that because 3D observations are degenerate in one direction (namely the backprojection direction), we prefer to work with the precision matrix, \(\Lambda\), instead of a covariance matrix.  Under this representation, noise-free values have infinite precision, so operations on \(\Lambda\) are invalid.  Instead, we take a hybrid appraoch, using both precisions and covariances.&lt;/p&gt;
-
-&lt;p&gt;Recall the standard formulation for the posterior mean:&lt;/p&gt;
-
-&lt;div&gt;
-\[
-    \mu = K_* \left[ K + \Sigma \right]^{-1} y
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;Without loss of generality, assume zero-noise observations appear after noisy observations.  We can rewrite the posterior in terms of the precision matrix \(\Lambda\) of the noisy values:&lt;/p&gt;
-
-&lt;div&gt;
-\[
-\begin{align}
-    \mu &amp;= K_* \left[ K + \left( 
-                \begin{array}{cc}
-                    \Lambda^{-1} &amp; 0 \\
-                    0 &amp; 0
-                \end{array}
-            \right) \right]^{-1} y \\
-        &amp;= K_* \left[
-        
-            \left( 
-                \begin{array}{cc}
-                    \Lambda &amp; 0 \\
-                    0 &amp; I
-                \end{array}
-             \right) 
-        K + 
-            \left( 
-                \begin{array}{cc}
-                    I &amp; 0 \\
-                    0 &amp; 0
-                \end{array}
-             \right) 
-
-            \right]^{-1} 
-            \left( 
-                \begin{array}{cc}
-                    \Lambda &amp; 0 \\
-                    0 &amp; I
-                \end{array}
-             \right) 
-            y \\
-\end{align}
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;We can implement this by slightly modifying our code for the precision-matrix formulation of posterior.  First, give all noise-free values a precision of 1.0 in \(\Lambda\), and then modify the \(I\) inside the parentheses by zeroing-out elements corresponding to noise-free values.  Using prime symbol to denote the modified matricies, the result is&lt;/p&gt;
-
-&lt;div&gt;
-\[
-    \mu = K_* \left[ \Lambda' K + I' \right]^{-1} \Lambda' y
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;The expression for posterior covariance is derived in the same way, and has similar form.&lt;/p&gt;
-</description>
-				<pubDate>Tue, 29 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/29/reference</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/29/reference</guid>
-			</item>
-		
-			<item>
-				<title>Implementing Nystrom method; bugs in posterior sampling code</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Re-ran with method 2.  Still getting negative eigenvalues.&lt;/p&gt;
-
-&lt;p&gt;Possibly non-symmetry issue.&lt;/p&gt;
-
-&lt;p&gt;Change gears -- work on fast implementation, then resume debugging.&lt;/p&gt;
-
-&lt;h2&gt;Reduced rank approximation of data-covariance&lt;/h2&gt;
-
-&lt;div&gt;
-&lt;p&gt;
-Goal: approximate \(\left(K + \Sigma_D \right)^{-1}\), using a low-rank approximation of K;  where \(\Sigma_D\) is the likelihood covariance.
-&lt;/p&gt;&lt;p&gt;
-In our case \(\Sigma_D\) has infinite covariance, so this inverse doesn't exist. However, if we work with precision matrix \(\Lambda = \Sigma_D^{-1}\), and use the decomposition \( S' S = \Lambda \) we can replace this expression with the equivalent
-
-\[
-    S' \left( S K S' + I \right)^{-1} S
-\]
-
-Even though S is rank-deficient, the inverse in this expression does exist, thanks to the finite positive values being added to the diagonal.  
-&lt;/p&gt;&lt;p&gt;
-We approximate the above expression as follows.  Let \(K\) be an \(N\) by \(N\) matrix. We can take the eigendecomposition \(K = V D V'\) and approximate it with \(\tilde K = \tilde V \tilde D \tilde V'\), where \(\tilde V\) and \(\tilde D\) consist of the first \(n\) eigenvalues and eigenvectors of \(K\) respectively.   We can use this low-rank approximation with the [Woodbury matrix identity](http://en.wikipedia.org/wiki/Woodbury_matrix_identity) to approximate the above inverse in \(O(n^3)\) time, rather than \(O(N^3)\).  The Woodbury identity is
-        
-\[
-    (A + U C V )^{-1} = A^{-1} - A^{-1} U (C^{-1} + V A^{-1} U)^{-1} V A^{-1}
-\]
-
-Setting \(A = I\), \(U = V' = S \tilde V \) and \(C = \tilde D \), we get:
-    
-\[
-    \left( S K S' + I \right)^{-1} = I - S \tilde V (\tilde D^{-1} + \tilde V' S' S \tilde V)^{-1} \tilde V' S'
-\]
-&lt;/p&gt;&lt;p&gt;
-It remains to find \(\tilde V\) and \(\tilde D\) efficiently.  Naive eigenvalue decomposition takes \(O(N^3)\) time, which isn't any better than direct inversion.  Sections 4.3.2 and 8.1 of Williams and Rasmussen show how to approximate \(n\) eigenfunctions and eigenvalues from \(n\) data points in \(O(n^3)\) time.  Eigenvectors \(\tilde V\) arise by evaluating the approximate eigenfunctions at the appropriate indices.
-&lt;/p&gt;
-&lt;p&gt;
-
-Substitutuing back into the original expression by surrounding with (\(S'\) and \(S\)), we get the final expression:
-    
-\[
-\begin{align}
-    \approx &amp; S' \left ( I - S \tilde V (\tilde D^{-1} + \tilde V' S' S \tilde V)^{-1} \tilde V' S' \right) S \\
-    =&amp;\Lambda - \Lambda \tilde V (\tilde D^{-1} + \tilde V' \Lambda \tilde V)^{-1} \tilde V' \Lambda
-    \end{align}
-
-\]
-&lt;/p&gt;
-&lt;/div&gt;
-
-
-&lt;h2&gt;Work log&lt;/h2&gt;
-
-&lt;p&gt;Implemented two different implementations of &quot;nystrom solve&quot; (&lt;code&gt;tools/nystrom_solve.m&lt;/code&gt;).  Crude testing shows big speedup, but stalling on a big eigenvalue decomposition.  Replacing with a call to &quot;chol&quot;, waiting on visual results.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;&quot;chol&quot; gives much faster results. (no need to symmetrize)  But results are junk -- blank screen.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Oops, bug in call to chol; fixed.&lt;/p&gt;
-
-&lt;p&gt;still getting black.  Posterior covariance is not positive definite; eigenvalues are negative.&lt;/p&gt;
-
-&lt;p&gt;When I force covariance to zero (to view the mean value), it's still in the ballpark but wonky (same as before).&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;&lt;strong&gt;Clue&lt;/strong&gt;:   When re-using (thinned) input covariance matrix and indices, result looks sensible.  Clearly, we have a problem with how K_star is computed (and likelihood K_star_star, too).&lt;/p&gt;
-
-&lt;p&gt;Comparing different K_star's...&lt;/p&gt;
-
-&lt;p&gt;Looks like on-diagonal elements differ, off-diagonals are okay.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Got it!  Wacv was trained using no-perturb model, but is being tested with OU-perturb.&lt;/p&gt;
-
-&lt;p&gt;TODO: edit get_all_Wacv and/or get_wacv_result to receive a model-type... done.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;reducing test to block (1,1)&lt;/p&gt;
-
-&lt;p&gt;possible sources of disparity: indices, function&lt;/p&gt;
-
-&lt;p&gt;checked indices -- same.&lt;/p&gt;
-
-&lt;p&gt;check params -- model-type doesnt match.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;First view now looks good in matlab.&lt;/p&gt;
-
-&lt;p&gt;Running all views in likelihood_server.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Means look great!.  Now on to random perturbed.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Cholesky claims posterior covariance isn't positive definite.&lt;/p&gt;
-
-&lt;p&gt;Possibly a bug in construct_attachment_covariance_3?&lt;/p&gt;
-
-&lt;p&gt;Re-running with K_star_star from original covariance matrix.  Still gives &quot;not positive definite&quot; errors.&lt;/p&gt;
-
-&lt;p&gt;Resorting to eigenvalue decomposition method.&lt;/p&gt;
-
-&lt;p&gt;Results look good!  perturbation from mode is &lt;em&gt;TINY&lt;/em&gt;, at least in the ground truthed WACV dataset.  If this is true for hyptoheses in the full system, we can probably get away with simply taking the mean and saving significant computation of the covariacne matrix.&lt;/p&gt;
-
-&lt;h2&gt;Tuning Nystrom factor&lt;/h2&gt;
-
-&lt;p&gt;nystrom factor: 50&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-28-nystrom_50.png&quot; alt=&quot;nystrom factor = 50&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;nystrom factor: 20&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-28-nystrom_20.png&quot; alt=&quot;nystrom factor = 20&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;nystrom factor: 10&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-10-28-nystrom_10.png&quot; alt=&quot;nystrom factor = 10&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Nystrom factor apparently has a huge affect on reconstruction quality.  Possibly better choice of thinned index set (compared to uniform sampling) will improve sensitivity, but a brief attempt at this (grouping xyz indices ) had net negative effect.&lt;/p&gt;
-
-&lt;p&gt;Needs more thought, possibly should resort to subset of data (SD) or subset of regressors (SR) method, or exploit markov structure.&lt;/p&gt;
-
-&lt;h2&gt;Summary&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Nystrom method is implemented and provides huge speedups without obvious in rendered results.&lt;/li&gt;
-&lt;li&gt;Spent many hours debugging issues with covariance matrix.  Turned out to not be bug in theory or implementation of the math, but from an unexpected hard-coded value in wacvin wacv results.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Nystrom thinning: 10
-ll2 spacing: 3
-Unclear&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;what is best thinning amount for Nystrom method?&lt;/li&gt;
-&lt;li&gt;what is best spacing for output index set&lt;/li&gt;
-&lt;li&gt;are perturbations always virtually nil?&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;h2&gt;TODO (new)&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;refactor construct_attachment_covariance_* into a single implementation.&lt;/li&gt;
-&lt;li&gt;optimize &lt;code&gt;curve_tree_ml_2.m&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Mon, 28 Oct 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/10/28/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/10/28/work-log</guid>
 			</item>
 		
 	</channel>

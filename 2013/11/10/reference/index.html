@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>iPlant Literature Review Planning Meetings &larr; </title>
+   <title>Gradient w.r.t. Indices &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -85,106 +85,165 @@
 
 
   <h1 class="title">
-        [Meeting Notes] iPlant Literature Review Planning Meetings
+        [Reference] Gradient w.r.t. Indices
     </h1>
 
-  <div class="date emphnext">November 08, 2013</div>
+  <div class="date emphnext">November 10, 2013</div>
     
 
 
   
-    <h2>Document discussion</h2>
+    <p>To optimize indices, we'll need to compute the derivative of the marginal log-likelihood w.r.t. changing indices.</p>
 
-<p>Some random notes about issues to bring up in the final document.</p>
+<p>I first tried to derive this using the generalization of the chain rule to matrix expressions (see matrix cookbook, section 2.8.1), but the computation exploded.  Since ultimately, the derivative is a simple single-input, single output function, we can use differentials to derive the solution.</p>
 
-<p>Talk about representation vs. "features" (characteristics).  Clarify "features", don't use indescriminitively (call them high-level features, topological features, as opposed to image features).</p>
+<p>Let the marginal likelihood as a function of indices be \(g(x)\):</p>
 
-<p>Two ways to go about finding "features":</p>
+<div>
+\[
+    \frac{\partial g(x)}{\partial x_i} = \frac{\partial}{\partial x_i} y^\top S^\top ( I + S K(x) S^\top)^{-1} S y
+\]
 
-<ul>
-<li>"look directly for charactersitics/features"</li>
-<li>"look for model, find the other stuff"</li>
-</ul>
+Let \(U = I + S K(x) S^\top\), and \(V = U^{-1}\).  Working inside out, lets find \(\frac{\partial U}{\partial x_i}\).
 
+\[
+\begin{align}
+    U + dU  &= I + S (K + dK) S ^\top \\
+            &= I + S K S^\top + S dK S ^\top \\
+        dU  &= S \, dK\, S^\top \\
+        U'  &= S K' S^\top
+\end{align}
+\]
 
-<p>i.e. looking for representations vs. characteristics</p>
+Where \(M'\) is the derivative of the elements of \(M\) w.r.t. \(x_i\).  Next, \(\frac{\partial V}{\partial x_i}\), which comes from the matrix cookbook, equation (36).
 
-<p>Bisque vs. Nonbisque?  Unclear what the final application will be, but if Bisque is the goal, some discussion of it's feasibility is probably warranted.  For example, interactive systems like the Clark paper might not be feasible for Bisque.</p>
+\[
+    dV = -U^{-1} \, dU \, U^{-1} \\
+    V' = -U^{-1} U' U^{-1}
+\]
 
-<h2>Taxonomy of curve-extraction methods</h2>
+Finally,  \(\frac{\partial g(x)}{\partial x_i}\):
+    
+\[
+\begin{align}
+    g + dg  &= y^\top S^\top (V + dV) S y \\
+    g + dg  &= y^\top S^\top \, V \, S y + y^\top S^\top \,dV \,S y \\
+        dg  &= y^\top S^\top \,dV \,S y \\
+        g'  &= y^\top S^\top \, V' \,S y \\
+\end{align}
+\]
 
-<p>Kobus mentioned the different "dimensions"  that the problem can be split into.  Some might be</p>
+Expanding \(g'\) gives the final formula:
+\[
+\begin{align}
+        g'  &= y^\top S^\top U^{-1} S K' S^\top U^{-1} S y \\
+        g'  &= y^\top M K' M y \\
+        g'  &= z^\top K' z \tag{1}\\
+\end{align}
+\]
 
-<ul>
-<li>3D vs 2D</li>
-<li>imaging system type (microscope, MRI, camera, etc)</li>
-<li>temporal vs. nontemporal</li>
-<li>branching vs non branching</li>
-<li>biological vs. nonbiological</li>
-</ul>
+<p>
+Here, \(M = S^\top U^{-1} S \), (which is symmetric), and \(z = M y\).  
+</p>
 
+<p>
+This equation gives us a single element of the gradient, namely \(d g(x)/dx_i\).  However, once \(z\) is computed, we can recompute (1) for all other \(x_j\)'s at a cost of \(O(n^2)\), making the total gradient \(O(n^3)\), which is pretty good. (This assumes the K's can be computed efficiently, which is true; see below.)  However, we also observe that \(K'\) is sparse with size \(O(n)\), so we can do sparse multiplication to reduce the running time to linear, and **the full gradient takes \(O(n^2)\). ** Cool! 
+</p>
 
-<h2>Research Topics</h2>
-
-<p>We can split the background reading into several areas, both in image processing/CV and biological application.
-Kobus recommended splitting time between these broad areas.</p>
-
-<p><em>Image Processing Topics</em></p>
-
-<ul>
-<li>"snakes" - active contours</li>
-<li>Medial axis filtering</li>
-<li>curve modelling (polynomial/splines, GP, level-set methods)</li>
-<li>finding branches</li>
-</ul>
-
-
-<p><em>Application Areas</em></p>
-
-<ul>
-<li>pollen tube tracking</li>
-<li>root tracking</li>
-<li>Blood vessel literature / vascular segmentation</li>
-<li>Neuron tracing</li>
-<li>Alternaria / Fungus?</li>
-</ul>
-
-
-<h2>Other stuff</h2>
-
-<p>Other topics that might be worth looking into, but maybe of speculative value.</p>
-
-<ul>
-<li>Rhizotron - nondestructive underground root imaging system</li>
-</ul>
+</div>
 
 
-<h2>Data Inventory </h2>
-
-<p>We currently have data sets from a handful of different applications/domains.</p>
-
-<ul>
-<li>Pollen tubes</li>
-<li>"Clark" root image (2D, one image)</li>
-<li>"Max Plank" root images</li>
-<li>Neurons</li>
-</ul>
+<p></p>
 
 
-<h2>Next steps</h2>
+<h2>Derivatives of K(x)</h2>
 
-<p>Any questions for Martha?</p>
+<p>The structure of \(\frac{\partial K}{\partial x_i}\) is sparse; only the i-th row and i-th column are nonzero. We can find the values of the nonzero elements by taking the derivative of the kernel function.</p>
 
-<p>Reading for next week: look into citations from Clark and Hypotrace</p>
+<p><strong> Cubic covariance </strong></p>
 
-<ul>
-<li>Kate - related work, Clark Paper</li>
-<li>Andrew - related work, Hypotrace paper</li>
-<li>Kyle image processing</li>
-</ul>
+<p>Recall the cubic covariance expression:</p>
+
+<div>
+\[
+k(x_1, x_2) = (x_a - x_b) x_b^2 / 2 + x_b^3/3
+\]
+
+Where \(x_b = min(x_1, x_2)\) and \(x_a = max(x_1, x_2)\).
+</div>
 
 
-<p>As we read, lets try to place each paper somewhere in the "Taxonomy" above.</p>
+<p>Taking the derivative w.r.t. (x_2) gives:</p>
+
+<div>
+\[
+k(x_1, x_2) = 
+    \begin{cases}
+         x_2^2 / 2 & \text{if } x_2 >= x_1 \\
+         x_1 x_2 - x_2^2/2 & \text{if } x_2 < x_1 
+    \end{cases}
+\]
+
+Or equivalently
+
+\[
+k(x_1, x_2) = 
+         x_2 \left [ \max(x_1,x_2)  - x_2/2 \right ]
+\]
+</div>
+
+
+<p><strong> Linear Covariance </strong></p>
+
+<p>Recall the cubic covariance expression:</p>
+
+<div>
+\[
+k(x_1, x_2) = x_1 x_2
+\]
+
+The derivative w.r.t. \(x_2\) is simply \(x_1\).
+</div>
+
+
+<p><strong> Offset Covariance </strong></p>
+
+<p>Recall the offset covariance expression:</p>
+
+<div>
+\[
+k(x_1, x_2) = k
+\]
+
+The derivative w.r.t. \(x_2\) is zero.
+</div>
+
+
+<p><strong> Implementation </strong></p>
+
+<p>Implemented end-to-end version in <code>kernel/get_model_kernel_derivative.m</code>; see also components in <code>kernel/get_spacial_kernel_derivative.m</code> and <code>kernel/cubic_kernel_derivative.m</code>.</p>
+
+<p>These functions return all of the partial derivatives of the matrix with respect to the first input.   The i-th row of the result make up the nonzero values in \(\frac{\partial K}{\partial x_i}\).  Below is example code that computes all of the partial derivative matrices.</p>
+
+<pre><code>N = 100;
+% construct indices
+x = linspace(0, 10, N);
+% construct derivative rows
+d_kernel = get_model_kernel_derivative(...);
+d_K = eval_kernel(d_kernel, x, x);
+% construct dK/dx_i, for each i = 1..N
+d_K_d_x = dcell(1,N);
+for i = 1:N
+    tmp = sparse(N, N);
+    tmp(i,:) = d_K(i,:);
+    tmp(:,i) = d_K(i,:)';
+    d_K_d_x{i} = tmp;
+end
+</code></pre>
+
+<p><strong> Directional Derivatives </strong></p>
+
+<p>I think we can get directional derivatives of \(K\) by taking the weighted sum of partial derivatives, where the weights are the component lengths of the direction vector.  I have yet to confirm this beyond a hand-wavy hunch, and in practice, this might not even be needed, since computing the full gradient is so efficient.</p>
 
       <address class="signature">
         Posted by
@@ -196,10 +255,10 @@ Kobus recommended splitting time between these broad areas.</p>
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/11/10/reference" class="next" title="Gradient w.r.t. Indices">Gradient w.r.t. Indices &rarr;</a>
+    <a href="/ksimek/research/2013/11/10/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/11/07/work-log" class="prev" title="WACV reconstruction (revisited)">&larr; WACV reconstruction (revisited)</a>
+    <a href="/ksimek/research/2013/11/08/meeting-notes" class="prev" title="iPlant Literature Review Planning Meetings">&larr; iPlant Literature Review Planning Meetings</a>
   
   </div>
   <div class="clearer"> </div>
