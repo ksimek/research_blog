@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-11-12T10:29:09-07:00</updated>
+ <updated>2013-11-12T10:48:22-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -80,7 +80,7 @@ index  2   | x x 1 1 ...  48 49 50 51 x  x  x  x  |
 
 &lt;ul&gt;
 &lt;li&gt;Zhu 2006 - hough-transform / space carving to find voxels; skeletonize using &quot;minumum cross section&quot;,  fit with NURBS curve.&lt;/li&gt;
-&lt;li&gt;&quot;Smart-root&quot; Lobet et. al 2011 - Most cited Clark descendant; Semi-auto, &lt;em&gt;2D&lt;/em&gt;; hand-build algorithm, trace bright regions with consistent radius.  Seems tuned, nonrobust, relies on a strong GUI.  Naive?
+&lt;li&gt;&quot;Smart-root&quot; Lobet et. al 2011 - Most cited Clark descendant; Semi-auto, &lt;em&gt;2D&lt;/em&gt;; hand-build algorithm, trace bright regions with consistent radius.  Grayscale features, strong GUI.
 
 &lt;ul&gt;
 &lt;li&gt;&quot;EZRhizo&quot; Armengaud et al. 2009 - Manual tracing? (To Read)&lt;/li&gt;
@@ -97,7 +97,7 @@ index  2   | x x 1 1 ...  48 49 50 51 x  x  x  x  |
 
 &lt;p&gt;&lt;em&gt;Neuron Analysis&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;Reading papers of the &lt;a href=&quot;http://diademchallenge.org/algorithms.html&quot;&gt;teams that won the Diadam Challenge&lt;/a&gt; for tracing neurons.  It seems that image processing used in these papers far surpasses those in the plant biology I've read.  Likely due to (a) better imaging systems and (b) much more ambiguity to deal with.&lt;/p&gt;
+&lt;p&gt;Reading papers of the &lt;a href=&quot;http://diademchallenge.org/algorithms.html&quot;&gt;teams that won the Diadam Challenge&lt;/a&gt; for tracing neurons.&lt;/p&gt;
 
 &lt;p&gt;&lt;em&gt;Wang et al. A Broadly Applicable 3-D Neuron Tracing Method Based on Open-Curve Snake&lt;/em&gt;&lt;/p&gt;
 
