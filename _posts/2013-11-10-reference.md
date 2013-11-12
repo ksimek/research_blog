@@ -48,12 +48,12 @@ Finally,  \(\frac{\partial g(x)}{\partial x_i}\):
 \end{align}
 \]
 
-Expanding \(g'\) gives the final formula:
+Expanding \(V\) gives the final formula:
 \[
 \begin{align}
-        g'  &= y^\top S^\top U^{-1} S K' S^\top U^{-1} S y \\
-        g'  &= y^\top M K' M y \\
-        g'  &= z^\top K' z \tag{1}\\
+        g'  &= -y^\top S^\top U^{-1} S K' S^\top U^{-1} S y \\
+        g'  &= -y^\top M K' M y \\
+        g'  &= -z^\top K' z \tag{1}\\
 \end{align}
 \]
 
@@ -67,6 +67,8 @@ This equation gives us a single element of the gradient, namely \(d g(x)/dx_i\).
 
 </div>
 <p></p>
+
+
 
 Derivatives of K(x)
 -------------------
@@ -89,7 +91,7 @@ Taking the derivative w.r.t. \(x_2\) gives:
 <div>
 \[
 \begin{align}
-k(x_1, x_2) &= 
+\frac{\partial k(x_1, x_2)}{\partial x_2} &= 
     \begin{cases}
          x_1^2 / 2 & \text{if } x_2 >= x_1 \\
          x_1 x_2 - x_2^2/2 & \text{if } x_2 < x_1 
@@ -101,14 +103,75 @@ k(x_1, x_2) &=
     \end{cases} \\
 \end{align}
 \]
+</div>
 
 Or equivalently
 
+<div>
 \[
-k(x_1, x_2) = 
-         x_b \left [ x_1  - x_b/2 \right ]
+\frac{\partial k(x_1, x_2)}{\partial x_2} = 
+         x_b \left ( x_1  - x_b/2 \right ) \tag{2}
 \]
 </div>
+
+Note that if the goal is to find \frac{\partial{K}}{\partial{x_i}}\\), the on-diagonal element \\(k_{i i}\\) needs a slightly different formula, because the kernel is a function of a single variable, \\(x_i\\).
+
+<div>
+\[
+\begin{align}
+\frac{\partial k(x_i)}{\partial x_i} &= 
+    \frac{\partial}{\partial x_i} x_i^3/3 \\
+        &= x_i^2 \tag{3}
+\end{align}
+\]
+
+Compare this with the general formula: if we plugged-in \(x_i\) to both inputs of equation (2), we'd get \(x_i^2/2\), which underestimates the derivative by half.  We'll see in the next section that when computing \\(g'\\) the "wrong" expression for \\(k_{ii}\\) is actually more useful than the correct one, because we'll need to scale it by 0.5 anyway.
+
+</div>
+
+Sparsity of K'
+--------------
+
+The sparsity of \\(\frac{\partial K}{\partial x_i}\\) actually allows us to further simplify formula (1) for \\(g'\\), ultimately allowing us to compute the entire gradient in a single matrix multiplication.
+
+First observe that K' is only nonzero on the i-th row and column:
+    
+<div>
+\[
+    k'_{i,j} = 
+    \begin{cases}
+        \delta_{ij} & \text{if } i == j \\
+        0 & \text{otherwise}
+    \end{cases}
+\]
+
+where \(\delta_{ij} = \frac{\partial k_{ij}}{\partial x_i} \).
+
+For convenience, we'll define the vector \(\Delta = [\delta_1, ..., \delta_n]^\top\).
+
+</div>
+
+Thus, \\(g'\\) can be rewritten as
+
+<div>
+\[
+    g' = z_i (\delta_1 z_1 + ... + \delta_{i-1} z_{i-1} + \sum_j \delta_j z_j + \delta_{i+1} z_{i+1} + ... + \delta_n z_n)
+\]
+
+The expression in the parentheses is almost a dot product of z and \(\Lambda\), but with the i-th term replaced with the dot product of z and \(\Lambda\).
+
+\[
+\begin{align}
+    g' = z_i (2 * z \cdot \Lambda - z_i \lambda_i) \\ 
+       = 2 z_i z \cdot \Lambda'
+\end{align}
+\]
+
+Where \(\Lambda'\)  is equal to \(\Lambda\) in all elements except the i-th, which is equal to \(0.5 \lambda_i\).  Note that we can get \(Lambda'\) by using 
+
+</div>
+
+
 
 ** Linear Covariance **
 
