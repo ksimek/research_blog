@@ -88,18 +88,25 @@ Where \(x_b = min(x_1, x_2)\) and \(x_a = max(x_1, x_2)\).
 Taking the derivative w.r.t. \(x_2\) gives:
 <div>
 \[
-k(x_1, x_2) = 
+\begin{align}
+k(x_1, x_2) &= 
     \begin{cases}
-         x_2^2 / 2 & \text{if } x_2 >= x_1 \\
+         x_1^2 / 2 & \text{if } x_2 >= x_1 \\
          x_1 x_2 - x_2^2/2 & \text{if } x_2 < x_1 
-    \end{cases}
+    \end{cases} \\
+            &= 
+    \begin{cases}
+         x_b^2 / 2 & \text{if } x_2 >= x_1 \\
+         x_a x_b - x_b^2/2 & \text{if } x_2 < x_1 
+    \end{cases} \\
+\end{align}
 \]
 
 Or equivalently
 
 \[
 k(x_1, x_2) = 
-         x_2 \left [ \max(x_1,x_2)  - x_2/2 \right ]
+         x_b \left [ x_1  - x_b/2 \right ]
 \]
 </div>
 
