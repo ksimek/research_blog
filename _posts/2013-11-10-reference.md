@@ -114,7 +114,7 @@ Or equivalently
 \]
 </div>
 
-Note that if the goal is to find \frac{\partial{K}}{\partial{x_i}}\\), the on-diagonal element \\(k_{i i}\\) needs a slightly different formula, because the kernel is a function of a single variable, \\(x_i\\).
+Note that if the goal is to find \\(K' = \frac{\partial{K}}{\partial{x_i}}\\), the on-diagonal element \\(k'_{i i}\\) needs a slightly different formula, because the kernel is a function of a single variable, \\(x_i\\).
 
 <div>
 \[
