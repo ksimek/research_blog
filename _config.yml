@@ -17,6 +17,9 @@ markdown: rdiscount
 # coderay:
 #  coderay_css: class
 #  coderay_line_numbers:
+#
+rdiscount:
+    extensions: [strict]
 
 # Themes are encouraged to use these universal variables 
 # so be sure to set them if your theme uses them.
