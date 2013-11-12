@@ -18,7 +18,7 @@ markdown: rdiscount
 #  coderay_css: class
 #  coderay_line_numbers:
 #
-rdiscount:
+#rdiscount:
 #    extensions: [strict]
 #    extensions: 
 #        - strict
