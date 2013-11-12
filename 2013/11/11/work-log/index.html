@@ -128,11 +128,15 @@ index  2   | x x 1 1 ...  48 49 50 51 x  x  x  x  |
 
 <p>My current theory assumes this occurs because the point-correspondence algorithm optimizes a local score, not taking into account smoothness or per-view perturbations that our full model allows.  I'm working on implementing a post-processing step that does local optimization on the index set w.r.t. the full marginal likelihood, which I'm hoping will fix these problems when they occur.</p>
 
-<p>I've derived an efficient method for computing the analytical gradient of the index set w.r.t. the marginal likelihood, which <a href="/ksimek/research/2013/11/10/reference/">I wrote up yesterday</a>.  I've implemented some of the pieces, but finish the end-to-end code or test anything yet.</p>
+<p>I've derived an efficient method for computing the analytical gradient of the index set w.r.t. the marginal likelihood, which <a href="/ksimek/research/2013/11/10/reference/">I wrote up yesterday</a>.  I've implemented some of the pieces, but finish the end-to-end code.</p>
+
+<hr />
+
+<p>Finished testing the function that computes dK/dt; accurate to within 1e-8 (which is probably due to the numerical approximation used for comparison).</p>
 
 <h2>iPlant Reading</h2>
 
-<p><strong>Hypocotyl Tracing</strong></p>
+<p><em>Hypocotyl Tracing</em></p>
 
 <p>Read three papers on Hypocotyl tracing from plant biology.  Methods are mostly straighforward: threshold, extract curve using {distance transform, morphological skeleton, gaussian tracing}, terminate using hand-built criterion.</p>
 
@@ -143,7 +147,7 @@ index  2   | x x 1 1 ...  48 49 50 51 x  x  x  x  |
 </ul>
 
 
-<p><strong>Root Tracing</strong></p>
+<p><em>Root Tracing</em></p>
 
 <p>Read several papers on root tracing</p>
 
@@ -152,12 +156,12 @@ index  2   | x x 1 1 ...  48 49 50 51 x  x  x  x  |
 
 <ul>
 <li>Zhu 2006 - hough-transform / space carving to find voxels; skeletonize using "minumum cross section",  fit with NURBS curve.</li>
-<li>"Smart-root" Lobet et. al 2011 - Most cited Clark descendant; Semi-auto, <strong>2D</strong>; hand-build algorithm, trace bright regions with consistent radius.  Seems tuned, nonrobust, relies on a strong GUI.  Naive?
+<li>"Smart-root" Lobet et. al 2011 - Most cited Clark descendant; Semi-auto, <em>2D</em>; hand-build algorithm, trace bright regions with consistent radius.  Seems tuned, nonrobust, relies on a strong GUI.  Naive?
 
 <ul>
 <li>"EZRhizo" Armengaud et al. 2009 - Manual tracing? (To Read)</li>
 <li>"DART" Le Bot et al., 2010 - Manual Tracing? (To read)</li>
-<li>Iyer-Pascuzzi et a., 2010 - Automatic.  Multiple angles, but <strong>2D analysis</strong>.  preprocess: Adaptive threshold.  Medial axis: distance transform</li>
+<li>Iyer-Pascuzzi et a., 2010 - Automatic.  Multiple angles, but <em>2D analysis</em>.  preprocess: Adaptive threshold.  Medial axis: distance transform</li>
 <li>"Root-trace" Nadeem et al. 2009 - auto; (To Download)</li>
 </ul>
 </li>
@@ -167,18 +171,29 @@ index  2   | x x 1 1 ...  48 49 50 51 x  x  x  x  |
 </ul>
 
 
-<p><strong>Neuron Analysis</strong></p>
+<p><em>Neuron Analysis</em></p>
 
 <p>Reading papers of the <a href="http://diademchallenge.org/algorithms.html">teams that won the Diadam Challenge</a> for tracing neurons.  It seems that image processing used in these papers far surpasses those in the plant biology I've read.  Likely due to (a) better imaging systems and (b) much more ambiguity to deal with.</p>
 
-<p><strong>Wang et al. A Broadly Applicable 3-D Neuron Tracing Method Based on Open-Curve Snake</strong></p>
+<p><em>Wang et al. A Broadly Applicable 3-D Neuron Tracing Method Based on Open-Curve Snake</em></p>
 
 <p>Preprocessing: eigenanalysis of image hessian, eigenvalues are used to determine "vesselness" of each pixel.
 Presegmentation: Graph cut on "vesselness image".  Actually "Vessel Cut";  "tubular structures are further enhanced and close-lying axons are thinned in the vesselness image".  A bit vague here.  See Freiman et al. (2009).</p>
 
-<p><strong>To Read:</strong></p>
+<p><em>To Read:</em></p>
 
-<p>Freiman et al. (2009).</p>
+<p>Freiman et al. (2009). vessel-cut
+Narayanaswamy et al. (2011) curvelets and scalar voting</p>
+
+<p><em>Applications to TULIPS:  datasets, evaluation</em></p>
+
+<p>This paper uses a handfull of branching curve datasets that we could use for our project.</p>
+
+<p>We also get an evaluation metric for comparing centerlines.</p>
+
+<p><em>Possible Bisque analysis</em></p>
+
+<p>Run graph-cut or grab-cut to do foreground segmentation.</p>
 
       <address class="signature">
         Posted by

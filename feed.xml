@@ -43,11 +43,15 @@ index  2   | x x 1 1 ...  48 49 50 51 x  x  x  x  |
 
 &lt;p&gt;My current theory assumes this occurs because the point-correspondence algorithm optimizes a local score, not taking into account smoothness or per-view perturbations that our full model allows.  I'm working on implementing a post-processing step that does local optimization on the index set w.r.t. the full marginal likelihood, which I'm hoping will fix these problems when they occur.&lt;/p&gt;
 
-&lt;p&gt;I've derived an efficient method for computing the analytical gradient of the index set w.r.t. the marginal likelihood, which &lt;a href=&quot;/ksimek/research/2013/11/10/reference/&quot;&gt;I wrote up yesterday&lt;/a&gt;.  I've implemented some of the pieces, but finish the end-to-end code or test anything yet.&lt;/p&gt;
+&lt;p&gt;I've derived an efficient method for computing the analytical gradient of the index set w.r.t. the marginal likelihood, which &lt;a href=&quot;/ksimek/research/2013/11/10/reference/&quot;&gt;I wrote up yesterday&lt;/a&gt;.  I've implemented some of the pieces, but finish the end-to-end code.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Finished testing the function that computes dK/dt; accurate to within 1e-8 (which is probably due to the numerical approximation used for comparison).&lt;/p&gt;
 
 &lt;h2&gt;iPlant Reading&lt;/h2&gt;
 
-&lt;p&gt;&lt;strong&gt;Hypocotyl Tracing&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Hypocotyl Tracing&lt;/em&gt;&lt;/p&gt;
 
 &lt;p&gt;Read three papers on Hypocotyl tracing from plant biology.  Methods are mostly straighforward: threshold, extract curve using {distance transform, morphological skeleton, gaussian tracing}, terminate using hand-built criterion.&lt;/p&gt;
 
@@ -58,7 +62,7 @@ index  2   | x x 1 1 ...  48 49 50 51 x  x  x  x  |
 &lt;/ul&gt;
 
 
-&lt;p&gt;&lt;strong&gt;Root Tracing&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Root Tracing&lt;/em&gt;&lt;/p&gt;
 
 &lt;p&gt;Read several papers on root tracing&lt;/p&gt;
 
@@ -67,12 +71,12 @@ index  2   | x x 1 1 ...  48 49 50 51 x  x  x  x  |
 
 &lt;ul&gt;
 &lt;li&gt;Zhu 2006 - hough-transform / space carving to find voxels; skeletonize using &quot;minumum cross section&quot;,  fit with NURBS curve.&lt;/li&gt;
-&lt;li&gt;&quot;Smart-root&quot; Lobet et. al 2011 - Most cited Clark descendant; Semi-auto, &lt;strong&gt;2D&lt;/strong&gt;; hand-build algorithm, trace bright regions with consistent radius.  Seems tuned, nonrobust, relies on a strong GUI.  Naive?
+&lt;li&gt;&quot;Smart-root&quot; Lobet et. al 2011 - Most cited Clark descendant; Semi-auto, &lt;em&gt;2D&lt;/em&gt;; hand-build algorithm, trace bright regions with consistent radius.  Seems tuned, nonrobust, relies on a strong GUI.  Naive?
 
 &lt;ul&gt;
 &lt;li&gt;&quot;EZRhizo&quot; Armengaud et al. 2009 - Manual tracing? (To Read)&lt;/li&gt;
 &lt;li&gt;&quot;DART&quot; Le Bot et al., 2010 - Manual Tracing? (To read)&lt;/li&gt;
-&lt;li&gt;Iyer-Pascuzzi et a., 2010 - Automatic.  Multiple angles, but &lt;strong&gt;2D analysis&lt;/strong&gt;.  preprocess: Adaptive threshold.  Medial axis: distance transform&lt;/li&gt;
+&lt;li&gt;Iyer-Pascuzzi et a., 2010 - Automatic.  Multiple angles, but &lt;em&gt;2D analysis&lt;/em&gt;.  preprocess: Adaptive threshold.  Medial axis: distance transform&lt;/li&gt;
 &lt;li&gt;&quot;Root-trace&quot; Nadeem et al. 2009 - auto; (To Download)&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
@@ -82,18 +86,29 @@ index  2   | x x 1 1 ...  48 49 50 51 x  x  x  x  |
 &lt;/ul&gt;
 
 
-&lt;p&gt;&lt;strong&gt;Neuron Analysis&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Neuron Analysis&lt;/em&gt;&lt;/p&gt;
 
 &lt;p&gt;Reading papers of the &lt;a href=&quot;http://diademchallenge.org/algorithms.html&quot;&gt;teams that won the Diadam Challenge&lt;/a&gt; for tracing neurons.  It seems that image processing used in these papers far surpasses those in the plant biology I've read.  Likely due to (a) better imaging systems and (b) much more ambiguity to deal with.&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Wang et al. A Broadly Applicable 3-D Neuron Tracing Method Based on Open-Curve Snake&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Wang et al. A Broadly Applicable 3-D Neuron Tracing Method Based on Open-Curve Snake&lt;/em&gt;&lt;/p&gt;
 
 &lt;p&gt;Preprocessing: eigenanalysis of image hessian, eigenvalues are used to determine &quot;vesselness&quot; of each pixel.
 Presegmentation: Graph cut on &quot;vesselness image&quot;.  Actually &quot;Vessel Cut&quot;;  &quot;tubular structures are further enhanced and close-lying axons are thinned in the vesselness image&quot;.  A bit vague here.  See Freiman et al. (2009).&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;To Read:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;To Read:&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;Freiman et al. (2009).&lt;/p&gt;
+&lt;p&gt;Freiman et al. (2009). vessel-cut
+Narayanaswamy et al. (2011) curvelets and scalar voting&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Applications to TULIPS:  datasets, evaluation&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;This paper uses a handfull of branching curve datasets that we could use for our project.&lt;/p&gt;
+
+&lt;p&gt;We also get an evaluation metric for comparing centerlines.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Possible Bisque analysis&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Run graph-cut or grab-cut to do foreground segmentation.&lt;/p&gt;
 </description>
 				<pubDate>Mon, 11 Nov 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/11/11/work-log</link>
@@ -238,18 +253,25 @@ Where \(x_b = min(x_1, x_2)\) and \(x_a = max(x_1, x_2)\).
 
 &lt;div&gt;
 \[
-k(x_1, x_2) = 
+\begin{align}
+k(x_1, x_2) &amp;= 
     \begin{cases}
-         x_2^2 / 2 &amp; \text{if } x_2 &gt;= x_1 \\
+         x_1^2 / 2 &amp; \text{if } x_2 &gt;= x_1 \\
          x_1 x_2 - x_2^2/2 &amp; \text{if } x_2 &lt; x_1 
-    \end{cases}
+    \end{cases} \\
+            &amp;= 
+    \begin{cases}
+         x_b^2 / 2 &amp; \text{if } x_2 &gt;= x_1 \\
+         x_a x_b - x_b^2/2 &amp; \text{if } x_2 &lt; x_1 
+    \end{cases} \\
+\end{align}
 \]
 
 Or equivalently
 
 \[
 k(x_1, x_2) = 
-         x_2 \left [ \max(x_1,x_2)  - x_2/2 \right ]
+         x_b \left [ x_1  - x_b/2 \right ]
 \]
 &lt;/div&gt;
 
