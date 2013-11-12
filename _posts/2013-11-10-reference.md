@@ -167,8 +167,16 @@ The expression in the parentheses is almost a dot product of z and \(\Delta_i\),
 
 Where \(\Delta_i'\)  is equal to \(\Delta_i\) in all elements except the i-th, which is equal to \(0.5 \lambda_i\).  Note that we can get \(Delta_i'\) by using equation (2) above instead of equation (3), which allows us to avoid having a separate implementation for on-diagonal elements.
 
-Since each \\(g_i\\)
+Since each \(g_i\) arises from a dot product, we can compute \(\nabla g\) as matrix multiplication.  Let \(\Delta' = [Delta'_1, ..., Delta'_n] \), i.e. the matrix whose i-th column is \(\Delta'_i\).  The gradient expression becomes
 
+\[
+\begin{align}
+    \nabla g =  
+       = 2 z \odot (\Delta' z)
+\end{align}
+\]
+
+where \(\odot\) denotes element-wise multiplication.
 
 
 </div>
