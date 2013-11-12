@@ -125,9 +125,10 @@ Note that if the goal is to find \\(K' = \frac{\partial{K}}{\partial{x_i}}\\), t
 \end{align}
 \]
 
-Compare this with the general formula: if we plugged-in \(x_i\) to both inputs of equation (2), we'd get \(x_i^2/2\), which underestimates the derivative by half.  We'll see in the next section that when computing \(g'\) the "wrong" expression for \(k_{ii}\) is actually more useful than the correct one, because we'll need to scale it by 0.5 anyway.
-
 </div>
+
+Compare this with the general formula: if we plugged-in \(x_i\) to both inputs of equation (2), we'd get \(x_i^2/2\), which underestimates the derivative by half.  We'll see in the next section that when computing \(g'\) the "wrong" expression for \(k'_{ii}\) is actually more useful than the correct one, because we'll need to scale it by 0.5 anyway.
+
 
 Sparsity of K'
 --------------
