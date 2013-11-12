@@ -147,27 +147,29 @@ First observe that K' is only nonzero on the i-th row and column:
 
 where \(\delta_{ij} = \frac{\partial k_{ij}}{\partial x_i} \).
 
-For convenience, we'll define the vector \(\Delta = [\delta_1, ..., \delta_n]^\top\).
+For convenience, we'll define the vector \(\Delta_i = [\delta_{i1}, ..., \delta_{in}]^\top\).
 
-</div>
 
-Thus, \\(g'\\) can be rewritten as
+Let \(g_i'\) be the partial derivative of \(g\) w.r.t. \(x_i\), with the entire gradient denoted by \(\nabla g = [g_1, ..., g_n]^\top.  Using sparsity, \(g_i'\) can be rewritten as
 
-<div>
 \[
-    g' = z_i (\delta_1 z_1 + ... + \delta_{i-1} z_{i-1} + \sum_j \delta_j z_j + \delta_{i+1} z_{i+1} + ... + \delta_n z_n)
+    g_i' = z_i (\delta_{i1} z_1 + ... + \delta_{i(i-1)} z_{i-1} + \sum_j \delta_ij z_j + \delta_{i(i+1)} z_{i+1} + ... + \delta_{in} z_n)
 \]
 
-The expression in the parentheses is almost a dot product of z and \(\Lambda\), but with the i-th term replaced with the dot product of z and \(\Lambda\).
+The expression in the parentheses is almost a dot product of z and \(\Delta_i\), but with the i-th term replaced with the dot product of z and \(\Delta_i\).
 
 \[
 \begin{align}
-    g' = z_i (2 * z \cdot \Lambda - z_i \lambda_i) \\ 
-       = 2 z_i z \cdot \Lambda'
+    g_i' = z_i (2 * z \cdot \Delta_i - z_i \lambda_i) \\ 
+       = 2 z_i \, z \cdot \Delta_i' \\
 \end{align}
 \]
 
-Where \(\Lambda'\)  is equal to \(\Lambda\) in all elements except the i-th, which is equal to \(0.5 \lambda_i\).  Note that we can get \(Lambda'\) by using 
+Where \(\Delta_i'\)  is equal to \(\Delta_i\) in all elements except the i-th, which is equal to \(0.5 \lambda_i\).  Note that we can get \(Delta_i'\) by using equation (2) above instead of equation (3), which allows us to avoid having a separate implementation for on-diagonal elements.
+
+Since each \\(g_i\\)
+
+
 
 </div>
 
