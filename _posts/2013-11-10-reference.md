@@ -73,9 +73,9 @@ This equation gives us a single element of the gradient, namely \(d g(x)/dx_i\).
 Derivatives of K(x)
 -------------------
 
-The structure of \\(\frac{\partial K}{\partial x_i}\\) is sparse; only the i-th row and i-th column are nonzero. We can find the values of the nonzero elements by taking the derivative of the kernel function.
+Below we derive the derivative of each of the three covariance expresssions, which combine to give \\(K'\\).
 
-** Cubic covariance **
+*Cubic covariance*
 
 Recall the cubic covariance expression:
     
@@ -88,6 +88,7 @@ Where \(x_b = min(x_1, x_2)\) and \(x_a = max(x_1, x_2)\).
 </div>
 
 Taking the derivative w.r.t. \(x_2\) gives:
+
 <div>
 \[
 \begin{align}
@@ -125,66 +126,14 @@ Note that if the goal is to find \\(K' = \frac{\partial{K}}{\partial{x_i}}\\), t
 \end{align}
 \]
 
-</div>
 
-Compare this with the general formula: if we plugged-in \\(g'\\) to both inputs of equation (2), we'd get \\(x_i^2/2\\), which underestimates the derivative by half.  We'll see in the next section that when computing \\(g'\\) the "wrong" expression for \\(k'_{ii}\\) is actually more useful than the correct one, because we'll need to scale it by 0.5 anyway.
-
-
-Sparsity of K'
---------------
-
-The sparsity of \\(\frac{\partial K}{\partial x_i}\\) actually allows us to further simplify formula (1) for \\(g'\\), ultimately allowing us to compute the entire gradient in a single matrix multiplication.
-
-First observe that K' is only nonzero on the i-th row and column:
-    
-<div>
-\[
-    k'_{i,j} = 
-    \begin{cases}
-        \delta_{ij} & \text{if } i == j \\
-        0 & \text{otherwise}
-    \end{cases}
-\]
-
-where \(\delta_{ij} = \frac{\partial k_{ij}}{\partial x_i} \).
-
-For convenience, we'll define the vector \(\Delta_i = [\delta_{i1}, ..., \delta_{in}]^\top\).
-
-
-Let \(g_i'\) be the partial derivative of \(g\) w.r.t. \(x_i\), with the entire gradient denoted by \(\nabla g = [g_1, ..., g_n]^\top.  Using sparsity, \(g_i'\) can be rewritten as
-
-\[
-    g_i' = z_i (\delta_{i1} z_1 + ... + \delta_{i(i-1)} z_{i-1} + \sum_j \delta_ij z_j + \delta_{i(i+1)} z_{i+1} + ... + \delta_{in} z_n)
-\]
-
-The expression in the parentheses is almost a dot product of z and \(\Delta_i\), but with the i-th term replaced with the dot product of z and \(\Delta_i\).
-
-\[
-\begin{align}
-    g_i' = z_i (2 * z \cdot \Delta_i - z_i \lambda_i) \\ 
-       = 2 z_i \, z \cdot \Delta_i' \\
-\end{align}
-\]
-
-Where \(\Delta_i'\)  is equal to \(\Delta_i\) in all elements except the i-th, which is equal to \(0.5 \lambda_i\).  Note that we can get \(Delta_i'\) by using equation (2) above instead of equation (3), which allows us to avoid having a separate implementation for on-diagonal elements.
-
-Since each \(g_i\) arises from a dot product, we can compute \(\nabla g\) as matrix multiplication.  Let \(\Delta' = [Delta'_1, ..., Delta'_n] \), i.e. the matrix whose i-th column is \(\Delta'_i\).  The gradient expression becomes
-
-\[
-\begin{align}
-    \nabla g =  
-       = 2 z \odot (\Delta' z)
-\end{align}
-\]
-
-where \(\odot\) denotes element-wise multiplication.
-
+Compare this with the general formula: if we plugged-in \(g'\) to both inputs of equation (2), we'd get \(x_i^2/2\), which underestimates the derivative by half.  We'll see in the next section that when computing \(g'\) the "wrong" expression for \(k'_{ii}\) is actually more useful than the correct one, because we'll need to scale it by 0.5 anyway.
 
 </div>
 
+<p></p>
 
-
-** Linear Covariance **
+*Linear Covariance*
 
 Recall the cubic covariance expression:
     
@@ -196,7 +145,7 @@ k(x_1, x_2) = x_1 x_2
 The derivative w.r.t. \(x_2\) is simply \(x_1\).
 </div>
 
-** Offset Covariance **
+*Offset Covariance*
 
 Recall the offset covariance expression:
     
@@ -209,7 +158,7 @@ The derivative w.r.t. \(x_2\) is zero.
 </div>
 
 
-** Implementation **
+*Implementation*
 
 Implemented end-to-end version in `kernel/get_model_kernel_derivative.m`; see also components in `kernel/get_spacial_kernel_derivative.m` and `kernel/cubic_kernel_derivative.m`.
 
@@ -230,6 +179,58 @@ These functions return all of the partial derivatives of the matrix with respect
         d_K_d_x{i} = tmp;
     end
 
-** Directional Derivatives **
+*Directional Derivatives*
 
 I think we can get directional derivatives of \\(K\\) by taking the weighted sum of partial derivatives, where the weights are the component lengths of the direction vector.  I have yet to confirm this beyond a hand-wavy hunch, and in practice, this might not even be needed, since computing the full gradient is so efficient.
+
+Sparsity of K'
+--------------
+
+The sparsity of \\(\frac{\partial K}{\partial x_i}\\) actually allows us to further simplify formula (1) for \\(g'\\), ultimately allowing us to compute the entire gradient in a single matrix multiplication.
+
+First observe that K' is only nonzero on the i-th row and column:
+    
+<div>
+\[
+    k'_{i,j} = 
+    \begin{cases}
+        \delta_{ij} & \text{if } i = j \\
+        0 & \text{otherwise}
+    \end{cases}
+\]
+
+where \(\delta_{ij} = \frac{\partial k_{ij}}{\partial x_i} \).
+
+For convenience, we'll define the vector \(\Delta_i = [\delta_{i1}, ..., \delta_{in}]^\top\).
+
+
+Let \(g_i'\) be the partial derivative of \(g\) w.r.t. \(x_i\), with the entire gradient denoted by \(\nabla g = [g_1, ..., g_n]^\top\).  Using sparsity, eq. (1) can be rewritten as
+
+\[
+    g_i' = z_i (\delta_{i1} z_1 + ... + \delta_{i(i-1)} z_{i-1} + \sum_j \delta_ij z_j + \delta_{i(i+1)} z_{i+1} + ... + \delta_{in} z_n)
+\]
+
+The expression in the parentheses is almost a dot product of z and \(\Delta_i\), but with the i-th term replaced with the dot product of z and \(\Delta_i\).  We can re-write the expression in terms of dot products, minus a correction.
+
+\[
+\begin{align}
+    g_i' = z_i (2 * z \cdot \Delta_i - z_i \lambda_i) \\ 
+       = 2 z_i \, z \cdot \Delta_i' \\
+\end{align}
+\]
+
+Where \(\Delta_i'\)  is equal to \(\Delta_i\) in all elements except the i-th, which is equal to \(0.5 \lambda_i\).  Note that we can get \(\Delta_i'\) by using equation (2) above instead of equation (3), which allows us to avoid having a separate implementation for on-diagonal elements.
+
+Since each \(g_i\) arises from a dot product, we can compute \(\nabla g\) using matrix multiplication.  Let \(\Delta' = [\Delta'_1, ..., \Delta'_n] \), i.e. the matrix whose i-th column is \(\Delta'_i\).  The gradient expression becomes
+
+\[
+\begin{align}
+    \nabla g = 2 z \odot (\Delta' z) \tag{4}
+\end{align}
+\]
+
+where \(\odot\) denotes element-wise multiplication.
+
+
+</div>
+
