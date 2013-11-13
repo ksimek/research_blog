@@ -204,7 +204,7 @@ where \(\delta_{ij} = \frac{\partial k_{ij}}{\partial x_i} \).
 For convenience, we'll define the vector \(\Delta_i = [\delta_{i1}, ..., \delta_{in}]^\top\).
 
 
-Let \(g_i'\) be the partial derivative of \(g\) w.r.t. \(x_i\), with the entire gradient denoted by \(\nabla g = [g_1, ..., g_n]^\top\).  Using sparsity, eq. (1) can be rewritten as
+Let \(g_i'\) be the partial derivative of \(g\) w.r.t. \(x_i\), with the entire gradient denoted by \(\nabla g = [g'_1, ..., g'_n]^\top\).  Using sparsity, eq. (1) can be rewritten as
 
 \[
     g_i' = z_i (\delta_{i1} z_1 + ... + \delta_{i(i-1)} z_{i-1} + \sum_j \delta_ij z_j + \delta_{i(i+1)} z_{i+1} + ... + \delta_{in} z_n)
@@ -214,7 +214,7 @@ The expression in the parentheses is almost a dot product of z and \(\Delta_i\),
 
 \[
 \begin{align}
-    g_i' = z_i (2 * z \cdot \Delta_i - z_i \lambda_i) \\ 
+    g_i' = z_i (2 * z \cdot \Delta_i - z_i \delta_i) \\ 
        = 2 z_i \, z \cdot \Delta_i' \\
 \end{align}
 \]
