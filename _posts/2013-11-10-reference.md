@@ -16,7 +16,8 @@ Let the marginal likelihood as a function of indices be \\(g(x)\\):
     
 <div>
 \[
-    \frac{\partial g(x)}{\partial x_i} = \frac{\partial}{\partial x_i} y^\top S^\top ( I + S K(x) S^\top)^{-1} S y
+    \frac{\partial g(x)}{\partial x_i} = \frac{\partial}{\partial x_i} 
+        \frac{1}{2}(-y^\top S^\top ( I + S K(x) S^\top)^{-1} S y)
 \]
 
 Let \(U = I + S K(x) S^\top\), and \(V = U^{-1}\).  Working inside out, lets find \(\frac{\partial U}{\partial x_i}\).
@@ -41,19 +42,19 @@ Finally,  \(\frac{\partial g(x)}{\partial x_i}\):
     
 \[
 \begin{align}
-    g + dg  &= y^\top S^\top (V + dV) S y \\
-    g + dg  &= y^\top S^\top \, V \, S y + y^\top S^\top \,dV \,S y \\
-        dg  &= y^\top S^\top \,dV \,S y \\
-        g'  &= y^\top S^\top \, V' \,S y \\
+    g + dg  &= -\frac{1}{2}y^\top S^\top (V + dV) S y \\
+    g + dg  &= -\frac{1}{2}y^\top S^\top \, V \, S y + y^\top S^\top \,dV \,S y \\
+        dg  &= -\frac{1}{2}y^\top S^\top \,dV \,S y \\
+        g'  &= -\frac{1}{2}y^\top S^\top \, V' \,S y \\
 \end{align}
 \]
 
 Expanding \(V\) gives the final formula:
 \[
 \begin{align}
-        g'  &= -y^\top S^\top U^{-1} S K' S^\top U^{-1} S y \\
-        g'  &= -y^\top M K' M y \\
-        g'  &= -z^\top K' z \tag{1}\\
+        g'  &= \frac{1}{2}y^\top S^\top U^{-1} S K' S^\top U^{-1} S y \\
+        g'  &= \frac{1}{2}y^\top M K' M y \\
+        g'  &= \frac{1}{2}z^\top K' z \tag{1}\\
 \end{align}
 \]
 
@@ -127,7 +128,7 @@ Note that if the goal is to find \\(K' = \frac{\partial{K}}{\partial{x_i}}\\), t
 \]
 
 
-Compare this with the general formula: if we plugged-in \(g'\) to both inputs of equation (2), we'd get \(x_i^2/2\), which underestimates the derivative by half.  We'll see in the next section that when computing \(g'\) the "wrong" expression for \(k'_{ii}\) is actually more useful than the correct one, because we'll need to scale it by 0.5 anyway.
+Compare this with the general formula: if we plugged-in \(x_i'\) to both inputs of equation (2), we'd get \(x_i^2/2\), which underestimates the derivative by half.  We'll see in the next section that when computing \(g'\) the "wrong" expression for \(k'_{ii}\) is actually more useful than the correct one, because we'll need to scale it by 0.5 anyway.
 
 </div>
 
@@ -207,15 +208,15 @@ For convenience, we'll define the vector \(\Delta_i = [\delta_{i1}, ..., \delta_
 Let \(g_i'\) be the partial derivative of \(g\) w.r.t. \(x_i\), with the entire gradient denoted by \(\nabla g = [g'_1, ..., g'_n]^\top\).  Using sparsity, eq. (1) can be rewritten as
 
 \[
-    g_i' = z_i (\delta_{i1} z_1 + ... + \delta_{i(i-1)} z_{i-1} + \sum_j \delta_ij z_j + \delta_{i(i+1)} z_{i+1} + ... + \delta_{in} z_n)
+    g_i' = \frac{1}{2} z_i (\delta_{i1} z_1 + ... + \delta_{i(i-1)} z_{i-1} + \sum_j \delta_ij z_j + \delta_{i(i+1)} z_{i+1} + ... + \delta_{in} z_n)
 \]
 
 The expression in the parentheses is almost a dot product of z and \(\Delta_i\), but with the i-th term replaced with the dot product of z and \(\Delta_i\).  We can re-write the expression in terms of dot products, minus a correction.
 
 \[
 \begin{align}
-    g_i' = z_i (2 * z \cdot \Delta_i - z_i \delta_i) \\ 
-       = 2 z_i \, z \cdot \Delta_i' \\
+    g_i' = \frac{1}{2} z_i (2 * z \cdot \Delta_i - z_i \delta_i) \\ 
+       = z_i \, z \cdot \Delta_i' \\
 \end{align}
 \]
 
@@ -225,12 +226,13 @@ Since each \(g_i\) arises from a dot product, we can compute \(\nabla g\) using 
 
 \[
 \begin{align}
-    \nabla g = 2 z \odot (\Delta' z) \tag{4}
+    \nabla g = z \odot (\Delta' z) \tag{4}
 \end{align}
 \]
 
 where \(\odot\) denotes element-wise multiplication.
-
+<br /><br />
+To handle multiple dimensions, simply apply to each dimension independently and sum the results.
 
 </div>
 
