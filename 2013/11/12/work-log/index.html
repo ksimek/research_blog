@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>KLS Research Blog &larr; Kyle Simek</title>
+   <title>Work Log &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -77,226 +77,83 @@
 
 
   
-
-<div id="page">
+<div id="page" class="article">
 	
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/09/25/work-log">
-      <li class="title">
-            [Work log] Sampling - birth/death
-        </li>
-      </a>
-      <div class="date emphnext">September 25, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/09/24/work-log">
-      <li class="title">
-            [Work log] Discussion: maintaining attachment during sampling
-        </li>
-      </a>
-      <div class="date emphnext">September 24, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/09/24/todo">
-      <li class="title">
-            [Todo] todo
-        </li>
-      </a>
-      <div class="date emphnext">September 24, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/09/23/work-log">
-      <li class="title">
-            [Work log] Misc maintenance & "Thinking" on sampling, priors
-        </li>
-      </a>
-      <div class="date emphnext">September 23, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/09/23/splitmerge-moves-and-association-priors">
-      <li class="title">
-            [Reference] Split/Merge moves and Association Priors
-        </li>
-      </a>
-      <div class="date emphnext">September 23, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/09/23/mcmcda-sampling-with-attachment">
-      <li class="title">
-            [Strategy] MCMCDA Sampling with Attachment
-        </li>
-      </a>
-      <div class="date emphnext">September 23, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/09/20/branching-ml-done">
-      <li class="title">
-            [Todo] Branching ML Done
-        </li>
-      </a>
-      <div class="date emphnext">September 20, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/09/19/work-log">
-      <li class="title">
-            [Work log] refactoring; dependencies
-        </li>
-      </a>
-      <div class="date emphnext">September 19, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/09/19/dependencies">
-      <li class="title">
-            [Reference] Summary of Dependency relationships
-        </li>
-      </a>
-      <div class="date emphnext">September 19, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/09/18/work-log">
-      <li class="title">
-            [Work log] Testing full-tree covariance matrix
-        </li>
-      </a>
-      <div class="date emphnext">September 18, 2013</div>
-</ul>
-
-
-<!-- Pagination links -->
-<div class="pagination">
-  
-    <a href="/ksimek/research/page4" class="previous">&lt;&lt; Read Newer Posts</a>
   
   
-    |
+    
+
+
+  <h1 class="title">
+        [Work Log] Work Log
+    </h1>
+
+  <div class="date emphnext">November 12, 2013</div>
+    
+
+
+  
+    <p>Implementing index optimization.</p>
+
+<p>Main accopmlishment of the day: Derived an approach for finding the entire gradient with a single matrix multiplication.  Added this to <a href="/ksimek/research/2013/11/10/reference">reference post on ML gradient</a>.</p>
+
+<h2>Diversion: updating Ruby</h2>
+
+<p>Struggling with blog engine, need to upate rdiscount to get new feature, but gem install fails because gcc-4.2 is missing since upgrading to Mavericks.  Need to recompile/reinstall ruby, so the gem system uses clang.  <code>rvm xxx instal</code> is failing, because gcc-4.2 is missing.  Forcing clang; building causes segfault. Research says upgrade to HEAd of rvm, install ruby 2.0.0.  Tried, but still segfaulting... out of ideas.</p>
+
+<p>New plan: install gcc-4.2 manually.  Luckilly homebrew has it in the repo.</p>
+
+<hr />
+
+<p>After some struggle, just gave up.  Annoyed at having wasted over an hour on this.</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
   
   
-    <a href="/ksimek/research/page6" class="next ">Read Older Posts &gt;&gt;</a>
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/11/13/work-log" class="next" title="Debugging ML gradient">Debugging ML gradient &rarr;</a>
   
+  
+    <a href="/ksimek/research/2013/11/11/work-log" class="prev" title="WACV Reconstruction issues; iPlant Reading; Index optimization">&larr; WACV Reconstruction issues; iPlant Reading; Index optimization</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
 </div>
 
 
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
 </div><!-- End Page -->
+
 
 
   

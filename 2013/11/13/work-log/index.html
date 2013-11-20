@@ -1,0 +1,308 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Debugging ML gradient &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Debugging ML gradient
+    </h1>
+
+  <div class="date emphnext">November 13, 2013</div>
+    
+
+
+  
+    <p>Implemented end-to-end ML gradient in <code>curve_ml_derivative.m</code>.  Now testing.</p>
+
+<p>Fixed some obvious math errors, changes reflected in <a href="/ksimek/research/2013/11/10/reference">writeup</a>.  Now getting close results, but still getting some noticible error, see below.</p>
+
+<p><img src="/ksimek/research/img/2013-11-13-gradient_test.png" alt="" /></p>
+
+<p>(Green is reference, blue is testing).</p>
+
+<p>Results are qualitatively close, but enough error to suggest a bug</p>
+
+<p>Debugging so far:</p>
+
+<ul>
+<li>two different impementations for analytical gradient</li>
+<li>two different implementations for numerical gradient</li>
+<li>one-sided and two-sided numerical gradient.</li>
+<li>several delta sizes for numerical gradient {0.0001, 0.0001, ..., 0.1, 1.0}</li>
+<li>Using emperical \(\Delta\)' (from finite differences) for analytical gradient.</li>
+<li>using both cholesky and direct method for matrix inversion (testing for numerical issues).</li>
+<li>sanity check: used intermediate values from gradient computation to compute function output.</li>
+</ul>
+
+
+<p>To try:</p>
+
+<ul>
+<li>use numerical gradient for K' instead of from \(\Delta'\).</li>
+</ul>
+
+
+<p>Is it possible we're not handling XYZ independence properly?</p>
+
+<p>Noticed that using a really large delta (~1.0) actually improves resuls.  Is it possible we're seeing precision errors being exacerbated somewhere in the end-to-end formula?</p>
+
+<hr />
+
+<p>Strategy:  pick gradient element with mode error and run the following test.  For each derivative component (dK, dU, dV, dg), compare against reference to determine where the error is being introduced.</p>
+
+<p><em>Index #22</em></p>
+
+<p><strong>dK/dt</strong> has 1e-4 error in on-diagonal.  Off diagonals max out at 1e-10.</p>
+
+<p>   delta: 0.01
+   on-diagonal error ~ 1e-3
+   below-and-right &lt; 1e-4</p>
+
+<p>   delta: 0.001
+   on-diagonal error ~ 1e-4
+   other error &lt; 1e-10</p>
+
+<p>   delta: 0.0001
+   on-diagonal error ~ 1e-5
+   below and right ~ 1e-6</p>
+
+<p>   delta: 0.00001
+   on-diagonal error ~ 1e-6
+   below and right ~ 1e-4</p>
+
+<p>Decreasing delta improves on-diagonal, makes below-and-right worse.</p>
+
+<p>This is weird that we're even getting error in dK/dt, because it passed our unit test.  Well, \(\Delta'\) passed our unit test, but that's basically the same thing...</p>
+
+<p>However, reduced error at delta of 1e-3 <em>seems</em> to agree with our end-to-end test.  So maybe this is the culprit.</p>
+
+<p>It's also surprising that there's so much fluctuation as delta changes.  The computation for K isn't that involved, and we shouldn't be hitting the precision limit yet.  However, the values do get pretty large, so maybe that's a factor.</p>
+
+<hr />
+
+<p>Magnitude of the original matrix does seem to be a factor.  Look at this slice of the error matrix (dK_test - dK_ref):</p>
+
+<p><img src="/ksimek/research/img/2013-11-13-error_trace.png" alt="" /></p>
+
+<p>Compare that to the diagonal of the matrix we did finite differences on.  This is basically a plot of the cubed index values.</p>
+
+<p><img src="/ksimek/research/img/2013-11-13-K_trace.png" alt="" /></p>
+
+<p>The error seems to increases in lockstep with the magnitude of the original values (note the jumps occur at similar positions).  I guess this is to be expected, but I was surprised at the magnitude.</p>
+
+<p>I'm still curious why the error starts to climb exactly at index #22, i.e. the index we're differentiating with respect to.</p>
+
+<p>This plot should drive home the relationship between index valuea end error.</p>
+
+<p><img src="/ksimek/research/img/2013-11-13-error_regress_2.png" alt="" /></p>
+
+<p>Definitely a linear relationship after index #22.</p>
+
+<hr />
+
+<p>A back of the envelope error analysis suggests that below index 22, the analytical derivative's approximation error is not a function of X, but above index 22, it's a linear function of X.  This is a pretty reasonable explanation, although I couldn't get the exact numbers to explain the slope of the line ( the slope seems high).  But at this hour I wouldn't trust my error analysis as far as I could throw it, quantitatively speaking.</p>
+
+<hr />
+
+<p>We can attempt to place an upper bound on the error estimate by propagating the error in K' through the differential formula for g'.  Assume every nonzero element of K has error of 3e-5 (the maximum we observed emperically).  Let this error matrix be \(\epsilon\), and it has the same banded structure as \(K'\).  Then we can replace \(K'\) with \(\epsilon\) in the formula for \(g'\) (formula (1) in the <a href="/ksimek/research/2013/11/10/reference">writeup</a>) to get the upper bound error on our data-set.</p>
+
+<div>
+\[
+    \text{max error} = \frac{1}{2}z^\top \epsilon z \tag{1}\\
+\]
+</div>
+
+
+<pre><code>&gt;&gt; 0.5 * z' * Epsilon * z
+
+ans =
+
+  -1.1758e-05
+</code></pre>
+
+<p>We can conclude that the error we're observing is coming from somewhere else.</p>
+
+<hr />
+
+<p>To conclude for tonight, we're seeing some error in dK/ds, but probably nothing out of the ordinary, and it has low enough error that we can hopefully ignore it.</p>
+
+<p>Lets look a the outher sources of error tomorrow, i.e. U' and V'</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/11/14/work-log" class="next" title="Debugging ML Gradient (part 2)">Debugging ML Gradient (part 2) &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2013/11/12/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

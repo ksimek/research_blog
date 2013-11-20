@@ -1,0 +1,344 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>2 Days: debugging WACV reconstruction &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] 2 Days: debugging WACV reconstruction
+    </h1>
+
+  <div class="date emphnext">November 18, 2013</div>
+    
+
+
+  
+    
+
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Data Association v3</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
+    </tr>
+
+
+</table>
+
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
+
+
+<p>Now that gradient is working, lets try using fminunc to optimize indices.</p>
+
+<hr />
+
+<p>Getting nonsense results.  Looking into curve data.</p>
+
+<p>...</p>
+
+<p>Inspecting the data, it's clear that our method of linearly sampling points along the bezier curve is resulting in very jagged curves.  Example in dataset 8, curve 7:</p>
+
+<p><img src="/ksimek/research/img/2013-11-18-dataset8_curve7_view9.png" alt="" /></p>
+
+<p><em>view 9</em></p>
+
+<p><img src="/ksimek/research/img/2013-11-18-dataset8_curve7_view4.png" alt="" /></p>
+
+<p><em>view 4</em></p>
+
+<p>It's not totally clear how best to resolve this.  Ideally, we would sample at a finer grain, but this caused big slow-downs for the longer curves.  Could use coarse-grain sampling for long curves, but some curves are long in some views and short in others, and nonuniform sampling breaks some assumptions we make in the library.  Furthermore, associations are unknown at the time of samplingz</p>
+
+<p>It's possible</p>
+
+<p>It's possible the bad reconstruction we're seeing from this curve isn't due to bad correspondence, but a bad indexing estimation (a later stage of inference).  We see that although the correspondence places c7v9 toward the end of the 3D curve, our re-indexing code places it more spread out, but unevenly: the first point has index 4, while the subsequent points have indieces [21, 23, 27, 27].  We usually prevent large amounts of index-skipping during re-indexing, but possibly the second-pass refinement is destroying this.</p>
+
+<hr />
+
+<p>After double-checking, realized view #5 is the biggest problem child, not #7.</p>
+
+<p>Interestingly, #5 has relatively reasonable looking correspondence:</p>
+
+<p><img src="/ksimek/research/img/2013-11-18-curve7_corrs.png" alt="" /></p>
+
+<p>But the reconstruction (both attached and free) is terrible:</p>
+
+<p><img src="/ksimek/research/img/2013-11-18-curve7_reconstr.png" alt="" /></p>
+
+<hr />
+
+<p>ll_means has really bad points at the beginning and end of the curve.  It looks like tails might be handled poorly in corr_to_likelihood_2.m</p>
+
+<hr />
+
+<p>Attempting to run with "FIX_WORLD_T = false" in corr_to_likelihood.  Early probes suggest this improves things; however, now getting a crash when calling <code>construct_attachment_covariance.m</code>.  Getting NaN's from curve #8.  I've observed that curve #8's indices start with two zeros.  Maybe this is causing our covariance algorithm to choke?</p>
+
+<p>...</p>
+
+<p>Got it: when we don't correct endpoints (i.e. FIX_WORLD_T = false), endpoints can get repeated, which makes our "initial direction" computation fail.</p>
+
+<ul>
+<li>Find out why duplicate endpoints occur (doesn't triangulation make this improbable?)</li>
+<li>Handle duplicated points gracefully when computing start point.</li>
+</ul>
+
+
+<hr />
+
+<p>Spun off <code>../correspondence/corr_to_likelihood_2.m</code>.  Added some plotting code to see data vs. smoothed reconstruction.  Reconstruction is particularly ugly for curve #5.</p>
+
+<p><img src="/ksimek/research/img/2013-11-18-curve5_reconstr_rough.png" alt="" /></p>
+
+<p>At first glance, it looks like end points are poorly localized, and then are preserved through the smoothing pass.   But the last 12 points which are poorly localized hive quite a few correspondences, according to the correspondence table.</p>
+
+<p><img src="/ksimek/research/img/2013-11-18-curve5_reconstr_rough.png" alt="" /></p>
+
+<p>With pre-smoothed reconstructrion in green:</p>
+
+<p><img src="/ksimek/research/img/2013-11-18-reconstr_w_data.png" alt="" /></p>
+
+<hr />
+
+<p>Tried using GP smoothing (implemented in <code>reconstruction/gp_smooth_curve.m</code>) instead of matlab's <code>csaps()</code>, but I'm getting weird tails.</p>
+
+<p><img src="/ksimek/research/img/2013-11-19-gp_reconstr.png" alt="" /></p>
+
+<p>Must be a bug in how I'm computing the covariance (which I'm doing by hand, since the necessary fields aren't constructed at that stage of the pipeline).  I've been over it a few times... time to sleep and look again in the morning.</p>
+
+<p>Eventually, chicken/egg approach might be the solution: optimize points, optimize indices, repeat.</p>
+
+<hr />
+
+<p>It's clear that smarter smoothing doesn't improve reconstruction of curve #5.</p>
+
+<p>TODO</p>
+
+<ul>
+<li>plot projected reconstruction vs. data
+
+<ul>
+<li>Terrible</li>
+</ul>
+</li>
+<li>plot camera centers</li>
+</ul>
+
+
+<p>is it all bad cameras?  why do others reconstruct okay?</p>
+
+<hr />
+
+<p>Test: incrementally reconstruct, adding one curve each time</p>
+
+<p>Reverse mode: started with views 9 &amp; 8, then added 7, 6, etc..  Goes to pot at curve 4, gets progressively worse through curve 1</p>
+
+<hr />
+
+<p>The purpose of <code>corr_to_likelihood</code> is to correct position and indexing errors made during naive triangulation.  Let's test if that's  happinging by viewing post-correction results.</p>
+
+<p>...</p>
+
+<p>Dramatic improvement over pre-correction results.  Still significant change after adding curve 2, and esp. after curve 1.</p>
+
+<p>Last 2 points and first 4 (?) are problematic.</p>
+
+<hr />
+
+<p>trying camera recalibration. wrote a quick 7-point calibration: <code>cal_cam_dlt.m</code>.  Also wrote a camera visualization routine: <code>visualization/draw_camera.m</code>.  The newly calibrated results are clearly different, but not obviously better, at least by inspection.</p>
+
+<p>TODO:</p>
+
+<ul>
+<li>touch up cameras for views 3 and 7.</li>
+<li>back up old cameras, copy-in new cameras, re-run wacv dataset 8.  Is curve 5 improved?</li>
+<li>Try chicken/egg approach,
+
+<pre><code>  * note that maximizing indices is easier than quasi-newton: just arc-length parameterize it.
+</code></pre></li>
+<li>Troubleshoot FIX_WORLD_T issue that's causing everything to break</li>
+<li>Need to adapt gp-smooth to handle perturbations</li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  
+    <a href="/ksimek/research/2013/11/15/work-log" class="prev" title="Friday - iPlant Reading Group">&larr; Friday - iPlant Reading Group</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

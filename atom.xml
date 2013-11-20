@@ -4,13 +4,438 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-11-12T10:48:22-07:00</updated>
+ <updated>2013-11-19T22:11:54-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>2 Days: debugging WACV reconstruction</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/18/work-log"/>
+   <updated>2013-11-18T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/18/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Now that gradient is working, lets try using fminunc to optimize indices.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Getting nonsense results.  Looking into curve data.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Inspecting the data, it's clear that our method of linearly sampling points along the bezier curve is resulting in very jagged curves.  Example in dataset 8, curve 7:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-11-18-dataset8_curve7_view9.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;view 9&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-11-18-dataset8_curve7_view4.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;view 4&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;It's not totally clear how best to resolve this.  Ideally, we would sample at a finer grain, but this caused big slow-downs for the longer curves.  Could use coarse-grain sampling for long curves, but some curves are long in some views and short in others, and nonuniform sampling breaks some assumptions we make in the library.  Furthermore, associations are unknown at the time of samplingz&lt;/p&gt;
+
+&lt;p&gt;It's possible&lt;/p&gt;
+
+&lt;p&gt;It's possible the bad reconstruction we're seeing from this curve isn't due to bad correspondence, but a bad indexing estimation (a later stage of inference).  We see that although the correspondence places c7v9 toward the end of the 3D curve, our re-indexing code places it more spread out, but unevenly: the first point has index 4, while the subsequent points have indieces [21, 23, 27, 27].  We usually prevent large amounts of index-skipping during re-indexing, but possibly the second-pass refinement is destroying this.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;After double-checking, realized view #5 is the biggest problem child, not #7.&lt;/p&gt;
+
+&lt;p&gt;Interestingly, #5 has relatively reasonable looking correspondence:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-11-18-curve7_corrs.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;But the reconstruction (both attached and free) is terrible:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-11-18-curve7_reconstr.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;ll_means has really bad points at the beginning and end of the curve.  It looks like tails might be handled poorly in corr_to_likelihood_2.m&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Attempting to run with &quot;FIX_WORLD_T = false&quot; in corr_to_likelihood.  Early probes suggest this improves things; however, now getting a crash when calling &lt;code&gt;construct_attachment_covariance.m&lt;/code&gt;.  Getting NaN's from curve #8.  I've observed that curve #8's indices start with two zeros.  Maybe this is causing our covariance algorithm to choke?&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Got it: when we don't correct endpoints (i.e. FIX_WORLD_T = false), endpoints can get repeated, which makes our &quot;initial direction&quot; computation fail.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Find out why duplicate endpoints occur (doesn't triangulation make this improbable?)&lt;/li&gt;
+&lt;li&gt;Handle duplicated points gracefully when computing start point.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;hr /&gt;
+
+&lt;p&gt;Spun off &lt;code&gt;../correspondence/corr_to_likelihood_2.m&lt;/code&gt;.  Added some plotting code to see data vs. smoothed reconstruction.  Reconstruction is particularly ugly for curve #5.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-11-18-curve5_reconstr_rough.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;At first glance, it looks like end points are poorly localized, and then are preserved through the smoothing pass.   But the last 12 points which are poorly localized hive quite a few correspondences, according to the correspondence table.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-11-18-curve5_reconstr_rough.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;With pre-smoothed reconstructrion in green:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-11-18-reconstr_w_data.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Tried using GP smoothing (implemented in &lt;code&gt;reconstruction/gp_smooth_curve.m&lt;/code&gt;) instead of matlab's &lt;code&gt;csaps()&lt;/code&gt;, but I'm getting weird tails.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-11-19-gp_reconstr.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Must be a bug in how I'm computing the covariance (which I'm doing by hand, since the necessary fields aren't constructed at that stage of the pipeline).  I've been over it a few times... time to sleep and look again in the morning.&lt;/p&gt;
+
+&lt;p&gt;Eventually, chicken/egg approach might be the solution: optimize points, optimize indices, repeat.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;It's clear that smarter smoothing doesn't improve reconstruction of curve #5.&lt;/p&gt;
+
+&lt;p&gt;TODO&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;plot projected reconstruction vs. data
+
+&lt;ul&gt;
+&lt;li&gt;Terrible&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;plot camera centers&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;is it all bad cameras?  why do others reconstruct okay?&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Test: incrementally reconstruct, adding one curve each time&lt;/p&gt;
+
+&lt;p&gt;Reverse mode: started with views 9 &amp;amp; 8, then added 7, 6, etc..  Goes to pot at curve 4, gets progressively worse through curve 1&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;The purpose of &lt;code&gt;corr_to_likelihood&lt;/code&gt; is to correct position and indexing errors made during naive triangulation.  Let's test if that's  happinging by viewing post-correction results.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Dramatic improvement over pre-correction results.  Still significant change after adding curve 2, and esp. after curve 1.&lt;/p&gt;
+
+&lt;p&gt;Last 2 points and first 4 (?) are problematic.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;trying camera recalibration. wrote a quick 7-point calibration: &lt;code&gt;cal_cam_dlt.m&lt;/code&gt;.  Also wrote a camera visualization routine: &lt;code&gt;visualization/draw_camera.m&lt;/code&gt;.  The newly calibrated results are clearly different, but not obviously better, at least by inspection.&lt;/p&gt;
+
+&lt;p&gt;TODO:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;touch up cameras for views 3 and 7.&lt;/li&gt;
+&lt;li&gt;back up old cameras, copy-in new cameras, re-run wacv dataset 8.  Is curve 5 improved?&lt;/li&gt;
+&lt;li&gt;Try chicken/egg approach,
+
+&lt;pre&gt;&lt;code&gt;  * note that maximizing indices is easier than quasi-newton: just arc-length parameterize it.
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;li&gt;Troubleshoot FIX_WORLD_T issue that's causing everything to break&lt;/li&gt;
+&lt;li&gt;Need to adapt gp-smooth to handle perturbations&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Friday - iPlant Reading Group</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/15/work-log"/>
+   <updated>2013-11-15T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/15/work-log</id>
+   <content type="html">&lt;h2&gt;iPLant Reading Group Meeting&lt;/h2&gt;
+
+&lt;p&gt;Decided to create a latex file for recording all of our reading.&lt;/p&gt;
+
+&lt;p&gt;Shared readings&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Kyle:&lt;/em&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Hyptrace&lt;/li&gt;
+&lt;li&gt;HyDe&lt;/li&gt;
+&lt;li&gt;Miller et al&lt;/li&gt;
+&lt;li&gt;Neuron tracing paper&lt;/li&gt;
+&lt;li&gt;(see work log from a few days ago for full list, details)&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;&lt;em&gt;Kate:&lt;/em&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Geotrace -&lt;/li&gt;
+&lt;li&gt;RooTrack - Pridmore lab (2012)&lt;/li&gt;
+&lt;li&gt;RootNav - Uses EM + others?  pridmore lab, (2013)&lt;/li&gt;
+&lt;li&gt;two survey apers on segmentation&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;hr /&gt;
+
+&lt;p&gt;Did a a writeup on iPlant wiki that details my reading from last week.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Debugging ML Gradient (part 2)</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/14/work-log"/>
+   <updated>2013-11-14T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/14/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Resuming debugging of analytical gradient.&lt;/p&gt;
+
+&lt;p&gt;I noted yesterday that the error we observed in K' was small -- on the order of 1e-5 -- implying that it wasn't sufficient to explain the end-to-end error we're seeing.  But we should put that into context.  The delta from the numerical gradient is 1e-7, so the error in K' is around 1%, i.e. in the noticible range.&lt;/p&gt;
+
+&lt;p&gt;Also remember that running analytical grdient using the K' from the numeric algorithm showed no noticible change to resutls.  So K' probably &lt;em&gt;isn't&lt;/em&gt; the issue.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Today's strategy: implement a legitimate test-bed that we can run for several deltas and get all intermediate values for both numeric and analytical gradient.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Implemented, examining results.&lt;/p&gt;
+
+&lt;p&gt;Okay, this is weird.  All of the partial derivatives have low error (1e-5), but the final derivative of g(x) is huge (0.1).&lt;/p&gt;
+
+&lt;p&gt;Consider the analytical expression we're using for the gradient of g(x)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;g' = -0.5 * y^\top * S^\top * V' * S * y
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Plugging-in the numerical estimate for V' above should give something close to the numerical estimate for g'.  But they're nowhere close.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; -0.5 * y' * S' * dV_hat * S * y
+
+ans =
+
+   -0.1015
+
+&amp;gt;&amp;gt; g_hat
+
+ans =
+
+    0.0522
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Stated differently, if we propagate the error in dV_hat through the expression for g', this theoretical error in g' is far smaller than the true error in the analytical expression for g'.&lt;/p&gt;
+
+&lt;p&gt;This strongly suggests there's a problem in our expression for g', that the error is not due to approximation or precision issues.  But if g' is so wrong, why are so many elements of the gradient so close to being correct?  Recall the plot of gradients from yesterday, shown below.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-11-13-gradient_test.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Element 22 (the element under scrutiny in the tests above) has large error, but several other elements are nearly perfect.  This suggests that if there is a problem in our expression.&lt;/p&gt;
+
+&lt;p&gt;Is it possible there's a bug in the test logic?  Maybe we're using the wrong field for y or S?  Or maybe when we perturb x, we aren't updating all the intermediate fields?&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;strong&gt;Got it!&lt;/strong&gt;  We're neglecting the change in the normalizing &quot;constant&quot;, Z. In the usual scenario, Z is constant w.r.t. the Gaussian distribution input y, but it is most certainly a function of the values of the Sigma matrix.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Debugging ML gradient</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/13/work-log"/>
+   <updated>2013-11-13T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/13/work-log</id>
+   <content type="html">&lt;p&gt;Implemented end-to-end ML gradient in &lt;code&gt;curve_ml_derivative.m&lt;/code&gt;.  Now testing.&lt;/p&gt;
+
+&lt;p&gt;Fixed some obvious math errors, changes reflected in &lt;a href=&quot;/ksimek/research/2013/11/10/reference&quot;&gt;writeup&lt;/a&gt;.  Now getting close results, but still getting some noticible error, see below.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-11-13-gradient_test.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;(Green is reference, blue is testing).&lt;/p&gt;
+
+&lt;p&gt;Results are qualitatively close, but enough error to suggest a bug&lt;/p&gt;
+
+&lt;p&gt;Debugging so far:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;two different impementations for analytical gradient&lt;/li&gt;
+&lt;li&gt;two different implementations for numerical gradient&lt;/li&gt;
+&lt;li&gt;one-sided and two-sided numerical gradient.&lt;/li&gt;
+&lt;li&gt;several delta sizes for numerical gradient {0.0001, 0.0001, ..., 0.1, 1.0}&lt;/li&gt;
+&lt;li&gt;Using emperical \(\Delta\)' (from finite differences) for analytical gradient.&lt;/li&gt;
+&lt;li&gt;using both cholesky and direct method for matrix inversion (testing for numerical issues).&lt;/li&gt;
+&lt;li&gt;sanity check: used intermediate values from gradient computation to compute function output.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;To try:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;use numerical gradient for K' instead of from \(\Delta'\).&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Is it possible we're not handling XYZ independence properly?&lt;/p&gt;
+
+&lt;p&gt;Noticed that using a really large delta (~1.0) actually improves resuls.  Is it possible we're seeing precision errors being exacerbated somewhere in the end-to-end formula?&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Strategy:  pick gradient element with mode error and run the following test.  For each derivative component (dK, dU, dV, dg), compare against reference to determine where the error is being introduced.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Index #22&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;dK/dt&lt;/strong&gt; has 1e-4 error in on-diagonal.  Off diagonals max out at 1e-10.&lt;/p&gt;
+
+&lt;p&gt;   delta: 0.01
+   on-diagonal error ~ 1e-3
+   below-and-right &amp;lt; 1e-4&lt;/p&gt;
+
+&lt;p&gt;   delta: 0.001
+   on-diagonal error ~ 1e-4
+   other error &amp;lt; 1e-10&lt;/p&gt;
+
+&lt;p&gt;   delta: 0.0001
+   on-diagonal error ~ 1e-5
+   below and right ~ 1e-6&lt;/p&gt;
+
+&lt;p&gt;   delta: 0.00001
+   on-diagonal error ~ 1e-6
+   below and right ~ 1e-4&lt;/p&gt;
+
+&lt;p&gt;Decreasing delta improves on-diagonal, makes below-and-right worse.&lt;/p&gt;
+
+&lt;p&gt;This is weird that we're even getting error in dK/dt, because it passed our unit test.  Well, \(\Delta'\) passed our unit test, but that's basically the same thing...&lt;/p&gt;
+
+&lt;p&gt;However, reduced error at delta of 1e-3 &lt;em&gt;seems&lt;/em&gt; to agree with our end-to-end test.  So maybe this is the culprit.&lt;/p&gt;
+
+&lt;p&gt;It's also surprising that there's so much fluctuation as delta changes.  The computation for K isn't that involved, and we shouldn't be hitting the precision limit yet.  However, the values do get pretty large, so maybe that's a factor.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Magnitude of the original matrix does seem to be a factor.  Look at this slice of the error matrix (dK_test - dK_ref):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-11-13-error_trace.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Compare that to the diagonal of the matrix we did finite differences on.  This is basically a plot of the cubed index values.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-11-13-K_trace.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The error seems to increases in lockstep with the magnitude of the original values (note the jumps occur at similar positions).  I guess this is to be expected, but I was surprised at the magnitude.&lt;/p&gt;
+
+&lt;p&gt;I'm still curious why the error starts to climb exactly at index #22, i.e. the index we're differentiating with respect to.&lt;/p&gt;
+
+&lt;p&gt;This plot should drive home the relationship between index valuea end error.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-11-13-error_regress_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Definitely a linear relationship after index #22.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;A back of the envelope error analysis suggests that below index 22, the analytical derivative's approximation error is not a function of X, but above index 22, it's a linear function of X.  This is a pretty reasonable explanation, although I couldn't get the exact numbers to explain the slope of the line ( the slope seems high).  But at this hour I wouldn't trust my error analysis as far as I could throw it, quantitatively speaking.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;We can attempt to place an upper bound on the error estimate by propagating the error in K' through the differential formula for g'.  Assume every nonzero element of K has error of 3e-5 (the maximum we observed emperically).  Let this error matrix be \(\epsilon\), and it has the same banded structure as \(K'\).  Then we can replace \(K'\) with \(\epsilon\) in the formula for \(g'\) (formula (1) in the &lt;a href=&quot;/ksimek/research/2013/11/10/reference&quot;&gt;writeup&lt;/a&gt;) to get the upper bound error on our data-set.&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    \text{max error} = \frac{1}{2}z^\top \epsilon z \tag{1}\\
+\]
+&lt;/div&gt;
+
+
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt; 0.5 * z' * Epsilon * z
+
+ans =
+
+  -1.1758e-05
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We can conclude that the error we're observing is coming from somewhere else.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;To conclude for tonight, we're seeing some error in dK/ds, but probably nothing out of the ordinary, and it has low enough error that we can hopefully ignore it.&lt;/p&gt;
+
+&lt;p&gt;Lets look a the outher sources of error tomorrow, i.e. U' and V'&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/12/work-log"/>
+   <updated>2013-11-12T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/12/work-log</id>
+   <content type="html">&lt;p&gt;Implementing index optimization.&lt;/p&gt;
+
+&lt;p&gt;Main accopmlishment of the day: Derived an approach for finding the entire gradient with a single matrix multiplication.  Added this to &lt;a href=&quot;/ksimek/research/2013/11/10/reference&quot;&gt;reference post on ML gradient&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2&gt;Diversion: updating Ruby&lt;/h2&gt;
+
+&lt;p&gt;Struggling with blog engine, need to upate rdiscount to get new feature, but gem install fails because gcc-4.2 is missing since upgrading to Mavericks.  Need to recompile/reinstall ruby, so the gem system uses clang.  &lt;code&gt;rvm xxx instal&lt;/code&gt; is failing, because gcc-4.2 is missing.  Forcing clang; building causes segfault. Research says upgrade to HEAd of rvm, install ruby 2.0.0.  Tried, but still segfaulting... out of ideas.&lt;/p&gt;
+
+&lt;p&gt;New plan: install gcc-4.2 manually.  Luckilly homebrew has it in the repo.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;After some struggle, just gave up.  Annoyed at having wasted over an hour on this.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>WACV Reconstruction issues; iPlant Reading; Index optimization</title>
@@ -186,7 +611,8 @@ Narayanaswamy et al. (2011) curvelets and scalar voting&lt;/p&gt;
 
 &lt;div&gt;
 \[
-    \frac{\partial g(x)}{\partial x_i} = \frac{\partial}{\partial x_i} y^\top S^\top ( I + S K(x) S^\top)^{-1} S y
+    \frac{\partial g(x)}{\partial x_i} = \frac{\partial}{\partial x_i} 
+        \frac{1}{2}(-y^\top S^\top ( I + S K(x) S^\top)^{-1} S y)
 \]
 
 Let \(U = I + S K(x) S^\top\), and \(V = U^{-1}\).  Working inside out, lets find \(\frac{\partial U}{\partial x_i}\).
@@ -211,19 +637,19 @@ Finally,  \(\frac{\partial g(x)}{\partial x_i}\):
     
 \[
 \begin{align}
-    g + dg  &amp;= y^\top S^\top (V + dV) S y \\
-    g + dg  &amp;= y^\top S^\top \, V \, S y + y^\top S^\top \,dV \,S y \\
-        dg  &amp;= y^\top S^\top \,dV \,S y \\
-        g'  &amp;= y^\top S^\top \, V' \,S y \\
+    g + dg  &amp;= -\frac{1}{2}y^\top S^\top (V + dV) S y \\
+    g + dg  &amp;= -\frac{1}{2}y^\top S^\top \, V \, S y + y^\top S^\top \,dV \,S y \\
+        dg  &amp;= -\frac{1}{2}y^\top S^\top \,dV \,S y \\
+        g'  &amp;= -\frac{1}{2}y^\top S^\top \, V' \,S y \\
 \end{align}
 \]
 
-Expanding \(g'\) gives the final formula:
+Expanding \(V\) gives the final formula:
 \[
 \begin{align}
-        g'  &amp;= y^\top S^\top U^{-1} S K' S^\top U^{-1} S y \\
-        g'  &amp;= y^\top M K' M y \\
-        g'  &amp;= z^\top K' z \tag{1}\\
+        g'  &amp;= \frac{1}{2}y^\top S^\top U^{-1} S K' S^\top U^{-1} S y \\
+        g'  &amp;= \frac{1}{2}y^\top M K' M y \\
+        g'  &amp;= \frac{1}{2}z^\top K' z \tag{1}\\
 \end{align}
 \]
 
@@ -243,9 +669,9 @@ This equation gives us a single element of the gradient, namely \(d g(x)/dx_i\).
 
 &lt;h2&gt;Derivatives of K(x)&lt;/h2&gt;
 
-&lt;p&gt;The structure of \(\frac{\partial K}{\partial x_i}\) is sparse; only the i-th row and i-th column are nonzero. We can find the values of the nonzero elements by taking the derivative of the kernel function.&lt;/p&gt;
+&lt;p&gt;Below we derive the derivative of each of the three covariance expresssions, which combine to give \(K'\).&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt; Cubic covariance &lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Cubic covariance&lt;/em&gt;&lt;/p&gt;
 
 &lt;p&gt;Recall the cubic covariance expression:&lt;/p&gt;
 
@@ -263,7 +689,7 @@ Where \(x_b = min(x_1, x_2)\) and \(x_a = max(x_1, x_2)\).
 &lt;div&gt;
 \[
 \begin{align}
-k(x_1, x_2) &amp;= 
+\frac{\partial k(x_1, x_2)}{\partial x_2} &amp;= 
     \begin{cases}
          x_1^2 / 2 &amp; \text{if } x_2 &gt;= x_1 \\
          x_1 x_2 - x_2^2/2 &amp; \text{if } x_2 &lt; x_1 
@@ -275,17 +701,42 @@ k(x_1, x_2) &amp;=
     \end{cases} \\
 \end{align}
 \]
+&lt;/div&gt;
 
-Or equivalently
 
+&lt;p&gt;Or equivalently&lt;/p&gt;
+
+&lt;div&gt;
 \[
-k(x_1, x_2) = 
-         x_b \left [ x_1  - x_b/2 \right ]
+\frac{\partial k(x_1, x_2)}{\partial x_2} = 
+         x_b \left ( x_1  - x_b/2 \right ) \tag{2}
 \]
 &lt;/div&gt;
 
 
-&lt;p&gt;&lt;strong&gt; Linear Covariance &lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Note that if the goal is to find \(K' = \frac{\partial{K}}{\partial{x_i}}\), the on-diagonal element \(k'_{i i}\) needs a slightly different formula, because the kernel is a function of a single variable, \(x_i\).&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+\frac{\partial k(x_i)}{\partial x_i} &amp;= 
+    \frac{\partial}{\partial x_i} x_i^3/3 \\
+        &amp;= x_i^2 \tag{3}
+\end{align}
+\]
+
+
+Compare this with the general formula: if we plugged-in \(x_i'\) to both inputs of equation (2), we'd get \(x_i^2/2\), which underestimates the derivative by half.  We'll see in the next section that when computing \(g'\) the &quot;wrong&quot; expression for \(k'_{ii}\) is actually more useful than the correct one, because we'll need to scale it by 0.5 anyway.
+
+&lt;/div&gt;
+
+
+
+
+&lt;p&gt;&lt;/p&gt;
+
+
+&lt;p&gt;&lt;em&gt;Linear Covariance&lt;/em&gt;&lt;/p&gt;
 
 &lt;p&gt;Recall the cubic covariance expression:&lt;/p&gt;
 
@@ -298,7 +749,7 @@ The derivative w.r.t. \(x_2\) is simply \(x_1\).
 &lt;/div&gt;
 
 
-&lt;p&gt;&lt;strong&gt; Offset Covariance &lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Offset Covariance&lt;/em&gt;&lt;/p&gt;
 
 &lt;p&gt;Recall the offset covariance expression:&lt;/p&gt;
 
@@ -311,7 +762,7 @@ The derivative w.r.t. \(x_2\) is zero.
 &lt;/div&gt;
 
 
-&lt;p&gt;&lt;strong&gt; Implementation &lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Implementation&lt;/em&gt;&lt;/p&gt;
 
 &lt;p&gt;Implemented end-to-end version in &lt;code&gt;kernel/get_model_kernel_derivative.m&lt;/code&gt;; see also components in &lt;code&gt;kernel/get_spacial_kernel_derivative.m&lt;/code&gt; and &lt;code&gt;kernel/cubic_kernel_derivative.m&lt;/code&gt;.&lt;/p&gt;
 
@@ -333,9 +784,63 @@ for i = 1:N
 end
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;strong&gt; Directional Derivatives &lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Directional Derivatives&lt;/em&gt;&lt;/p&gt;
 
 &lt;p&gt;I think we can get directional derivatives of \(K\) by taking the weighted sum of partial derivatives, where the weights are the component lengths of the direction vector.  I have yet to confirm this beyond a hand-wavy hunch, and in practice, this might not even be needed, since computing the full gradient is so efficient.&lt;/p&gt;
+
+&lt;h2&gt;Sparsity of K'&lt;/h2&gt;
+
+&lt;p&gt;The sparsity of \(\frac{\partial K}{\partial x_i}\) actually allows us to further simplify formula (1) for \(g'\), ultimately allowing us to compute the entire gradient in a single matrix multiplication.&lt;/p&gt;
+
+&lt;p&gt;First observe that K' is only nonzero on the i-th row and column:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    k'_{i,j} = 
+    \begin{cases}
+        \delta_{ij} &amp; \text{if } i = j \\
+        0 &amp; \text{otherwise}
+    \end{cases}
+\]
+
+where \(\delta_{ij} = \frac{\partial k_{ij}}{\partial x_i} \).
+
+For convenience, we'll define the vector \(\Delta_i = [\delta_{i1}, ..., \delta_{in}]^\top\).
+
+
+Let \(g_i'\) be the partial derivative of \(g\) w.r.t. \(x_i\), with the entire gradient denoted by \(\nabla g = [g'_1, ..., g'_n]^\top\).  Using sparsity, eq. (1) can be rewritten as
+
+\[
+    g_i' = \frac{1}{2} z_i (\delta_{i1} z_1 + ... + \delta_{i(i-1)} z_{i-1} + \sum_j \delta_ij z_j + \delta_{i(i+1)} z_{i+1} + ... + \delta_{in} z_n)
+\]
+
+The expression in the parentheses is almost a dot product of z and \(\Delta_i\), but with the i-th term replaced with the dot product of z and \(\Delta_i\).  We can re-write the expression in terms of dot products, minus a correction.
+
+\[
+\begin{align}
+    g_i' = \frac{1}{2} z_i (2 * z \cdot \Delta_i - z_i \delta_i) \\ 
+       = z_i \, z \cdot \Delta_i' \\
+\end{align}
+\]
+
+Where \(\Delta_i'\)  is equal to \(\Delta_i\) in all elements except the i-th, which is equal to \(0.5 \lambda_i\).  Note that we can get \(\Delta_i'\) by using equation (2) above instead of equation (3), which allows us to avoid having a separate implementation for on-diagonal elements.
+
+Since each \(g_i\) arises from a dot product, we can compute \(\nabla g\) using matrix multiplication.  Let \(\Delta' = [\Delta'_1, ..., \Delta'_n] \), i.e. the matrix whose i-th column is \(\Delta'_i\).  The gradient expression becomes
+
+\[
+\begin{align}
+    \nabla g = z \odot (\Delta' z) \tag{4}
+\end{align}
+\]
+
+where \(\odot\) denotes element-wise multiplication.
+&lt;br /&gt;&lt;br /&gt;
+To handle multiple dimensions, simply apply to each dimension independently and sum the results.
+
+&lt;/div&gt;
+
+
+
 </content>
  </entry>
  
