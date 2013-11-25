@@ -28,7 +28,7 @@ Taking the log gives
 \]
 </div>
 
-When taking the derivative, the first term vanishes, and the third term was handled in the last writeup.  We need to find the derivative of the second term.
+When taking the derivative, the first term vanishes, and the third term was handled in the last writeup.  We need to find the derivative of the second term.  Let \\(Z(x) = \frac{1}{2} \log(|\Sigma(x)|) \\).
 
 
 According to equation (38) of The Matrix Cookbook, the derivative of the log determinant is given by:
@@ -36,7 +36,21 @@ According to equation (38) of The Matrix Cookbook, the derivative of the log det
 <div>
 \[
 \begin{align}
-    \frac{\partial }{\partial x_i} \frac{1}{2} \log(|\Sigma(x)|) &=
+    \frac{\partial Z(x) }{\partial x_i} &= \frac{1}{2} \text{Tr}\left[ U^{-1} U' \right] \\
+                &= \frac{1}{2} \text{Tr}\left[ U^{-1} (C + C^\top )\right] \\
+                &= \frac{1}{2} \text{Tr}\left[ U^{-1} C \right]  + \text{Tr}\left[ U^{-1}  C^\top \right] \\
+                &= \frac{1}{2} \text{Tr}\left[ U^{-1} S \delta_i S_i^\top \right]  + \text{Tr}\left[ U^{-1}  S_i \delta_i^\top S^\top \right] \\
+                &= \frac{1}{2} \text{Tr}\left[ S_i^\top U^{-1} S \delta_i \right]  + \text{Tr}\left[ \delta_i^\top S^\top U^{-1}  S_i \right] \\
+                &= \frac{1}{2} 2 \text{Tr}\left[ S_i^\top U^{-1} S \delta_i \right]  \\
+                &= \frac{1}{2} 2 \text{Tr}\left[ S_i^\top U^{-1} S \delta_i \right]  \\
+                &= S_i^\top U^{-1} S \delta_i \\
 \end{align}
+\]
+</div>
+
+Since this inner product gives us a single element of the gradient, we can get the entire gradient using matrix multiplication.
+<div>
+\[
+    \nabla Z(x) &= S^\top \odot U^{-1} S \Delta^\top 
 \]
 </div>
