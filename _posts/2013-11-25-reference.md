@@ -51,6 +51,9 @@ According to equation (38) of The Matrix Cookbook, the derivative of the log det
 Since this inner product gives us a single element of the gradient, we can get the entire gradient using matrix multiplication.
 <div>
 \[
-    \nabla Z(x) &= S^\top \odot U^{-1} S \Delta^\top 
+    \nabla Z(x) &= \diag(S^\top U^{-1} S \Delta^\top
+    \nabla Z(x) &= \sum_i (S \odot U^{-1} S \Delta^\top )_{i:}
 \]
 </div>
+
+Note that we conly care about the diagonal elements of the matrix product.  The second expression avoids computing the off-diagonal elements by taking only the dot product of matrix rows/columns that result in the diagonal elmeents.  To do this, we use the Hadamard product, \\(\odot\\), and then sum over rows.
