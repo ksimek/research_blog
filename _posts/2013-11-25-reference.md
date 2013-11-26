@@ -7,7 +7,7 @@ tags: []
 ---
 {% include JB/setup %}
 
-Today, I'll cover some additional issues not covered in the earlier reference post on this topic.  First, the original gradient derivation was missing a term corresponding to the normalization constant (which isn't constant as a function of the index set).  Second, the previous write-up assumed 1-dimensional data; today we'll talk about generalizing the formulae to three dimensions.
+Today, I'll cover some additional issues not covered in the [earlier reference post on this topic]({{site.baseurl}}/2013/11/10/reference/).  First, the original gradient derivation was missing a term corresponding to the normalization constant (which isn't constant as a function of the index set).  Second, the previous write-up assumed 1-dimensional data; today we'll talk about generalizing the formulae to three dimensions.
 
 Normalization constant
 ------------------------

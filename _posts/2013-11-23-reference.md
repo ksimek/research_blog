@@ -59,7 +59,7 @@ Thus, the derivative of the \\(\delta_i\\) vectors becomes
 <div>
 \[
 \begin{align}
-f' = \frac{\partial \delta_i(x)}{\partial x_j} &= (0, ..., \min(x_i, x_j), ..., 0)^\top \\
+\frac{\partial \delta_i(x)}{\partial x_j} &= (0, ..., \min(x_i, x_j), ..., 0)^\top \\
             &= \delta'_{(ij)} \tag{1}
 \end{align}
 \]
@@ -122,7 +122,7 @@ Below are the expressions for the zeroth, first, and second derivitives of Z;
 <div>
 \[
 \begin{align}
-Z &= 0.5 \log(\det(S^K S^\top + I)) \\
+Z &= 0.5 \log(\det(S K S^\top + I)) \\
 \frac{\partial Z}{\partial x_i} &= 0.5 \text{Tr} \left[ U^{-1} U' \right] \\
 \frac{\partial^2 Z}{\partial x_i \partial x_j} &= 0.5 \text{Tr} \left[ \frac{\partial U^{-1}}{\partial x_j} U' + U^{-1} \frac{\partial U'}{\partial x_j} \right] \\
         &= 0.5 \text{Tr} \left[ V'_{(j)} U'_{(i)} + U^{-1} U''_{(ij)} \right] \\
@@ -214,8 +214,7 @@ Here, we've regrouped the dot-products in each term to be a product of two dot-p
 
 \[
 \begin{align}
-    H_{2,A} &= 0.5 \text{Tr}[A] \\
-            &= -\left( S^\top U^{-1} S \Delta^\top \right)^\top \odot \left( S^\top U^{-1} S \Delta^\top \right)  - \left(\Delta S^\top U^{-1} S \Delta^\top\right) \odot \left(S^\top U^{-1} S \right) 
+    H_{2,A} &= -\left( S^\top U^{-1} S \Delta^\top \right)^\top \odot \left( S^\top U^{-1} S \Delta^\top \right)  - \left(\Delta S^\top U^{-1} S \Delta^\top\right) \odot \left(S^\top U^{-1} S \right) 
 \end{align}
 \]
 
@@ -246,29 +245,28 @@ Now we can derive \\(\text{Tr}[B]\\).
 <div>
 \[
 \begin{align}
-    \text{Tr}[B] &= 0.5 \text{Tr}[U^{-1} U''_{(ij)}] \\
-            &= 0.5 \text{Tr}[U^{-1} \min(x_i, x_j) \left( S_i S_j^\top + S_j S_i^\top \right)] \\
-            &= 0.5 \min(x_i, x_j) \text{Tr}\left [ U^{-1} S_i  S_j^\top \right ] + 0.5 \min(x_i, x_j) \text{Tr}\left [ U^{-1} S_j  S_i^\top \right ] \\
-            &= 0.5 \min(x_i, x_j) \left( S_j^\top U^{-1} S_i \right)  + ...  & \text{(Second term is the transpose of the first; is equivalent)}\\
-            &= \min(x_i, x_j) \left( S_j^\top U^{-1} S_i \right) \\
+    \text{Tr}[B] &= \text{Tr}[U^{-1} U''_{(ij)}] \\
+            &= \text{Tr}[U^{-1} \min(x_i, x_j) \left( S_i S_j^\top + S_j S_i^\top \right)] \\
+            &= \min(x_i, x_j) \text{Tr}\left [ U^{-1} S_i  S_j^\top \right ] + \min(x_i, x_j) \text{Tr}\left [ U^{-1} S_j  S_i^\top \right ] \\
+            &= \min(x_i, x_j) \left( S_j^\top U^{-1} S_i \right)  + ...  & \text{(Second term is the transpose of the first; is equivalent)}\\
+            &= 2 \min(x_i, x_j) \left( S_j^\top U^{-1} S_i \right) \\
 \end{align}
 \]
 
 </div>
 
-This is for a single term of the hessian.  We can rewrite it to compute the entire hessian using matrix arithmetic
+This is for a single term of the Hessian.  We can rewrite it to compute the entire Hessian using matrix arithmetic:
 
 
 <div>
 \[
     H_{2,B} = M \odot S^\top U^{-1} S
 \]
-
 </div>
 
 Here, M is defined as, \\(m_{ij} = \min(x_i, x_j)\\).  
 
-We can put these three expresssions together to get the full hessian matrix:
+We can put these three expresssions together to get the full Hessian matrix:
 
 <div>
 \[
