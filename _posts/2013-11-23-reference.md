@@ -41,34 +41,48 @@ Ultimately, we'll split the second term \\(H_2\\) into two sub-terms:
     \]
 </div>
 
+Prerequisite: \\(\frac{\partial \delta_i}{\partial x_j}\\)
+-------------------------------------------------------
 
-First term, \\(H_1 = f_i'\\)
-------------------
-
-First, we take the second derivitive of the kernel function, which has the conveniently simple form:
+First, we take the second derivitive of the kernel function:
 
 <div>
 \[
 \begin{align}
-\frac{\partial^2 k(x_i, k_j)}{\partial x_i \partial x_j} &= \min(x_i, x_j) \\
+\frac{\partial^2 k(x_i, k_j)}{\partial x_i \partial x_k} &= 
+    \begin{cases}
+        2 x_i & \text{if } i == j == k \\
+        x_j - \min(x_i, x_j) & \text{if } j \neq i == k \\
+        \min(x_i, x_j)  & \text{if } i \neq j == k
+        0  & \text{otherwise} 
+    \end{cases}
 \end{align}
 \]
 </div>
+
+Recall that for convenience, the i-th element of \\(\delta_i\\) is the partial derivitve divided by two, because it ends up being added to itself, and this allows for all elements of the vector to have the same formula. 
 
 Thus, the derivative of the \\(\delta_i\\) vectors becomes
 <div>
 \[
 \begin{align}
-\frac{\partial \delta_i(x)}{\partial x_j} &= 
+\frac{\partial \delta_i(x)}{\partial x_k} &= 
 
 \begin{cases}
-    (x_1 - \min(x_i, x_1), x_2 - \min(x_i, x_2)), ...)^\top  & \text{if } i == j\\
-    (0, ..., \min(x_i, x_j), ..., 0)^\top  & \text{if } i \neq j\\
+    (x_1 - \min(x_i, x_j), x_j - \min(x_i, x_j)), ...)^\top  & \text{if } i == k\\
+    (0, ..., \min(x_i, x_j), ..., 0)^\top  & \text{if } i \neq k\\
 \end{cases} \\
             &= \delta'_{(ij)} \tag{1}
 \end{align}
 \]
 </div>
+
+We can organize 
+
+
+
+First term, \\(H_1 = f_i'\\)
+------------------
 
 We use the product rule to take the derivitive of \\(f_i = z_i \delta_i \cdot  z\\).
 
@@ -100,16 +114,31 @@ z' = z'_{(j)} = \frac{\partial z(x)}{\partial x_j} &= \frac{\partial}{\partial x
 \]
 </div>
 
-All the vectors \\(f'_i\\) make up the columns of the hessian matrix.  Each of the \\(z_i\\)'s are are each pre-computed in quadratic time, so all precomputation is accomplished in cubic time.  Each \\(f_i(x)\\) consists of two dot products and a scalar product, which takes linear time, and there are \\(n^2\\) elements in the hessian, so the running time is cubic.
 
+Our goal is to simplify this expression so the entire Hessian can be computed at once.  Since \\(\delta'_{(ij)}\\) takes two different forms depending on the equality of i and j, we'll handle the on-diagonal case separately from the off-diagonal case.
 
-We can reformulate the hessian in terms of matrix arithmetic.  Let \\(Z'\\) be the jacobian of \\(z\\), i.e. it's columns are \\(z_{(i)}'\\).  
+When \\(i \neq j\\), the vector \\(\delta'_{(ij)}\\) takes the sparse form, so  the expression of off-diagonal Hessian elements becomes 
 
 <div>
 \[
-H_1 = Z' \odot \left[ \Delta \, z \, (1 \, 1 \, ...) \right] + A \odot \left(z z^\top \right ) + \left[ z \, (1 \, 1 \, ...) \right] \odot \left[ \Delta \, Z' \right]
+\begin{align}
+\frac{\partial f_i(x)}{\partial x_j} &=
+&=
+            z_i' (x) \, \delta_i^\top(x) \, z(x)  +
+            z_i(x) \, \min(x_i, x_j) \, z_j(x) + 
+            z_i(x) \, \delta_i^\top(x) \, z'(x)
+\end{align}
 \]
 </div>
+
+Let \\(\mathcal{Z}' \\) be the jacobian of \\(z\\).  The off-diagonal elements of the Hessian are given by the equation below; the on-diagonal elements of the matrix will need to be corrected. 
+
+<div>
+\[
+H_{1,\text{off}} = \mathcal{Z}' \odot \left[ \Delta \, z \, (1 \, 1 \, ...) \right] + A \odot \left(z z^\top \right ) + \left[ z \, (1 \, 1 \, ...) \right] \odot \left[ \Delta \, \mathcal{Z}' \right]
+\]
+</div>
+
 
 where \\(\Delta\\) is a matrix whose rows are composed of the \\(\delta_i\\) vectors, i.e. \\(\delta_{ij} = \frac{\partial k(x_i, x_j)}{\partial x_i}\\), 
       
@@ -118,6 +147,10 @@ the matrix \\(A\\) is the hessian of \\(k(x_i, x_j)\\), i.e. \\(a_{ij} = \frac{\
 and \\((1 \, 1 \, ...) \\) is a row-matrix of \\(N\\) ones.
 
 Note that the definition of \\(\Delta\\) used here was denoted as \\(\Delta'\\) [in the previous writeup]({{site.baseurl}}/2013/11/10/reference/).
+
+For on-diagonal elements, the first and last terms of the equation above are correct, but the second term needs to be replaced to use the alternate form of \\(\delta_{(ij)}\\) for the case \\(i == j\\).  The vector of corrections to the on-diagonal elements is given by:
+
+h_{1, \text{on}} = z \odot \Delta' z 
 
 Second term, \\(Z''_i(x) = H_{2,A} + H_{2,B} \\)
 ------------------------
