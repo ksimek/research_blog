@@ -49,7 +49,7 @@ First, we take the second derivitive of the kernel function:
 <div>
 \[
 \begin{align}
-\frac{\partial^2 k(x_i, k_j)}{\partial x_i \partial x_k} &= 
+\frac{\partial^2 k(x_i, x_j)}{\partial x_i \partial x_k} &= 
     \begin{cases}
         2 x_i & \text{if } i == j == k \\
         x_j - \min(x_i, x_j) & \text{if } j \neq i == k \\
@@ -60,9 +60,30 @@ First, we take the second derivitive of the kernel function:
 \]
 </div>
 
-Recall that for convenience, the i-th element of \\(\delta_i\\) is the partial derivitve divided by two, because it ends up being added to itself, and this allows for all elements of the vector to have the same formula. 
+Note that the on-diagonal case, \\(i == j\\), equals the sum of the two off-diagonal cases.  We noticed a similar pattern with the first derivitive, i.e. 
+Recall that we introduced the vector \\(\delta_i\\) to represent \\(\frac(\partial k_{x_i, x_j}{\partial x_i)\\)  for convenience, the i-th element of \\(\delta_i\\) is the partial derivitve divided by two, because it ends up being added to itself, and it allows for all elements of the vector to have the same formula. 
 
-Thus, the derivative of the \\(\delta_i\\) vectors becomes
+Thus, the derivative of \\(\delta_i\\) take the form below (using parenthized superscripts to denote element index).
+
+<div>
+\[
+\begin{align}
+\frac{\partial \delta_i^{(j)}}{\partial x_i \partial x_k} &= 
+    \begin{cases}
+        x_i & \text{if } i == j == k \\
+        x_j - \min(x_i, x_j) & \text{if } j \neq i == k \\
+        \min(x_i, x_j)  & \text{if } i \neq j == k
+        0  & \text{otherwise} 
+    \end{cases}
+\end{align}
+\]
+</div>
+
+Like in the case of first-derivitives, our representation will omit the first case above, observing that it is equal to the sum of the second and third cases.  In our derivation below, 
+
+
+
+
 <div>
 \[
 \begin{align}
@@ -146,11 +167,13 @@ the matrix \\(A\\) is the hessian of \\(k(x_i, x_j)\\), i.e. \\(a_{ij} = \frac{\
 
 and \\((1 \, 1 \, ...) \\) is a row-matrix of \\(N\\) ones.
 
-Note that the definition of \\(\Delta\\) used here was denoted as \\(\Delta'\\) [in the previous writeup]({{site.baseurl}}/2013/11/10/reference/).
-
 For on-diagonal elements, the first and last terms of the equation above are correct, but the second term needs to be replaced to use the alternate form of \\(\delta_{(ij)}\\) for the case \\(i == j\\).  The vector of corrections to the on-diagonal elements is given by:
 
+<div>
+\[
 h_{1, \text{on}} = z \odot \Delta' z 
+\]
+</div>
 
 Second term, \\(Z''_i(x) = H_{2,A} + H_{2,B} \\)
 ------------------------
