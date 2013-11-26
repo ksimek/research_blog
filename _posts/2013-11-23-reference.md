@@ -24,9 +24,25 @@ Where \\(\delta_i = k'(x_i, x_j)\\), and \\(Z'_i\\) is the derivitive of the nor
     
 
 
-Next we'll derive the second derivitive starting with the first term, f_i(x).
+The goal today is to derive the second derivitive, H.  Like the first derivitive, it will have two terms,
+    
+    
+<div>
+    \[
+    H = H_1 - H_2
+    \]
+</div>
 
-First term, f_i'
+Ultimately, we'll split the second term \\(H_2\\) into two sub-terms:
+
+<div>
+    \[
+    H = H_1 - H_{2,A} - H_{2,B}
+    \]
+</div>
+
+
+First term, \\(H_1 = f_i'\\)
 ------------------
 
 First, we take the second derivitive of the kernel function, which has the conveniently simple form:
@@ -35,7 +51,16 @@ First, we take the second derivitive of the kernel function, which has the conve
 \[
 \begin{align}
 \frac{\partial^2 k(x_i, k_j)}{\partial x_i \partial x_j} &= \min(x_i, x_j) \\
-\frac{\partial \delta_i(x)}{\partial x_j} &= (0, ..., \min(x_i, x_j), ..., 0)^\top
+\end{align}
+\]
+</div>
+
+Thus, the derivative of the \\(\delta_i\\) vectors becomes
+<div>
+\[
+\begin{align}
+f' = \frac{\partial \delta_i(x)}{\partial x_j} &= (0, ..., \min(x_i, x_j), ..., 0)^\top \\
+            &= \delta'_{(ij)} \tag{1}
 \end{align}
 \]
 </div>
@@ -62,7 +87,7 @@ where
 <div>
 \[
 \begin{align}
-\frac{\partial z(x)}{\partial x_j} &= \frac{\partial}{\partial x_j} S^\top U^{-1}(x) S y \\
+z' = z'_{(j)} = \frac{\partial z(x)}{\partial x_j} &= \frac{\partial}{\partial x_j} S^\top U^{-1}(x) S y \\
         &= S V' S^\top y \\
         &= S^\top U^{-1} U' U^{-1} S y \\
         &= (S^\top U^{-1} S) K' (S^\top U^{-1} S) y
@@ -70,34 +95,14 @@ where
 \]
 </div>
 
-All the vectors \\(f_i\\) make up the columns of the hessian matrix.
-
-We can reformulate the entire hessian in terms of vector and matrix operations
-
-<div>
-\[
-\begin{align}
-H(g) &=
-            
-            \left ( \frac{\partial}{\partial x_j} \, z_i(x) \right ) \delta_i^\top(x) z(x)  +
-            z_i(x) \left ( \frac{\partial}{\partial x_j}\delta_i^\top(x) \right ) z(x) +
-            z_i(x) \, \delta_i^\top(x) \left ( \frac{\partial}{\partial x_j} z(x) \right ) \\
-&=
-            z_i' (x) \, \delta_i^\top(x) \, z(x)  +
-            z_i(x) \, \min(x_i, x_j) \, z_j(x) + 
-            z_i(x) \, \delta_i^\top(x) \, z'(x)
-\end{align}
-\]
-</div>
+All the vectors \\(f'_i\\) make up the columns of the hessian matrix.  Each of the \\(z_i\\)'s are are each pre-computed in quadratic time, so all precomputation is accomplished in cubic time.  Each \\(f_i(x)\\) consists of two dot products and a scalar product, which takes linear time, and there are \\(n^2\\) elements in the hessian, so the running time is cubic.
 
 
-Each of the \\(z_i\\)'s are are each pre-computed in quadratic time, so all precomputation is accomplished in cubic time.  Each \\(f_i(x)\\) consists of two dot products and a scalar product, which takes linear time, and there are \\(n^2\\) elements in the hessian, so the running time is cubic.
-
-We can reformulate the hessian in terms of matrix arithmetic.  Let \\(Z'\\) be the jacobian of \\(z\\), i.e. it's columns are \\(z_i'\\).  
+We can reformulate the hessian in terms of matrix arithmetic.  Let \\(Z'\\) be the jacobian of \\(z\\), i.e. it's columns are \\(z_{(i)}'\\).  
 
 <div>
 \[
-H = Z' \odot \left[ \Delta \, z \, (1 \, 1 \, ...) \right] + A \odot \left(z z^\top \right ) + \left[ z \, (1 \, 1 \, ...) \right] \odot \left[ \Delta \, Z' \right]
+H_1 = Z' \odot \left[ \Delta \, z \, (1 \, 1 \, ...) \right] + A \odot \left(z z^\top \right ) + \left[ z \, (1 \, 1 \, ...) \right] \odot \left[ \Delta \, Z' \right]
 \]
 </div>
 
@@ -107,9 +112,9 @@ the matrix \\(A\\) is the hessian of \\(k(x_i, x_j)\\), i.e. \\(a_{ij} = \frac{\
 
 and \\((1 \, 1 \, ...) \\) is a row-matrix of \\(N\\) ones.
 
-Note that the definition of \\(\Delta\\) used here was denoted as \\(\Delta'\\) in the previous writeup.
+Note that the definition of \\(\Delta\\) used here was denoted as \\(\Delta'\\) [in the previous writeup]({{site.baseurl}}/2013/11/10/reference/).
 
-Second term, \\(Z''_i(x)\\)
+Second term, \\(Z''_i(x) = H_{2,A} + H_{2,B} \\)
 ------------------------
 
 Below are the expressions for the zeroth, first, and second derivitives of Z;
@@ -119,20 +124,35 @@ Below are the expressions for the zeroth, first, and second derivitives of Z;
 \begin{align}
 Z &= 0.5 \log(\det(S^K S^\top + I)) \\
 \frac{\partial Z}{\partial x_i} &= 0.5 \text{Tr} \left[ U^{-1} U' \right] \\
-\frac{\partial^2 Z}{\partial x_i \partial x_j} &= 0.5 \text{Tr} \left[ \frac{\partial U^{-1}}{\partial} U' + U^{-1} \frac{\partial U'}{\partial x_j} \right] \\
+\frac{\partial^2 Z}{\partial x_i \partial x_j} &= 0.5 \text{Tr} \left[ \frac{\partial U^{-1}}{\partial x_j} U' + U^{-1} \frac{\partial U'}{\partial x_j} \right] \\
         &= 0.5 \text{Tr} \left[ V'_{(j)} U'_{(i)} + U^{-1} U''_{(ij)} \right] \\
         &= 0.5 \left \{ \text{Tr} \left[ V'_{(j)} U'_{(i)} \right] + \text{Tr} \left[ U^{-1} U''_{(ij)} \right] \right\} \\
+        &= 0.5 \text{Tr}[A] +0.5 \text{Tr}[B]
 \end{align}
 \]
 </div>
 
-Observe that we can rewrite \\(U_{(i)}'\\) as sum of two outer products:
+Where
+
+<div>
+\[
+        A =  V'_{(j)} U'_{(i)} \\  
+        B = U^{-1} U''_{(ij)} 
+\]
+</div>
+
+These two terms correspond to the elements to the two hessian terms, \\(H_{2,A}\\) and \\(H_{2,B}\\).
+
+We'll begin by finding \\(Tr[A]\\) and \\(H_{2,A}\\).
+
+
+Observe that we can rewrite \\(U_{(i)}'\\) as 
 
 <div>
 \[
 \begin{align}
-U'_{(i)} &= S * K' * S^\top \\
-U'_{(i)} &= S * (B + B^\top) * S^\top \\
+U'_{(i)} &= S  K'  S^\top \\
+U'_{(i)} &= S  (B + B^\top)  S^\top \\
 \end{align}
 \]
 </div>
@@ -149,31 +169,20 @@ B = \left( \begin{array}{ccccc}
 \]
 </div>
 
-We can simplify \\(U'\\) to
+We can exploit this sparsity to further expand \\(U'\\) to
 
 <div>
 \[
 \begin{align}
 U'_{(i)} &= \left(S \, \delta_i \right) S_i^\top  + S_i \left( S \, \delta_i \right)^\top \\
-         &= 
+         &= C_{(i)} + C_{(i)}^\top
 \end{align}
 \]
+
+where \(C_{(i)} = S \, \delta_i \, S_i^\top \).
 </div>
 
-where \\(C_{(i)} = S \, \delta_i \, S_i^\top \\).
-
-<div>
-\[
-\begin{align}
-\frac{\partial^2 Z}{\partial x_i \partial x_j} &= 
-        0.5 \left \{ \text{Tr} \left[ V'_{(j)} U'_{(i)} \right] + \text{Tr} \left[ U^{-1} U''_{(ij)} \right] \right\} \\
-            &= 0.5 Tr[A] + Tr[B]
-\end{align}
-\]
-</div>
-
-We'll work on the first term first.
-
+We can use this identity to expand \\(\text{Tr}[A]\\).
 
 <div>
 \[
@@ -186,27 +195,63 @@ We'll work on the first term first.
           &= -\text{Tr}\left [U^{-1}  C_{(j)} U^{-1}C_{(i)} + U^{-1}  C_{(j)} U^{-1}C_{(i)}^\top + U^{-1}C_{(j)}^\top U^{-1}C_{(i)} + U^{-1}C_{(j)}^\top U^{-1}C_{(i)} ^\top\right] \\
           &= -2 \text{Tr}\left [U^{-1}  C_{(j)} U^{-1}C_{(i)}\right]  - 2 \text{Tr}\left[U^{-1} C_{(j)} U^{-1}C_{(i)}^\top \right ] \\
           &= -2 \text{Tr}\left [U^{-1} \left( S \delta_j S_j^\top \right) U^{-1} \left ( S \delta_i S_i^\top \right)\right]  - 2 \text{Tr}\left[U^{-1} \left( S \delta_j S_j^\top \right) U^{-1}\left( S_i \delta_i^\top S^\top \right) \right ] \\
+          &= -2 \text{Tr}\left [S_i^\top U^{-1} S \delta_j S_j^\top U^{-1} S \delta_i \right]  - 2 \text{Tr}\left[ \delta_i^\top S^\top U^{-1} S \delta_j S_j^\top U^{-1} S_i \right ] \\
 
 \end{align}
 \]
 
-TODO: rotate terms inside Tr to get product of 1x1 expressions; convert to matrix products and Hadamard products.  
+The last identity exploits the fact that Traces are invariant under cyclic permutations.  Note that both expressions inside the trace operator are scalar products, which makes the trace operator redundant.  
 
 \[
-    H = -2 \left( S^\top U^{-1} S \Delta\right)^\top \odot S^\top U^{-1} S \Delta^\top  -2 S^\top U^{-1} S \odot \Delta S^\top U^{-1} S \Delta^\top
+\begin{align}
+    \text{Tr}[A]
+          &= -2 S_i^\top U^{-1} S \delta_j S_j^\top U^{-1} S \delta_i  - 2  \delta_i^\top S^\top U^{-1} S \delta_j S_j^\top U^{-1} S_i \\
+          &= -2 \left( S_i^\top U^{-1} S \delta_j \right) \left(S_j^\top U^{-1} S \delta_i \right)  - 2  \left(\delta_i^\top S^\top U^{-1} S \delta_j \right) \left( S_j^\top U^{-1} S_i \right) \\
+\end{align}
+\]
+
+Here, we've regrouped the dot-products in each term to be a product of two dot-products.  We can generalize this for the full hessian as follows:
+
+\[
+\begin{align}
+    H_{2,A} &= 0.5 \text{Tr}[A] \\
+            &= -\left( S^\top U^{-1} S \Delta^\top \right)^\top \odot \left( S^\top U^{-1} S \Delta^\top \right)  - \left(\Delta S^\top U^{-1} S \Delta^\top\right) \odot \left(S^\top U^{-1} S \right) 
+\end{align}
 \]
 
 </div>
 
-Next is the second term
+Next is the second term, \\(\text{Tr}[B]\\).  
 
+First lets derive \\(U''\\).
+
+<div>
+\begin{align}
+U''_{(ij)} = \frac{\partial U_{(i)}'}{\partial x_j} &= 
+            \frac{\partial}{\partial x_j} \left \{ 
+            \left(S \, \delta_i \right) S_i^\top  +
+            S_i \left( S \, \delta_i \right)^\top 
+            \right \} \\
+            &= \left(S \, \delta'_{(ij)} \right) S_i^\top  +
+            S_i \left( S \, \delta'_{(ij)} \right)^\top  \\
+            &= S \, 
+            \left( \begin{array}{c} 0 \\ \cdots \\ \min(x_i, x_j) \\ \cdots \\ 0 \end{array}\right)
+                    S_i^\top  + ... \\
+            &= S_j \min(x_i, x_j) S_i^\top + S_i \min(x_i, x_j) S_j^\top \\
+            &= \min(x_i, x_j) \left( S_i S_j^\top + S_j  S_i^\top \right)
+\end{align}
+</div>
+
+Now we can derive \\(\text{Tr}[B]\\).
 <div>
 \[
 \begin{align}
-    \text{Tr}[B] &= \text{Tr}[U^{-1} U''_{(ij)}] \\
-            &= \text{Tr}\left [U^{-1} S \left( \begin{array}{c} 0 \\ \cdots \\ \min(x_i, x_j) \\ \cdots \\ 0 \end{array}\right) S_i^\top + ... \right ] & \text{dots are the transpose of first term} \\
-            &= \text{Tr}\left [ U^{-1} S_i \min(x_i, x_j) S_j \right ] + \cdots & \text{second term is trace of transpose; is equivalent to first} \\
-            &= 2 * min(x_i, x_j) \left( S_j^\top U^{-1} S_i \right) + \cdots  \\
+    \text{Tr}[B] &= 0.5 \text{Tr}[U^{-1} U''_{(ij)}] \\
+            &= 0.5 \text{Tr}[U^{-1} \min(x_i, x_j) \left( S_i S_j^\top + S_j S_i^\top \right)] \\
+            &= 0.5 \min(x_i, x_j) \text{Tr}\left [ U^{-1} S_i  S_j^\top \right ] + 0.5 \min(x_i, x_j) \text{Tr}\left [ U^{-1} S_j  S_i^\top \right ] \\
+            &= 0.5 \min(x_i, x_j) \left( S_j^\top U^{-1} S_i \right)  + ...  & \text{(Second term is the transpose of the first; is equivalent)}\\
+            &= \min(x_i, x_j) \left( S_j^\top U^{-1} S_i \right) \\
+\end{align}
 \]
 
 </div>
@@ -216,9 +261,19 @@ This is for a single term of the hessian.  We can rewrite it to compute the enti
 
 <div>
 \[
-    H_{2,B} &= 2 \, A \odot S^\top U^{-1} S
+    H_{2,B} = M \odot S^\top U^{-1} S
 \]
 
 </div>
 
-Here, A is defined as before, i.e. \\(a_{ij} = \min(x_i, x_j)\\).  Thus, the second term of \\(Z''\\) is expressible using matrix multiplication.
+Here, M is defined as, \\(m_{ij} = \min(x_i, x_j)\\).  
+
+We can put these three expresssions together to get the full hessian matrix:
+
+<div>
+\[
+ H = Z' \odot \left[ \Delta \, z \, (1 \, 1 \, ...) \right] + A \odot \left(z z^\top \right ) + \left[ z \, (1 \, 1 \, ...) \right] \odot \left[ \Delta \, Z' \right]
+    +\left( S^\top U^{-1} S \Delta^\top \right)^\top \odot \left( S^\top U^{-1} S \Delta^\top \right)  - \left(\Delta S^\top U^{-1} S \Delta^\top\right) \odot \left(S^\top U^{-1} S \right)
+    -  M \odot S^\top U^{-1} S
+\]
+</div>
