@@ -59,7 +59,11 @@ Thus, the derivative of the \\(\delta_i\\) vectors becomes
 <div>
 \[
 \begin{align}
-\frac{\partial \delta_i(x)}{\partial x_j} &= (0, ..., \min(x_i, x_j), ..., 0)^\top \\
+\frac{\partial \delta_i(x)}{\partial x_j} &= 
+
+\begin{cases}
+    (x_1 - \min(x_i, x_1), x_2 - \min(x_i, x_2)), ...)^\top  & \text{if } i == j\\
+    (0, ..., \min(x_i, x_j), ..., 0)^\top  & \text{if } i \neq j\\
             &= \delta'_{(ij)} \tag{1}
 \end{align}
 \]
