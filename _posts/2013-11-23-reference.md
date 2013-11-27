@@ -99,11 +99,11 @@ We use the product rule to take the derivitive of \\(f_i = z_i \delta_i \cdot  z
             z_i(x) \, \delta_i^\top(x) \left ( \frac{\partial}{\partial x_j} z(x) \right ) \\
 &=
             z_i' (x) \, \delta_i^\top(x) \, z(x)  +
-            z_i(x) \, (A_{i}\mathbb{1}_{k = i} + B_{ij})^\top \, z(x) + 
+            z_i(x) \, (A_{i}\mathbb{1}_{j = i} + B_{ij})^\top \, z(x) + 
             z_i(x) \, \delta_i^\top(x) \, z'(x) \\
 &=
             z_i' (x) \, \delta_i^\top(x) \, z(x)  +
-            \mathbb{1}_{k = i} z_i(x) \, A_{i}^\top \, z(x) + z_i(x) \, \min(x_i, x_j) \, z_j(x)  +
+            \mathbb{1}_{j = i} z_i(x) \, A_{i}^\top \, z(x) + z_i(x) \, \min(x_i, x_j) \, z_j(x)  +
             z_i(x) \, \delta_i^\top(x) \, z'(x)
 \end{align}
 \]
@@ -261,13 +261,14 @@ U''_{(ij)} = \frac{\partial U_{(i)}'}{\partial x_j} &=
             \left(S \, \delta_i \right) S_i^\top  +
             S_i \left( S \, \delta_i \right)^\top 
             \right \} \\
-            &= \left(S \, \delta'_{(ij)} \right) S_i^\top  +
-            S_i \left( S \, \delta'_{(ij)} \right)^\top  \\
-            &= S \, 
-            \left( \begin{array}{c} 0 \\ \cdots \\ \min(x_i, x_j) \\ \cdots \\ 0 \end{array}\right)
-                    S_i^\top  + ... \\
-            &= S_j \min(x_i, x_j) S_i^\top + S_i \min(x_i, x_j) S_j^\top \\
-            &= \min(x_i, x_j) \left( S_i S_j^\top + S_j  S_i^\top \right)
+            &= \left(S \, \frac{\partial \delta_i}{\partial x_j} \right) S_i^\top  +
+            S_i \left( S \, \frac{\partial \delta_i}{\partial x_j} \right)^\top  \\
+            &= S \, \left(A_i \mathbb{1}_{i = j} + B_{ij} \right) S_i^\top  +
+            S_i \left(A_i^\top \mathbb{1}_{i = j} + B_{ij}^\top \right) S^\top   \\
+            &= \mathbb{1}_{i = j} S \, A_i \, S_i^\top + S\, B_{ij} S_i^\top +
+             \mathbb{1}_{i = j} \, S_i \, A_i^\top \, S^\top + S_i \, B_{ij} \, S^\top \\
+            &= \mathbb{1}_{i = j} S \, A_i \, S_i^\top + \mathbb{1}_{i = j} S_i \, A_i^\top \, S^\top + S_j \min(x_i, x_j) S_i^\top + S_i \min(x_i, x_j) S_j^\top \\
+            &= \mathbb{1}_{i = j} \left ( S \, A_i \, S_i^\top + S_i \, A_i^\top \, S^\top \right ) + \min(x_i, x_j) \left( S_i S_j^\top + S_j  S_i^\top \right)
 \end{align}
 </div>
 
@@ -276,10 +277,18 @@ Now we can derive \\(\text{Tr}[B]\\).
 \[
 \begin{align}
     \text{Tr}[B] &= \text{Tr}[U^{-1} U''_{(ij)}] \\
-            &= \text{Tr}[U^{-1} \min(x_i, x_j) \left( S_i S_j^\top + S_j S_i^\top \right)] \\
-            &= \min(x_i, x_j) \text{Tr}\left [ U^{-1} S_i  S_j^\top \right ] + \min(x_i, x_j) \text{Tr}\left [ U^{-1} S_j  S_i^\top \right ] \\
-            &= \min(x_i, x_j) \left( S_j^\top U^{-1} S_i \right)  + ...  & \text{(Second term is the transpose of the first; is equivalent)}\\
-            &= 2 \min(x_i, x_j) \left( S_j^\top U^{-1} S_i \right) \\
+            &= \text{Tr}[U^{-1} \left \{\mathbb{1}_{i = j} \left ( S \, A_i \, S_i^\top + S_i \, A_i^\top \, S^\top \right ) +  \min(x_i, x_j) \left( S_i S_j^\top + S_j S_i^\top \right) \right \} ] \\
+            &= 
+            \mathbb{1}_{i = j} \text{Tr}\left [ U^{-1} S A_i S_i^\top \right ] +
+            \mathbb{1}_{i = j} \text{Tr}\left [ U^{-1} S_i A_i^\top S \right ] +
+            \min(x_i, x_j) \text{Tr}\left [ U^{-1} S_i  S_j^\top \right ] + \min(x_i, x_j) \text{Tr}\left [ U^{-1} S_j  S_i^\top \right ] \\
+            &= 
+            \mathbb{1}_{i = j} \text{Tr}\left [ S_i^\top U^{-1} S A_i \right ] +
+            \mathbb{1}_{i = j} \text{Tr}\left [ A_i^\top S U^{-1} S_i \right ] +
+            \min(x_i, x_j) \text{Tr}\left [S_j^\top  U^{-1} S_i \right ] + \min(x_i, x_j) \text{Tr}\left [ S_i^\top U^{-1} S_j \right ] \\
+            &= 
+            2 \mathbb{1}_{i = j}  S_i^\top U^{-1} S A_i +
+            2 \min(x_i, x_j) S_j^\top  U^{-1} S_i  \\
 \end{align}
 \]
 
@@ -290,18 +299,26 @@ This is for a single term of the Hessian.  We can rewrite it to compute the enti
 
 <div>
 \[
-    H_{2,B} = M \odot S^\top U^{-1} S
+    H_{2,B} = M \odot S^\top U^{-1} S + ( S^\top \left ( U^{-1} S \mathcal{A} \right ) ) \odot I
 \]
 </div>
 
-Here, M is defined as, \\(m_{ij} = \min(x_i, x_j)\\).  
+Here, M is defined as, \\(m_{ij} = \min(x_i, x_j)\\), and  \\(\mathcal{A}\\) is the matrix whose i-th column is \\(A_i\\).  Note that only the diagonal elements of the second term are preserved; in implementation, this can be implemented as
 
-We can put these three expresssions together to get the full Hessian matrix:
+    diag(sum(S .* (inv(U) * S * A)))
+
+Full Hessian
+-----------------
+
+The full Hessian is the sum of the three parts above
 
 <div>
 \[
- H = Z' \odot \left[ \Delta \, z \, (1 \, 1 \, ...) \right] + A \odot \left(z z^\top \right ) + \left[ z \, (1 \, 1 \, ...) \right] \odot \left[ \Delta \, Z' \right]
-    +\left( S^\top U^{-1} S \Delta^\top \right)^\top \odot \left( S^\top U^{-1} S \Delta^\top \right)  - \left(\Delta S^\top U^{-1} S \Delta^\top\right) \odot \left(S^\top U^{-1} S \right)
-    -  M \odot S^\top U^{-1} S
+\begin{align}
+    H =& H_1 - H_{2,A} - H_{2,B} \\
+      =& \mathcal{Z}' \odot \left[ \Delta \, z \, (1 \, 1 \, ...) \right] + M \odot \left(z z^\top \right ) + \text{diag}\left\{ z(x) \odot \Delta' z(x) \right\} +  \left[ z \, (1 \, 1 \, ...) \right] \odot \left[ \Delta \, \mathcal{Z}' \right] +  \\
+      & \left( S^\top U^{-1} S \Delta^\top \right)^\top \odot \left( S^\top U^{-1} S \Delta^\top \right)  + \left(\Delta S^\top U^{-1} S \Delta^\top\right) \odot \left(S^\top U^{-1} S \right)  - \\
+      & M \odot S^\top U^{-1} S - ( S^\top \left ( U^{-1} S \mathcal{A} \right ) ) \odot I
+\end{align}
 \]
 </div>
