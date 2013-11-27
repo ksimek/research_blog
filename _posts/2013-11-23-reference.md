@@ -44,63 +44,46 @@ Ultimately, we'll split the second term \\(H_2\\) into two sub-terms:
 Prerequisite: \\(\frac{\partial \delta_i}{\partial x_j}\\)
 -------------------------------------------------------
 
-First, we take the second derivitive of the kernel function:
+Recall that the elements of \\(\delta_i\\) are the partial derivatives of the kernel function w.r.t. its first input.  The second derivatives \\(\delta_i\\) will be given by the second partial derivatives of the kernel function.
 
 <div>
 \[
 \begin{align}
-\frac{\partial^2 k(x_i, x_j)}{\partial x_i \partial x_k} &= 
-    \begin{cases}
-        2 x_i & \text{if } i == j == k \\
-        x_j - \min(x_i, x_j) & \text{if } j \neq i == k \\
-        \min(x_i, x_j)  & \text{if } i \neq j == k
-        0  & \text{otherwise} 
-    \end{cases}
+\frac{\partial^2 k(x_i, x_j)}{\partial x_i^2} &= 
+        x_j - \min(x_i, x_j)  \\
+\frac{\partial^2 k(x_i, x_j)}{\partial x_i \partial x_j} &= 
+        \min(x_i, x_j) 
 \end{align}
 \]
 </div>
 
-Note that the on-diagonal case, \\(i == j\\), equals the sum of the two off-diagonal cases.  We noticed a similar pattern with the first derivitive, i.e. 
-Recall that we introduced the vector \\(\delta_i\\) to represent \\(\frac(\partial k_{x_i, x_j}{\partial x_i)\\)  for convenience, the i-th element of \\(\delta_i\\) is the partial derivitve divided by two, because it ends up being added to itself, and it allows for all elements of the vector to have the same formula. 
-
-Thus, the derivative of \\(\delta_i\\) take the form below (using parenthized superscripts to denote element index).
+The derivative of the j-th element of \\(\delta_i\\) is derived below.  
 
 <div>
 \[
 \begin{align}
-\frac{\partial \delta_i^{(j)}}{\partial x_i \partial x_k} &= 
-    \begin{cases}
-        x_i & \text{if } i == j == k \\
-        x_j - \min(x_i, x_j) & \text{if } j \neq i == k \\
-        \min(x_i, x_j)  & \text{if } i \neq j == k
-        0  & \text{otherwise} 
-    \end{cases}
+\frac{\partial \left(\delta_i \right)_j}{\partial x_k} 
+    &= \frac{\partial^2 k(x_i, x_j)}{\partial x_i \partial x_k} \\
+    &= (x_j - \min(x_i, x_j))\mathbb{1}_{k = i} + \min(x_i, x_j) \mathbb{1}_{k = j} 
 \end{align}
 \]
 </div>
 
-Like in the case of first-derivitives, our representation will omit the first case above, observing that it is equal to the sum of the second and third cases.  In our derivation below, 
+Note that this handles the special cases where k = i = j and \\(k \neq i, k \neq j\\).  
 
-
-
+We can generalizing to the full vector \\(\delta_i\\) 
 
 <div>
 \[
 \begin{align}
-\frac{\partial \delta_i(x)}{\partial x_k} &= 
-
-\begin{cases}
-    (x_1 - \min(x_i, x_j), x_j - \min(x_i, x_j)), ...)^\top  & \text{if } i == k\\
-    (0, ..., \min(x_i, x_j), ..., 0)^\top  & \text{if } i \neq k\\
-\end{cases} \\
-            &= \delta'_{(ij)} \tag{1}
+\frac{\partial \delta_i }{\partial x_k}  &= A_{i} \mathbb{1}_{k = i}  + B_{ik}\\
+A_{i} &= (x_1 - \min(x_i, x_1), \dots, x_j - \min(x_i, x_j), \dots)^\top  \\
+B_{ik} &= (0, \dots, \underbrace{\min(x_i, x_k)}_\text{k-th element}, \dots, 0)^\top
 \end{align}
 \]
 </div>
 
-We can organize 
-
-
+The A term handles the on-diagonal hessian terms, whereas B is included in all terms.   
 
 First term, \\(H_1 = f_i'\\)
 ------------------
@@ -116,7 +99,11 @@ We use the product rule to take the derivitive of \\(f_i = z_i \delta_i \cdot  z
             z_i(x) \, \delta_i^\top(x) \left ( \frac{\partial}{\partial x_j} z(x) \right ) \\
 &=
             z_i' (x) \, \delta_i^\top(x) \, z(x)  +
-            z_i(x) \, \min(x_i, x_j) \, z_j(x) + 
+            z_i(x) \, (A_{i}\mathbb{1}_{k = i} + B_{ij})^\top \, z(x) + 
+            z_i(x) \, \delta_i^\top(x) \, z'(x) \\
+&=
+            z_i' (x) \, \delta_i^\top(x) \, z(x)  +
+            \mathbb{1}_{k = i} z_i(x) \, A_{i}^\top \, z(x) + z_i(x) \, \min(x_i, x_j) \, z_j(x)  +
             z_i(x) \, \delta_i^\top(x) \, z'(x)
 \end{align}
 \]
@@ -136,46 +123,28 @@ z' = z'_{(j)} = \frac{\partial z(x)}{\partial x_j} &= \frac{\partial}{\partial x
 </div>
 
 
-Our goal is to simplify this expression so the entire Hessian can be computed at once.  Since \\(\delta'_{(ij)}\\) takes two different forms depending on the equality of i and j, we'll handle the on-diagonal case separately from the off-diagonal case.
-
-When \\(i \neq j\\), the vector \\(\delta'_{(ij)}\\) takes the sparse form, so  the expression of off-diagonal Hessian elements becomes 
-
-<div>
-\[
-\begin{align}
-\frac{\partial f_i(x)}{\partial x_j} &=
-&=
-            z_i' (x) \, \delta_i^\top(x) \, z(x)  +
-            z_i(x) \, \min(x_i, x_j) \, z_j(x) + 
-            z_i(x) \, \delta_i^\top(x) \, z'(x)
-\end{align}
-\]
-</div>
-
-Let \\(\mathcal{Z}' \\) be the jacobian of \\(z\\).  The off-diagonal elements of the Hessian are given by the equation below; the on-diagonal elements of the matrix will need to be corrected. 
+Our goal is the generalize this to a single expression for the entire hessian matrix.
+Note that when \\(i \neq j\\), the third term disappears, so that term will become a diagonal matrix in the hessian expression.
+Let \\(\mathcal{Z}' \\) be the jacobian of \\(z\\).  We can express the hessian asWe can express the hessian as
 
 <div>
 \[
-H_{1,\text{off}} = \mathcal{Z}' \odot \left[ \Delta \, z \, (1 \, 1 \, ...) \right] + A \odot \left(z z^\top \right ) + \left[ z \, (1 \, 1 \, ...) \right] \odot \left[ \Delta \, \mathcal{Z}' \right]
+H_1 = \mathcal{Z}' \odot \left[ \Delta \, z \, (1 \, 1 \, ...) \right] + M \odot \left(z z^\top \right ) + \text{diag}\left\{ z(x) \odot \Delta' z(x) \right\} +  \left[ z \, (1 \, 1 \, ...) \right] \odot \left[ \Delta \, \mathcal{Z}' \right]
 \]
 </div>
 
-
-where \\(\Delta\\) is a matrix whose rows are composed of the \\(\delta_i\\) vectors, i.e. \\(\delta_{ij} = \frac{\partial k(x_i, x_j)}{\partial x_i}\\), 
+where \\(M\\) is a matrix whose elements \\(m_{ij} = \min(x_i, x_j)\\), 
       
-the matrix \\(A\\) is the hessian of \\(k(x_i, x_j)\\), i.e. \\(a_{ij} = \frac{\partial \partial k(x_i, x_j)}{\partial x_i \partial x_j} = \min(x_i, x_j)\\),
+\\(\Delta\\) is a matrix whose rows are composed of the \\(\delta_i\\) vectors,
 
-and \\((1 \, 1 \, ...) \\) is a row-matrix of \\(N\\) ones.
+\\(\Delta'\\) is the matrix whose i-th row is the vector \\(A_i\\),
 
-For on-diagonal elements, the first and last terms of the equation above are correct, but the second term needs to be replaced to use the alternate form of \\(\delta_{(ij)}\\) for the case \\(i == j\\).  The vector of corrections to the on-diagonal elements is given by:
+\\(\odot\\) is the Hadamard matrix product,
 
-<div>
-\[
-h_{1, \text{on}} = z \odot \Delta' z 
-\]
-</div>
+and diag() is an operator that converts a vector into a diagonal matrix.
+      
 
-Second term, \\(Z''_i(x) = H_{2,A} + H_{2,B} \\)
+Second term, \\(Z_i''(x) = H\_{2,A} + H\_{2,B} \\)
 ------------------------
 
 Below are the expressions for the zeroth, first, and second derivitives of Z;
@@ -202,7 +171,7 @@ Where
 \]
 </div>
 
-These two terms correspond to the elements to the two hessian terms, \\(H_{2,A}\\) and \\(H_{2,B}\\).
+These two terms correspond to the elements to the two hessian terms, \\(H\_{2,A}\\) and \\(H\_{2,B}\\).
 
 We'll begin by finding \\(Tr[A]\\) and \\(H_{2,A}\\).
 
