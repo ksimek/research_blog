@@ -116,8 +116,8 @@ where
 \begin{align}
 z' = z'_{(j)} = \frac{\partial z(x)}{\partial x_j} &= \frac{\partial}{\partial x_j} S^\top U^{-1}(x) S y \\
         &= S V' S^\top y \\
-        &= S^\top U^{-1} U' U^{-1} S y \\
-        &= (S^\top U^{-1} S) K' (S^\top U^{-1} S) y
+        &= -S^\top U^{-1} U' U^{-1} S y \\
+        &= -(S^\top U^{-1} S) K' (S^\top U^{-1} S) y
 \end{align}
 \]
 </div>
