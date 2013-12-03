@@ -12,8 +12,8 @@ Recall  the expression for the i-th element of the gradient of ML w.r.t. indices
 <div>
 \[
 \begin{align}
-g'_i(x) &= \frac{1}{2} z(x)^\top K'(x) z(x) \\
-        &= \frac{1}{2} z_i(x) \delta_i^\top(x) z(x) - Z'_i(x) \\
+g'_i(x) &= \frac{1}{2} z(x)^\top K'(x) z(x) - Z'_i(x) \\
+        &= z_i(x) \delta_i^\top(x) z(x) - Z'_i(x) \\
         &= f_i(x) - Z'_i(x)
 \end{align}
 \]

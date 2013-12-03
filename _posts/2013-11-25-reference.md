@@ -16,7 +16,7 @@ Recall the gaussian equation, as a function of indices:
 
 <div>
 \[
-\frac{k}{|\Sigma(x)|^{\frac{1}{2}}} \exp\left\{-2 (y - \mu)^\top \Sigma^{-1}(x) (y - \mu) \right\}
+\frac{k}{|\Sigma(x)|^{\frac{1}{2}}} \exp\left\{- \frac{1}{2} (y - \mu)^\top \Sigma^{-1}(x) (y - \mu) \right\}
 \]
 </div>
 
@@ -24,7 +24,7 @@ Taking the log gives
 
 <div>
 \[
-\log(k) - \frac{1}{2} \log(|\Sigma(x)|) + \left( -2 (y - \mu)^\top \Sigma^{-1}(x) (y - \mu) \right )
+\log(k) - \frac{1}{2} \log(|\Sigma(x)|) + \left( -\frac{1}{2} (y - \mu)^\top \Sigma^{-1}(x) (y - \mu) \right )
 \]
 
 When taking the derivative, the first term vanishes, and the third term was handled [in the last writeup]({{site.baseurl}}/2013/11/10/reference/) as \(\nabla g\).  We need to find the derivative of the second term.  Let \(Z(x) = \frac{1}{2} \log(|\Sigma(x)|) \). Also, let \(C_{(i)} = S \, \delta_i \, S_i^\top \), so \(U'_{(i)} = C_{(i)} + C_{(i)}^\top\)
