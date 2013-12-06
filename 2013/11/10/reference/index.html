@@ -128,7 +128,7 @@ Finally,  \(\frac{\partial g(x)}{\partial x_i}\):
 \[
 \begin{align}
     g + dg  &= -\frac{1}{2}y^\top S^\top (V + dV) S y \\
-    g + dg  &= -\frac{1}{2}y^\top S^\top \, V \, S y + y^\top S^\top \,dV \,S y \\
+    g + dg  &= -\frac{1}{2}y^\top S^\top \, V \, S y - \frac{1}{2} y^\top S^\top \,dV \,S y \\
         dg  &= -\frac{1}{2}y^\top S^\top \,dV \,S y \\
         g'  &= -\frac{1}{2}y^\top S^\top \, V' \,S y \\
 \end{align}
@@ -159,7 +159,29 @@ This equation gives us a single element of the gradient, namely \(d g(x)/dx_i\).
 
 <h2>Derivatives of K(x)</h2>
 
-<p>Below we derive the derivative of each of the three covariance expresssions, which combine to give \(K'\).</p>
+<p>First, we'll layout the general form of K', whose elements are the full derivative of the kernel w.r.t.  \(x_k\).</p>
+
+<div>
+\[
+\frac{\partial K_{ij}}{\partial x_k} = \frac{\partial k(x_i, x_j)}{\partial x_i} \frac{d x_i}{d x_k} + \frac{\partial k(x_i, x_j)}{\partial x_j} \frac{d x_j}{d x_k}\\
+\]
+</div>
+
+
+<p>The first term is nonzero only on the i-th row of K', and the second term is nonzero on the i-th column of K'.  This suggests the following convenient sparse representation  for K'.</p>
+
+<p>Let the vector \(\delta_i\)  be the vector whose j-th element is \( \frac{\partial k(x_i, x_j) }{\partial x_i} \).  Using this notation, we can rewrite \(K'\) as</p>
+
+<div>
+\[
+    \frac{\partial K}{\partial x_i} = K' = C + C^\top  \tag{4}
+\]
+</div>
+
+
+<p>where \(C = \left(0 \, \dots \, \delta_i \, \dots \, 0 \right)  \).</p>
+
+<p>Below we derive the derivative \(\frac{\partial k(x_i, x_j)}{\partial x_i}\) for each of the three covariance expresssions.</p>
 
 <p><em>Cubic covariance</em></p>
 
@@ -167,27 +189,27 @@ This equation gives us a single element of the gradient, namely \(d g(x)/dx_i\).
 
 <div>
 \[
-k(x_1, x_2) = (x_a - x_b) x_b^2 / 2 + x_b^3/3
+k(x_i, x_j) = (x_a - x_b) x_b^2 / 2 + x_b^3/3
 \]
 
-Where \(x_b = min(x_1, x_2)\) and \(x_a = max(x_1, x_2)\).
+Where \(x_b = min(x_i, x_i)\) and \(x_a = max(x_i, x_i)\).
 </div>
 
 
-<p>Taking the derivative w.r.t. (x_2) gives:</p>
+<p>Taking the derivative w.r.t. (x_i) gives:</p>
 
 <div>
 \[
 \begin{align}
-\frac{\partial k(x_1, x_2)}{\partial x_2} &= 
+\frac{\partial k(x_i, x_j)}{\partial x_i} &= 
     \begin{cases}
-         x_1^2 / 2 & \text{if } x_2 >= x_1 \\
-         x_1 x_2 - x_2^2/2 & \text{if } x_2 < x_1 
+         x_j^2 / 2 & \text{if } x_i >= x_j \\
+         x_i x_j - x_i^2/2 & \text{if } x_i < x_i
     \end{cases} \\
             &= 
     \begin{cases}
-         x_b^2 / 2 & \text{if } x_2 >= x_1 \\
-         x_a x_b - x_b^2/2 & \text{if } x_2 < x_1 
+         x_b^2 / 2 & \text{if } x_i >= x_j \\
+         x_a x_b - x_b^2/2 & \text{if } x_i < x_j
     \end{cases} \\
 \end{align}
 \]
@@ -198,44 +220,23 @@ Where \(x_b = min(x_1, x_2)\) and \(x_a = max(x_1, x_2)\).
 
 <div>
 \[
-\frac{\partial k(x_1, x_2)}{\partial x_2} = 
-         x_b \left ( x_1  - x_b/2 \right ) \tag{2}
+\frac{\partial k(x_i, x_j)}{\partial x_i} = 
+         x_b \left ( x_j  - x_b/2 \right ) \tag{2}
 \]
 </div>
-
-
-<p>Note that if the goal is to find \(K' = \frac{\partial{K}}{\partial{x_i}}\), the on-diagonal element \(k'_{i i}\) needs a slightly different formula, because the kernel is a function of a single variable, \(x_i\).</p>
-
-<div>
-\[
-\begin{align}
-\frac{\partial k(x_i)}{\partial x_i} &= 
-    \frac{\partial}{\partial x_i} x_i^3/3 \\
-        &= x_i^2 \tag{3}
-\end{align}
-\]
-
-
-Compare this with the general formula: if we plugged-in \(x_i'\) to both inputs of equation (2), we'd get \(x_i^2/2\), which underestimates the derivative by half.  We'll see in the next section that when computing \(g'\) the "wrong" expression for \(k'_{ii}\) is actually more useful than the correct one, because we'll need to scale it by 0.5 anyway.
-
-</div>
-
-
-
-
-<p></p>
 
 
 <p><em>Linear Covariance</em></p>
 
-<p>Recall the cubic covariance expression:</p>
+<p>Recall the linear covariance expression:</p>
 
 <div>
 \[
-k(x_1, x_2) = x_1 x_2
+k(x_i, x_j) = x_i x_j
 \]
 
-The derivative w.r.t. \(x_2\) is simply \(x_1\).
+The derivative w.r.t. \(x_i\) is simply \(x_j\).
+
 </div>
 
 
@@ -245,10 +246,10 @@ The derivative w.r.t. \(x_2\) is simply \(x_1\).
 
 <div>
 \[
-k(x_1, x_2) = k
+k(x_i, x_j) = k
 \]
 
-The derivative w.r.t. \(x_2\) is zero.
+The derivative w.r.t. \(x_i\) is zero.
 </div>
 
 
@@ -278,59 +279,39 @@ end
 
 <p>I think we can get directional derivatives of \(K\) by taking the weighted sum of partial derivatives, where the weights are the component lengths of the direction vector.  I have yet to confirm this beyond a hand-wavy hunch, and in practice, this might not even be needed, since computing the full gradient is so efficient.</p>
 
-<h2>Sparsity of K'</h2>
+<h2>Full gradient</h2>
 
-<p>The sparsity of \(\frac{\partial K}{\partial x_i}\) actually allows us to further simplify formula (1) for \(g'\), ultimately allowing us to compute the entire gradient in a single matrix multiplication.</p>
+<p>As we saw earlier, \(\frac{\partial K}{\partial x_i}\) is sparse, and has the form in equation (4).  We can use the sparsity to ultimately compute the entire gradient in a single matrix multiplication.</p>
 
-<p>First observe that K' is only nonzero on the i-th row and column:</p>
+<p>First we'll rewrite \(g'\) in terms if \(\delta_i\)</p>
 
 <div>
 \[
-    k'_{i,j} = 
-    \begin{cases}
-        \delta_{ij} & \text{if } i = j \\
-        0 & \text{otherwise}
-    \end{cases}
-\]
-
-where \(\delta_{ij} = \frac{\partial k_{ij}}{\partial x_i} \).
-
-For convenience, we'll define the vector \(\Delta_i = [\delta_{i1}, ..., \delta_{in}]^\top\).
-
-
-Let \(g_i'\) be the partial derivative of \(g\) w.r.t. \(x_i\), with the entire gradient denoted by \(\nabla g = [g'_1, ..., g'_n]^\top\).  Using sparsity, eq. (1) can be rewritten as
-
-\[
-    g_i' = \frac{1}{2} z_i (\delta_{i1} z_1 + ... + \delta_{i(i-1)} z_{i-1} + \sum_j \delta_ij z_j + \delta_{i(i+1)} z_{i+1} + ... + \delta_{in} z_n)
-\]
-
-The expression in the parentheses is almost a dot product of z and \(\Delta_i\), but with the i-th term replaced with the dot product of z and \(\Delta_i\).  We can re-write the expression in terms of dot products, minus a correction.
-
-\[
 \begin{align}
-    g_i' = \frac{1}{2} z_i (2 * z \cdot \Delta_i - z_i \delta_i) \\ 
-       = z_i \, z \cdot \Delta_i' \\
+g' &= \frac{1}{2} z^\top K' z \\
+   &= \frac{1}{2} z^\top C z + z^\top C^\top z \\
+   &= \frac{1}{2} \left \{ (0 \, \dots \, z^\top \delta_i \, \dots \, 0) z + z^\top (0 \, \dots \, \delta_i^\top z \, \dots \, 0)^\top \right \} \\
+   &= z_i (\delta_i \cdot z)
 \end{align}
 \]
+</div>
 
-Where \(\Delta_i'\)  is equal to \(\Delta_i\) in all elements except the i-th, which is equal to \(0.5 \lambda_i\).  Note that we can get \(\Delta_i'\) by using equation (2) above instead of equation (3), which allows us to avoid having a separate implementation for on-diagonal elements.
 
-Since each \(g_i\) arises from a dot product, we can compute \(\nabla g\) using matrix multiplication.  Let \(\Delta' = [\Delta'_1, ..., \Delta'_n] \), i.e. the matrix whose i-th column is \(\Delta'_i\).  The gradient expression becomes
+<p>We can generalize this to the entire gradient using matrix operations:</p>
 
+<div>
 \[
 \begin{align}
-    \nabla g = z \odot (\Delta' z) \tag{4}
+    \nabla g = z \odot (\Delta z) \tag{4}
 \end{align}
 \]
-
-where \(\odot\) denotes element-wise multiplication.
-<br /><br />
-To handle multiple dimensions, simply apply to each dimension independently and sum the results.
 
 </div>
 
 
+<p>Where \(\Delta\) is the matrix whose ith row is \(\delta_i\), and \(\odot\) denotes element-wise multiplication.</p>
 
+<p>To handle multiple dimensions, simply apply to each dimension independently and sum the results.</p>
 
       <address class="signature">
         Posted by

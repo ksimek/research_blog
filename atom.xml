@@ -4,13 +4,1180 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-11-19T22:11:54-07:00</updated>
+ <updated>2013-12-05T23:30:16-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Troubleshooting excessive index drift in endpoints; fixing Hessian under variable transformation.</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/05/work-log"/>
+   <updated>2013-12-05T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/05/work-log</id>
+   <content type="html">&lt;p&gt;Getting bizarre spikes in indices during optimization.  Confirmed that removing the spikes will improve ML, but there's a steep well between the two local minima as we reduce the index value:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-05-ml_vs_index.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The index starts at a fairly reasonable initial value, so my only guess is that the Hessian is suggesting a large step which happens to step over the well.&lt;/p&gt;
+
+&lt;p&gt;I'm wondering if the hessian is screwy; or maybe it's just the transformation we're using.  Optimizing raw indices doesn't exhibit this problem, but it is a problem in our our current approach of working with log differences to prevent re-ordering.&lt;/p&gt;
+
+&lt;p&gt;A prior over index spacing should probably prevent this; I'm hesitatnt to add the extra complexity at this point, considering the additional training and troubleshooting it would entail.&lt;/p&gt;
+
+&lt;p&gt;Should unit test the transformation.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Gradient looks okay.&lt;/p&gt;
+
+&lt;p&gt;On-diagonal elements have significant error!&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-05-hessian_error.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Actually, significant off-diagonal error, but on-diagonal dominates.&lt;/p&gt;
+
+&lt;p&gt;Since gradient is fine, and it uses the same jacobian, I'm guessing the problem isn't the jacobian transformation, but the hessian itself.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Confirmed.  diagonal is (mostly) too high, error on order of 1e-3.  Gradient error is around 1e-9.&lt;/p&gt;
+
+&lt;p&gt;Detective work.  Look at diagonal of each Hessian term, compare to residual of diagonal, look for patterns.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Ugh, worst afternoon ever.  Spent hours trying every trick in the book to track down the source of the error, including lots of time looking at the raw Hessian (it wasn't the raw Hessian).  Finally found the bug: I formula I used for the chain rule for Hessians was wrong.  In particular, it was missing a second term that (in my problem) corresponded to adding the transformed gradient to the diagonal.   See &lt;a href=&quot;http://en.wikipedia.org/wiki/Chain_rule#Higher_derivatives_of_multivariable_functions&quot;&gt;Faa di Bruno's formula&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Total error is much reduced now, but not zero.  around 0.1, instead of 20 before, new results:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-05-hessian_error_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The norm-check is around 1e-4; very nice.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Re-running dataset 11 with hopes that we don't lose the global optimum.  Interesting observation: optimization requires more iterations than before to converge.  It seems a more conservative hessian results in smaller steps and is less likely   Looks better:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-05-reconst_hess_fixed.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Notice we're still getting offset, but at least the reconstruction is qualitatively better that before. However, now we're getting a small loop at the top:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-05-weird_loop.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;It seems to be caused by changing of index order between views. Needs some thought to best address.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Re-running on all datasets.  Hopefully excessive index drift won't be too big an issue.  Possibly an extra term to prevent drift far from initial points would be sensible.&lt;/p&gt;
+
+&lt;p&gt;Datasets 4,5  still drifts:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-05-drift_ds4.png&quot; alt=&quot;&quot; /&gt;
+&lt;img src=&quot;/ksimek/research/img/2013-12-05-drift_ds5.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Datasets 7,9  have detached curves&lt;/p&gt;
+
+&lt;p&gt;Dataset 10, curve 2 (?) appears to have failed to prune&lt;/p&gt;
+
+&lt;h2&gt;endpoint drift&lt;/h2&gt;
+
+&lt;p&gt;It looks like interior points are confined by their neighbor points from drifting too far, but end points have no such constraint.  After a small amount of drift, they're able to loop back on themselves and land directly on the backprojection line.  It's surprising that the extra flexibility afforded by large spacing between indices doesn't cause marginal likelihood to suffer, since most of the new configurations are bad ones.&lt;/p&gt;
+
+&lt;p&gt;Considerations&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;in-plone offset perturbation&lt;/li&gt;
+&lt;li&gt;penalize excessive drift&lt;/li&gt;
+&lt;li&gt;penalize excessive gaps (a-la latent GP model).&lt;/li&gt;
+&lt;li&gt;penalize shrinkage.&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/04/work-log"/>
+   <updated>2013-12-04T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/04/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15864&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Implemented re-ordering of indices.  Some are improved, some are worse.&lt;/p&gt;
+
+&lt;p&gt;Found bug in re-ordering -- the gradient and Hessian's transformation Jacobian wasn't updated properly.  After a few false starts, got it right.  Results seem much better.  Still getting signficant positive index offset for three curves, all others start at zero.  Post-procssing to force them to zero seems to fix; more investigation is warranted in the future.&lt;/p&gt;
+
+&lt;p&gt;Offset may be due to insufficient perturb variance?  Positive index offset only increases the variance of the first point; the conditional variance of future points is roughly the same for any index offset, due to conditional independence.  Possibly the perturb position variance is too low?  Carefull setting it too high, we'll get drift toward the camera.  Quick test: increase perturb position variance from 5&lt;sup&gt;2&lt;/sup&gt; to 20&lt;sup&gt;2.&lt;/sup&gt;  The offset phenomenon is exagerated.  When position perturbations are left in, the attached model moves all over the place, over 100 mm at times. Well beyond the perturb variance.&lt;/p&gt;
+
+&lt;p&gt;Remember that increasing the perturb variance increases the marginal within-view variance, too.&lt;/p&gt;
+
+&lt;h2&gt;Reintroducing connections.  All bad behaviors in dataset 8 appear to be fixed!&lt;/h2&gt;
+
+&lt;p&gt;Running on dataset 9.  Crashed.  missing views of some curves.  Going into ground truth tool to fix...&lt;/p&gt;
+
+&lt;p&gt;Still crashing.  bug in process_gt2 -- new minimum points code. fixed.&lt;/p&gt;
+
+&lt;p&gt;Running okay, not much movement even though dataset has significant movement.&lt;/p&gt;
+
+&lt;p&gt;We were removing perturbations coming from the rate kernel.  new getting more movement, still not the right kind.&lt;/p&gt;
+
+&lt;p&gt;plotting triangulated data over reconstructed data.  Significant offset, no explanation:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-04-ds9_reconst_and_triangulation.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Intrestingly, one curve wasn't properly connected to the parent; that curve shows no offset.  Re-running with no connections to test this observation.  Offset seems gone, ecept for the middle part of the root curve:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-04-ds9_reconst_and_riangulation_no_connection.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Observation: main curve shifts a lot between views; other curves have almost no shift. Possible index shrinkage problem?&lt;/p&gt;
+
+&lt;p&gt;measure index shrinkage: index vs. distance&lt;/p&gt;
+
+&lt;p&gt;If position variance is too low, we might be getting a pull toward the origin.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Off-center may be caused by pulling toward camera in per-view perturbation reconstructions.  The overall reconstruction is basically the mean of the per-view reconstructions, so if the camera-pull isn't symmetric between views, this can lead to significant shift in the mean.&lt;/p&gt;
+
+&lt;p&gt;Indeed, lowering the perturb position variance reduces reconstruction offset.  Recall that camera-pulling occurs because likelihood cylinders converge as they approach the camera.  See the &lt;a href=&quot;/ksimek/research/2013/08/06/work-log/&quot;&gt;original discussion of this phenomenon back in August&lt;/a&gt;.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2&gt;Non-isotropic perturbation offset variance&lt;/h2&gt;
+
+&lt;p&gt;Idea: can we limit offset perturbation to only occur in the directions of the imaging plane?  It seem possible -- just have constant offset in xy, zero offset in z, and rotate to match camera.  Can even add this to S, so it's part of that noise model.  This should take care of camera-pulling, at least to the extent that it's caused by the offset model.  Can even scale offset variance based on the distance from the camera, effectively using pixel units instead of world units.&lt;/p&gt;
+
+&lt;h2&gt;closing&lt;/h2&gt;
+
+&lt;p&gt;Running current version on all datasets.&lt;/p&gt;
+
+&lt;p&gt;Program crashes if curves are missing.  Regression in code that constructs Track assoc -- emtpy curves weren't being removed. Fixed.&lt;/p&gt;
+
+&lt;p&gt;Will inspect results in the morning.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/03/work-log"/>
+   <updated>2013-12-03T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/03/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15864&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Fixed change-of-variable transformation for Hessian.  OPtimization now finishes with fewer iterations and with higher likelihood solution.&lt;/p&gt;
+
+&lt;p&gt;Still getting weird overshoot curves:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-03-new_recons_3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;It seems that our optimization occasionally causes large DC offset compared to the unoptimized indices.  See below, blue is original, green is optimized.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-03-updated_indices_1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;On the other hand, some indices are much improved.  Here's our always problematic curve #10, see how the large gap after the first two indices is removed.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-03-updated_indices_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The DC offset issue raises two questions: (1) why isn't offset of zero preferred, and (2) why does DC offset result in overshooting?&lt;/p&gt;
+
+&lt;p&gt;I think I know the answer to (2): we always start reconstructions at index zero.  So if the evidence starts at index 10, the reconstrution will always draw the segment between index 0 and 10, even if there's no evidence.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Cached prior K is used in gradient computation; cache isn't updated when indices change.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;On second look, I was wrong, cached K is updated in a call to &lt;code&gt;att_set_start_index_2&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;I'll probably need to update children branch indices when parent indices change.  Or only do index optimization in isolation.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Why is DC offset preferred?  It's not an inference problem; confirmed that zero-offset indeed has a lower ML (not by much though).&lt;/p&gt;
+
+&lt;p&gt;It's clear that the curve is beneficting from extra freedom gained by starting at a higher index.  The question is which parameter is encouraging this (smoothing, offset, rate)?&lt;/p&gt;
+
+&lt;p&gt;Lowering position variance below the optimal point reverses the trend, surprisingly.  Increasing perturb position variance helps, but doesn't reverse.&lt;/p&gt;
+
+&lt;p&gt;Increasing rate variance past the optimal point reverses the trend, but the effect is not dramatic.&lt;/p&gt;
+
+&lt;p&gt;Increasing smoothing variance far past optimal shows a dramatic trend reversal.&lt;/p&gt;
+
+&lt;p&gt;Increasing rate variance makes position variance behave naturally -- zero offset is better for all values of position variance, with peak difference near the optimal.  Correction: at very low position variance ( &amp;lt;= 5) the positive-offset model looks better, as we'd expect, since offset makes the model more forgiving.&lt;/p&gt;
+
+&lt;h2&gt;Correction: increasing position variance is required for some curves.&lt;/h2&gt;
+
+&lt;p&gt;Let's re-run with larger rate variance.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;After increasing rate variance, indicies grow without bound!  Eventually they get into the range of 4e6.  Its our old friend, curve #10.  This is very surprising, because the marginal likelihood should strongly discourage such large indices, since the number of poor configufations grows with index magnitude.&lt;/p&gt;
+
+&lt;p&gt;Could add a regulating factor, but it really seems like this shouldn't be necessary.&lt;/p&gt;
+
+&lt;p&gt;Fixed by simply returning -inf on failure.  It seems this phenomenon is simply the result of an aggressive step in the wrong direction.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;I'm starting to realize the allowing the indices to move freely can result in all kinds of subtle issues.  For example, nothing prevents the spacing between indices from shrinking simultaneously, because the rate kernel is still happy (in fact, happier), the curve just appears to be moving more quickly.  If the smoothing variance was set too high, this &quot;quickening&quot; makes the marginal likelihood happier, because points have less freedom to move in space -- the prior's slack is pulled out.&lt;/p&gt;
+
+&lt;p&gt;Something similar might be happening to cause indices to drift upward simultaneously.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Conclusion:&lt;/strong&gt; Whatever the dynamics, index optimization might be a good idea to get a decent first-pass MAP reconstruction, but indices should be re-mapped using chord-length parameterization when computing ML's and final reconstructions.&lt;/p&gt;
+
+&lt;p&gt;For now, just subtract the excess, so first index is zero.&lt;/p&gt;
+
+&lt;p&gt;Reconstructions look better, but curve 7 still overshoots at the beginning:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-03-new_recons_3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Possibly relaxing ordering constraints between views will fix this.&lt;/p&gt;
+
+&lt;p&gt;Relaxing smoothness variance a small amount makes it worse.  Arg...&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;OMG, plotting the 2D curve over the images shows significant offset!&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-03-orrset_error_lo_res.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;hi resolution:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-03-offset_error_hi_res.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Notice curve #7 (dark green) is waaaay off on it's first point.  What's going on here?  I've re-traced that curve twice, is there some offset being added in opengl?  Why haven't we seen the evidence of this before?&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;check other views for offset error&lt;/li&gt;
+&lt;li&gt;check other datasets for offset error&lt;/li&gt;
+&lt;li&gt;quantify offset error (1 pixel?)&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Looks like curves are shifted left by 0.5 pixels and down by 1.5 pixels.  Part of the culprit is the flip_y function, which erroneously added 1 after flipping (presumably to account for the pixel grid).  This brings it to within 0.5 in both directions.  This is due to an ill-advised line I had added in the ground-truth tool, which translated everything by 0.5 pixels before rendering.  I presumably wanted (0,0) to render in the middle of the bottom-left pixel, but in retrospect, this is stupid.&lt;/p&gt;
+
+&lt;p&gt;Added option 'halfPixelCorrection' for process_gt_2.  Left half-pixel offset in ground-truth tool for now; with intent to fix all existing ground truth files and then remove the offending line of code.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Starting to get some real stairstep patterns in the index spacing.  Almost certainly this means points from different views want to change order.  Do this next&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Index optimization, end-to-end</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/02/work-log"/>
+   <updated>2013-12-02T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/02/work-log</id>
+   <content type="html">&lt;p&gt;Troubleshooting ML optimization.&lt;/p&gt;
+
+&lt;p&gt;Found a few bugs in the optimization code.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;math bug in variable transformation formula.  Applying chain rule to account for transformation used wrong formula.&lt;/li&gt;
+&lt;li&gt;math bug in new version of gradient function.  Used Uc where Uc' was called for (transpose of cholesky)&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;As a result of bug #2, decided to re-implement end-to-end test (which hadn't been run for some time; was running a unit test on synthetic data).  Refactored test to use the functional style in &lt;code&gt;test/test_ml_deriv.m&lt;/code&gt;, added hessian computation.&lt;/p&gt;
+
+&lt;p&gt;Fixed gradient looks good.  Hessian is way off.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;found some bugs in hessian&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;forgot to include terms from linear covariance function.&lt;/li&gt;
+&lt;li&gt;forgot to scale second derivitives by variance parameters.&lt;/li&gt;
+&lt;li&gt;used H1 + H2 instead of H1 - H2&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;All of these weren't caught in the unit test, because everything was tested in isolation, with scaling constants omitted.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Looks&lt;/em&gt; a lot better now, still some error on the order of 1e-2.  Most troubling isn't the magnitude, but the fact that the error seems to be structured, as opposed to random:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-02-hessian_error.png&quot; alt=&quot;hessian error&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We're comparing against numerical approximation, so the error might be in the approximation, not in the math.  For now we'll proceed, but there's probably room for further investigation in the future.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Ran index optimization, and results for curve #10 are much improved.  Curve #7 still overshoots, but beyond that, no significant nastiness.&lt;/p&gt;
+
+&lt;p&gt;Initially, we were getting errors from the gradient checker.  Swtiching the central differences fixed it.&lt;/p&gt;
+
+&lt;p&gt;Interestingly, the optimization algorithm takes 10X to 30x more iterations to complete.  (update: Hessian isn't being transformed correctly)&lt;/p&gt;
+
+&lt;p&gt;Recall that we increased the position-perturb variance significantly.  This seems to improve ground-truth reconstructions; setting it too small causes bizarre curves and over-extensions.  Below, we see the old method, followed by the new method with large position perturbation variance, and the new method with small perturbation variance.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-02-old_recons.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Above: old method&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-02-new_recons_1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Above: new method, large position perturbation variance&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-02-new_recons_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Above: new method, small position perturbation variance&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Tried fixing hessian, results are worse.  Probably got the transformation math wrong.&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;per-view ordering constraints&lt;/li&gt;
+&lt;li&gt;fix hessian transformation&lt;/li&gt;
+&lt;li&gt;investigate curve #7
+
+&lt;ul&gt;
+&lt;li&gt;possibly larger position perturbation variance will help?&lt;/li&gt;
+&lt;li&gt;maybe fixing hessian will help?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/01/work-log"/>
+   <updated>2013-12-01T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/01/work-log</id>
+   <content type="html">&lt;p&gt;Implemented first cut on index optimization using ML maximization.  Initial results aren't great; we currently enforce index ordering, but we probably need to allow re-ordering of indices between curves, while preserving ordering within curves.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Implementing, testing Hessian</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/29/work-log"/>
+   <updated>2013-11-29T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/29/work-log</id>
+   <content type="html">&lt;p&gt;Spent most of the week implementing and testing the Hessian, now done.&lt;/p&gt;
+
+&lt;p&gt;The biggest issue was correcting the math error mentioned in the previous post.  Developed a general equation for the second derivitive of the kernel matrix, K, and updated all formulas &lt;a href=&quot;/ksimek/research/2013/11/23/reference/&quot;&gt;in the writeup&lt;/a&gt; to incorporate it.&lt;/p&gt;
+
+&lt;p&gt;Finished hessian test program, &lt;code&gt;test/test_ml_derivs.h&lt;/code&gt;, which compares the analytical solution to one obtained by finite differences.  The error that arises in the Hessian during finite differences was shockingly large and unstable -- lowering the delta below 1e-4 caused very large errors (&gt; 1%) in finite differences.  This was a significant source of confusion and frustration during testing.  In order to track down the source of errors, performed numerical and analytical first and second derivatives of all intermediate values, and tracked growth of error through the equations.  In the end, error appeared to grow slowly through each computation, with the largest error arising at the beginning, in K'.&lt;/p&gt;
+
+&lt;p&gt;It also took a long time to find a reasonable way to compare the analytical and numerical gradients.  Absolute differences were deceiving, because small absolute diferences can actually be large in terms of percentages.  On the other hand, when the true gradient is near zero, the percent error skyrocketed.  Ultimately followed the lead of Rasmussen's &lt;a href=&quot;http://learning.eng.cam.ac.uk/carl/code/minimize/checkgrad.m&quot;&gt;checkgrad.m&lt;/a&gt;, which divides the determinant of the difference by the determinant of the sum.  Was able to confirm results to an error of 1e-3.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Implemented Hessian in &lt;code&gt;curve_ml_gradient_3.m&lt;/code&gt;, refactoring existing computation to share as much as possible with the hessian.  New function runs 4x slower than the gradient alone in a 1500-dimensional problem, which isn't bad considering the numerical Hessian would take 1500&lt;sup&gt;2&lt;/sup&gt; = 2.25 million times more running time!&lt;/p&gt;
+
+&lt;p&gt;Still need to test against a few random elements of the numerical Hessian.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Next step is to run &lt;code&gt;fminunc&lt;/code&gt; with the hessian to optimize indices after calling &lt;code&gt;corr_to_likelihood&lt;/code&gt;.  If that fixes our problems, we should roll it into &lt;code&gt;corr_to_likelihood&lt;/code&gt; and which could simplify the code significantly.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Covering Vision Course</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/25/work-log"/>
+   <updated>2013-11-25T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/25/work-log</id>
+   <content type="html">&lt;p&gt;Make sure to get through slides, because homework relies on the later stuff&lt;/p&gt;
+
+&lt;p&gt;Arrive at 1:30, start at 1:35, eand at 2:45 (can run over slightly).  Location: Shantz 242E&lt;/p&gt;
+
+&lt;p&gt;Monday topic: Hough transform, robust estimators.&lt;/p&gt;
+
+&lt;p&gt;Must do ransac, 15 minutes will do.&lt;/p&gt;
+
+&lt;h2&gt;Testing hessian formulae&lt;/h2&gt;
+
+&lt;p&gt;Realized I got the formula for \(\frac{\partial \delta_i}{\partial x_j}\) wrong for the case where \(i == j\).  It's actually a dense vector, not a sparse one, which changes all of my computations.  Should only affect on-diagonal elements of the hessian.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Marginal likelihood gradient (part 2)</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/25/reference"/>
+   <updated>2013-11-25T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/25/reference</id>
+   <content type="html">&lt;p&gt;Today, I'll cover some additional issues not covered in the &lt;a href=&quot;/ksimek/research/2013/11/10/reference/&quot;&gt;earlier reference post on this topic&lt;/a&gt;.  First, the original gradient derivation was missing a term corresponding to the normalization constant (which isn't constant as a function of the index set).  Second, the previous write-up assumed 1-dimensional data; today we'll talk about generalizing the formulae to three dimensions.&lt;/p&gt;
+
+&lt;h2&gt;Normalization constant&lt;/h2&gt;
+
+&lt;p&gt;Recall the gaussian equation, as a function of indices:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\frac{k}{|\Sigma(x)|^{\frac{1}{2}}} \exp\left\{- \frac{1}{2} (y - \mu)^\top \Sigma^{-1}(x) (y - \mu) \right\}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Taking the log gives&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\log(k) - \frac{1}{2} \log(|\Sigma(x)|) + \left( -\frac{1}{2} (y - \mu)^\top \Sigma^{-1}(x) (y - \mu) \right )
+\]
+
+When taking the derivative, the first term vanishes, and the third term was handled [in the last writeup](/ksimek/research/2013/11/10/reference/) as \(\nabla g\).  We need to find the derivative of the second term.  Let \(Z(x) = \frac{1}{2} \log(|\Sigma(x)|) \). Also, let \(C_{(i)} = S \, \delta_i \, S_i^\top \), so \(U'_{(i)} = C_{(i)} + C_{(i)}^\top\)
+&lt;/div&gt;
+
+
+&lt;p&gt;According to equation (38) of The Matrix Cookbook, the derivative of the log determinant is given by:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    \frac{\partial Z(x) }{\partial x_i} &amp;= \frac{1}{2} \text{Tr}\left[ U^{-1} U' \right] \\
+                &amp;= \frac{1}{2} \text{Tr}\left[ U^{-1} (C + C^\top )\right] \\
+                &amp;= \frac{1}{2} \text{Tr}\left[ U^{-1} C \right]  + \text{Tr}\left[ U^{-1}  C^\top \right] \\
+                &amp;= \frac{1}{2} \text{Tr}\left[ U^{-1} S \delta_i S_i^\top \right]  + \text{Tr}\left[ U^{-1}  S_i \delta_i^\top S^\top \right] \\
+                &amp;= \frac{1}{2} \text{Tr}\left[ S_i^\top U^{-1} S \delta_i \right]  + \text{Tr}\left[ \delta_i^\top S^\top U^{-1}  S_i \right] \\
+                &amp;= \frac{1}{2} 2 \text{Tr}\left[ S_i^\top U^{-1} S \delta_i \right]  \\
+                &amp;= \frac{1}{2} 2 \text{Tr}\left[ S_i^\top U^{-1} S \delta_i \right]  \\
+                &amp;= S_i^\top U^{-1} S \delta_i \\
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Since this inner product gives us a single element of the gradient, we can get the entire gradient using matrix multiplication.&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    \nabla Z(x) &amp;= \text{diag}(S^\top U^{-1} S \Delta^\top \\
+    &amp;= \sum_i (S \odot U^{-1} S \Delta^\top )_{(i:)} \tag{1}
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Note that we conly care about the diagonal elements of the matrix product.  The second expression avoids computing the off-diagonal elements by taking only the dot product of matrix rows/columns that result in the diagonal elmeents.  To do this, we use the Hadamard product, \(\odot\), and then sum over rows.&lt;/p&gt;
+
+&lt;h2&gt;Generalizing to three dimensions&lt;/h2&gt;
+
+&lt;p&gt;We replace several matrices with their 3D version.&lt;/p&gt;
+
+&lt;p&gt;The 3D version of \(\delta_i\) is:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\delta_i^{(3)} = P \left ( \begin{array}{ccc}\delta_i &amp; 0 &amp; 0 \\ 0 &amp; \delta_i &amp; 0 \\ 0 &amp; 0 &amp; \delta_i \end{array}\right) 
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Here, P is a permutation matrix such that PM converts the rows of M from \((x_1, x_2, ..., y_1, y_2, ..., z_1, z_2, ...)\) to \((x_1, y_1, z_1, x_2, y_2, z_2, ...)\).&lt;/p&gt;
+
+&lt;p&gt;Similarly, the 3D version of \(\Delta\) is&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\Delta^{(3)} = P \left ( \begin{array}{ccc}\Delta &amp; 0 &amp; 0 \\ 0 &amp; \Delta &amp; 0 \\ 0 &amp; 0 &amp; \Delta \end{array}\right)  P^\top
+\]
+
+The vector \(S_i\) becomes a three-column matrix, \([ S_{x_i} S_{y_i} S_{z_i}]\), corresponding to the noise-covariance of the i-th 3D point.
+&lt;/div&gt;
+
+
+&lt;p&gt;The expression for \(\frac{\partial Z(x)}{\partial x_i}\) is no longer a dot product, but the trace of a 3x3 matrix.  In practice, this is easy to implement, by replacing all matrices in eq (1) with their 3D equivalent, and then suming each (xyz) block in the resulting vector.  In matlab, we can do this cheaply by reshaping the vector into a 3x(N/3) matrix and summing over rows. If the old expression was&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;grad_Z = sum(S .* inv(U) S Delta')
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;the new expresssion becomes&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;grad_Z_3d = sum(reshape(sum(S .* inv(U) S Delta_3d'), 3, []));
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Applying to \(\nabla g\)&lt;/h2&gt;
+
+&lt;p&gt;We can apply a similar transformation to the other term of the gradient (which we called \(\nabla g\) &lt;a href=&quot;/ksimek/research/2013/11/10/reference/&quot;&gt;in this post&lt;/a&gt;.  Recall the old expression for a single elements of the graident was&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    \frac{\partial g}{\partial x_i} = \frac{1}{2} z^\top K'_{(i)} z \tag{2}
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Recall that \(K'\) in 1D is sparse, having the form&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    K' = 
+    \left( \begin{array}{c} 
+        0 &amp; 0 &amp; \cdots &amp; \delta_i &amp; \cdots &amp; 0
+    \end{array}\right )
+    +
+    \left( \begin{array}{c} 
+        0 &amp; 0 &amp; \cdots &amp; \delta_i &amp; \cdots &amp; 0
+    \end{array}\right )^\top
+\]
+
+Generalizing to the 3D equivalent, \(K'^{(3)} \), the equation becomes:
+&lt;/div&gt;
+
+
+
+
+&lt;div&gt;
+\[
+\begin{align}
+    K'^{(3)} &amp;= 
+    P \left( \begin{array}{c} 
+        0 &amp; 0 &amp; \cdots &amp; \delta_i^{(3)} &amp; \cdots &amp; 0
+    \end{array}\right ) 
+    +
+    \left( \begin{array}{c} 
+        0 &amp; 0 &amp; \cdots &amp; \delta_i^{(3)} &amp; \cdots &amp; 0
+    \end{array}\right )^\top P^\top
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;In other words, the \(\delta_i\) in \(K'\) is replaced with a permuted block-diagonal matrix of three \(\delta_i\)'s.
+The dot product in equation (2) then becomes the sum of the three individual dot products for x, y, and z coordinates.&lt;/p&gt;
+
+&lt;p&gt;We can use this observation to apply this generalization to the full gradient equation.  Recall the 1D equation for the full gradient,&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    \nabla g = z \odot (\Delta' z) \tag{4}
+\end{align}
+\]
+
+Like in the case of a single element of the gradient, we can generalize to 3D by simply taking the sum of the result for each of the x, y, and z dimensions.  We can accomplish this in a vectorized way by replacing \(\Delta\) with it's 3D equivalent \(\Delta^{(3)}\), and then sum each block of (xyz) coordinates in the resulting vector, like we did for \(\nabla Z\).  (Note that here, we assume \(z\) is computed using the 3D prior covariance, \(K^{(3)}\), and needs no explicit lifting to 3D).  In matlab, this looks like
+
+&lt;/div&gt;
+
+
+&lt;pre&gt;&lt;code&gt;grad_g = sum(reshape(z .* (Delta_3d' * z), 3, []))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Mathematically, we can represent this summation by right-multiplying by permuted stack of identity matriceces.&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    \nabla g^{(3)} = \left [ z \odot (\Delta^{(3)\top} z) \right ] P \left ( \begin{array}{c} I \\ I \\ I \end{array} \right )
+\end{align}
+\]
+&lt;/div&gt;
+
+
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/23/work-log"/>
+   <updated>2013-11-23T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/23/work-log</id>
+   <content type="html">&lt;p&gt;Need to re-focus my efforts on getting WACV datasets working by December 10.  My recent efforts have shown good progress on the hard problem of inferring the index set under difficult conditions, but I only have about 2 weeks to get results and write the paper, so I should be focusing on a few quick-and-dirty fixes first (improved camera calibration, naive correspondence matching).  These fixes only apply to the super-clean WACV datasets, so they won't help for ECCV, but they'll get the paper out, which is what matters at the moment.&lt;/p&gt;
+
+&lt;p&gt;TODO today:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;save wacv results from old cameras&lt;/li&gt;
+&lt;li&gt;supplant camera files with recalibrated ones.&lt;/li&gt;
+&lt;li&gt;re-run with new cameras&lt;/li&gt;
+&lt;li&gt;compare results (hopefully much improved)&lt;/li&gt;
+&lt;li&gt;investigate possible bug with continuous index-correction, i.e. FIX_WORLD_T(or omit entirely?, or replace with quasi-newton?)
+
+&lt;ul&gt;
+&lt;li&gt;remember, this doesn't need to be fast&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;hr /&gt;
+
+&lt;h2&gt;next&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;better data curve subdivision&lt;/li&gt;
+&lt;li&gt;invsetigate crap curve #2&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Investigating bad reconstruction of curve 2&lt;/h2&gt;
+
+&lt;p&gt;it was reversed. fixed.&lt;/p&gt;
+
+&lt;p&gt;Wait, now several views of several curves are missing.  Also, several corrections I remember making are now missing.  What is going on?  Did I somehow overwrite an old file?  Can I recover it from time machine?&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Okay, recovered from time machine.  Still not sure what caused this.&lt;/p&gt;
+
+&lt;h2&gt;Running WACV w/ linear-map correspondences&lt;/h2&gt;
+
+&lt;p&gt;Getting NaN when estimating branch distance.  Coincident points aren't handled sensibly.  Fixed; also added handling of degenerate curves (single point repeated multiple times).&lt;/p&gt;
+
+&lt;p&gt;Running succeeded (FIX_WORLD_T is off).&lt;/p&gt;
+
+&lt;p&gt;The reconstructed result for dataset 8 looks good (for the first time ever), but the base point moves from view to view, even though we've removed the offset component from the kernel.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Found the problem:  had commented out some lines during debugging; caused offset perturbations to remain in the reconstruction.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Enabling FIX_WORLD_T.  Rerun succeeded, result looks reasonable; seems 98% identical to the version with FIX_WORLD_T disabled.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Getting some attachment issues.  Deteched reconstruction shows a few curves were badly reconstructed. time to try new cameras&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;new cameras seem to be reconstructing everything in reverse???  is it an axis-flipping issue?&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;It turned out to be an error in my calibration routine.  I had x and y swapped in my 3D coordinates.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Everything is now working.  Result: New results aren't qualitatively different from results using old cameras.  Back to the drawing board.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;The failing curves seem to be caused by at least one view where the curve is view on-end.  The resulting reconstructed points have lots of variability as to where on the 3D curve they arise from; in some cases, the chosen point is well in to the &quot;extrapolation region&quot; of the curve, i.e. past the end of where the other well-localized points stop.&lt;/p&gt;
+
+&lt;p&gt;On the plus side, these badly localized points have lots of variance in the direction of error, so there is hope to correct them.  On the down side, the inferred index of these points forces them to be far from their true position.&lt;/p&gt;
+
+&lt;p&gt;This is an issue of poor indexing not being corrected.  Is it time to bring out the big guns and try maximizing the index set w.r.t. the marginal likelihood?  It seems like we've put this off long enough...&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Imlemented, but slooooooow.  Profiling shows the gradient calculation is the culprit, specifically, a dot product that is called once per dimension, per gradient evaluation. We should be able to replace that with a matrix multiplication to get a significant vectorization speedup.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Done, still slow.  It looks like the gradient itself is pretty fast (~100ms) but the first iteration of Quasi-Newton takes several hundred evaluations (probably to build up a good estimate of the hessian).  We should implement the hessian directly, which should be cheap using the cubic-time derivation, given the fact that we've already performed inversion.  Need to write-up this derivation, then implement and test.&lt;/p&gt;
+
+&lt;h2&gt;TODO (new)&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Fix cameras
+
+&lt;ul&gt;
+&lt;li&gt;done. no significant improvement&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Why is root point moving in the reconstruction?
+
+&lt;ul&gt;
+&lt;li&gt;fixed; debugging &quot;comment-out&quot; bug&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Try FIX_WORLD_T=true
+
+&lt;ul&gt;
+&lt;li&gt;done. not great.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Consider running index point optimization
+
+&lt;ul&gt;
+&lt;li&gt;in the works&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;run with denser point subdivision
+
+&lt;ul&gt;
+&lt;li&gt;done. slower, not significantly better results&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;gradient write-up: generalization from 1d to 3d&lt;/li&gt;
+&lt;li&gt;Gradient write-up: normalization component&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Hessian of Marginal Likelihood</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/23/reference"/>
+   <updated>2013-11-23T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/23/reference</id>
+   <content type="html">&lt;p&gt;Recall  the expression for the i-th element of the gradient of ML w.r.t. indices.&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+g'_i(x) &amp;= \frac{1}{2} z(x)^\top K'(x) z(x) - Z'_i(x) \\
+        &amp;= z_i(x) \delta_i^\top(x) z(x) - Z'_i(x) \\
+        &amp;= f_i(x) - Z'_i(x)
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Where \(\delta_i = k'(x_i, x_j)\), and \(Z'_i\) is the derivitive of the normalization constant.&lt;/p&gt;
+
+&lt;p&gt;The goal today is to derive the second derivitive, H.  Like the first derivitive, it will have two terms,&lt;/p&gt;
+
+&lt;div&gt;
+    \[
+    H = H_1 - H_2
+    \]
+&lt;/div&gt;
+
+
+&lt;p&gt;Ultimately, we'll split the second term \(H_2\) into two sub-terms:&lt;/p&gt;
+
+&lt;div&gt;
+    \[
+    H = H_1 - H_{2,A} - H_{2,B}
+    \]
+&lt;/div&gt;
+
+
+&lt;h2&gt;Prerequisite: \(\frac{\partial \delta_i}{\partial x_j}\)&lt;/h2&gt;
+
+&lt;p&gt;Recall that the elements of \(\delta_i\) are the partial derivatives of the kernel function w.r.t. its first input.  The second derivatives \(\delta_i\) will be given by the second partial derivatives of the kernel function.&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+\frac{\partial^2 k(x_i, x_j)}{\partial x_i^2} &amp;= 
+        x_j - \min(x_i, x_j)  \\
+\frac{\partial^2 k(x_i, x_j)}{\partial x_i \partial x_j} &amp;= 
+        \min(x_i, x_j) 
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;The derivative of the j-th element of \(\delta_i\) is derived below.&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+\frac{\partial \left(\delta_i \right)_j}{\partial x_k} 
+    &amp;= \frac{\partial^2 k(x_i, x_j)}{\partial x_i \partial x_k} \\
+    &amp;= (x_j - \min(x_i, x_j))\mathbb{1}_{k = i} + \min(x_i, x_j) \mathbb{1}_{k = j} 
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Note that this handles the special cases where k = i = j and \(k \neq i, k \neq j\).&lt;/p&gt;
+
+&lt;p&gt;We can generalizing to the full vector \(\delta_i\)&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+\frac{\partial \delta_i }{\partial x_k}  &amp;= A_{i} \mathbb{1}_{k = i}  + B_{ik}\\
+A_{i} &amp;= (x_1 - \min(x_i, x_1), \dots, x_j - \min(x_i, x_j), \dots)^\top  \\
+B_{ik} &amp;= (0, \dots, \underbrace{\min(x_i, x_k)}_\text{k-th element}, \dots, 0)^\top
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;The A term handles the on-diagonal hessian terms, whereas B is included in all terms.&lt;/p&gt;
+
+&lt;h2&gt;First term, \(H_1 = f_i'\)&lt;/h2&gt;
+
+&lt;p&gt;We use the product rule to take the derivitive of \(f_i = z_i \delta_i \cdot  z\).&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+\frac{\partial f_i(x)}{\partial x_j} &amp;=
+            \left ( \frac{\partial}{\partial x_j} \, z_i(x) \right ) \delta_i^\top(x) z(x)  +
+            z_i(x) \left ( \frac{\partial}{\partial x_j}\delta_i^\top(x) \right ) z(x) +
+            z_i(x) \, \delta_i^\top(x) \left ( \frac{\partial}{\partial x_j} z(x) \right ) \\
+&amp;=
+            z_i' (x) \, \delta_i^\top(x) \, z(x)  +
+            z_i(x) \, (A_{i}\mathbb{1}_{j = i} + B_{ij})^\top \, z(x) + 
+            z_i(x) \, \delta_i^\top(x) \, z'(x) \\
+&amp;=
+            z_i' (x) \, \delta_i^\top(x) \, z(x)  +
+            \mathbb{1}_{j = i} z_i(x) \, A_{i}^\top \, z(x) + z_i(x) \, \min(x_i, x_j) \, z_j(x)  +
+            z_i(x) \, \delta_i^\top(x) \, z'(x)
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;where&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+z' = z'_{(j)} = \frac{\partial z(x)}{\partial x_j} &amp;= \frac{\partial}{\partial x_j} S^\top U^{-1}(x) S y \\
+        &amp;= S V' S^\top y \\
+        &amp;= -S^\top U^{-1} U' U^{-1} S y \\
+        &amp;= -(S^\top U^{-1} S) K' (S^\top U^{-1} S) y
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Our goal is the generalize this to a single expression for the entire hessian matrix.
+Note that when \(i \neq j\), the third term disappears, so that term will become a diagonal matrix in the hessian expression.
+Let \(\mathcal{Z}' \) be the jacobian of \(z\).  We can express the hessian asWe can express the hessian as&lt;/p&gt;
+
+&lt;div&gt;
+\[
+H_1 = \mathcal{Z}' \odot \left[ \Delta \, z \, (1 \, 1 \, ...) \right] + M \odot \left(z z^\top \right ) + \text{diag}\left\{ z(x) \odot \Delta' z(x) \right\} +  \left[ z \, (1 \, 1 \, ...) \right] \odot \left[ \Delta \, \mathcal{Z}' \right]
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;where \(M\) is a matrix whose elements \(m_{ij} = \min(x_i, x_j)\),&lt;/p&gt;
+
+&lt;p&gt;\(\Delta\) is a matrix whose rows are composed of the \(\delta_i\) vectors,&lt;/p&gt;
+
+&lt;p&gt;\(\Delta'\) is the matrix whose i-th row is the vector \(A_i\),&lt;/p&gt;
+
+&lt;p&gt;\(\odot\) is the Hadamard matrix product,&lt;/p&gt;
+
+&lt;p&gt;and diag() is an operator that converts a vector into a diagonal matrix.&lt;/p&gt;
+
+&lt;h2&gt;Second term, \(Z_i''(x) = H_{2,A} + H_{2,B} \)&lt;/h2&gt;
+
+&lt;p&gt;Below are the expressions for the zeroth, first, and second derivitives of Z;&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+Z &amp;= 0.5 \log(\det(S K S^\top + I)) \\
+\frac{\partial Z}{\partial x_i} &amp;= 0.5 \text{Tr} \left[ U^{-1} U' \right] \\
+\frac{\partial^2 Z}{\partial x_i \partial x_j} &amp;= 0.5 \text{Tr} \left[ \frac{\partial U^{-1}}{\partial x_j} U' + U^{-1} \frac{\partial U'}{\partial x_j} \right] \\
+        &amp;= 0.5 \text{Tr} \left[ V'_{(j)} U'_{(i)} + U^{-1} U''_{(ij)} \right] \\
+        &amp;= 0.5 \left \{ \text{Tr} \left[ V'_{(j)} U'_{(i)} \right] + \text{Tr} \left[ U^{-1} U''_{(ij)} \right] \right\} \\
+        &amp;= 0.5 \text{Tr}[A] +0.5 \text{Tr}[B]
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Where&lt;/p&gt;
+
+&lt;div&gt;
+\[
+        A =  V'_{(j)} U'_{(i)} \\  
+        B = U^{-1} U''_{(ij)} 
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;These two terms correspond to the elements to the two hessian terms, \(H_{2,A}\) and \(H_{2,B}\).&lt;/p&gt;
+
+&lt;p&gt;We'll begin by finding \(Tr[A]\) and \(H_{2,A}\).&lt;/p&gt;
+
+&lt;p&gt;Observe that we can rewrite \(U_{(i)}'\) as&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+U'_{(i)} &amp;= S  K'  S^\top \\
+U'_{(i)} &amp;= S  (B + B^\top)  S^\top \\
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;where B is the sparse matrix,&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+B = \left( \begin{array}{ccccc}
+        \mathbf{0} &amp; \cdots &amp; \delta_i &amp; \cdots &amp; \mathbf{0}
+    \end{array}\right)
+\end{align}.
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;We can exploit this sparsity to further expand \(U'\) to&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+U'_{(i)} &amp;= \left(S \, \delta_i \right) S_i^\top  + S_i \left( S \, \delta_i \right)^\top \\
+         &amp;= C_{(i)} + C_{(i)}^\top
+\end{align}
+\]
+
+where \(C_{(i)} = S \, \delta_i \, S_i^\top \).
+&lt;/div&gt;
+
+
+&lt;p&gt;We can use this identity to expand \(\text{Tr}[A]\).&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    \text{Tr}[A] &amp;= \text{Tr}[V'_{(j)} U'_{(i)}] \\
+          &amp;= \text{Tr}[-U^{-1} U'_{(j)}U^{-1} U'_{(i)}] \\
+          &amp;= -\text{Tr}[U^{-1} \left( C_{(j)} + C_{(j)}^\top \right) U^{-1} \left( C_{(i)} + C_{(i)}^\top \right) ] \\
+          &amp;= -\text{Tr}[U^{-1} \left( C_{(j)} + C_{(j)}^\top \right) U^{-1} \left( C_{(i)} + C_{(i)}^\top \right) ] \\
+          &amp;= -\text{Tr}[\left( U^{-1}  C_{(j)} + U^{-1}C_{(j)}^\top \right) \left(U^{-1}  C_{(i)} + U^{-1}C_{(i)}^\top \right) ] \\
+          &amp;= -\text{Tr}\left [U^{-1}  C_{(j)} U^{-1}C_{(i)} + U^{-1}  C_{(j)} U^{-1}C_{(i)}^\top + U^{-1}C_{(j)}^\top U^{-1}C_{(i)} + U^{-1}C_{(j)}^\top U^{-1}C_{(i)} ^\top\right] \\
+          &amp;= -2 \text{Tr}\left [U^{-1}  C_{(j)} U^{-1}C_{(i)}\right]  - 2 \text{Tr}\left[U^{-1} C_{(j)} U^{-1}C_{(i)}^\top \right ] \\
+          &amp;= -2 \text{Tr}\left [U^{-1} \left( S \delta_j S_j^\top \right) U^{-1} \left ( S \delta_i S_i^\top \right)\right]  - 2 \text{Tr}\left[U^{-1} \left( S \delta_j S_j^\top \right) U^{-1}\left( S_i \delta_i^\top S^\top \right) \right ] \\
+          &amp;= -2 \text{Tr}\left [S_i^\top U^{-1} S \delta_j S_j^\top U^{-1} S \delta_i \right]  - 2 \text{Tr}\left[ \delta_i^\top S^\top U^{-1} S \delta_j S_j^\top U^{-1} S_i \right ] \\
+
+\end{align}
+\]
+
+The last identity exploits the fact that Traces are invariant under cyclic permutations.  Note that both expressions inside the trace operator are scalar products, which makes the trace operator redundant.  
+
+\[
+\begin{align}
+    \text{Tr}[A]
+          &amp;= -2 S_i^\top U^{-1} S \delta_j S_j^\top U^{-1} S \delta_i  - 2  \delta_i^\top S^\top U^{-1} S \delta_j S_j^\top U^{-1} S_i \\
+          &amp;= -2 \left( S_i^\top U^{-1} S \delta_j \right) \left(S_j^\top U^{-1} S \delta_i \right)  - 2  \left(\delta_i^\top S^\top U^{-1} S \delta_j \right) \left( S_j^\top U^{-1} S_i \right) \\
+\end{align}
+\]
+
+Here, we've regrouped the dot-products in each term to be a product of two dot-products.  We can generalize this for the full hessian as follows:
+
+\[
+\begin{align}
+    H_{2,A} &amp;= -\left( S^\top U^{-1} S \Delta^\top \right)^\top \odot \left( S^\top U^{-1} S \Delta^\top \right)  - \left(\Delta S^\top U^{-1} S \Delta^\top\right) \odot \left(S^\top U^{-1} S \right) 
+\end{align}
+\]
+
+&lt;/div&gt;
+
+
+&lt;p&gt;Next is the second term, \(\text{Tr}[B]\).&lt;/p&gt;
+
+&lt;p&gt;First lets derive \(U''\).&lt;/p&gt;
+
+&lt;div&gt;
+\begin{align}
+U''_{(ij)} = \frac{\partial U_{(i)}'}{\partial x_j} &amp;= 
+            \frac{\partial}{\partial x_j} \left \{ 
+            \left(S \, \delta_i \right) S_i^\top  +
+            S_i \left( S \, \delta_i \right)^\top 
+            \right \} \\
+            &amp;= \left(S \, \frac{\partial \delta_i}{\partial x_j} \right) S_i^\top  +
+            S_i \left( S \, \frac{\partial \delta_i}{\partial x_j} \right)^\top  \\
+            &amp;= S \, \left(A_i \mathbb{1}_{i = j} + B_{ij} \right) S_i^\top  +
+            S_i \left(A_i^\top \mathbb{1}_{i = j} + B_{ij}^\top \right) S^\top   \\
+            &amp;= \mathbb{1}_{i = j} S \, A_i \, S_i^\top + S\, B_{ij} S_i^\top +
+             \mathbb{1}_{i = j} \, S_i \, A_i^\top \, S^\top + S_i \, B_{ij} \, S^\top \\
+            &amp;= \mathbb{1}_{i = j} S \, A_i \, S_i^\top + \mathbb{1}_{i = j} S_i \, A_i^\top \, S^\top + S_j \min(x_i, x_j) S_i^\top + S_i \min(x_i, x_j) S_j^\top \\
+            &amp;= \mathbb{1}_{i = j} \left ( S \, A_i \, S_i^\top + S_i \, A_i^\top \, S^\top \right ) + \min(x_i, x_j) \left( S_i S_j^\top + S_j  S_i^\top \right)
+\end{align}
+&lt;/div&gt;
+
+
+&lt;p&gt;Now we can derive \(\text{Tr}[B]\).&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    \text{Tr}[B] &amp;= \text{Tr}[U^{-1} U''_{(ij)}] \\
+            &amp;= \text{Tr}[U^{-1} \left \{\mathbb{1}_{i = j} \left ( S \, A_i \, S_i^\top + S_i \, A_i^\top \, S^\top \right ) +  \min(x_i, x_j) \left( S_i S_j^\top + S_j S_i^\top \right) \right \} ] \\
+            &amp;= 
+            \mathbb{1}_{i = j} \text{Tr}\left [ U^{-1} S A_i S_i^\top \right ] +
+            \mathbb{1}_{i = j} \text{Tr}\left [ U^{-1} S_i A_i^\top S \right ] +
+            \min(x_i, x_j) \text{Tr}\left [ U^{-1} S_i  S_j^\top \right ] + \min(x_i, x_j) \text{Tr}\left [ U^{-1} S_j  S_i^\top \right ] \\
+            &amp;= 
+            \mathbb{1}_{i = j} \text{Tr}\left [ S_i^\top U^{-1} S A_i \right ] +
+            \mathbb{1}_{i = j} \text{Tr}\left [ A_i^\top S U^{-1} S_i \right ] +
+            \min(x_i, x_j) \text{Tr}\left [S_j^\top  U^{-1} S_i \right ] + \min(x_i, x_j) \text{Tr}\left [ S_i^\top U^{-1} S_j \right ] \\
+            &amp;= 
+            2 \mathbb{1}_{i = j}  S_i^\top U^{-1} S A_i +
+            2 \min(x_i, x_j) S_j^\top  U^{-1} S_i  \\
+\end{align}
+\]
+
+&lt;/div&gt;
+
+
+&lt;p&gt;This is for a single term of the Hessian.  We can rewrite it to compute the entire Hessian using matrix arithmetic:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    H_{2,B} = M \odot S^\top U^{-1} S + ( S^\top \left ( U^{-1} S \mathcal{A} \right ) ) \odot I
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Here, M is defined as, \(m_{ij} = \min(x_i, x_j)\), and  \(\mathcal{A}\) is the matrix whose i-th column is \(A_i\).  Note that only the diagonal elements of the second term are preserved; in implementation, this can be implemented as&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;diag(sum(S .* (inv(U) * S * A)))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Full Hessian&lt;/h2&gt;
+
+&lt;p&gt;The full Hessian is the sum of the three parts above&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    H =&amp; H_1 - H_{2,A} - H_{2,B} \\
+      =&amp; \mathcal{Z}' \odot \left[ \Delta \, z \, (1 \, 1 \, ...) \right] + M \odot \left(z z^\top \right ) + \text{diag}\left\{ z(x) \odot \Delta' z(x) \right\} +  \left[ z \, (1 \, 1 \, ...) \right] \odot \left[ \Delta \, \mathcal{Z}' \right] +  \\
+      &amp; \left( S^\top U^{-1} S \Delta^\top \right)^\top \odot \left( S^\top U^{-1} S \Delta^\top \right)  + \left(\Delta S^\top U^{-1} S \Delta^\top\right) \odot \left(S^\top U^{-1} S \right)  - \\
+      &amp; M \odot S^\top U^{-1} S - ( S^\top \left ( U^{-1} S \mathcal{A} \right ) ) \odot I
+\end{align}
+\]
+&lt;/div&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Chicken and Egg</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/11/20/work-log"/>
+   <updated>2013-11-20T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/11/20/work-log</id>
+   <content type="html">&lt;p&gt;Despite all of the elaborate scaffolding in the pipeline, we're essentially solving a chicken-and-egg problem, trying to find:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Ideal point-depth for likelihood approximation&lt;/li&gt;
+&lt;li&gt;Ideal point-indices&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;We currently use a multi-step approach to estimate both using elaborate heuristics, and the discussion over the last week or shows that this approach is less than satisfying.  The current approach (roughly) is&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;recursively apply dynamic time warping (DTW) to find a decent point correspondence&lt;/li&gt;
+&lt;li&gt;get 3D points by triangulating (omitting untriangulatable points)&lt;/li&gt;
+&lt;li&gt;estimate indices by chord_length_parameterization&lt;/li&gt;
+&lt;li&gt;smooth&lt;/li&gt;
+&lt;li&gt;(optional) repeat 3 % 4 until convergence&lt;/li&gt;
+&lt;li&gt;get index of untriangulated points by backprojection&lt;/li&gt;
+&lt;li&gt;Re-index points in 2D against reconstructed curve in 2D (DTW)&lt;/li&gt;
+&lt;li&gt;(optional) use newton's method to improve indices&lt;/li&gt;
+&lt;li&gt;backproject all points against new index to get point-depth&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Steps 1 and 2 get initial 3D estimate.&lt;/p&gt;
+
+&lt;p&gt;Steps 3, 4, 5, 6 try to optimize the posterior reconstruction&lt;/p&gt;
+
+&lt;p&gt;Finally, in step 7, we get our first estimate of point-indices.
+Step 8 gives us point-depths.&lt;/p&gt;
+
+&lt;p&gt;Forcing a point correspondence is unnatural, since points lie on a continuous index-set, don't correspond exactly.  Jagged-tails cause correspondence failures, which prevent triangulation, so we need special code to handle these after the fact.&lt;/p&gt;
+
+&lt;p&gt;Index estimates don't account for between-view perturbations; this rigidity causes bad index estimates when perturbations are large.&lt;/p&gt;
+
+&lt;p&gt;Index estimation in 2D can be ambiguous; nearby points in 2D can be far in 3D.&lt;/p&gt;
+
+&lt;p&gt;Index estimation using DTW algorithm doesn't handle smoothness.&lt;/p&gt;
+
+&lt;p&gt;Each stage is full of hacks.&lt;/p&gt;
+
+&lt;p&gt;Is there a better way?&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Revised algorithm:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Point-depth:  Backproject against XXX.&lt;/li&gt;
+&lt;li&gt;point-indices: optimize marginal likelihood w.r.t. indicies.&lt;/li&gt;
+&lt;li&gt;repeat until convergence.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;In the first pass, XXX can be a &quot;scene center&quot; point, or some heuristic (steps 1 and 2 above).  In future passes, the maximum posterior can be used.&lt;/p&gt;
+
+&lt;p&gt;Getting the indices right is essential, more important than getting the depths early on, since the depths have infinite variance in the backprojection direction.&lt;/p&gt;
+
+&lt;p&gt;Index optimization will use Quasi-newton optimization, a local minimizer.  Thus, a reasonable initial estimate is needed.  Hopefully, a simple linear map between endpoints should suffice, otherwise one of the existing heuristics could be used.  Currently have a gradient for the Newton algorithm, but need to implement hessian.  Hessian should be implementable in \(O(n&lt;sup&gt;3)\).&lt;/sup&gt;&lt;/p&gt;
+
+&lt;p&gt;For speed, this procedure could be applied incrementally to get reasonable initial estimates when adding an extra curve to the track, just skip re-estimating depth and indices of existing points.  If accepted, re-estimate all points and re-accept.&lt;/p&gt;
+
+&lt;h2&gt;Hessian of Marginal Likelihood&lt;/h2&gt;
+
+&lt;p&gt;After some playing around, I'm nearly certain the Hessian can be computed in cubic time (i.e. same as gradient)!&lt;/p&gt;
+
+&lt;p&gt;The first derivative (gradient) has two terms: the exponential term and the partition function term.  Thus, the hessian has two terms, and a cubic-time formula for the first is relatively easy to derive.&lt;/p&gt;
+
+&lt;p&gt;The hessian of the partition function is much messier, but we can boil it down to the following statement: each element of the hessian is the trace of a vector outer-product, which is equivalent to a dot product of the same two vectors.  Assuming we can obtain these vectors in ammortized linear time, we can compute all elements of the hessian in cubic time.&lt;/p&gt;
+
+&lt;p&gt;It remains to show that we compute all the vectors in ammortized linear time.  Each vector takes O(n&lt;sup&gt;2)&lt;/sup&gt; to compute (multiplication of a nxn matrix and a nx1 vector).   There are O(n) different vectors in total which can then be cached, for a total of O(n&lt;sup&gt;3)&lt;/sup&gt; precomputation.  Divided over the n&lt;sup&gt;2&lt;/sup&gt; different times we use these vectors, the per-iteration ammortized running time is O(n).&lt;/p&gt;
+
+&lt;p&gt;It's going to be a bear implementing this, but the payoff will be huge.  First, we'll get efficient local optimization with each iteration costing the same speed as an MCMC iteration (implementeed naively) would take.  Second, we can finally properly (approximately) integrate out the index set in our marginal likelihood computation, using the hessian and the Candidate's estimator.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>2 Days: debugging WACV reconstruction</title>
@@ -638,7 +1805,7 @@ Finally,  \(\frac{\partial g(x)}{\partial x_i}\):
 \[
 \begin{align}
     g + dg  &amp;= -\frac{1}{2}y^\top S^\top (V + dV) S y \\
-    g + dg  &amp;= -\frac{1}{2}y^\top S^\top \, V \, S y + y^\top S^\top \,dV \,S y \\
+    g + dg  &amp;= -\frac{1}{2}y^\top S^\top \, V \, S y - \frac{1}{2} y^\top S^\top \,dV \,S y \\
         dg  &amp;= -\frac{1}{2}y^\top S^\top \,dV \,S y \\
         g'  &amp;= -\frac{1}{2}y^\top S^\top \, V' \,S y \\
 \end{align}
@@ -669,7 +1836,29 @@ This equation gives us a single element of the gradient, namely \(d g(x)/dx_i\).
 
 &lt;h2&gt;Derivatives of K(x)&lt;/h2&gt;
 
-&lt;p&gt;Below we derive the derivative of each of the three covariance expresssions, which combine to give \(K'\).&lt;/p&gt;
+&lt;p&gt;First, we'll layout the general form of K', whose elements are the full derivative of the kernel w.r.t.  \(x_k\).&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\frac{\partial K_{ij}}{\partial x_k} = \frac{\partial k(x_i, x_j)}{\partial x_i} \frac{d x_i}{d x_k} + \frac{\partial k(x_i, x_j)}{\partial x_j} \frac{d x_j}{d x_k}\\
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;The first term is nonzero only on the i-th row of K', and the second term is nonzero on the i-th column of K'.  This suggests the following convenient sparse representation  for K'.&lt;/p&gt;
+
+&lt;p&gt;Let the vector \(\delta_i\)  be the vector whose j-th element is \( \frac{\partial k(x_i, x_j) }{\partial x_i} \).  Using this notation, we can rewrite \(K'\) as&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    \frac{\partial K}{\partial x_i} = K' = C + C^\top  \tag{4}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;where \(C = \left(0 \, \dots \, \delta_i \, \dots \, 0 \right)  \).&lt;/p&gt;
+
+&lt;p&gt;Below we derive the derivative \(\frac{\partial k(x_i, x_j)}{\partial x_i}\) for each of the three covariance expresssions.&lt;/p&gt;
 
 &lt;p&gt;&lt;em&gt;Cubic covariance&lt;/em&gt;&lt;/p&gt;
 
@@ -677,27 +1866,27 @@ This equation gives us a single element of the gradient, namely \(d g(x)/dx_i\).
 
 &lt;div&gt;
 \[
-k(x_1, x_2) = (x_a - x_b) x_b^2 / 2 + x_b^3/3
+k(x_i, x_j) = (x_a - x_b) x_b^2 / 2 + x_b^3/3
 \]
 
-Where \(x_b = min(x_1, x_2)\) and \(x_a = max(x_1, x_2)\).
+Where \(x_b = min(x_i, x_i)\) and \(x_a = max(x_i, x_i)\).
 &lt;/div&gt;
 
 
-&lt;p&gt;Taking the derivative w.r.t. (x_2) gives:&lt;/p&gt;
+&lt;p&gt;Taking the derivative w.r.t. (x_i) gives:&lt;/p&gt;
 
 &lt;div&gt;
 \[
 \begin{align}
-\frac{\partial k(x_1, x_2)}{\partial x_2} &amp;= 
+\frac{\partial k(x_i, x_j)}{\partial x_i} &amp;= 
     \begin{cases}
-         x_1^2 / 2 &amp; \text{if } x_2 &gt;= x_1 \\
-         x_1 x_2 - x_2^2/2 &amp; \text{if } x_2 &lt; x_1 
+         x_j^2 / 2 &amp; \text{if } x_i &gt;= x_j \\
+         x_i x_j - x_i^2/2 &amp; \text{if } x_i &lt; x_i
     \end{cases} \\
             &amp;= 
     \begin{cases}
-         x_b^2 / 2 &amp; \text{if } x_2 &gt;= x_1 \\
-         x_a x_b - x_b^2/2 &amp; \text{if } x_2 &lt; x_1 
+         x_b^2 / 2 &amp; \text{if } x_i &gt;= x_j \\
+         x_a x_b - x_b^2/2 &amp; \text{if } x_i &lt; x_j
     \end{cases} \\
 \end{align}
 \]
@@ -708,44 +1897,23 @@ Where \(x_b = min(x_1, x_2)\) and \(x_a = max(x_1, x_2)\).
 
 &lt;div&gt;
 \[
-\frac{\partial k(x_1, x_2)}{\partial x_2} = 
-         x_b \left ( x_1  - x_b/2 \right ) \tag{2}
+\frac{\partial k(x_i, x_j)}{\partial x_i} = 
+         x_b \left ( x_j  - x_b/2 \right ) \tag{2}
 \]
 &lt;/div&gt;
-
-
-&lt;p&gt;Note that if the goal is to find \(K' = \frac{\partial{K}}{\partial{x_i}}\), the on-diagonal element \(k'_{i i}\) needs a slightly different formula, because the kernel is a function of a single variable, \(x_i\).&lt;/p&gt;
-
-&lt;div&gt;
-\[
-\begin{align}
-\frac{\partial k(x_i)}{\partial x_i} &amp;= 
-    \frac{\partial}{\partial x_i} x_i^3/3 \\
-        &amp;= x_i^2 \tag{3}
-\end{align}
-\]
-
-
-Compare this with the general formula: if we plugged-in \(x_i'\) to both inputs of equation (2), we'd get \(x_i^2/2\), which underestimates the derivative by half.  We'll see in the next section that when computing \(g'\) the &quot;wrong&quot; expression for \(k'_{ii}\) is actually more useful than the correct one, because we'll need to scale it by 0.5 anyway.
-
-&lt;/div&gt;
-
-
-
-
-&lt;p&gt;&lt;/p&gt;
 
 
 &lt;p&gt;&lt;em&gt;Linear Covariance&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;Recall the cubic covariance expression:&lt;/p&gt;
+&lt;p&gt;Recall the linear covariance expression:&lt;/p&gt;
 
 &lt;div&gt;
 \[
-k(x_1, x_2) = x_1 x_2
+k(x_i, x_j) = x_i x_j
 \]
 
-The derivative w.r.t. \(x_2\) is simply \(x_1\).
+The derivative w.r.t. \(x_i\) is simply \(x_j\).
+
 &lt;/div&gt;
 
 
@@ -755,10 +1923,10 @@ The derivative w.r.t. \(x_2\) is simply \(x_1\).
 
 &lt;div&gt;
 \[
-k(x_1, x_2) = k
+k(x_i, x_j) = k
 \]
 
-The derivative w.r.t. \(x_2\) is zero.
+The derivative w.r.t. \(x_i\) is zero.
 &lt;/div&gt;
 
 
@@ -788,59 +1956,39 @@ end
 
 &lt;p&gt;I think we can get directional derivatives of \(K\) by taking the weighted sum of partial derivatives, where the weights are the component lengths of the direction vector.  I have yet to confirm this beyond a hand-wavy hunch, and in practice, this might not even be needed, since computing the full gradient is so efficient.&lt;/p&gt;
 
-&lt;h2&gt;Sparsity of K'&lt;/h2&gt;
+&lt;h2&gt;Full gradient&lt;/h2&gt;
 
-&lt;p&gt;The sparsity of \(\frac{\partial K}{\partial x_i}\) actually allows us to further simplify formula (1) for \(g'\), ultimately allowing us to compute the entire gradient in a single matrix multiplication.&lt;/p&gt;
+&lt;p&gt;As we saw earlier, \(\frac{\partial K}{\partial x_i}\) is sparse, and has the form in equation (4).  We can use the sparsity to ultimately compute the entire gradient in a single matrix multiplication.&lt;/p&gt;
 
-&lt;p&gt;First observe that K' is only nonzero on the i-th row and column:&lt;/p&gt;
+&lt;p&gt;First we'll rewrite \(g'\) in terms if \(\delta_i\)&lt;/p&gt;
 
 &lt;div&gt;
 \[
-    k'_{i,j} = 
-    \begin{cases}
-        \delta_{ij} &amp; \text{if } i = j \\
-        0 &amp; \text{otherwise}
-    \end{cases}
-\]
-
-where \(\delta_{ij} = \frac{\partial k_{ij}}{\partial x_i} \).
-
-For convenience, we'll define the vector \(\Delta_i = [\delta_{i1}, ..., \delta_{in}]^\top\).
-
-
-Let \(g_i'\) be the partial derivative of \(g\) w.r.t. \(x_i\), with the entire gradient denoted by \(\nabla g = [g'_1, ..., g'_n]^\top\).  Using sparsity, eq. (1) can be rewritten as
-
-\[
-    g_i' = \frac{1}{2} z_i (\delta_{i1} z_1 + ... + \delta_{i(i-1)} z_{i-1} + \sum_j \delta_ij z_j + \delta_{i(i+1)} z_{i+1} + ... + \delta_{in} z_n)
-\]
-
-The expression in the parentheses is almost a dot product of z and \(\Delta_i\), but with the i-th term replaced with the dot product of z and \(\Delta_i\).  We can re-write the expression in terms of dot products, minus a correction.
-
-\[
 \begin{align}
-    g_i' = \frac{1}{2} z_i (2 * z \cdot \Delta_i - z_i \delta_i) \\ 
-       = z_i \, z \cdot \Delta_i' \\
+g' &amp;= \frac{1}{2} z^\top K' z \\
+   &amp;= \frac{1}{2} z^\top C z + z^\top C^\top z \\
+   &amp;= \frac{1}{2} \left \{ (0 \, \dots \, z^\top \delta_i \, \dots \, 0) z + z^\top (0 \, \dots \, \delta_i^\top z \, \dots \, 0)^\top \right \} \\
+   &amp;= z_i (\delta_i \cdot z)
 \end{align}
 \]
+&lt;/div&gt;
 
-Where \(\Delta_i'\)  is equal to \(\Delta_i\) in all elements except the i-th, which is equal to \(0.5 \lambda_i\).  Note that we can get \(\Delta_i'\) by using equation (2) above instead of equation (3), which allows us to avoid having a separate implementation for on-diagonal elements.
 
-Since each \(g_i\) arises from a dot product, we can compute \(\nabla g\) using matrix multiplication.  Let \(\Delta' = [\Delta'_1, ..., \Delta'_n] \), i.e. the matrix whose i-th column is \(\Delta'_i\).  The gradient expression becomes
+&lt;p&gt;We can generalize this to the entire gradient using matrix operations:&lt;/p&gt;
 
+&lt;div&gt;
 \[
 \begin{align}
-    \nabla g = z \odot (\Delta' z) \tag{4}
+    \nabla g = z \odot (\Delta z) \tag{4}
 \end{align}
 \]
-
-where \(\odot\) denotes element-wise multiplication.
-&lt;br /&gt;&lt;br /&gt;
-To handle multiple dimensions, simply apply to each dimension independently and sum the results.
 
 &lt;/div&gt;
 
 
+&lt;p&gt;Where \(\Delta\) is the matrix whose ith row is \(\delta_i\), and \(\odot\) denotes element-wise multiplication.&lt;/p&gt;
 
+&lt;p&gt;To handle multiple dimensions, simply apply to each dimension independently and sum the results.&lt;/p&gt;
 </content>
  </entry>
  

@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>KLS Research Blog &larr; Kyle Simek</title>
+   <title>Implementing, testing Hessian &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -77,226 +77,87 @@
 
 
   
-
-<div id="page">
+<div id="page" class="article">
 	
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/11/07/work-log">
-      <li class="title">
-            [Work log] WACV reconstruction (revisited)
-        </li>
-      </a>
-      <div class="date emphnext">November 07, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/11/06/work-log">
-      <li class="title">
-            [Work log] CVPR cleanup, documentation
-        </li>
-      </a>
-      <div class="date emphnext">November 06, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/11/05/work-log">
-      <li class="title">
-            [Work log] iPlant 
-        </li>
-      </a>
-      <div class="date emphnext">November 05, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/11/04/work-log">
-      <li class="title">
-            [Work log] Post-CVPR-deadline; 2-part likelihood efficiency, 2-pass sampling
-        </li>
-      </a>
-      <div class="date emphnext">November 04, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/10/31/work-log">
-      <li class="title">
-            [Work log] (Two day) Markov Sampling (ctd).  Implementing, testing, optimizing
-        </li>
-      </a>
-      <div class="date emphnext">October 31, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/10/30/work-log">
-      <li class="title">
-            [Work log] Optimizing posterior-sampling for pixel likelihood
-        </li>
-      </a>
-      <div class="date emphnext">October 30, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/10/29/work-log">
-      <li class="title">
-            [Work log] Ancestral Sampling from poserior (Markov-aware sampling)
-        </li>
-      </a>
-      <div class="date emphnext">October 29, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/10/29/reference">
-      <li class="title">
-            [Reference] Mixing Noisy and Noise-free values in GP Posterior
-        </li>
-      </a>
-      <div class="date emphnext">October 29, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/10/28/work-log">
-      <li class="title">
-            [Work log] Implementing Nystrom method; bugs in posterior sampling code
-        </li>
-      </a>
-      <div class="date emphnext">October 28, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/10/26/work-log">
-      <li class="title">
-            [Work log] Testing likelihood #2 (2-day)
-        </li>
-      </a>
-      <div class="date emphnext">October 26, 2013</div>
-</ul>
-
-
-<!-- Pagination links -->
-<div class="pagination">
-  
-    <a href="/ksimek/research/page2" class="previous">&lt;&lt; Read Newer Posts</a>
   
   
-    |
+    
+
+
+  <h1 class="title">
+        [Work Log] Implementing, testing Hessian
+    </h1>
+
+  <div class="date emphnext">November 29, 2013</div>
+    
+
+
+  
+    <p>Spent most of the week implementing and testing the Hessian, now done.</p>
+
+<p>The biggest issue was correcting the math error mentioned in the previous post.  Developed a general equation for the second derivitive of the kernel matrix, K, and updated all formulas <a href="/ksimek/research/2013/11/23/reference/">in the writeup</a> to incorporate it.</p>
+
+<p>Finished hessian test program, <code>test/test_ml_derivs.h</code>, which compares the analytical solution to one obtained by finite differences.  The error that arises in the Hessian during finite differences was shockingly large and unstable -- lowering the delta below 1e-4 caused very large errors (> 1%) in finite differences.  This was a significant source of confusion and frustration during testing.  In order to track down the source of errors, performed numerical and analytical first and second derivatives of all intermediate values, and tracked growth of error through the equations.  In the end, error appeared to grow slowly through each computation, with the largest error arising at the beginning, in K'.</p>
+
+<p>It also took a long time to find a reasonable way to compare the analytical and numerical gradients.  Absolute differences were deceiving, because small absolute diferences can actually be large in terms of percentages.  On the other hand, when the true gradient is near zero, the percent error skyrocketed.  Ultimately followed the lead of Rasmussen's <a href="http://learning.eng.cam.ac.uk/carl/code/minimize/checkgrad.m">checkgrad.m</a>, which divides the determinant of the difference by the determinant of the sum.  Was able to confirm results to an error of 1e-3.</p>
+
+<hr />
+
+<p>Implemented Hessian in <code>curve_ml_gradient_3.m</code>, refactoring existing computation to share as much as possible with the hessian.  New function runs 4x slower than the gradient alone in a 1500-dimensional problem, which isn't bad considering the numerical Hessian would take 1500<sup>2</sup> = 2.25 million times more running time!</p>
+
+<p>Still need to test against a few random elements of the numerical Hessian.</p>
+
+<hr />
+
+<p>Next step is to run <code>fminunc</code> with the hessian to optimize indices after calling <code>corr_to_likelihood</code>.  If that fixes our problems, we should roll it into <code>corr_to_likelihood</code> and which could simplify the code significantly.</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
   
   
-    <a href="/ksimek/research/page4" class="next ">Read Older Posts &gt;&gt;</a>
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/12/01/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
+  
+    <a href="/ksimek/research/2013/11/25/work-log" class="prev" title="Covering Vision Course">&larr; Covering Vision Course</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
 </div>
 
 
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
 </div><!-- End Page -->
+
 
 
   

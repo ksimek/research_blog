@@ -1,0 +1,320 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Work Log &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Work Log
+    </h1>
+
+  <div class="date emphnext">December 03, 2013</div>
+    
+
+
+  
+    
+
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Data Association v3</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
+    </tr>
+
+    <tr>
+        <th>SVN Revision</th>
+        <td>15864</td>
+    </tr>
+
+
+</table>
+
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
+
+
+<p>Fixed change-of-variable transformation for Hessian.  OPtimization now finishes with fewer iterations and with higher likelihood solution.</p>
+
+<p>Still getting weird overshoot curves:</p>
+
+<p><img src="/ksimek/research/img/2013-12-03-new_recons_3.png" alt="" /></p>
+
+<p>It seems that our optimization occasionally causes large DC offset compared to the unoptimized indices.  See below, blue is original, green is optimized.</p>
+
+<p><img src="/ksimek/research/img/2013-12-03-updated_indices_1.png" alt="" /></p>
+
+<p>On the other hand, some indices are much improved.  Here's our always problematic curve #10, see how the large gap after the first two indices is removed.</p>
+
+<p><img src="/ksimek/research/img/2013-12-03-updated_indices_2.png" alt="" /></p>
+
+<p>The DC offset issue raises two questions: (1) why isn't offset of zero preferred, and (2) why does DC offset result in overshooting?</p>
+
+<p>I think I know the answer to (2): we always start reconstructions at index zero.  So if the evidence starts at index 10, the reconstrution will always draw the segment between index 0 and 10, even if there's no evidence.</p>
+
+<hr />
+
+<p>Cached prior K is used in gradient computation; cache isn't updated when indices change.</p>
+
+<p>...</p>
+
+<p>On second look, I was wrong, cached K is updated in a call to <code>att_set_start_index_2</code></p>
+
+<p>I'll probably need to update children branch indices when parent indices change.  Or only do index optimization in isolation.</p>
+
+<hr />
+
+<p>Why is DC offset preferred?  It's not an inference problem; confirmed that zero-offset indeed has a lower ML (not by much though).</p>
+
+<p>It's clear that the curve is beneficting from extra freedom gained by starting at a higher index.  The question is which parameter is encouraging this (smoothing, offset, rate)?</p>
+
+<p>Lowering position variance below the optimal point reverses the trend, surprisingly.  Increasing perturb position variance helps, but doesn't reverse.</p>
+
+<p>Increasing rate variance past the optimal point reverses the trend, but the effect is not dramatic.</p>
+
+<p>Increasing smoothing variance far past optimal shows a dramatic trend reversal.</p>
+
+<p>Increasing rate variance makes position variance behave naturally -- zero offset is better for all values of position variance, with peak difference near the optimal.  Correction: at very low position variance ( &lt;= 5) the positive-offset model looks better, as we'd expect, since offset makes the model more forgiving.</p>
+
+<h2>Correction: increasing position variance is required for some curves.</h2>
+
+<p>Let's re-run with larger rate variance.</p>
+
+<p>...</p>
+
+<p>After increasing rate variance, indicies grow without bound!  Eventually they get into the range of 4e6.  Its our old friend, curve #10.  This is very surprising, because the marginal likelihood should strongly discourage such large indices, since the number of poor configufations grows with index magnitude.</p>
+
+<p>Could add a regulating factor, but it really seems like this shouldn't be necessary.</p>
+
+<p>Fixed by simply returning -inf on failure.  It seems this phenomenon is simply the result of an aggressive step in the wrong direction.</p>
+
+<hr />
+
+<p>I'm starting to realize the allowing the indices to move freely can result in all kinds of subtle issues.  For example, nothing prevents the spacing between indices from shrinking simultaneously, because the rate kernel is still happy (in fact, happier), the curve just appears to be moving more quickly.  If the smoothing variance was set too high, this "quickening" makes the marginal likelihood happier, because points have less freedom to move in space -- the prior's slack is pulled out.</p>
+
+<p>Something similar might be happening to cause indices to drift upward simultaneously.</p>
+
+<p><strong>Conclusion:</strong> Whatever the dynamics, index optimization might be a good idea to get a decent first-pass MAP reconstruction, but indices should be re-mapped using chord-length parameterization when computing ML's and final reconstructions.</p>
+
+<p>For now, just subtract the excess, so first index is zero.</p>
+
+<p>Reconstructions look better, but curve 7 still overshoots at the beginning:</p>
+
+<p><img src="/ksimek/research/img/2013-12-03-new_recons_3.png" alt="" /></p>
+
+<p>Possibly relaxing ordering constraints between views will fix this.</p>
+
+<p>Relaxing smoothness variance a small amount makes it worse.  Arg...</p>
+
+<hr />
+
+<p>OMG, plotting the 2D curve over the images shows significant offset!</p>
+
+<p><img src="/ksimek/research/img/2013-12-03-orrset_error_lo_res.png" alt="" /></p>
+
+<p>hi resolution:</p>
+
+<p><img src="/ksimek/research/img/2013-12-03-offset_error_hi_res.png" alt="" /></p>
+
+<p>Notice curve #7 (dark green) is waaaay off on it's first point.  What's going on here?  I've re-traced that curve twice, is there some offset being added in opengl?  Why haven't we seen the evidence of this before?</p>
+
+<ul>
+<li>check other views for offset error</li>
+<li>check other datasets for offset error</li>
+<li>quantify offset error (1 pixel?)</li>
+</ul>
+
+
+<p>Looks like curves are shifted left by 0.5 pixels and down by 1.5 pixels.  Part of the culprit is the flip_y function, which erroneously added 1 after flipping (presumably to account for the pixel grid).  This brings it to within 0.5 in both directions.  This is due to an ill-advised line I had added in the ground-truth tool, which translated everything by 0.5 pixels before rendering.  I presumably wanted (0,0) to render in the middle of the bottom-left pixel, but in retrospect, this is stupid.</p>
+
+<p>Added option 'halfPixelCorrection' for process_gt_2.  Left half-pixel offset in ground-truth tool for now; with intent to fix all existing ground truth files and then remove the offending line of code.</p>
+
+<hr />
+
+<p>Starting to get some real stairstep patterns in the index spacing.  Almost certainly this means points from different views want to change order.  Do this next</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/12/04/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2013/12/02/work-log" class="prev" title="Index optimization, end-to-end">&larr; Index optimization, end-to-end</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

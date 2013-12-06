@@ -1,0 +1,268 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Troubleshooting excessive index drift in endpoints; fixing Hessian under variable transformation. &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Troubleshooting excessive index drift in endpoints; fixing Hessian under variable transformation.
+    </h1>
+
+  <div class="date emphnext">December 05, 2013</div>
+    
+
+
+  
+    <p>Getting bizarre spikes in indices during optimization.  Confirmed that removing the spikes will improve ML, but there's a steep well between the two local minima as we reduce the index value:</p>
+
+<p><img src="/ksimek/research/img/2013-12-05-ml_vs_index.png" alt="" /></p>
+
+<p>The index starts at a fairly reasonable initial value, so my only guess is that the Hessian is suggesting a large step which happens to step over the well.</p>
+
+<p>I'm wondering if the hessian is screwy; or maybe it's just the transformation we're using.  Optimizing raw indices doesn't exhibit this problem, but it is a problem in our our current approach of working with log differences to prevent re-ordering.</p>
+
+<p>A prior over index spacing should probably prevent this; I'm hesitatnt to add the extra complexity at this point, considering the additional training and troubleshooting it would entail.</p>
+
+<p>Should unit test the transformation.</p>
+
+<p>...</p>
+
+<p>Gradient looks okay.</p>
+
+<p>On-diagonal elements have significant error!</p>
+
+<p><img src="/ksimek/research/img/2013-12-05-hessian_error.png" alt="" /></p>
+
+<p>Actually, significant off-diagonal error, but on-diagonal dominates.</p>
+
+<p>Since gradient is fine, and it uses the same jacobian, I'm guessing the problem isn't the jacobian transformation, but the hessian itself.</p>
+
+<p>...</p>
+
+<p>Confirmed.  diagonal is (mostly) too high, error on order of 1e-3.  Gradient error is around 1e-9.</p>
+
+<p>Detective work.  Look at diagonal of each Hessian term, compare to residual of diagonal, look for patterns.</p>
+
+<p>...</p>
+
+<p>Ugh, worst afternoon ever.  Spent hours trying every trick in the book to track down the source of the error, including lots of time looking at the raw Hessian (it wasn't the raw Hessian).  Finally found the bug: I formula I used for the chain rule for Hessians was wrong.  In particular, it was missing a second term that (in my problem) corresponded to adding the transformed gradient to the diagonal.   See <a href="http://en.wikipedia.org/wiki/Chain_rule#Higher_derivatives_of_multivariable_functions">Faa di Bruno's formula</a>.</p>
+
+<p>Total error is much reduced now, but not zero.  around 0.1, instead of 20 before, new results:</p>
+
+<p><img src="/ksimek/research/img/2013-12-05-hessian_error_2.png" alt="" /></p>
+
+<p>The norm-check is around 1e-4; very nice.</p>
+
+<p>...</p>
+
+<p>Re-running dataset 11 with hopes that we don't lose the global optimum.  Interesting observation: optimization requires more iterations than before to converge.  It seems a more conservative hessian results in smaller steps and is less likely   Looks better:</p>
+
+<p><img src="/ksimek/research/img/2013-12-05-reconst_hess_fixed.png" alt="" /></p>
+
+<p>Notice we're still getting offset, but at least the reconstruction is qualitatively better that before. However, now we're getting a small loop at the top:</p>
+
+<p><img src="/ksimek/research/img/2013-12-05-weird_loop.png" alt="" /></p>
+
+<p>It seems to be caused by changing of index order between views. Needs some thought to best address.</p>
+
+<p>...</p>
+
+<p>Re-running on all datasets.  Hopefully excessive index drift won't be too big an issue.  Possibly an extra term to prevent drift far from initial points would be sensible.</p>
+
+<p>Datasets 4,5  still drifts:</p>
+
+<p><img src="/ksimek/research/img/2013-12-05-drift_ds4.png" alt="" />
+<img src="/ksimek/research/img/2013-12-05-drift_ds5.png" alt="" /></p>
+
+<p>Datasets 7,9  have detached curves</p>
+
+<p>Dataset 10, curve 2 (?) appears to have failed to prune</p>
+
+<h2>endpoint drift</h2>
+
+<p>It looks like interior points are confined by their neighbor points from drifting too far, but end points have no such constraint.  After a small amount of drift, they're able to loop back on themselves and land directly on the backprojection line.  It's surprising that the extra flexibility afforded by large spacing between indices doesn't cause marginal likelihood to suffer, since most of the new configurations are bad ones.</p>
+
+<p>Considerations</p>
+
+<ul>
+<li>in-plone offset perturbation</li>
+<li>penalize excessive drift</li>
+<li>penalize excessive gaps (a-la latent GP model).</li>
+<li>penalize shrinkage.</li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  
+    <a href="/ksimek/research/2013/12/04/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

@@ -1,0 +1,517 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Hessian of Marginal Likelihood &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Reference] Hessian of Marginal Likelihood
+    </h1>
+
+  <div class="date emphnext">November 23, 2013</div>
+    
+
+
+  
+    <p>Recall  the expression for the i-th element of the gradient of ML w.r.t. indices.</p>
+
+<div>
+\[
+\begin{align}
+g'_i(x) &= \frac{1}{2} z(x)^\top K'(x) z(x) - Z'_i(x) \\
+        &= z_i(x) \delta_i^\top(x) z(x) - Z'_i(x) \\
+        &= f_i(x) - Z'_i(x)
+\end{align}
+\]
+</div>
+
+
+<p>Where \(\delta_i = k'(x_i, x_j)\), and \(Z'_i\) is the derivitive of the normalization constant.</p>
+
+<p>The goal today is to derive the second derivitive, H.  Like the first derivitive, it will have two terms,</p>
+
+<div>
+    \[
+    H = H_1 - H_2
+    \]
+</div>
+
+
+<p>Ultimately, we'll split the second term \(H_2\) into two sub-terms:</p>
+
+<div>
+    \[
+    H = H_1 - H_{2,A} - H_{2,B}
+    \]
+</div>
+
+
+<h2>Prerequisite: \(\frac{\partial \delta_i}{\partial x_j}\)</h2>
+
+<p>Recall that the elements of \(\delta_i\) are the partial derivatives of the kernel function w.r.t. its first input.  The second derivatives \(\delta_i\) will be given by the second partial derivatives of the kernel function.</p>
+
+<div>
+\[
+\begin{align}
+\frac{\partial^2 k(x_i, x_j)}{\partial x_i^2} &= 
+        x_j - \min(x_i, x_j)  \\
+\frac{\partial^2 k(x_i, x_j)}{\partial x_i \partial x_j} &= 
+        \min(x_i, x_j) 
+\end{align}
+\]
+</div>
+
+
+<p>The derivative of the j-th element of \(\delta_i\) is derived below.</p>
+
+<div>
+\[
+\begin{align}
+\frac{\partial \left(\delta_i \right)_j}{\partial x_k} 
+    &= \frac{\partial^2 k(x_i, x_j)}{\partial x_i \partial x_k} \\
+    &= (x_j - \min(x_i, x_j))\mathbb{1}_{k = i} + \min(x_i, x_j) \mathbb{1}_{k = j} 
+\end{align}
+\]
+</div>
+
+
+<p>Note that this handles the special cases where k = i = j and \(k \neq i, k \neq j\).</p>
+
+<p>We can generalizing to the full vector \(\delta_i\)</p>
+
+<div>
+\[
+\begin{align}
+\frac{\partial \delta_i }{\partial x_k}  &= A_{i} \mathbb{1}_{k = i}  + B_{ik}\\
+A_{i} &= (x_1 - \min(x_i, x_1), \dots, x_j - \min(x_i, x_j), \dots)^\top  \\
+B_{ik} &= (0, \dots, \underbrace{\min(x_i, x_k)}_\text{k-th element}, \dots, 0)^\top
+\end{align}
+\]
+</div>
+
+
+<p>The A term handles the on-diagonal hessian terms, whereas B is included in all terms.</p>
+
+<h2>First term, \(H_1 = f_i'\)</h2>
+
+<p>We use the product rule to take the derivitive of \(f_i = z_i \delta_i \cdot  z\).</p>
+
+<div>
+\[
+\begin{align}
+\frac{\partial f_i(x)}{\partial x_j} &=
+            \left ( \frac{\partial}{\partial x_j} \, z_i(x) \right ) \delta_i^\top(x) z(x)  +
+            z_i(x) \left ( \frac{\partial}{\partial x_j}\delta_i^\top(x) \right ) z(x) +
+            z_i(x) \, \delta_i^\top(x) \left ( \frac{\partial}{\partial x_j} z(x) \right ) \\
+&=
+            z_i' (x) \, \delta_i^\top(x) \, z(x)  +
+            z_i(x) \, (A_{i}\mathbb{1}_{j = i} + B_{ij})^\top \, z(x) + 
+            z_i(x) \, \delta_i^\top(x) \, z'(x) \\
+&=
+            z_i' (x) \, \delta_i^\top(x) \, z(x)  +
+            \mathbb{1}_{j = i} z_i(x) \, A_{i}^\top \, z(x) + z_i(x) \, \min(x_i, x_j) \, z_j(x)  +
+            z_i(x) \, \delta_i^\top(x) \, z'(x)
+\end{align}
+\]
+</div>
+
+
+<p>where</p>
+
+<div>
+\[
+\begin{align}
+z' = z'_{(j)} = \frac{\partial z(x)}{\partial x_j} &= \frac{\partial}{\partial x_j} S^\top U^{-1}(x) S y \\
+        &= S V' S^\top y \\
+        &= -S^\top U^{-1} U' U^{-1} S y \\
+        &= -(S^\top U^{-1} S) K' (S^\top U^{-1} S) y
+\end{align}
+\]
+</div>
+
+
+<p>Our goal is the generalize this to a single expression for the entire hessian matrix.
+Note that when \(i \neq j\), the third term disappears, so that term will become a diagonal matrix in the hessian expression.
+Let \(\mathcal{Z}' \) be the jacobian of \(z\).  We can express the hessian asWe can express the hessian as</p>
+
+<div>
+\[
+H_1 = \mathcal{Z}' \odot \left[ \Delta \, z \, (1 \, 1 \, ...) \right] + M \odot \left(z z^\top \right ) + \text{diag}\left\{ z(x) \odot \Delta' z(x) \right\} +  \left[ z \, (1 \, 1 \, ...) \right] \odot \left[ \Delta \, \mathcal{Z}' \right]
+\]
+</div>
+
+
+<p>where \(M\) is a matrix whose elements \(m_{ij} = \min(x_i, x_j)\),</p>
+
+<p>\(\Delta\) is a matrix whose rows are composed of the \(\delta_i\) vectors,</p>
+
+<p>\(\Delta'\) is the matrix whose i-th row is the vector \(A_i\),</p>
+
+<p>\(\odot\) is the Hadamard matrix product,</p>
+
+<p>and diag() is an operator that converts a vector into a diagonal matrix.</p>
+
+<h2>Second term, \(Z_i''(x) = H_{2,A} + H_{2,B} \)</h2>
+
+<p>Below are the expressions for the zeroth, first, and second derivitives of Z;</p>
+
+<div>
+\[
+\begin{align}
+Z &= 0.5 \log(\det(S K S^\top + I)) \\
+\frac{\partial Z}{\partial x_i} &= 0.5 \text{Tr} \left[ U^{-1} U' \right] \\
+\frac{\partial^2 Z}{\partial x_i \partial x_j} &= 0.5 \text{Tr} \left[ \frac{\partial U^{-1}}{\partial x_j} U' + U^{-1} \frac{\partial U'}{\partial x_j} \right] \\
+        &= 0.5 \text{Tr} \left[ V'_{(j)} U'_{(i)} + U^{-1} U''_{(ij)} \right] \\
+        &= 0.5 \left \{ \text{Tr} \left[ V'_{(j)} U'_{(i)} \right] + \text{Tr} \left[ U^{-1} U''_{(ij)} \right] \right\} \\
+        &= 0.5 \text{Tr}[A] +0.5 \text{Tr}[B]
+\end{align}
+\]
+</div>
+
+
+<p>Where</p>
+
+<div>
+\[
+        A =  V'_{(j)} U'_{(i)} \\  
+        B = U^{-1} U''_{(ij)} 
+\]
+</div>
+
+
+<p>These two terms correspond to the elements to the two hessian terms, \(H_{2,A}\) and \(H_{2,B}\).</p>
+
+<p>We'll begin by finding \(Tr[A]\) and \(H_{2,A}\).</p>
+
+<p>Observe that we can rewrite \(U_{(i)}'\) as</p>
+
+<div>
+\[
+\begin{align}
+U'_{(i)} &= S  K'  S^\top \\
+U'_{(i)} &= S  (B + B^\top)  S^\top \\
+\end{align}
+\]
+</div>
+
+
+<p>where B is the sparse matrix,</p>
+
+<div>
+\[
+\begin{align}
+B = \left( \begin{array}{ccccc}
+        \mathbf{0} & \cdots & \delta_i & \cdots & \mathbf{0}
+    \end{array}\right)
+\end{align}.
+\]
+</div>
+
+
+<p>We can exploit this sparsity to further expand \(U'\) to</p>
+
+<div>
+\[
+\begin{align}
+U'_{(i)} &= \left(S \, \delta_i \right) S_i^\top  + S_i \left( S \, \delta_i \right)^\top \\
+         &= C_{(i)} + C_{(i)}^\top
+\end{align}
+\]
+
+where \(C_{(i)} = S \, \delta_i \, S_i^\top \).
+</div>
+
+
+<p>We can use this identity to expand \(\text{Tr}[A]\).</p>
+
+<div>
+\[
+\begin{align}
+    \text{Tr}[A] &= \text{Tr}[V'_{(j)} U'_{(i)}] \\
+          &= \text{Tr}[-U^{-1} U'_{(j)}U^{-1} U'_{(i)}] \\
+          &= -\text{Tr}[U^{-1} \left( C_{(j)} + C_{(j)}^\top \right) U^{-1} \left( C_{(i)} + C_{(i)}^\top \right) ] \\
+          &= -\text{Tr}[U^{-1} \left( C_{(j)} + C_{(j)}^\top \right) U^{-1} \left( C_{(i)} + C_{(i)}^\top \right) ] \\
+          &= -\text{Tr}[\left( U^{-1}  C_{(j)} + U^{-1}C_{(j)}^\top \right) \left(U^{-1}  C_{(i)} + U^{-1}C_{(i)}^\top \right) ] \\
+          &= -\text{Tr}\left [U^{-1}  C_{(j)} U^{-1}C_{(i)} + U^{-1}  C_{(j)} U^{-1}C_{(i)}^\top + U^{-1}C_{(j)}^\top U^{-1}C_{(i)} + U^{-1}C_{(j)}^\top U^{-1}C_{(i)} ^\top\right] \\
+          &= -2 \text{Tr}\left [U^{-1}  C_{(j)} U^{-1}C_{(i)}\right]  - 2 \text{Tr}\left[U^{-1} C_{(j)} U^{-1}C_{(i)}^\top \right ] \\
+          &= -2 \text{Tr}\left [U^{-1} \left( S \delta_j S_j^\top \right) U^{-1} \left ( S \delta_i S_i^\top \right)\right]  - 2 \text{Tr}\left[U^{-1} \left( S \delta_j S_j^\top \right) U^{-1}\left( S_i \delta_i^\top S^\top \right) \right ] \\
+          &= -2 \text{Tr}\left [S_i^\top U^{-1} S \delta_j S_j^\top U^{-1} S \delta_i \right]  - 2 \text{Tr}\left[ \delta_i^\top S^\top U^{-1} S \delta_j S_j^\top U^{-1} S_i \right ] \\
+
+\end{align}
+\]
+
+The last identity exploits the fact that Traces are invariant under cyclic permutations.  Note that both expressions inside the trace operator are scalar products, which makes the trace operator redundant.  
+
+\[
+\begin{align}
+    \text{Tr}[A]
+          &= -2 S_i^\top U^{-1} S \delta_j S_j^\top U^{-1} S \delta_i  - 2  \delta_i^\top S^\top U^{-1} S \delta_j S_j^\top U^{-1} S_i \\
+          &= -2 \left( S_i^\top U^{-1} S \delta_j \right) \left(S_j^\top U^{-1} S \delta_i \right)  - 2  \left(\delta_i^\top S^\top U^{-1} S \delta_j \right) \left( S_j^\top U^{-1} S_i \right) \\
+\end{align}
+\]
+
+Here, we've regrouped the dot-products in each term to be a product of two dot-products.  We can generalize this for the full hessian as follows:
+
+\[
+\begin{align}
+    H_{2,A} &= -\left( S^\top U^{-1} S \Delta^\top \right)^\top \odot \left( S^\top U^{-1} S \Delta^\top \right)  - \left(\Delta S^\top U^{-1} S \Delta^\top\right) \odot \left(S^\top U^{-1} S \right) 
+\end{align}
+\]
+
+</div>
+
+
+<p>Next is the second term, \(\text{Tr}[B]\).</p>
+
+<p>First lets derive \(U''\).</p>
+
+<div>
+\begin{align}
+U''_{(ij)} = \frac{\partial U_{(i)}'}{\partial x_j} &= 
+            \frac{\partial}{\partial x_j} \left \{ 
+            \left(S \, \delta_i \right) S_i^\top  +
+            S_i \left( S \, \delta_i \right)^\top 
+            \right \} \\
+            &= \left(S \, \frac{\partial \delta_i}{\partial x_j} \right) S_i^\top  +
+            S_i \left( S \, \frac{\partial \delta_i}{\partial x_j} \right)^\top  \\
+            &= S \, \left(A_i \mathbb{1}_{i = j} + B_{ij} \right) S_i^\top  +
+            S_i \left(A_i^\top \mathbb{1}_{i = j} + B_{ij}^\top \right) S^\top   \\
+            &= \mathbb{1}_{i = j} S \, A_i \, S_i^\top + S\, B_{ij} S_i^\top +
+             \mathbb{1}_{i = j} \, S_i \, A_i^\top \, S^\top + S_i \, B_{ij} \, S^\top \\
+            &= \mathbb{1}_{i = j} S \, A_i \, S_i^\top + \mathbb{1}_{i = j} S_i \, A_i^\top \, S^\top + S_j \min(x_i, x_j) S_i^\top + S_i \min(x_i, x_j) S_j^\top \\
+            &= \mathbb{1}_{i = j} \left ( S \, A_i \, S_i^\top + S_i \, A_i^\top \, S^\top \right ) + \min(x_i, x_j) \left( S_i S_j^\top + S_j  S_i^\top \right)
+\end{align}
+</div>
+
+
+<p>Now we can derive \(\text{Tr}[B]\).</p>
+
+<div>
+\[
+\begin{align}
+    \text{Tr}[B] &= \text{Tr}[U^{-1} U''_{(ij)}] \\
+            &= \text{Tr}[U^{-1} \left \{\mathbb{1}_{i = j} \left ( S \, A_i \, S_i^\top + S_i \, A_i^\top \, S^\top \right ) +  \min(x_i, x_j) \left( S_i S_j^\top + S_j S_i^\top \right) \right \} ] \\
+            &= 
+            \mathbb{1}_{i = j} \text{Tr}\left [ U^{-1} S A_i S_i^\top \right ] +
+            \mathbb{1}_{i = j} \text{Tr}\left [ U^{-1} S_i A_i^\top S \right ] +
+            \min(x_i, x_j) \text{Tr}\left [ U^{-1} S_i  S_j^\top \right ] + \min(x_i, x_j) \text{Tr}\left [ U^{-1} S_j  S_i^\top \right ] \\
+            &= 
+            \mathbb{1}_{i = j} \text{Tr}\left [ S_i^\top U^{-1} S A_i \right ] +
+            \mathbb{1}_{i = j} \text{Tr}\left [ A_i^\top S U^{-1} S_i \right ] +
+            \min(x_i, x_j) \text{Tr}\left [S_j^\top  U^{-1} S_i \right ] + \min(x_i, x_j) \text{Tr}\left [ S_i^\top U^{-1} S_j \right ] \\
+            &= 
+            2 \mathbb{1}_{i = j}  S_i^\top U^{-1} S A_i +
+            2 \min(x_i, x_j) S_j^\top  U^{-1} S_i  \\
+\end{align}
+\]
+
+</div>
+
+
+<p>This is for a single term of the Hessian.  We can rewrite it to compute the entire Hessian using matrix arithmetic:</p>
+
+<div>
+\[
+    H_{2,B} = M \odot S^\top U^{-1} S + ( S^\top \left ( U^{-1} S \mathcal{A} \right ) ) \odot I
+\]
+</div>
+
+
+<p>Here, M is defined as, \(m_{ij} = \min(x_i, x_j)\), and  \(\mathcal{A}\) is the matrix whose i-th column is \(A_i\).  Note that only the diagonal elements of the second term are preserved; in implementation, this can be implemented as</p>
+
+<pre><code>diag(sum(S .* (inv(U) * S * A)))
+</code></pre>
+
+<h2>Full Hessian</h2>
+
+<p>The full Hessian is the sum of the three parts above</p>
+
+<div>
+\[
+\begin{align}
+    H =& H_1 - H_{2,A} - H_{2,B} \\
+      =& \mathcal{Z}' \odot \left[ \Delta \, z \, (1 \, 1 \, ...) \right] + M \odot \left(z z^\top \right ) + \text{diag}\left\{ z(x) \odot \Delta' z(x) \right\} +  \left[ z \, (1 \, 1 \, ...) \right] \odot \left[ \Delta \, \mathcal{Z}' \right] +  \\
+      & \left( S^\top U^{-1} S \Delta^\top \right)^\top \odot \left( S^\top U^{-1} S \Delta^\top \right)  + \left(\Delta S^\top U^{-1} S \Delta^\top\right) \odot \left(S^\top U^{-1} S \right)  - \\
+      & M \odot S^\top U^{-1} S - ( S^\top \left ( U^{-1} S \mathcal{A} \right ) ) \odot I
+\end{align}
+\]
+</div>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/11/23/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2013/11/20/work-log" class="prev" title="Chicken and Egg">&larr; Chicken and Egg</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

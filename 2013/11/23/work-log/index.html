@@ -1,0 +1,316 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Work Log &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Work Log
+    </h1>
+
+  <div class="date emphnext">November 23, 2013</div>
+    
+
+
+  
+    <p>Need to re-focus my efforts on getting WACV datasets working by December 10.  My recent efforts have shown good progress on the hard problem of inferring the index set under difficult conditions, but I only have about 2 weeks to get results and write the paper, so I should be focusing on a few quick-and-dirty fixes first (improved camera calibration, naive correspondence matching).  These fixes only apply to the super-clean WACV datasets, so they won't help for ECCV, but they'll get the paper out, which is what matters at the moment.</p>
+
+<p>TODO today:</p>
+
+<ul>
+<li>save wacv results from old cameras</li>
+<li>supplant camera files with recalibrated ones.</li>
+<li>re-run with new cameras</li>
+<li>compare results (hopefully much improved)</li>
+<li>investigate possible bug with continuous index-correction, i.e. FIX_WORLD_T(or omit entirely?, or replace with quasi-newton?)
+
+<ul>
+<li>remember, this doesn't need to be fast</li>
+</ul>
+</li>
+</ul>
+
+
+<hr />
+
+<h2>next</h2>
+
+<ul>
+<li>better data curve subdivision</li>
+<li>invsetigate crap curve #2</li>
+</ul>
+
+
+<h2>Investigating bad reconstruction of curve 2</h2>
+
+<p>it was reversed. fixed.</p>
+
+<p>Wait, now several views of several curves are missing.  Also, several corrections I remember making are now missing.  What is going on?  Did I somehow overwrite an old file?  Can I recover it from time machine?</p>
+
+<p>...</p>
+
+<p>Okay, recovered from time machine.  Still not sure what caused this.</p>
+
+<h2>Running WACV w/ linear-map correspondences</h2>
+
+<p>Getting NaN when estimating branch distance.  Coincident points aren't handled sensibly.  Fixed; also added handling of degenerate curves (single point repeated multiple times).</p>
+
+<p>Running succeeded (FIX_WORLD_T is off).</p>
+
+<p>The reconstructed result for dataset 8 looks good (for the first time ever), but the base point moves from view to view, even though we've removed the offset component from the kernel.</p>
+
+<p>...</p>
+
+<p>Found the problem:  had commented out some lines during debugging; caused offset perturbations to remain in the reconstruction.</p>
+
+<p>...</p>
+
+<p>Enabling FIX_WORLD_T.  Rerun succeeded, result looks reasonable; seems 98% identical to the version with FIX_WORLD_T disabled.</p>
+
+<p>...</p>
+
+<p>Getting some attachment issues.  Deteched reconstruction shows a few curves were badly reconstructed. time to try new cameras</p>
+
+<p>...</p>
+
+<p>new cameras seem to be reconstructing everything in reverse???  is it an axis-flipping issue?</p>
+
+<p>...</p>
+
+<p>It turned out to be an error in my calibration routine.  I had x and y swapped in my 3D coordinates.</p>
+
+<p>...</p>
+
+<p>Everything is now working.  Result: New results aren't qualitatively different from results using old cameras.  Back to the drawing board.</p>
+
+<p>...</p>
+
+<p>The failing curves seem to be caused by at least one view where the curve is view on-end.  The resulting reconstructed points have lots of variability as to where on the 3D curve they arise from; in some cases, the chosen point is well in to the "extrapolation region" of the curve, i.e. past the end of where the other well-localized points stop.</p>
+
+<p>On the plus side, these badly localized points have lots of variance in the direction of error, so there is hope to correct them.  On the down side, the inferred index of these points forces them to be far from their true position.</p>
+
+<p>This is an issue of poor indexing not being corrected.  Is it time to bring out the big guns and try maximizing the index set w.r.t. the marginal likelihood?  It seems like we've put this off long enough...</p>
+
+<p>...</p>
+
+<p>Imlemented, but slooooooow.  Profiling shows the gradient calculation is the culprit, specifically, a dot product that is called once per dimension, per gradient evaluation. We should be able to replace that with a matrix multiplication to get a significant vectorization speedup.</p>
+
+<p>...</p>
+
+<p>Done, still slow.  It looks like the gradient itself is pretty fast (~100ms) but the first iteration of Quasi-Newton takes several hundred evaluations (probably to build up a good estimate of the hessian).  We should implement the hessian directly, which should be cheap using the cubic-time derivation, given the fact that we've already performed inversion.  Need to write-up this derivation, then implement and test.</p>
+
+<h2>TODO (new)</h2>
+
+<ul>
+<li>Fix cameras
+
+<ul>
+<li>done. no significant improvement</li>
+</ul>
+</li>
+<li>Why is root point moving in the reconstruction?
+
+<ul>
+<li>fixed; debugging "comment-out" bug</li>
+</ul>
+</li>
+<li>Try FIX_WORLD_T=true
+
+<ul>
+<li>done. not great.</li>
+</ul>
+</li>
+<li>Consider running index point optimization
+
+<ul>
+<li>in the works</li>
+</ul>
+</li>
+<li>run with denser point subdivision
+
+<ul>
+<li>done. slower, not significantly better results</li>
+</ul>
+</li>
+<li>gradient write-up: generalization from 1d to 3d</li>
+<li>Gradient write-up: normalization component</li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/11/25/reference" class="next" title="Marginal likelihood gradient (part 2)">Marginal likelihood gradient (part 2) &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2013/11/23/reference" class="prev" title="Hessian of Marginal Likelihood">&larr; Hessian of Marginal Likelihood</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+
