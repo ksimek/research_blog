@@ -9,6 +9,8 @@ meta:
 ---
 {% include JB/setup %}
 
+**Update: What follows is an early working of the constant-length energy function and much of which I learned to be invalid.**
+
 Energy function and its gradient are:
 
 <div>
