@@ -34,7 +34,7 @@ Mu and it's jacobian are:
 \end{align}
 \]
 
-where \(\mathcal{Z}'\) is the Jacobian of \(z\), and \(z_3\) is the re-arrangement of \(z\) into x,y,z columns.  \(\Delta_{3x3}\) is the conversion of \(\Delta\) to 3D by block-diagonalizing three copies of \(\Delta\) and permuting rows and columns so each (x,y,z) is grouped together.  \(\Delta{1x3}\) repeats \(\Delta\) over three columns and permuting columns.  \(\operatorname{diag_{3x1}}\) is a modified diagonalization operator where x is split into 3x1 matrices, which are arranged into block-diagonal form.
+where \(\mathcal{Z}'\) is the Jacobian of \(z\), and \(z_3\) is the re-arrangement of \(z\) into x,y,z columns.  \(\Delta_{3x3}\) is the conversion of \(\Delta\) to 3D by block-diagonalizing three copies of \(\Delta\) and permuting rows and columns so each (x,y,z) is grouped together.  \(\Delta_{1x3}\) repeats \(\Delta\) over three columns and permuting columns.  \(\operatorname{diag_{3x1}}\) is a modified diagonalization operator where x is split into 3x1 matrices, which are arranged into block-diagonal form.
 </div>
 
 
