@@ -60,7 +60,7 @@ Let \(A = S^\top U^{-1} S \), so \(z = Ay \).
                                       \right) 
                                     \right \} z \\
          &= A_i (\delta_i^\top z) + A \delta_i z_i \\
-         &= A_{3i:3i+2} (\delta_{i,3x3}^\top z) + A \delta_i z_i & \text{3D version} \\
+         &= A_{3i:3i+2} (\delta_{i,3x3}^\top z) + A \delta_{i,3x3} z_{3i:3i+1} & \text{3D version} \\
 \nabla z &= \operatorname{sum_{1x3}}\left(A \odot \left( \Delta_{3x3} z \right)^\top \right)+ A \left( \Delta_{1x3}  \right )^\top \odot (z_3^\top z_3^\top \cdots)
 \end{align}
 \]
