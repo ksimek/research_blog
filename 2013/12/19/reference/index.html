@@ -1,0 +1,281 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Constant-length energy function -- revisited &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Reference] Constant-length energy function -- revisited
+    </h1>
+
+  <div class="date emphnext">December 19, 2013</div>
+    
+
+
+  
+    <p>My <a href="/ksimek/research/2013/12/12/reference/">earlier derivation</a> of the constant-length energy function was flawed, because it pooled the individual lengths before comparing them to the pooled index-spacing.  Thus, this energy function enforces the <em>sum</em> of squared lengths but not the individual lengths.  Chalk it up to trying to be too clever in avoiding a square root.</p>
+
+<p>In what follows, I derive a new energy function and its gradient.  The Jacobians of \(\mu\) and \(z\) are re-used from the earlier treatment.</p>
+
+<div>
+<p>
+  Let \(\mu\) be the maximum posterior curve, given an index set, \(\mathbf{x}\), arranged as a single column in "xyzxyz" format.  Let \(\mu^{(3)}\) be the 3 by N/3 matrix obtained by rearranging the points of \(\mu\) into column vectors.  That is, the i-th column \(\mu^{(3)}_i\) is the i-th reconstructed point.  
+  </p>
+
+<p>
+  Let \(\eta\) be the vector of absolute distances between adjacent points in \(mu^{3}\). Formally,
+  
+\[
+    \eta_i = \| \mu^{(3)}_i - \mu^{(3)}_{i-1} \|.
+\]
+
+Note that \(\eta^\top \eta = \|\eta\|^2 = \mu^\top D^\top D \mu\), where \(D\) is the adjacent differences matrix, adapted to operate on column vectors in the "xyzxyz" format.
+
+</p>
+</div>
+
+
+<p>The constant width energy function is defined as</p>
+
+<div>
+\[
+\begin{align}
+    E &= \frac{1}{2} \left ( Dx  - \eta \right ) ^2 \\
+      &= \frac{1}{2} x^\top D^\top D x + \frac 12 \eta^\top \eta  - x^\top D^\top \eta \\
+      &= \frac{1}{2} x^\top D^\top D x + \frac 12 \mu^\top D^\top D \mu  - x^\top D^\top \eta \\
+
+\end{align}
+\]
+</div>
+
+
+<p>Gradient is given by</p>
+
+<div>
+\[
+    \frac{\partial E}{\partial x} = x^\top D^\top D + \mu^\top D^\top D J_\mu - \eta^\top D - x^\top D^\top J_\eta
+\]
+</div>
+
+
+<p>where \(J_z\) is the Jacobian of \(\mathbf{z}\) w.r.t. \(\mathbf{x}\).</p>
+
+<p>The Jacobian of \(z\) and \(\mu\) are derived in <a href="/ksimek/research/2013/12/12/reference/">this earlier post</a>.  It remains to find the Jacobian of \(\eta\).</p>
+
+<div>
+Note the identity \( \eta_i^2 = \| \mu^{(3)}_i - \mu^{(3)}_{i-1} \|^2 \) can be rewritten in terms of the full vector \(\eta\) as 
+
+\[
+\eta \odot \eta = \operatorname{sum_{3x1}}(D \mu \odot D \mu)
+\]
+
+where \(\operatorname{sum_{kx1}}\) implements k-way blockwise summation over columns of a matrix.  Formally, it is the function \(f : \mathbb{R}^{NxM} \rightarrow R^{(N/k)xM}\) (for any N divisible by k), such that 
+
+\[
+    (f(A))_{ij} = \sum_{s = (i-1)\times k+1}^{i \times k} A_{sj}
+\]
+</div>
+
+
+<p>The Jacobian of \(\mathbf{\eta}\) can then be given by</p>
+
+<div>
+\[
+
+\begin{align}
+\frac{\partial \eta}{\partial x_i} &= \frac{\partial}{\partial x_i} \left ( \eta \odot \eta \right)^{\circ\frac12} \\
+                                 &= \frac{\partial}{\partial x_i} \left ( \operatorname{sum_{3x1}}(D \mu \odot D \mu) \right)^{\circ\frac12} \\
+                                &= \frac12 \left ( \eta \odot \eta \right)^{\circ \frac{-1}{2}} \frac{\partial}{\partial x} 
+                                    \left ( \operatorname{sum_{3x1}}(D \mu \odot D \mu )\right) \\
+                                &= \frac12 \eta^{\circ (-1)} 
+                                     \left ( \operatorname{sum_{3x1}}(\frac{\partial}{\partial x} D \mu \odot D \mu )\right) \\
+                                &= \frac12 \eta^{\circ (-1)} 
+                                     \left ( \operatorname{sum_{3x1}}( 2 D \mu \odot D J_\mu )\right) \\
+                                &= \eta^{\circ (-1)} \left ( \operatorname{sum_{3x1}}( D \mu \odot D J_\mu )\right) \\
+
+\end{align}
+\]
+
+where \(x^{\circ(-1)} = \left( \frac{1}{x_{ij}} \right)\) is the Hadamard (i.e. element-wise) inverse, and \(x^{\circ \frac12}\) is the Hadamard root.
+</div>
+
+
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2013/12/19/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2013/12/12/reference" class="prev" title="Constant-length energy function">&larr; Constant-length energy function</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

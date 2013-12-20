@@ -4,13 +4,493 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-12-05T23:30:47-07:00</updated>
+ <updated>2013-12-20T10:06:53-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/19/work-log"/>
+   <updated>2013-12-19T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/19/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15864&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Troubleshooting Jacobians of z and mu.&lt;/p&gt;
+
+&lt;p&gt;Analytical and numerical versions of z's Jacobian differ significantly in some entries.  To troubleshoot, stepping backward through the derivations of J_z outlined in &lt;a href=&quot;/ksimek/research/2013/12/12/reference/&quot;&gt;the reference post&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I will refer to the final equation from that post and count backward from the final line, describing the result of implementing each line.  E.g. line 0 is the final result, the one used to compute z_ana; line 1 is the one labelled &quot;(3D version)&quot; .&lt;/p&gt;
+
+&lt;p&gt;Setup:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Track = detach(trash_Tracks_11(end), params_test);
+K = get_K(Track); 
+S = Track.ll_S;
+U = speye(size(K)) + S * K * S';
+Ui = inv(U);
+kern = get_model_kernel_derivative(params_test);
+ind = get_curve_indices(Track);
+views = Track.ll_views_flat;
+Delta = eval_kernel(kern, ind, ind, views, views);
+Delta3 = one_d_to_three_d(Delta);
+
+i = 1;   
+i3 = 3*(i-1)+1;
+I = i3:i3+2;
+
+delta_i = Delta(i,:)';
+delta_i3 = one_d_to_three_d(delta_i);
+
+dK = zeros(size(K));
+dK(I,:) = dK(I,:) + Delta3(I,:);
+dK(:,I) = dK(:,I) + Delta3(I,:)';
+
+A = A = S' * Ui * S;
+z = z = A * y;
+N = length(K);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Implementing line 1:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;line_1 = -A(:,I) *delta_i3' * z - A * delta_i3 * z(i3:i3+2);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It actually looks pretty good.  So why is line_0 wrong?&lt;/p&gt;
+
+&lt;p&gt;Let's isolate the first term.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;line_1_a = -A(:,I) *delta_i3' * z;
+line_0_a = -sum_1xN(A .* repmat((Delta3 * z)', N,1), 3);
+plot(xx, line_1_a - line_0_a(:,i))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Error within 1e-12.  Great!  Error must be in the second term...&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;line_1_b = A * delta_i3 * z(i3:i3+2);
+line_0_b =  - A * (Delta3(1:3:end, :)' .* repmat(reshape(z,3,[]), N/3, 1));
+plot(xx, line_1_b - line_0_b(:,i))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Yep.  it's a mess.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Found the bug.  Was incorrectly trying to implement Delta&lt;em&gt;{1x3} by taking Delta&lt;/em&gt;{3x3}(1:3:end, :), which is totally wrong.  Also, was mis-associating the matrix multiplication and elementwise multiplication.  That is, I was taking (A * Delta_1x3) .&lt;em&gt; XXX  instead of A * (Delta_1x3 .&lt;/em&gt; XXX).&lt;/p&gt;
+
+&lt;p&gt;Those two fixes, and the dZ test now passes.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Still getting bad results for dmu.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Same bug as for dZ.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Developed new constant-width energy function, and derived its gradient.  Writeup &lt;a href=&quot;/ksimek/research/2013/12/19/reference&quot;&gt;is here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;TODO:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Derive Hessian of energy function&lt;/li&gt;
+&lt;li&gt;implement and test gradient and hessian.&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Constant-length energy function -- revisited</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/19/reference"/>
+   <updated>2013-12-19T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/19/reference</id>
+   <content type="html">&lt;p&gt;My &lt;a href=&quot;/ksimek/research/2013/12/12/reference/&quot;&gt;earlier derivation&lt;/a&gt; of the constant-length energy function was flawed, because it pooled the individual lengths before comparing them to the pooled index-spacing.  Thus, this energy function enforces the &lt;em&gt;sum&lt;/em&gt; of squared lengths but not the individual lengths.  Chalk it up to trying to be too clever in avoiding a square root.&lt;/p&gt;
+
+&lt;p&gt;In what follows, I derive a new energy function and its gradient.  The Jacobians of \(\mu\) and \(z\) are re-used from the earlier treatment.&lt;/p&gt;
+
+&lt;div&gt;
+&lt;p&gt;
+  Let \(\mu\) be the maximum posterior curve, given an index set, \(\mathbf{x}\), arranged as a single column in &quot;xyzxyz&quot; format.  Let \(\mu^{(3)}\) be the 3 by N/3 matrix obtained by rearranging the points of \(\mu\) into column vectors.  That is, the i-th column \(\mu^{(3)}_i\) is the i-th reconstructed point.  
+  &lt;/p&gt;
+
+&lt;p&gt;
+  Let \(\eta\) be the vector of absolute distances between adjacent points in \(mu^{3}\). Formally,
+  
+\[
+    \eta_i = \| \mu^{(3)}_i - \mu^{(3)}_{i-1} \|.
+\]
+
+Note that \(\eta^\top \eta = \|\eta\|^2 = \mu^\top D^\top D \mu\), where \(D\) is the adjacent differences matrix, adapted to operate on column vectors in the &quot;xyzxyz&quot; format.
+
+&lt;/p&gt;
+&lt;/div&gt;
+
+
+&lt;p&gt;The constant width energy function is defined as&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    E &amp;= \frac{1}{2} \left ( Dx  - \eta \right ) ^2 \\
+      &amp;= \frac{1}{2} x^\top D^\top D x + \frac 12 \eta^\top \eta  - x^\top D^\top \eta \\
+      &amp;= \frac{1}{2} x^\top D^\top D x + \frac 12 \mu^\top D^\top D \mu  - x^\top D^\top \eta \\
+
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Gradient is given by&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    \frac{\partial E}{\partial x} = x^\top D^\top D + \mu^\top D^\top D J_\mu - \eta^\top D - x^\top D^\top J_\eta
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;where \(J_z\) is the Jacobian of \(\mathbf{z}\) w.r.t. \(\mathbf{x}\).&lt;/p&gt;
+
+&lt;p&gt;The Jacobian of \(z\) and \(\mu\) are derived in &lt;a href=&quot;/ksimek/research/2013/12/12/reference/&quot;&gt;this earlier post&lt;/a&gt;.  It remains to find the Jacobian of \(\eta\).&lt;/p&gt;
+
+&lt;div&gt;
+Note the identity \( \eta_i^2 = \| \mu^{(3)}_i - \mu^{(3)}_{i-1} \|^2 \) can be rewritten in terms of the full vector \(\eta\) as 
+
+\[
+\eta \odot \eta = \operatorname{sum_{3x1}}(D \mu \odot D \mu)
+\]
+
+where \(\operatorname{sum_{kx1}}\) implements k-way blockwise summation over columns of a matrix.  Formally, it is the function \(f : \mathbb{R}^{NxM} \rightarrow R^{(N/k)xM}\) (for any N divisible by k), such that 
+
+\[
+    (f(A))_{ij} = \sum_{s = (i-1)\times k+1}^{i \times k} A_{sj}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;The Jacobian of \(\mathbf{\eta}\) can then be given by&lt;/p&gt;
+
+&lt;div&gt;
+\[
+
+\begin{align}
+\frac{\partial \eta}{\partial x_i} &amp;= \frac{\partial}{\partial x_i} \left ( \eta \odot \eta \right)^{\circ\frac12} \\
+                                 &amp;= \frac{\partial}{\partial x_i} \left ( \operatorname{sum_{3x1}}(D \mu \odot D \mu) \right)^{\circ\frac12} \\
+                                &amp;= \frac12 \left ( \eta \odot \eta \right)^{\circ \frac{-1}{2}} \frac{\partial}{\partial x} 
+                                    \left ( \operatorname{sum_{3x1}}(D \mu \odot D \mu )\right) \\
+                                &amp;= \frac12 \eta^{\circ (-1)} 
+                                     \left ( \operatorname{sum_{3x1}}(\frac{\partial}{\partial x} D \mu \odot D \mu )\right) \\
+                                &amp;= \frac12 \eta^{\circ (-1)} 
+                                     \left ( \operatorname{sum_{3x1}}( 2 D \mu \odot D J_\mu )\right) \\
+                                &amp;= \eta^{\circ (-1)} \left ( \operatorname{sum_{3x1}}( D \mu \odot D J_\mu )\right) \\
+
+\end{align}
+\]
+
+where \(x^{\circ(-1)} = \left( \frac{1}{x_{ij}} \right)\) is the Hadamard (i.e. element-wise) inverse, and \(x^{\circ \frac12}\) is the Hadamard root.
+&lt;/div&gt;
+
+
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Constant-length energy function</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/12/reference"/>
+   <updated>2013-12-12T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/12/reference</id>
+   <content type="html">&lt;p&gt;&lt;strong&gt;Update: What follows is an early working of the constant-length energy function and much of which I learned to be invalid.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Energy function and its gradient are:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+E = 0.5 (0.5 \mu^\top D^\top D \mu - 0.5 t^\top D^\top D t)^2 \\
+\frac{\partial E}{\partial t_i} = 2E \left [ 0.5 \mu^\top D^\top D J_\mu - t^\top D^\top D  \right ]
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Mu and it's jacobian are:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+\mu &amp;= K_* S^\top \left( S K S^\top + I\right)^{-1} S y \\
+    &amp;= K_* S^\top U^{-1} S y \\
+    &amp;= K_* z \\
+\frac{\partial \mu}{\partial t_i} 
+    &amp;= K'_* z + K_* z' \\
+J_\mu &amp;= \operatorname{diag_{3x1}}(\Delta_{3x3}) z + \left( \Delta_{1x3} \right)^\top \operatorname{repmat}(z_3 N/3, 1) + K_* J_z 
+\end{align}
+\]
+
+where \(J_z\) is the Jacobian of \(z\), and \(z_3\) is the re-arrangement of \(z\) into columns of xyz vectors.  \(\Delta_{3x3}\) is the conversion of \(\Delta\) to 3D by block-diagonalizing three copies of \(\Delta\) and permuting rows and columns so each (x,y,z) is grouped together.  \(\Delta_{1x3}\) repeats \(\Delta\) over three columns and permuting columns.  \(\operatorname{diag_{3x1}}\) is a modified diagonalization operator where x is split into 3x1 matrices, which are arranged into block-diagonal form.
+&lt;/div&gt;
+
+
+
+
+&lt;div&gt;
+Let \(A = S^\top U^{-1} S \), so \(z = Ay \).
+\[
+\begin{align}
+\frac{\partial z}{\partial t_i} &amp;= \frac{\partial }{\partial t_i} D^\top U^{-1} S y \\
+                              &amp;= - S^\top U^{-1} \frac{\partial U}{\partial t_i} U^{-1} S y \\
+                              &amp;= - S^\top U^{-1} S \frac{\partial K}{\partial t_i} S^\top U^{-1} S y \\
+                              &amp;= - A \frac{\partial K}{\partial t_i} z \\
+                              &amp;= - A \left \{
+                                      \left (
+                                      \begin{array}{c} 
+                                          \mathbf{0}             \\
+                                          \vdots        \\
+                                          \delta_i^\top \\
+                                          \vdots        \\
+                                          \mathbf{0}             \\
+                                      \end{array} \right ) + 
+                                      \left (
+                                          \begin{array}{c}
+                                          \mathbf{0} &amp; \cdots &amp; \delta_i &amp; \cdots &amp; \mathbf{0}
+                                          \end{array} 
+                                      \right) 
+                                    \right \} z \\
+         &amp;= - A_i (\delta_i^\top z) - A \delta_i z_i \\
+         &amp;= - A_{3i:3i+2} (\delta_{i,3x3}^\top z) - A \delta_{i,3x3} z_{3i:3i+1} &amp; \text{(3D version)} \\
+J_z &amp;= - \operatorname{sum_{1x3}}\left(A \odot \left( \Delta_{3x3} z \right)^\top \right) - A \left [ \left( \Delta_{1x3}  \right )^\top \odot \operatorname{repmat}(z_3, N/3, 1)^\top \right ]
+\end{align}
+\]
+&lt;/div&gt;
+
+
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Optimizing indices: Length constraints</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/10/work-log"/>
+   <updated>2013-12-10T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/10/work-log</id>
+   <content type="html">&lt;p&gt;Continuing along the inspiration from the yesterday's Pascal Fua paper investigating length constraint terms for index optimization.&lt;/p&gt;
+
+&lt;p&gt;It's difficult, because length implies known structure, which in turn implies known indices.  So constraining indices based on length feels like a circular argument.  This has been a sticking point in my thinking for a long time.  But we can formulate this in terms of expectations, namely, given an index set, the &lt;em&gt;expected segment length&lt;/em&gt; should be equal to difference of their indices.&lt;/p&gt;
+
+&lt;p&gt;Let \( L_i = \|x_i - x_{i-1}\| \) be the distance between points with adjacent indices.&lt;/p&gt;
+
+&lt;p&gt;Expected length given and index set, \(t\) is:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+\mathrm{E}[L_i^2] &amp;= \mathrm{E}[\| x_i - x_{i-1}\|^2] \\
+                &amp;= \mathrm{E}[x_i^2 - 2 x_i x_{i-1} + x_{i-1}^2 ] \\
+                &amp;= \mathrm{E}[x_i^2] - 2 \mathrm{E}[x_i x_{i-1}] + \mathrm{E}[x_{i-1}^2 ] \\
+                &amp;= \left( \mathrm{Cov}[x_i]  + \left( \mathrm{E}[x_i] \right) \right) - 2 \left( \mathrm{Cov}[x_i, x_{i-1}] + \mathrm{E}[x_i]\mathrm{E}[x_{i-1}] \right) + \left( \mathrm{Cov}[x_{i-1}]  + \left( \mathrm{E}[x_{i-1}] \right) \right)\\
+                &amp;= \left(k(x_i,x_i) + k(x_{i-1}, x_{i-1} - 2 k(x_i, x_{i-1}) \right) + \left( \mu_i^2 + \mu_{i-1}^2 - 2 \mu_i \mu_{i-1} \right)\\
+                &amp;= D K_i D^\top + (D \mu_{i,i-1})^\top D \mu_{i,i-1}
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Where D is the differencing matrix, \(D = (1, -1)\).&lt;/p&gt;
+
+&lt;p&gt;Observe that each dimension is independent in the squared distance equation, so we can treat each dimension separately in the equation above.&lt;/p&gt;
+
+&lt;p&gt;For now, we'll aproximate by ignoring the first term, since nearby indices should be nearly 100% corellated.  So all that remains is the squared difference of the reconstructed points.&lt;/p&gt;
+
+&lt;p&gt;We'll consider two different energy functions.  The first is exactly what we'd like to minimize, but it needs an approximation.&lt;/p&gt;
+
+&lt;div&gt;
+\[
+
+E_i = \left( \mathrm{E}[L_i] - \Delta_{t_i} \right)^2
+    \approx \left( \sqrt{\mathrm{E}[L_i^2]} - \Delta_{t_i} \right)^2
+
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;We can't compute \(\mathrm{E}[L_i] \) directly, so we approximate it by taking the square root of the expected square length.  The square root function is concave, so Jensen's inequality tells us that this approximation will never under-estimate the expected length, and since our main objective is to prevent index shrinkage, overestimating is preferred to underestimating.    The result is \(D \mu \), the adjacent differences of the posterior mean.&lt;/p&gt;
+
+&lt;p&gt;TODO: writeup derivation for gradient for \(E\) and \(\mu\)&lt;/p&gt;
+
+&lt;p&gt;Implemented analytical Jacobian for \(\mu\) in &lt;code&gt;posterior_mu_gradient.m&lt;/code&gt;.  Some error in results, according to &lt;code&gt;test/test_mu_deriv.m&lt;/code&gt;, but passes the inspection test.  Overall, diagonal term looks okay, so error is probably in derivation of dZ.  Particularly damning is that the quality metric isn't sensitive to the delta step size.&lt;/p&gt;
+
+&lt;p&gt;Should probably test Jacobian dZ.  It's undergone some changes today.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Yep, subtle but significant error.  Inspection suggests &lt;code&gt;term2&lt;/code&gt; is the culprit.  Can we focus on the individual faulty elements and check the partial derivatives?&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Hyperprior</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/09/work-log"/>
+   <updated>2013-12-09T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/09/work-log</id>
+   <content type="html">&lt;p&gt;Training hyperprior over indices vs. observation ordinal.&lt;/p&gt;
+
+&lt;p&gt;Struggling with modeling offset and rate.  Mean is usually zero, but not in this case.  Don't really care about initial conditions for now (and struggling with learning it anyway), so just learn smoothing sigma and set offset and rate covariance to large.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Reading more on GP Latend Variable Models.&lt;/p&gt;
+
+&lt;p&gt;[1] N. D. Lawrence and A. J. Moore, “Hierarchical Gaussian process latent variable models,” presented at the ICML '07: Proceedings of the 24th international conference on Machine learning, 2007.&lt;/p&gt;
+
+&lt;p&gt;At once similar and different from what we're doing.  In some sense, the index is a latent variable, but we aren't using latent variables as a dimension reduction technique, as is the crux of the GPLVM approach.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Reading up on existing literature dealing with reconstructing inextensible structures.&lt;/p&gt;
+
+&lt;p&gt;[1] M. Salzmann and P. Fua, “Linear Local Models for Monocular Reconstruction of Deformable Surfaces,” IEEE Trans. Pattern Anal. Mach. Intell., vol. 33, no. 5, pp. 931–944.
+[2] M. Salzmann, R. Urtasun, and P. Fua, “Local deformation models for monocular 3D shape recovery,” presented at the Computer Vision and Pattern Recognition, 2008. CVPR 2008. IEEE Conference on, 2008, pp. 1–8.
+[3] M. Perriollat, R. Hartley, and A. Bartoli, “Monocular Template-based Reconstruction of Inextensible Surfaces,” Int J Comput Vision, vol. 95, no. 2, Nov. 2011.
+[4] J. Taylor, A. D. Jepson, and K. N. Kutulakos, “Non-rigid structure from locally-rigid motion,” presented at the Computer Vision and Pattern Recognition (CVPR), 2010 IEEE Conference on, 2010, pp. 2761–2768.&lt;/p&gt;
+
+&lt;p&gt;All these papers assume we can match keypoints of some patches, which isn't the case in our problem since our curves don't have distinctive texture.  However, I can draw inspiration from [1], in which several interesting energy functions are constructed as homogeneous linear equations and with linear constraints.  In one formulation, the normal posterior energy is supplemented with extra terms that prevent edge-lengths from changing.  In another formulation, the rigidity constraint is replaced with an inequality that prevents extension but disallows contraction, which permits sharp folds.&lt;/p&gt;
+
+&lt;p&gt;There are significant differences in our case.  First, we don't have a reference structure to compare the model against, so we don't know the reference length of each segment.  Second, this assumes known correspondences, which we don't have.  But we can use the idea of adding an energy term based on length.&lt;/p&gt;
+
+&lt;p&gt;Reference [2] uses GPLVM (Gaussian process latent variable model) to model local deformations.  The latent variable formulation allows for nonlinear deformations (e.g. kinks, creases).  On the downside, it's nonconvex, so is best suited for tracking only.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/07/work-log"/>
+   <updated>2013-12-07T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/07/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15864&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;running with 5mm in-plane variance.  Dataset 4 and 5's issues seem to be resolved.  Interesting, since we still have isotropoic offset veriance in-place, too.&lt;/p&gt;
+
+&lt;p&gt;Can we get old issue to return by setting in-plane variance to zero?&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Yes.  And setting in-plane to nonzero and isotropic to zero?&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Yes.  But shifting is very significant, and motion is large and random.&lt;/p&gt;
+
+&lt;h2&gt;The offset mystery&lt;/h2&gt;
+
+&lt;p&gt;There's obviously some part of the model thats resulting in these offsets, its just a matter of zeroing out parameters until the phenomenon goes away.&lt;/p&gt;
+
+&lt;p&gt;Position perturbation variance is the root of the problem; both iso and nonisotropic version fail in this way.&lt;/p&gt;
+
+&lt;p&gt;Some modification I made is causing indices to collapse...  probably insufficient flexibility since I disabled rate and smoothness perturbations.&lt;/p&gt;
+
+&lt;p&gt;weird, rate and position variance seem tied to disappearing curves (index collape?).  Seems that increasing rate variance a lot is causing it.&lt;/p&gt;
+
+&lt;p&gt;Increasing rate variance seems to facilitate perturb_rate_variance having more influcence.  Possibly because we're getting index shrinkage, so small fluctuations in rate result in large fluctuations in structure.&lt;/p&gt;
+
+&lt;h2&gt;Prevending index shrinkage&lt;/h2&gt;
+
+&lt;p&gt;My current hypothesis is that index shrinkage is resulting in the highly non-intuitive results we're seeing.  Intuition assumes index corresponds to distance, but when shrinkage occurs, this is no longer the case, so intuition becomes cloudy or fails entirely.&lt;/p&gt;
+
+&lt;p&gt;We really need to constrain indices somehow, without preventing corrections.&lt;/p&gt;
+
+&lt;p&gt;First attempt: force length to remain constant.  added a squared penalty over total change in index length.  It's tricky because of our view-grouped transformation; only one group contributes to the size of the maximum end-point, and only one index contributes to the minimum start-point.  Implemented, but didn't get desired result.  Instead, indices shifted wildly to comply with the length constraint.  In some cases, overall shrinkage occurred, combined with occasional spikes to keep the length up.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Observation: plot of index vs. observation number is &lt;em&gt;smooth&lt;/em&gt;.  Add a GP prior over index using observation ordinal as index.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Implemented in &lt;code&gt;optimize_ml_wrt_indices_2.m&lt;/code&gt;.  Initial tests seem promising, but need to train on parameters.  Zeroth and first derivitives w.r.t. parameters:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+
+g(x) = \log p(x | t) = -0.5 x^\top \left( \sigma_1^2 K_1 + \sigma_2^2 K_2 + \sigma_3^2 K_3 \right)^{-1} x - 0.5 log \left | \sigma_1^2 K_1 + \sigma_2^2 K_2 + \sigma_3^2 K_3 \right | - C \\
+                &amp;= -0.5 x^\top U^{-1} x - 0.5 log | U | - C \\
+
+\frac{\partial g(x)}{\partial \sigma_i} = \sigma_i \left(z' K_i z - \text{Tr}\left[U^{-1} K_i\right] \right)
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;where \(U = \sigma_1 K_1 + ... \) and \(z = U&lt;sup&gt;{-1}&lt;/sup&gt; x \) .
+TODO:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;get curve indices from reconstruction&lt;/li&gt;
+&lt;li&gt;group by view; get corresponding ordinal; add to set&lt;/li&gt;
+&lt;li&gt;construct energy function over set of curves using functions above&lt;/li&gt;
+&lt;li&gt;initial fit of rate and offset using direct means;&lt;/li&gt;
+&lt;li&gt;refine all using N-R&lt;/li&gt;
+&lt;/ol&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Troubleshooting excessive index drift in endpoints; fixing Hessian under variable transformation.</title>
@@ -95,6 +575,44 @@
 &lt;li&gt;penalize shrinkage.&lt;/li&gt;
 &lt;/ul&gt;
 
+
+&lt;h2&gt;Constraining offset perturbation&lt;/h2&gt;
+
+&lt;p&gt;Constructing the offset perturbation variance so perturbations can only occur parallel to the image plane.  Code is pretty straightforward:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;cam_variance = blkdiag(repmat(sigma,N,N), repmat(sigma,N,N), zero(N,N));
+camvariance(I,I) = cam_variance;
+world_variance = R' * cam_variance * R
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Where R is the rotation matrix from world to camera coordinates (i.e. from the extrinsic matrix).&lt;/p&gt;
+
+&lt;p&gt;The main difficulty here is logistical: throughout the codebase we store the prior variance in 1D format, and assume it will be expanded to 3D isotropically.  Now we have a non-isotropic part of the prior, and we need to make sure it's included wherever the prior is needed.&lt;/p&gt;
+
+&lt;p&gt;Time for a real refactor.  Need a 'get_K' function, instead of just taking the prior_K, adding the branch variance, and then adding the nonisotropic offset variance each time.  Throw error if prior_K or branch_variance isn't ready.  refactor strategy: search files for prior_K; those that call one_d_to_three_d shortly thereafter are refactor candidates, others will need further recursion to find the regactor point.  But it all starts with prior_K.  There shouldn't be that many leaf-nodes that use prior_K -- ML, gradient, reconstruction, WACV-spectific stuff...&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;em&gt;Saturday&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Refactoring to use nonisotropic perturb position covariance.&lt;/p&gt;
+
+&lt;p&gt;Refactoring construct_attachment_covariance will be difficult, because it works in 1D matrix format, but the new covariance must operate in 3D format.  Will involve refactoring everything to 3D, re-index using block indexing, and double-check that noting relies on an independence assumption.&lt;/p&gt;
+
+&lt;p&gt;Better idea: apply perturb covariance after the fact.  All connected curves will get the same covariance offset, so none of the special logic in &lt;code&gt;construct_attachment_covariance&lt;/code&gt; is needed.&lt;/p&gt;
+
+&lt;p&gt;IDEA: use image position as an alternative index, and define a within-plane scaling covariance over it to account for poor calibration.  Don't need to know any tree structure; shouldn't distort reconstruction positions since it's in-plane.&lt;/p&gt;
+
+&lt;p&gt;in-plane covariance adds to branch_index &lt;em&gt;only&lt;/em&gt;.  Thus, the only change needs to be in att_set_branch_index and/or detach.  ...  But what if we want index-specific in-plane covariance (e.g. scaling).  Best to drop it into get_K, which will trickle into att_set_branch_index&lt;/p&gt;
+
+&lt;p&gt;Question: should each curve be allowed to shift in the image, or should the entire image be shifted as one?  The former gives more flexibility, but possibly undeserved.  One concern is that attaching two curves will eliminate that freedom, unfairly penalizing attachment.  On the other hand, of all curves tend to shift in the same direction, the ML will increase after attaching them, promoting attachment.  Will use per-curve shift for now.&lt;/p&gt;
+
+&lt;p&gt;Question: should shift be correlated between views?  The theory is shift arises due to camera miscalibration.&lt;/p&gt;
+
+&lt;p&gt;Issue: sometimes the covariance matrix is gotten in other ways, e.g. when computing branch index, the parent's covariance is computed in-line.&lt;/p&gt;
+
+&lt;p&gt;TODO: recurse on
+* &lt;code&gt;construct_attachment_covariance&lt;/code&gt;&lt;/p&gt;
 </content>
  </entry>
  
