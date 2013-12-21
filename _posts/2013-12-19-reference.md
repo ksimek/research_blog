@@ -75,13 +75,13 @@ The Jacobian of \\(\mathbf{\eta}\\) can then be given by
 \begin{align}
 \frac{\partial \eta}{\partial x_i} &= \frac{\partial}{\partial x_i} \left ( \eta \odot \eta \right)^{\circ\frac12} \\
                                  &= \frac{\partial}{\partial x_i} \left ( \operatorname{sum_{3x1}}(D \mu \odot D \mu) \right)^{\circ\frac12} \\
-                                &= \frac12 \left ( \eta \odot \eta \right)^{\circ \frac{-1}{2}} \frac{\partial}{\partial x} 
+                                &= \frac12 \left ( \eta \odot \eta \right)^{\circ \frac{-1}{2}} \odot \frac{\partial}{\partial x} 
                                     \left ( \operatorname{sum_{3x1}}(D \mu \odot D \mu )\right) \\
-                                &= \frac12 \eta^{\circ (-1)} 
+                                &= \frac12 \eta^{\circ (-1)}  \odot
                                      \left ( \operatorname{sum_{3x1}}(\frac{\partial}{\partial x} D \mu \odot D \mu )\right) \\
-                                &= \frac12 \eta^{\circ (-1)} 
+                                &= \frac12 \eta^{\circ (-1)}  \odot
                                      \left ( \operatorname{sum_{3x1}}( 2 D \mu \odot D J_\mu )\right) \\
-                                &= \eta^{\circ (-1)} \left ( \operatorname{sum_{3x1}}( D \mu \odot D J_\mu )\right) \\
+                                &= \eta^{\circ (-1)} \odot \left ( \operatorname{sum_{3x1}}( D \mu \odot D J_\mu )\right) \\
 
 \end{align}
 \]
