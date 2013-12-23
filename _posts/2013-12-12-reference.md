@@ -30,7 +30,7 @@ Mu and it's jacobian are:
     &= K_* z \\
 \frac{\partial \mu}{\partial t_i} 
     &= K'_* z + K_* z' \\
-J_\mu &= \operatorname{diag_{3x1}}(\Delta_{3x3}) z + \left( \Delta_{1x3} \right)^\top \operatorname{repmat}(z_3 N/3, 1) + K_* J_z 
+J_\mu &= \operatorname{diag_{3x1}}(\Delta_{3x3} z) + \left( \Delta_{1x3} \right)^\top \operatorname{repmat}(z_3 N/3, 1) + K_* J_z 
 \end{align}
 \]
 
