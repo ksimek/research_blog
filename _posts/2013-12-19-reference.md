@@ -79,7 +79,7 @@ The Jacobian of \\(\mathbf{\eta}\\) can then be given by
                                     \left ( \operatorname{sum_{3x1}}(D \mu \odot D \mu )\right) \\
                                 &= \frac12 \eta^{\circ (-1)}  \odot
                                      \left ( \operatorname{sum_{3x1}}(\frac{\partial}{\partial x_i} D \mu \odot D \mu )\right) \\
-                        J_mu &= \frac12 \eta^{\circ (-1)}  \odot
+                        J_\mu &= \frac12 \eta^{\circ (-1)}  \odot
                                      \left ( \operatorname{sum_{3x1}}( 2 D \mu \odot D J_\mu )\right) \\
                                 &= \eta^{\circ (-1)} \odot \left ( \operatorname{sum_{3x1}}( D \mu \odot D J_\mu )\right) \\
 
