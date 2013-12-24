@@ -66,8 +66,12 @@ To keep running time to \\(O(n^3)\\), we'll use diagonal approximations for thos
                                                     \begin{array}{c}
                                                     0 \\ 0 \\ \vdots \\ \delta^\top_{i3x3} z'_i \\ \vdots \\ 0 \\ 0
                                                     \end{array} \right )
-                                                    + C_{i,3x1} \odot \operatorname{repmat}(z'^{(3)}_i, N/3, 1) 
-    + K_* (J_z )_{:i} \\
+                                                    + C_{i,3x1} \odot \operatorname{repmat}(z^{(3)}_i, N/3, 1) 
+                                                    + \delta_{i,3x1} \odot \operatorname{repmat}(z'^{(3)}_i, N/3, 1) 
+                                                        + K_* (J'_z )_{:i} \\
+                                                        + K'_* (J_z )_{:i} \\
 \end{align}
 \]
 </div>
+
+Started deriving \\(J'_z\\), but was stymied by the complexity.  For now, we'll resort to ignoring these terms and see how the optimization goes.
