@@ -30,7 +30,7 @@ Mu and it's jacobian are:
     &= K_* z \\
 \frac{\partial \mu}{\partial t_i} 
     &= K'_* z + K_* z' \\
-J_\mu &= \operatorname{diag_{3x1}}(\Delta_{3x3} z) + \left( \Delta_{1x3} \right)^\top \operatorname{repmat}(z_3 N/3, 1) + K_* J_z 
+J_\mu &= \operatorname{diag_{3x1}}(\Delta_{3x3} z) + \left( \Delta_{1x3} \right)^\top \odot \operatorname{repmat}(z_3 N/3, 1) + K_* J_z 
 \end{align}
 \]
 
@@ -64,7 +64,7 @@ Let \(A = S^\top U^{-1} S \), so \(z = Ay \).
                                     \right \} z \\
          &= - A_i (\delta_i^\top z) - A \delta_i z_i \\
          &= - A_{3i:3i+2} (\delta_{i,3x3}^\top z) - A \delta_{i,3x3} z_{3i:3i+1} & \text{(3D version)} \\
-J_z &= - \operatorname{sum_{1x3}}\left(A \odot \left( \Delta_{3x3} z \right)^\top \right) - A \left [ \left( \Delta_{1x3}  \right )^\top \odot \operatorname{repmat}(z_3, N/3, 1)^\top \right ]
+J_z &= - \operatorname{sum_{1x3}}\left(A \odot \left( \Delta_{3x3} z \right)^\top \right) - A \left [ \left( \Delta_{1x3}  \right )^\top \odot \operatorname{repmat}(z_3, N/3, 1) \right ]
 \end{align}
 \]
 </div>
