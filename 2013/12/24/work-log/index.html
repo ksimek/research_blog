@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Struggling with index offset and shrinkage &larr; </title>
+   <title>Testing CL energy &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -85,108 +85,19 @@
 
 
   <h1 class="title">
-        [Work Log] Struggling with index offset and shrinkage
+        [Work Log] Testing CL energy
     </h1>
 
-  <div class="date emphnext">December 07, 2013</div>
+  <div class="date emphnext">December 24, 2013</div>
     
 
 
   
-    
+    <p>Testing constant-length energy function.  First test: \(\eta\) and it's Jacobian, implemented in <code>test/test_eta_deriv.m</code>.  Test passes.  Interesting observation: jacobian is nearly bidiagonal.  Hopefully the hessian will have similar form, so ignoring the off-diagonal terms won't be too detrimental.</p>
 
-<div class="meta-info">
-<table>
-    <tr>
-        <th>Project</th>
-        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
-    </tr>
-    <tr>
-        <th>Subproject</th>
-        <td>Data Association v3</td>
-    </tr>
-    <tr>
-        <th>Working path</th>
-        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
-    </tr>
+<p>Need to implement end-to-end test for \(E\) and its gradient/hessian.  Compare against analytical Hessian estimate and the crude \(J'J\) Hessian approximator.</p>
 
-    <tr>
-        <th>SVN Revision</th>
-        <td>15864</td>
-    </tr>
-
-
-</table>
-
-    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
-</div>
-
-
-<p>running with 5mm in-plane variance.  Dataset 4 and 5's issues seem to be resolved.  Interesting, since we still have isotropoic offset veriance in-place, too.</p>
-
-<p>Can we get old issue to return by setting in-plane variance to zero?</p>
-
-<p>...</p>
-
-<p>Yes.  And setting in-plane to nonzero and isotropic to zero?</p>
-
-<p>...</p>
-
-<p>Yes.  But shifting is very significant, and motion is large and random.</p>
-
-<h2>The offset mystery</h2>
-
-<p>There's obviously some part of the model thats resulting in these offsets, its just a matter of zeroing out parameters until the phenomenon goes away.</p>
-
-<p>Position perturbation variance is the root of the problem; both iso and nonisotropic version fail in this way.</p>
-
-<p>Some modification I made is causing indices to collapse...  probably insufficient flexibility since I disabled rate and smoothness perturbations.</p>
-
-<p>weird, rate and position variance seem tied to disappearing curves (index collape?).  Seems that increasing rate variance a lot is causing it.</p>
-
-<p>Increasing rate variance seems to facilitate perturb_rate_variance having more influcence.  Possibly because we're getting index shrinkage, so small fluctuations in rate result in large fluctuations in structure.</p>
-
-<h2>Preventing index shrinkage</h2>
-
-<p>My current hypothesis is that index shrinkage is resulting in the highly non-intuitive results we're seeing.  Intuition assumes index corresponds to distance, but when shrinkage occurs, this is no longer the case, so intuition becomes cloudy or fails entirely.</p>
-
-<p>We really need to constrain indices somehow, without preventing corrections.</p>
-
-<p>First attempt: force length to remain constant.  added a squared penalty over total change in index length.  It's tricky because of our view-grouped transformation; only one group contributes to the size of the maximum end-point, and only one index contributes to the minimum start-point.  Implemented, but didn't get desired result.  Instead, indices shifted wildly to comply with the length constraint.  In some cases, overall shrinkage occurred, combined with occasional spikes to keep the length up.</p>
-
-<p>...</p>
-
-<p>Observation: plot of index vs. observation number is <em>smooth</em>.  Add a GP prior over index using observation ordinal as index.</p>
-
-<p>...</p>
-
-<p>Implemented in <code>optimize_ml_wrt_indices_2.m</code>.  Initial tests seem promising, but need to train on parameters.  Zeroth and first derivitives w.r.t. parameters:</p>
-
-<div>
-\[
-
-\begin{align}
-g(x) = \log p(x | t) &= -0.5 x^\top \left( \sigma_1^2 K_1 + \sigma_2^2 K_2 + \sigma_3^2 K_3 \right)^{-1} x - 0.5 \log \left | \sigma_1^2 K_1 + \sigma_2^2 K_2 + \sigma_3^2 K_3 \right | - C \\
-                &= -0.5 x^\top U^{-1} x - 0.5 \log | U | - C \\
-
-\frac{\partial g(x)}{\partial \sigma_i} &= \sigma_i \left(z' K_i z - \text{Tr}\left[U^{-1} K_i\right] \right)
-\end{align}
-\]
-</div>
-
-
-<p>where \(U = \sigma_1 K_1 + ... \) and \(z = U<sup>{-1}</sup> x \).</p>
-
-<p>TODO:</p>
-
-<ol>
-<li>get curve indices from reconstruction</li>
-<li>group by view; get corresponding ordinal; add to set</li>
-<li>construct energy function over set of curves using functions above</li>
-<li>initial fit of rate and offset using direct means;</li>
-<li>refine all using Newton-Raphson</li>
-</ol>
-
+<p>need to update likelihood means?</p>
 
       <address class="signature">
         Posted by
@@ -198,10 +109,10 @@ g(x) = \log p(x | t) &= -0.5 x^\top \left( \sigma_1^2 K_1 + \sigma_2^2 K_2 + \si
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/12/09/work-log" class="next" title="Hyperprior">Hyperprior &rarr;</a>
+    <a href="/ksimek/research/2013/12/27/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/12/05/work-log" class="prev" title="Troubleshooting excessive index drift in endpoints; fixing Hessian under variable transformation.">&larr; Troubleshooting excessive index drift in endpoints; fixing Hessian under variable transformation.</a>
+    <a href="/ksimek/research/2013/12/23/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>

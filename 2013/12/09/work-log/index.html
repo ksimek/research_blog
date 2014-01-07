@@ -93,13 +93,21 @@
 
 
   
-    <p>Training hyperprior over indices vs. observation ordinal.</p>
+    <p>Training hyperprior over indices vs. observation ordinal.  Implemented in <code>wacv_2012/wacv_train_index_prior</code>.</p>
+
+<p>Training is apparently very sensitive to initial point.  Is the hessian wrong?  Implemented <code>test_mu_deriv()</code>  to test hessian using finite differences.</p>
 
 <p>Struggling with modeling offset and rate.  Mean is usually zero, but not in this case.  Don't really care about initial conditions for now (and struggling with learning it anyway), so just learn smoothing sigma and set offset and rate covariance to large.</p>
 
 <hr />
 
-<p>Reading more on GP Latend Variable Models.</p>
+<p>Index GP hyperprior doesn't fix index shrinkage issue, which is the root of several problems.  Tried another hack that adds an energy term to keep the total length constant.</p>
+
+<p>Still getting unexplained extension of curves.  Time to review the literature for ideas.</p>
+
+<hr />
+
+<p>Reading more on GP Latent Variable Models.</p>
 
 <p>[1] N. D. Lawrence and A. J. Moore, “Hierarchical Gaussian process latent variable models,” presented at the ICML '07: Proceedings of the 24th international conference on Machine learning, 2007.</p>
 
@@ -133,7 +141,7 @@
     <a href="/ksimek/research/2013/12/10/work-log" class="next" title="Optimizing indices: Length constraints">Optimizing indices: Length constraints &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/12/07/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2013/12/07/work-log" class="prev" title="Struggling with index offset and shrinkage">&larr; Struggling with index offset and shrinkage</a>
   
   </div>
   <div class="clearer"> </div>

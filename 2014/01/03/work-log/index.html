@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Struggling with index offset and shrinkage &larr; </title>
+   <title>Reading: Semantic SLAM w/ GPLVM shape priors; FIRE reading &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -85,108 +85,63 @@
 
 
   <h1 class="title">
-        [Work Log] Struggling with index offset and shrinkage
+        [Work Log] Reading: Semantic SLAM w/ GPLVM shape priors; FIRE reading
     </h1>
 
-  <div class="date emphnext">December 07, 2013</div>
+  <div class="date emphnext">January 03, 2014</div>
     
 
 
   
-    
+    <p>Read two papers.  The first was David Sbarra's paper for the FIRE project, modeling sleep disturbances vs. depression symptoms.  The second is a dense SLAM paper from CVPR 2013.</p>
 
-<div class="meta-info">
-<table>
-    <tr>
-        <th>Project</th>
-        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
-    </tr>
-    <tr>
-        <th>Subproject</th>
-        <td>Data Association v3</td>
-    </tr>
-    <tr>
-        <th>Working path</th>
-        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
-    </tr>
+<p>Decomposing</p>
 
-    <tr>
-        <th>SVN Revision</th>
-        <td>15864</td>
-    </tr>
+<h2>Decomposing Depression: On the Prospective and Reciprocal Dynamics of Mood and Sleep Disturbances</h2>
 
+<p>by David A. Sbarra and John J. B. Allen</p>
 
-</table>
+<p>David's paper, which will likely play a role in the FIRE project this Spring semester.  Uses time-series data of ~100 people at 5 time points describing two variables: mood and sleep disruptions.  A dynamical model (first order diff-eq) is developed to model the data, which captures drift, self-regulation, and inter-variable coupling.</p>
 
-    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
-</div>
+<p>Since the model is trained and evaluated on the same data, it isn't clear how predictive this model would be on held-out data.  Chi-squared test is used to determine which parameters are meaningful; I'm not familiar enough with this method to comment on it, but the Bayesian literatures constant struggle with model selection suggests that the classical (i.e. frequentist) methods like this may need scruitiny.</p>
 
+<p>Synthetic data is drawn from the resulting fit for 5 subjects, using observations for initial values. I couldn't compare it to the true data or maybe I misunderstood the plot -- perhaps David can elaborate on this.</p>
 
-<p>running with 5mm in-plane variance.  Dataset 4 and 5's issues seem to be resolved.  Interesting, since we still have isotropoic offset veriance in-place, too.</p>
+<p>A vector-field plot nicely illustrates the flow of the dynamical system.</p>
 
-<p>Can we get old issue to return by setting in-plane variance to zero?</p>
+<p>Can 6 parameters really model this data well?  Need to get familiar with the data.  Perhaps a good candidate nonparametric modeling?</p>
 
-<p>...</p>
+<p>Ideas:</p>
 
-<p>Yes.  And setting in-plane to nonzero and isotropic to zero?</p>
-
-<p>...</p>
-
-<p>Yes.  But shifting is very significant, and motion is large and random.</p>
-
-<h2>The offset mystery</h2>
-
-<p>There's obviously some part of the model thats resulting in these offsets, its just a matter of zeroing out parameters until the phenomenon goes away.</p>
-
-<p>Position perturbation variance is the root of the problem; both iso and nonisotropic version fail in this way.</p>
-
-<p>Some modification I made is causing indices to collapse...  probably insufficient flexibility since I disabled rate and smoothness perturbations.</p>
-
-<p>weird, rate and position variance seem tied to disappearing curves (index collape?).  Seems that increasing rate variance a lot is causing it.</p>
-
-<p>Increasing rate variance seems to facilitate perturb_rate_variance having more influcence.  Possibly because we're getting index shrinkage, so small fluctuations in rate result in large fluctuations in structure.</p>
-
-<h2>Preventing index shrinkage</h2>
-
-<p>My current hypothesis is that index shrinkage is resulting in the highly non-intuitive results we're seeing.  Intuition assumes index corresponds to distance, but when shrinkage occurs, this is no longer the case, so intuition becomes cloudy or fails entirely.</p>
-
-<p>We really need to constrain indices somehow, without preventing corrections.</p>
-
-<p>First attempt: force length to remain constant.  added a squared penalty over total change in index length.  It's tricky because of our view-grouped transformation; only one group contributes to the size of the maximum end-point, and only one index contributes to the minimum start-point.  Implemented, but didn't get desired result.  Instead, indices shifted wildly to comply with the length constraint.  In some cases, overall shrinkage occurred, combined with occasional spikes to keep the length up.</p>
-
-<p>...</p>
-
-<p>Observation: plot of index vs. observation number is <em>smooth</em>.  Add a GP prior over index using observation ordinal as index.</p>
-
-<p>...</p>
-
-<p>Implemented in <code>optimize_ml_wrt_indices_2.m</code>.  Initial tests seem promising, but need to train on parameters.  Zeroth and first derivitives w.r.t. parameters:</p>
-
-<div>
-\[
-
-\begin{align}
-g(x) = \log p(x | t) &= -0.5 x^\top \left( \sigma_1^2 K_1 + \sigma_2^2 K_2 + \sigma_3^2 K_3 \right)^{-1} x - 0.5 \log \left | \sigma_1^2 K_1 + \sigma_2^2 K_2 + \sigma_3^2 K_3 \right | - C \\
-                &= -0.5 x^\top U^{-1} x - 0.5 \log | U | - C \\
-
-\frac{\partial g(x)}{\partial \sigma_i} &= \sigma_i \left(z' K_i z - \text{Tr}\left[U^{-1} K_i\right] \right)
-\end{align}
-\]
-</div>
+<ul>
+<li>Make Bayesian by using LDS similar to Jinyan's work.</li>
+<li>Model the direction at each grid-point independently, using GP to enforce smoothness and avoid overfitting.</li>
+<li>Consider higher-order diff-eq.</li>
+<li>Use a GP-LVM model to handle non-linear dynamics.</li>
+</ul>
 
 
-<p>where \(U = \sigma_1 K_1 + ... \) and \(z = U<sup>{-1}</sup> x \).</p>
+<h2>Dense Reconstruction Using 3D Ojbect Shape Priors</h2>
 
-<p>TODO:</p>
+<p>Uses GP-LVM-based shape priors (cars) to improve existing dense SLAM implementation.  Manages to heavilly leverage parallelism in CPU and GPU to achieve (arguably) real-time performance.  Use Feltzenswalb car detector to find consistent detections in two views and perform rough pose estimation.  Uses color-based (3D histogram) and depth-based energy functions to refine pose and shape; authors derive the gradient of these energy functions w.r.t. rigid transformations and GP-LVM latent variables.  Tractibility of GP-LVM addressed by taking lowest N frequencies from a DCT; reduced 128x128x128 to 25x25x25.</p>
 
-<ol>
-<li>get curve indices from reconstruction</li>
-<li>group by view; get corresponding ordinal; add to set</li>
-<li>construct energy function over set of curves using functions above</li>
-<li>initial fit of rate and offset using direct means;</li>
-<li>refine all using Newton-Raphson</li>
-</ol>
+<p>How is the GP-LVM trained?  Where is the training data coming from?</p>
 
+<p>Related papers:</p>
+
+<ul>
+<li>R. A. Newcombe, A. J. Davison, S. Izadi, P. Kohli, O. Hilliges, J. Shotton, D. Molyneaux, S. Hodges, D. Kim, and A. Fitzgibbon, “KinectFusion: Real-time dense surface mapping and tracking,” Mixed and Augmented Reality (ISMAR), 2011 10th IEEE International Symposium on, pp. 127–136, 2011.</li>
+</ul>
+
+
+<p>The implicit level-set representation and the merging of depth images are the same as those from KinectFusion.  Also, KinectFusion's stereo results are used to evaluate their monocular results.</p>
+
+<ul>
+<li>S. Y. Bao and S. Savarese, “Semantic structure from motion,” presented at the Computer Vision and Pattern Recognition (CVPR), 2011 IEEE Conference on, 2011, pp. 2025–2032.</li>
+</ul>
+
+
+<p>Spiritual predecessor of this paper -- use detectors to improve structure from motion.</p>
 
       <address class="signature">
         Posted by
@@ -198,10 +153,10 @@ g(x) = \log p(x | t) &= -0.5 x^\top \left( \sigma_1^2 K_1 + \sigma_2^2 K_2 + \si
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/12/09/work-log" class="next" title="Hyperprior">Hyperprior &rarr;</a>
+    <a href="/ksimek/research/2014/01/06/work-log" class="next" title="Dissertation Proposal - Preparation, Organization">Dissertation Proposal - Preparation, Organization &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/12/05/work-log" class="prev" title="Troubleshooting excessive index drift in endpoints; fixing Hessian under variable transformation.">&larr; Troubleshooting excessive index drift in endpoints; fixing Hessian under variable transformation.</a>
+    <a href="/ksimek/research/2013/12/27/work-log" class="prev" title="Work Log">&larr; Work Log</a>
   
   </div>
   <div class="clearer"> </div>

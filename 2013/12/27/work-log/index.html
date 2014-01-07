@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Struggling with index offset and shrinkage &larr; </title>
+   <title>Work Log &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -85,108 +85,44 @@
 
 
   <h1 class="title">
-        [Work Log] Struggling with index offset and shrinkage
+        [Work Log] Work Log
     </h1>
 
-  <div class="date emphnext">December 07, 2013</div>
+  <div class="date emphnext">December 27, 2013</div>
     
 
 
   
-    
+    <h2>Debugging</h2>
 
-<div class="meta-info">
-<table>
-    <tr>
-        <th>Project</th>
-        <td><a href="/ksimek/research/projects/tulips.html">Tulips</a></td>
-    </tr>
-    <tr>
-        <th>Subproject</th>
-        <td>Data Association v3</td>
-    </tr>
-    <tr>
-        <th>Working path</th>
-        <td>projects/&#8203;tulips/&#8203;trunk/&#8203;src/&#8203;matlab/&#8203;data_association_3</td>
-    </tr>
+<p>New energy function causes much worse index ordering.  Ordering before optimization is terrible; new energy function seems to introduce new local minima that we can't overcome.</p>
 
-    <tr>
-        <th>SVN Revision</th>
-        <td>15864</td>
-    </tr>
+<hr />
 
-
-</table>
-
-    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
-</div>
-
-
-<p>running with 5mm in-plane variance.  Dataset 4 and 5's issues seem to be resolved.  Interesting, since we still have isotropoic offset veriance in-place, too.</p>
-
-<p>Can we get old issue to return by setting in-plane variance to zero?</p>
+<p>Running old version to recall problems.</p>
 
 <p>...</p>
 
-<p>Yes.  And setting in-plane to nonzero and isotropic to zero?</p>
+<p>Significant offset from LL reconstruction.  <strong>Increasing perturb_scale improves significantly</strong> (from 2.5 to 81).  When influsence of wide-baseline views is small, pulling toward camera is significant; increasing perturb_scale increasing that influence.</p>
 
-<p>...</p>
+<p>Side effect of increasing perturb_scale is massive increase of tip extension in the direction of the camera.  This is because the posterior is more peaked, decreasing the size of the global optimum.</p>
 
-<p>Yes.  But shifting is very significant, and motion is large and random.</p>
-
-<h2>The offset mystery</h2>
-
-<p>There's obviously some part of the model thats resulting in these offsets, its just a matter of zeroing out parameters until the phenomenon goes away.</p>
-
-<p>Position perturbation variance is the root of the problem; both iso and nonisotropic version fail in this way.</p>
-
-<p>Some modification I made is causing indices to collapse...  probably insufficient flexibility since I disabled rate and smoothness perturbations.</p>
-
-<p>weird, rate and position variance seem tied to disappearing curves (index collape?).  Seems that increasing rate variance a lot is causing it.</p>
-
-<p>Increasing rate variance seems to facilitate perturb_rate_variance having more influcence.  Possibly because we're getting index shrinkage, so small fluctuations in rate result in large fluctuations in structure.</p>
-
-<h2>Preventing index shrinkage</h2>
-
-<p>My current hypothesis is that index shrinkage is resulting in the highly non-intuitive results we're seeing.  Intuition assumes index corresponds to distance, but when shrinkage occurs, this is no longer the case, so intuition becomes cloudy or fails entirely.</p>
-
-<p>We really need to constrain indices somehow, without preventing corrections.</p>
-
-<p>First attempt: force length to remain constant.  added a squared penalty over total change in index length.  It's tricky because of our view-grouped transformation; only one group contributes to the size of the maximum end-point, and only one index contributes to the minimum start-point.  Implemented, but didn't get desired result.  Instead, indices shifted wildly to comply with the length constraint.  In some cases, overall shrinkage occurred, combined with occasional spikes to keep the length up.</p>
-
-<p>...</p>
-
-<p>Observation: plot of index vs. observation number is <em>smooth</em>.  Add a GP prior over index using observation ordinal as index.</p>
-
-<p>...</p>
-
-<p>Implemented in <code>optimize_ml_wrt_indices_2.m</code>.  Initial tests seem promising, but need to train on parameters.  Zeroth and first derivitives w.r.t. parameters:</p>
-
-<div>
-\[
-
-\begin{align}
-g(x) = \log p(x | t) &= -0.5 x^\top \left( \sigma_1^2 K_1 + \sigma_2^2 K_2 + \sigma_3^2 K_3 \right)^{-1} x - 0.5 \log \left | \sigma_1^2 K_1 + \sigma_2^2 K_2 + \sigma_3^2 K_3 \right | - C \\
-                &= -0.5 x^\top U^{-1} x - 0.5 \log | U | - C \\
-
-\frac{\partial g(x)}{\partial \sigma_i} &= \sigma_i \left(z' K_i z - \text{Tr}\left[U^{-1} K_i\right] \right)
-\end{align}
-\]
-</div>
-
-
-<p>where \(U = \sigma_1 K_1 + ... \) and \(z = U<sup>{-1}</sup> x \).</p>
+<p>Adding index smoothness metaprior seems to help, but I'm not confident in the implementation, since there's no unit test for it.  Also getting a small amount of index extension, possibly because end-caps arent a full unit away from previous point.  can this be fixed?  Can't really use chord-length in 2D, because this could contain significant noise.  Although using ordinal isn't much different.  Could store fraction of last point.  Also need to acknowledge that different sub-sampling periods cause GP parameters to change meaning.  Should re-number ordinals based on resampling.  Store in data?</p>
 
 <p>TODO:</p>
 
-<ol>
-<li>get curve indices from reconstruction</li>
-<li>group by view; get corresponding ordinal; add to set</li>
-<li>construct energy function over set of curves using functions above</li>
-<li>initial fit of rate and offset using direct means;</li>
-<li>refine all using Newton-Raphson</li>
-</ol>
+<ul>
+<li>unit test index metaprior</li>
+<li>experiment with constant length energy function?</li>
+</ul>
 
+
+<p>dataset 6: overextension in teal top curve, red mid curve
+dataset 7: overextension in dk green top curve
+dataset 8: extreme overextension in teal top curve; bad ll localization
+dataset 9: overextension in red  top curve</p>
+
+<p>and others.  Always when ll point is in direction of previous curve.</p>
 
       <address class="signature">
         Posted by
@@ -198,10 +134,10 @@ g(x) = \log p(x | t) &= -0.5 x^\top \left( \sigma_1^2 K_1 + \sigma_2^2 K_2 + \si
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2013/12/09/work-log" class="next" title="Hyperprior">Hyperprior &rarr;</a>
+    <a href="/ksimek/research/2014/01/03/work-log" class="next" title="Reading: Semantic SLAM w/ GPLVM shape priors; FIRE reading">Reading: Semantic SLAM w/ GPLVM shape priors; FIRE reading &rarr;</a>
   
   
-    <a href="/ksimek/research/2013/12/05/work-log" class="prev" title="Troubleshooting excessive index drift in endpoints; fixing Hessian under variable transformation.">&larr; Troubleshooting excessive index drift in endpoints; fixing Hessian under variable transformation.</a>
+    <a href="/ksimek/research/2013/12/24/work-log" class="prev" title="Testing CL energy">&larr; Testing CL energy</a>
   
   </div>
   <div class="clearer"> </div>

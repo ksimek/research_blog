@@ -4,13 +4,522 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2013-12-20T10:06:53-07:00</updated>
+ <updated>2014-01-06T18:31:56-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Dissertation Proposal - Preparation, Organization</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/01/06/work-log"/>
+   <updated>2014-01-06T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/01/06/work-log</id>
+   <content type="html">&lt;p&gt;Spent morning and early afternoon doing preparation for my dissertation proposal by doing some background reading and laying out a rough sketch of what I'd like to cover.&lt;/p&gt;
+
+&lt;p&gt;Read Ernesto's dissertation proposal.  The bulk of Ernesto's proposal seemed to be his two published papers, with an extended literature review and a brief description of remaining work to be done.  This isn't too surprising, since he was so far along in his research when he wrote the proposal.  Unfortunately, I have no such publications to draw on, but I may be able to use part of the tracking paper, which I was third author on.  But on the whole, I'll need to lean more in the &quot;proposal&quot; direction, and less in the &quot;dissertation&quot; direction than Ernesto was able to.  Time to dig for more representative examples of the proposal I'll be writing...&lt;/p&gt;
+
+&lt;p&gt;Read &lt;a href=&quot;http://www.gwr.arizona.edu/writingproposal1.htm&quot;&gt;this article&lt;/a&gt;, describing a dissertation proposal in science.  The second page has a nice organization of possible sections for my proposal.&lt;/p&gt;
+
+&lt;p&gt;According to the aforementioned article, length is 10-40 pages.  This is supported by Ernesto's proposal (25 pages w/ references), and &lt;a href=&quot;http://www.cs.unc.edu/~cssa/guides/proposals/&quot;&gt;these example proposals from computer science&lt;/a&gt;, which fall between 9 and 20 pages, with references.  The number of references is between 14 and 85, with a median around 20.&lt;/p&gt;
+
+&lt;p&gt;I was surprised to see the level of brevity and abstractness in most of the example proposals above.  I'm assuming these were written early in the research phase, shortly after the end of coursework;  it is encouraging to see that this document need not be a &lt;em&gt;tour de force&lt;/em&gt;.  Overall, I'm thinking that since I've developed my research so extensively, my proposal will probably be heavier on references and detail, and likely longer than the average.  However, I need to avoid falling into the trap of trying to write my dissertation instead of a proposal.&lt;/p&gt;
+
+&lt;p&gt;I'm feeling more confident now that I can finish this by the deadline I set for myself of January 31, and a reschedule hopefully won't be needed.  My initial investigation suggested that writing the proposal should take three to nine months, a surprise that knocked the wind out of me.   I realize now that much of that time is spent investigating topics, doing initial research, and reviewing literature, not specifically writing.  Since I've completed those steps (extensively!) it should be reasonable to assume I can write the full document in 2.5 weeks.  I'd like to get Kobus a first draft within the week, with at least the rough structure layed out, so he can correct my course if I'm way off.&lt;/p&gt;
+
+&lt;p&gt;I briefly reviewed the computer science department's graduate program policy for comp exams (something I haven't looked it in probably far too long!) and realized I should have scheduled my dissertation proposal in Fall 2011!!  It should be no surprise the department was urging me to complete this right away!&lt;/p&gt;
+
+&lt;h2&gt;Organizational Notes&lt;/h2&gt;
+
+&lt;p&gt;Below are notes I jotted down while reading Ernesto's proposal.&lt;/p&gt;
+
+&lt;h3&gt;Parts&lt;/h3&gt;
+
+&lt;p&gt;Research items worth covering in the proposal (or dedicating chapters to in the dissertation proper)&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Edge extraction, Stroke-width transform skeleton.&lt;/li&gt;
+&lt;li&gt;Bayesian Model
+
+&lt;ul&gt;
+&lt;li&gt;GPU-enabled edge-based likelihood
+
+&lt;ul&gt;
+&lt;li&gt;Blurred-difference likelihood&lt;/li&gt;
+&lt;li&gt;Chamfer likelihood&lt;/li&gt;
+&lt;li&gt;GMM likelihood&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Prior: &quot;Branching Gaussian Process&quot;
+
+&lt;ul&gt;
+&lt;li&gt;Modification for multimodal likelihoods (Importance sampling)&lt;/li&gt;
+&lt;li&gt;novel covariance function&lt;/li&gt;
+&lt;li&gt;Temporal modeling&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Marginalization: Laplace Approximation&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Initial estimate: Dynamic programming algorithm for multi-view triangulation&lt;/li&gt;
+&lt;li&gt;Inference: MCMCDA&lt;/li&gt;
+&lt;li&gt;Index estimation
+
+&lt;ul&gt;
+&lt;li&gt;Analytical gradients derived&lt;/li&gt;
+&lt;li&gt;Dimensionality reduction? (for pixel likelihood)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;Background / Related work&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Multi-view Reconstruction
+
+&lt;ul&gt;
+&lt;li&gt;Visual Hull&lt;/li&gt;
+&lt;li&gt;Voxel-based (Hough transform)&lt;/li&gt;
+&lt;li&gt;Space carving (Hough + photoconsistency)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Biological application
+
+&lt;ul&gt;
+&lt;li&gt;Root structure Architecture papers&lt;/li&gt;
+&lt;li&gt;Neuron Tracing&lt;/li&gt;
+&lt;li&gt;Vascular segmentation and modeling&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.google.com/url?sa=t&amp;amp;rct=j&amp;amp;q=&amp;amp;esrc=s&amp;amp;source=web&amp;amp;cd=1&amp;amp;cad=rja&amp;amp;ved=0CCwQFjAA&amp;amp;url=http%3A%2F%2Fwww.cv-foundation.org%2Fopenaccess%2Fcontent_cvpr_2013%2Fpapers%2FTabb_Shape_from_Silhouette_2013_CVPR_paper.pdf&amp;amp;ei=SELLUs63G4e9rgHwuYHYAw&amp;amp;usg=AFQjCNHAaFQi-2H2zTQUOSm67WI2p87odw&amp;amp;sig2=L0V4Txw-fqypkloITh-dlA&amp;amp;bvm=bv.58187178,d.aWM&quot;&gt;Tree branches - Amy Tabb, CVPR-2013&lt;/a&gt; [pdf]&lt;/li&gt;
+&lt;li&gt;L-systems - &lt;a href=&quot;http://vladlen.info/publications/metropolis-procedural-modeling/&quot;&gt;Metropolis Procedural Modeling&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;S-C Zhu plant paper - Bayesian reconstruction of 3d shapes and scenes from a single image&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Tracking
+
+&lt;ul&gt;
+&lt;li&gt;Oh et al.&lt;/li&gt;
+&lt;li&gt;Ernesto&lt;/li&gt;
+&lt;li&gt;Tracklets? (TODO)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Bayesian Model Choice
+
+&lt;ul&gt;
+&lt;li&gt;P.J. Green, RJMCMC&lt;/li&gt;
+&lt;li&gt;Laplace approximation&lt;/li&gt;
+&lt;li&gt;Candidates estimator&lt;/li&gt;
+&lt;li&gt;Examples without model choice?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Curve models
+
+&lt;ul&gt;
+&lt;li&gt;Song-Chun Zhu - Parsing Images into Regions, Curves, and Curve Groups&lt;/li&gt;
+&lt;li&gt;snakes&lt;/li&gt;
+&lt;li&gt;Curve indicator random field&lt;/li&gt;
+&lt;li&gt;Implicit definitions&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Edge-based likelihoods / energy functions
+
+&lt;ul&gt;
+&lt;li&gt;Curve indicator random field&lt;/li&gt;
+&lt;li&gt;Joe Schlecht's papers&lt;/li&gt;
+&lt;li&gt;Chamfer matching
+
+&lt;ul&gt;
+&lt;li&gt;Shotton, PAMI 2007 - Multi-Scale Categorical Object Recognition Using Contour Fragments&lt;/li&gt;
+&lt;li&gt;Shotton, ICCV 2005 - Contour-Based Learning for Object Detection&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Poon &amp;amp; Fleet 2002 - Hybrid Monte Carlo Filtering: Edge-Based People Tracking&lt;/li&gt;
+&lt;li&gt;TODO: More examples of edges in bayesian inference&lt;/li&gt;
+&lt;li&gt;Gradient Vector Flow&lt;/li&gt;
+&lt;li&gt;Blurred Gaussian&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Thin plate splines
+
+&lt;ul&gt;
+&lt;li&gt;Ferarri - Accurate Object Detection with Deformable Shape Models Learnt from Images&lt;/li&gt;
+&lt;li&gt;TODO: others&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Deformable models
+
+&lt;ul&gt;
+&lt;li&gt;Fua, Uratsen (TODO)&lt;/li&gt;
+&lt;li&gt;Monocular Template-based Reconstruction of Inextensible Surfaces Perriollat, Hartley, and Bartoli&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Sampling-based Structure From Motion
+
+&lt;ul&gt;
+&lt;li&gt;Dellaert - SfM Without Correspondence (and other?)&lt;/li&gt;
+&lt;li&gt;Forsyth - Bayesian Structure From Motion; Joy of Sampling&lt;/li&gt;
+&lt;li&gt;TODO: dig here&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Misc Structure from Motion
+
+&lt;ul&gt;
+&lt;li&gt;Semantic Structure From Motion?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Model-based Reconstruction
+
+&lt;ul&gt;
+&lt;li&gt;Joe, Luca's work&lt;/li&gt;
+&lt;li&gt;Savarese, Fei-Fei - 3D generic object categorization, localization and pose estimation&lt;/li&gt;
+&lt;li&gt;TODO: dig here&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Evaluation
+
+&lt;ul&gt;
+&lt;li&gt;Diadem Challenge&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Gaussian Process
+
+&lt;ul&gt;
+&lt;li&gt;Basic: Williams and Rasmussen&lt;/li&gt;
+&lt;li&gt;GP-LVM&lt;/li&gt;
+&lt;li&gt;Urstein Ulenbeck process&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Miscellaneous
+
+&lt;ul&gt;
+&lt;li&gt;Stroke width Transform&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;Layout Ideas&lt;/h3&gt;
+
+&lt;p&gt;An initial strategy for laying out the proposal is below.  I may want to rethink this after reading &lt;a href=&quot;http://www.gwr.arizona.edu/writingproposal1.htm&quot;&gt;this guide&lt;/a&gt;, which suggests a much higher-level strategy.  However, the level of detail in the strategy that follows may be justified by the late stage I'm at with my research; could contribute to a stronger argument.  Should sleep on it.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Intro.&lt;/em&gt; describe problem, motivate and give background.
+&lt;em&gt;Body.&lt;/em&gt; One Seciton per part, with one or more of the following parts&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Background and related work (show it's sensible and proven, but also novel in this case)&lt;/li&gt;
+&lt;li&gt;Progress so far (include derived equations, intermediate results, etc.)&lt;/li&gt;
+&lt;li&gt;Work to be done (defend why it's promising).&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;Future Work&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Leafs, flowers?&lt;/li&gt;
+&lt;li&gt;Root structure architecture?&lt;/li&gt;
+&lt;li&gt;Neurons?&lt;/li&gt;
+&lt;li&gt;Vascular modeling&lt;/li&gt;
+&lt;li&gt;Likelihood improvements - color, patch-based?&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;Diagrams&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Camera setup
+
+&lt;ul&gt;
+&lt;li&gt;One camera, multiple angles&lt;/li&gt;
+&lt;li&gt;Multiple cameras, many angles&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Degenerate likelihood
+
+&lt;ul&gt;
+&lt;li&gt;(rough diagram in notes)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Data / edges&lt;/li&gt;
+&lt;li&gt;Likelihoods
+
+&lt;ul&gt;
+&lt;li&gt;BD Likelihood
+
+&lt;ul&gt;
+&lt;li&gt;GMM per-pixel&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;Equations&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Two-phase likelhood&lt;/li&gt;
+&lt;li&gt;Curve Covariance - 1. smooth, 2. Rate and offset, 3. temporal&lt;/li&gt;
+&lt;li&gt;Branching covariance&lt;/li&gt;
+&lt;li&gt;Laplace approximation&lt;/li&gt;
+&lt;li&gt;Marginal likelihood approx w/ Laplace&lt;/li&gt;
+&lt;li&gt;Mean approx w/ Laplace&lt;/li&gt;
+&lt;li&gt;Index gradients&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;Miscellaneous Thoughts&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Think more on diagrams; what do I have?  what do I need?&lt;/li&gt;
+&lt;li&gt;Width as depth-cue; single-view reconstruction&lt;/li&gt;
+&lt;li&gt;GPU-based gradient?  Can render index w/ each edge. tell GPU how index moves to avoid re-rendering full model.&lt;/li&gt;
+&lt;li&gt;Is mean-offset really a problem?  If there's no size/shape distortion (pure translation), maybe not in many applications.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Use chicken/egg for index optimization in the wild&lt;/strong&gt;. As opposed to energy minimization we use for ground-truth.  The data will drive the fitting well enough so clever index fitting isn't necessary.&lt;/li&gt;
+&lt;li&gt;Remember to draw from the blog (TODO)&lt;/li&gt;
+&lt;li&gt;Add MRF smoothness to pixel Likelihood? (to address non-dependence)&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Proposal TODO:&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Contact Dr. Zhang or Dr. Gniady about joining the committee.&lt;/li&gt;
+&lt;li&gt;Complete form in UAccess.&lt;/li&gt;
+&lt;li&gt;Look for quality blog posts to draw content/equations&lt;/li&gt;
+&lt;li&gt;Lit Review
+
+&lt;ul&gt;
+&lt;li&gt;Look into tracklets; MCMCDA?  Ernesto has a referencek&lt;/li&gt;
+&lt;li&gt;examples ignoring model choice problem?&lt;/li&gt;
+&lt;li&gt;More edge-based likelihood applications
+
+&lt;ul&gt;
+&lt;li&gt;Ferrari papers?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Misc TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Dig into (Vladlen Koltun's literature)[http://vladlen.info/] on reconstruction.&lt;/li&gt;
+&lt;li&gt;Dig into Ferrari edge/contour literature.&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Reading: Semantic SLAM w/ GPLVM shape priors; FIRE reading</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/01/03/work-log"/>
+   <updated>2014-01-03T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/01/03/work-log</id>
+   <content type="html">&lt;p&gt;Read two papers.  The first was David Sbarra's paper for the FIRE project, modeling sleep disturbances vs. depression symptoms.  The second is a dense SLAM paper from CVPR 2013.&lt;/p&gt;
+
+&lt;p&gt;Decomposing&lt;/p&gt;
+
+&lt;h2&gt;Decomposing Depression: On the Prospective and Reciprocal Dynamics of Mood and Sleep Disturbances&lt;/h2&gt;
+
+&lt;p&gt;by David A. Sbarra and John J. B. Allen&lt;/p&gt;
+
+&lt;p&gt;David's paper, which will likely play a role in the FIRE project this Spring semester.  Uses time-series data of ~100 people at 5 time points describing two variables: mood and sleep disruptions.  A dynamical model (first order diff-eq) is developed to model the data, which captures drift, self-regulation, and inter-variable coupling.&lt;/p&gt;
+
+&lt;p&gt;Since the model is trained and evaluated on the same data, it isn't clear how predictive this model would be on held-out data.  Chi-squared test is used to determine which parameters are meaningful; I'm not familiar enough with this method to comment on it, but the Bayesian literatures constant struggle with model selection suggests that the classical (i.e. frequentist) methods like this may need scruitiny.&lt;/p&gt;
+
+&lt;p&gt;Synthetic data is drawn from the resulting fit for 5 subjects, using observations for initial values. I couldn't compare it to the true data or maybe I misunderstood the plot -- perhaps David can elaborate on this.&lt;/p&gt;
+
+&lt;p&gt;A vector-field plot nicely illustrates the flow of the dynamical system.&lt;/p&gt;
+
+&lt;p&gt;Can 6 parameters really model this data well?  Need to get familiar with the data.  Perhaps a good candidate nonparametric modeling?&lt;/p&gt;
+
+&lt;p&gt;Ideas:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Make Bayesian by using LDS similar to Jinyan's work.&lt;/li&gt;
+&lt;li&gt;Model the direction at each grid-point independently, using GP to enforce smoothness and avoid overfitting.&lt;/li&gt;
+&lt;li&gt;Consider higher-order diff-eq.&lt;/li&gt;
+&lt;li&gt;Use a GP-LVM model to handle non-linear dynamics.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Dense Reconstruction Using 3D Ojbect Shape Priors&lt;/h2&gt;
+
+&lt;p&gt;Uses GP-LVM-based shape priors (cars) to improve existing dense SLAM implementation.  Manages to heavilly leverage parallelism in CPU and GPU to achieve (arguably) real-time performance.  Use Feltzenswalb car detector to find consistent detections in two views and perform rough pose estimation.  Uses color-based (3D histogram) and depth-based energy functions to refine pose and shape; authors derive the gradient of these energy functions w.r.t. rigid transformations and GP-LVM latent variables.  Tractibility of GP-LVM addressed by taking lowest N frequencies from a DCT; reduced 128x128x128 to 25x25x25.&lt;/p&gt;
+
+&lt;p&gt;How is the GP-LVM trained?  Where is the training data coming from?&lt;/p&gt;
+
+&lt;p&gt;Related papers:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;R. A. Newcombe, A. J. Davison, S. Izadi, P. Kohli, O. Hilliges, J. Shotton, D. Molyneaux, S. Hodges, D. Kim, and A. Fitzgibbon, “KinectFusion: Real-time dense surface mapping and tracking,” Mixed and Augmented Reality (ISMAR), 2011 10th IEEE International Symposium on, pp. 127–136, 2011.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;The implicit level-set representation and the merging of depth images are the same as those from KinectFusion.  Also, KinectFusion's stereo results are used to evaluate their monocular results.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;S. Y. Bao and S. Savarese, “Semantic structure from motion,” presented at the Computer Vision and Pattern Recognition (CVPR), 2011 IEEE Conference on, 2011, pp. 2025–2032.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Spiritual predecessor of this paper -- use detectors to improve structure from motion.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/27/work-log"/>
+   <updated>2013-12-27T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/27/work-log</id>
+   <content type="html">&lt;h2&gt;Debugging&lt;/h2&gt;
+
+&lt;p&gt;New energy function causes much worse index ordering.  Ordering before optimization is terrible; new energy function seems to introduce new local minima that we can't overcome.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Running old version to recall problems.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Significant offset from LL reconstruction.  &lt;strong&gt;Increasing perturb_scale improves significantly&lt;/strong&gt; (from 2.5 to 81).  When influsence of wide-baseline views is small, pulling toward camera is significant; increasing perturb_scale increasing that influence.&lt;/p&gt;
+
+&lt;p&gt;Side effect of increasing perturb_scale is massive increase of tip extension in the direction of the camera.  This is because the posterior is more peaked, decreasing the size of the global optimum.&lt;/p&gt;
+
+&lt;p&gt;Adding index smoothness metaprior seems to help, but I'm not confident in the implementation, since there's no unit test for it.  Also getting a small amount of index extension, possibly because end-caps arent a full unit away from previous point.  can this be fixed?  Can't really use chord-length in 2D, because this could contain significant noise.  Although using ordinal isn't much different.  Could store fraction of last point.  Also need to acknowledge that different sub-sampling periods cause GP parameters to change meaning.  Should re-number ordinals based on resampling.  Store in data?&lt;/p&gt;
+
+&lt;p&gt;TODO:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;unit test index metaprior&lt;/li&gt;
+&lt;li&gt;experiment with constant length energy function?&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;dataset 6: overextension in teal top curve, red mid curve
+dataset 7: overextension in dk green top curve
+dataset 8: extreme overextension in teal top curve; bad ll localization
+dataset 9: overextension in red  top curve&lt;/p&gt;
+
+&lt;p&gt;and others.  Always when ll point is in direction of previous curve.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Testing CL energy</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/24/work-log"/>
+   <updated>2013-12-24T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/24/work-log</id>
+   <content type="html">&lt;p&gt;Testing constant-length energy function.  First test: \(\eta\) and it's Jacobian, implemented in &lt;code&gt;test/test_eta_deriv.m&lt;/code&gt;.  Test passes.  Interesting observation: jacobian is nearly bidiagonal.  Hopefully the hessian will have similar form, so ignoring the off-diagonal terms won't be too detrimental.&lt;/p&gt;
+
+&lt;p&gt;Need to implement end-to-end test for \(E\) and its gradient/hessian.  Compare against analytical Hessian estimate and the crude \(J'J\) Hessian approximator.&lt;/p&gt;
+
+&lt;p&gt;need to update likelihood means?&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/23/work-log"/>
+   <updated>2013-12-23T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/23/work-log</id>
+   <content type="html">&lt;p&gt;Lost matlab workspace during reboot, because I accidentally saved the current figure instead of the workspace.  Working on reloading them.&lt;/p&gt;
+
+&lt;p&gt;Realized I never documented why I abandoned the hyperprior GP (which models index smoothness) is failing.  Looking through the matlab logs to recreate the failing test.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Done; added notes to previous entries to better illustrate the story as it originally developed.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Implemented new constant-length energy function in &lt;code&gt;wacv-2012/cl_energy.m&lt;/code&gt;.  Need to test.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Constant-length energy function - Hessian</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/23/reference"/>
+   <updated>2013-12-23T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/23/reference</id>
+   <content type="html">&lt;p&gt;Recall energy function&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    E &amp;= \frac{1}{2} x^\top D^\top D x + \frac 12 \mu^\top D^\top D \mu  - x^\top D^\top \eta \\
+
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;and its gradient,&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    E' = \frac{\partial E}{\partial x} = x^\top D^\top D + \mu^\top D^\top D J_\mu - \eta^\top D - x^\top D^\top J_\eta
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;The derivative w.r.t. t_i of E' (i.e. the i-th row of the Hessian) is given by:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    \frac{\partial E'}{\partial t_i} &amp;=
+        (D^\top D)_{:i} + 
+        (J_\mu^\top D^\top D J_\mu)_{:i} + 
+        \frac{\partial J_\mu^\top}{\partial t_i} D^\top D \mu - 
+        (D^\top J_\eta)_{:i} -  
+        (J_\eta^\top D^\top)_{:i} - 
+        \left \{ x^\top D^\top \frac{\partial J_\eta}{\partial t_i} \right \}^\top
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Of the six terms, the third and sixth are particularly problematic when generalizing to the full hessian, because they involve the Jacobian of a Jacobian, which is a 3D tensor.&lt;/p&gt;
+
+&lt;p&gt;To keep running time to \(O(n&lt;sup&gt;3)\),&lt;/sup&gt; we'll use diagonal approximations for those terms.&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    \frac{\partial^2 \mu}{(\partial t_i)^2} &amp;= \frac{\partial}{\partial t_i} (J_\mu)_{:i} \\
+
+                                            &amp;= \frac{\partial}{\partial t_i} \left [\operatorname{diag_{3x1}}(\Delta_{3x3} z) + \left( \Delta_{1x3} \right)^\top \odot \operatorname{repmat}(z_3 , N/3, 1) + K_* J_z \right ]_{:i} \\
+                                            &amp;= \frac{\partial}{\partial t_i} \left( 
+                                                    \begin{array}{c}
+                                                    0 \\ 0 \\ \vdots \\ \delta^\top_{i3x3} z \\ \vdots \\ 0 \\ 0
+                                                    \end{array} \right )
+                                                    + \delta_{i,3x1} \odot \operatorname{repmat}(z^{(3)}_i, N/3, 1) 
+    + K_* (J_z )_{:i} \\
+                                            &amp;= \left( 
+                                                    \begin{array}{c}
+                                                    0 \\ 0 \\ \vdots \\ C^\top_{i3x3} z \\ \vdots \\ 0 \\ 0
+                                                    \end{array} \right ) + 
+                                                \left (
+                                                    \begin{array}{c}
+                                                    0 \\ 0 \\ \vdots \\ \delta^\top_{i3x3} z'_i \\ \vdots \\ 0 \\ 0
+                                                    \end{array} \right )
+                                                    + C_{i,3x1} \odot \operatorname{repmat}(z^{(3)}_i, N/3, 1) 
+                                                    + \delta_{i,3x1} \odot \operatorname{repmat}(z'^{(3)}_i, N/3, 1) 
+                                                        + K_* (J'_z )_{:i} \\
+                                                        + K'_* (J_z )_{:i} \\
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Started deriving \(J'_z\), but was stymied by the complexity.  For now, we'll resort to ignoring these terms and see how the optimization goes.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Work Log</title>
@@ -209,13 +718,13 @@ where \(\operatorname{sum_{kx1}}\) implements k-way blockwise summation over col
 \begin{align}
 \frac{\partial \eta}{\partial x_i} &amp;= \frac{\partial}{\partial x_i} \left ( \eta \odot \eta \right)^{\circ\frac12} \\
                                  &amp;= \frac{\partial}{\partial x_i} \left ( \operatorname{sum_{3x1}}(D \mu \odot D \mu) \right)^{\circ\frac12} \\
-                                &amp;= \frac12 \left ( \eta \odot \eta \right)^{\circ \frac{-1}{2}} \frac{\partial}{\partial x} 
+                                &amp;= \frac12 \left ( \eta \odot \eta \right)^{\circ \frac{-1}{2}} \odot \frac{\partial}{\partial x_i} 
                                     \left ( \operatorname{sum_{3x1}}(D \mu \odot D \mu )\right) \\
-                                &amp;= \frac12 \eta^{\circ (-1)} 
-                                     \left ( \operatorname{sum_{3x1}}(\frac{\partial}{\partial x} D \mu \odot D \mu )\right) \\
-                                &amp;= \frac12 \eta^{\circ (-1)} 
+                                &amp;= \frac12 \eta^{\circ (-1)}  \odot
+                                     \left ( \operatorname{sum_{3x1}}(\frac{\partial}{\partial x_i} D \mu \odot D \mu )\right) \\
+                        J_\mu &amp;= \frac12 \eta^{\circ (-1)}  \odot
                                      \left ( \operatorname{sum_{3x1}}( 2 D \mu \odot D J_\mu )\right) \\
-                                &amp;= \eta^{\circ (-1)} \left ( \operatorname{sum_{3x1}}( D \mu \odot D J_\mu )\right) \\
+                                &amp;= \eta^{\circ (-1)} \odot \left ( \operatorname{sum_{3x1}}( D \mu \odot D J_\mu )\right) \\
 
 \end{align}
 \]
@@ -255,7 +764,7 @@ E = 0.5 (0.5 \mu^\top D^\top D \mu - 0.5 t^\top D^\top D t)^2 \\
     &amp;= K_* z \\
 \frac{\partial \mu}{\partial t_i} 
     &amp;= K'_* z + K_* z' \\
-J_\mu &amp;= \operatorname{diag_{3x1}}(\Delta_{3x3}) z + \left( \Delta_{1x3} \right)^\top \operatorname{repmat}(z_3 N/3, 1) + K_* J_z 
+J_\mu &amp;= \operatorname{diag_{3x1}}(\Delta_{3x3} z) + \left( \Delta_{1x3} \right)^\top \odot \operatorname{repmat}(z_3 N/3, 1) + K_* J_z 
 \end{align}
 \]
 
@@ -290,7 +799,7 @@ Let \(A = S^\top U^{-1} S \), so \(z = Ay \).
                                     \right \} z \\
          &amp;= - A_i (\delta_i^\top z) - A \delta_i z_i \\
          &amp;= - A_{3i:3i+2} (\delta_{i,3x3}^\top z) - A \delta_{i,3x3} z_{3i:3i+1} &amp; \text{(3D version)} \\
-J_z &amp;= - \operatorname{sum_{1x3}}\left(A \odot \left( \Delta_{3x3} z \right)^\top \right) - A \left [ \left( \Delta_{1x3}  \right )^\top \odot \operatorname{repmat}(z_3, N/3, 1)^\top \right ]
+J_z &amp;= - \operatorname{sum_{1x3}}\left(A \odot \left( \Delta_{3x3} z \right)^\top \right) - A \left [ \left( \Delta_{1x3}  \right )^\top \odot \operatorname{repmat}(z_3, N/3, 1) \right ]
 \end{align}
 \]
 &lt;/div&gt;
@@ -364,13 +873,21 @@ E_i = \left( \mathrm{E}[L_i] - \Delta_{t_i} \right)^2
    <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/09/work-log"/>
    <updated>2013-12-09T00:00:00-07:00</updated>
    <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/09/work-log</id>
-   <content type="html">&lt;p&gt;Training hyperprior over indices vs. observation ordinal.&lt;/p&gt;
+   <content type="html">&lt;p&gt;Training hyperprior over indices vs. observation ordinal.  Implemented in &lt;code&gt;wacv_2012/wacv_train_index_prior&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Training is apparently very sensitive to initial point.  Is the hessian wrong?  Implemented &lt;code&gt;test_mu_deriv()&lt;/code&gt;  to test hessian using finite differences.&lt;/p&gt;
 
 &lt;p&gt;Struggling with modeling offset and rate.  Mean is usually zero, but not in this case.  Don't really care about initial conditions for now (and struggling with learning it anyway), so just learn smoothing sigma and set offset and rate covariance to large.&lt;/p&gt;
 
 &lt;hr /&gt;
 
-&lt;p&gt;Reading more on GP Latend Variable Models.&lt;/p&gt;
+&lt;p&gt;Index GP hyperprior doesn't fix index shrinkage issue, which is the root of several problems.  Tried another hack that adds an energy term to keep the total length constant.&lt;/p&gt;
+
+&lt;p&gt;Still getting unexplained extension of curves.  Time to review the literature for ideas.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Reading more on GP Latent Variable Models.&lt;/p&gt;
 
 &lt;p&gt;[1] N. D. Lawrence and A. J. Moore, “Hierarchical Gaussian process latent variable models,” presented at the ICML '07: Proceedings of the 24th international conference on Machine learning, 2007.&lt;/p&gt;
 
@@ -394,7 +911,7 @@ E_i = \left( \mathrm{E}[L_i] - \Delta_{t_i} \right)^2
  </entry>
  
  <entry>
-   <title>Work Log</title>
+   <title>Struggling with index offset and shrinkage</title>
    <link href="http://vision.sista.arizona.edu/ksimek/research/2013/12/07/work-log"/>
    <updated>2013-12-07T00:00:00-07:00</updated>
    <id>http://vision.sista.arizona.edu/ksimek/research/2013/12/07/work-log</id>
@@ -451,7 +968,7 @@ E_i = \left( \mathrm{E}[L_i] - \Delta_{t_i} \right)^2
 
 &lt;p&gt;Increasing rate variance seems to facilitate perturb_rate_variance having more influcence.  Possibly because we're getting index shrinkage, so small fluctuations in rate result in large fluctuations in structure.&lt;/p&gt;
 
-&lt;h2&gt;Prevending index shrinkage&lt;/h2&gt;
+&lt;h2&gt;Preventing index shrinkage&lt;/h2&gt;
 
 &lt;p&gt;My current hypothesis is that index shrinkage is resulting in the highly non-intuitive results we're seeing.  Intuition assumes index corresponds to distance, but when shrinkage occurs, this is no longer the case, so intuition becomes cloudy or fails entirely.&lt;/p&gt;
 
@@ -470,23 +987,26 @@ E_i = \left( \mathrm{E}[L_i] - \Delta_{t_i} \right)^2
 &lt;div&gt;
 \[
 
-g(x) = \log p(x | t) = -0.5 x^\top \left( \sigma_1^2 K_1 + \sigma_2^2 K_2 + \sigma_3^2 K_3 \right)^{-1} x - 0.5 log \left | \sigma_1^2 K_1 + \sigma_2^2 K_2 + \sigma_3^2 K_3 \right | - C \\
-                &amp;= -0.5 x^\top U^{-1} x - 0.5 log | U | - C \\
+\begin{align}
+g(x) = \log p(x | t) &amp;= -0.5 x^\top \left( \sigma_1^2 K_1 + \sigma_2^2 K_2 + \sigma_3^2 K_3 \right)^{-1} x - 0.5 \log \left | \sigma_1^2 K_1 + \sigma_2^2 K_2 + \sigma_3^2 K_3 \right | - C \\
+                &amp;= -0.5 x^\top U^{-1} x - 0.5 \log | U | - C \\
 
-\frac{\partial g(x)}{\partial \sigma_i} = \sigma_i \left(z' K_i z - \text{Tr}\left[U^{-1} K_i\right] \right)
+\frac{\partial g(x)}{\partial \sigma_i} &amp;= \sigma_i \left(z' K_i z - \text{Tr}\left[U^{-1} K_i\right] \right)
+\end{align}
 \]
 &lt;/div&gt;
 
 
-&lt;p&gt;where \(U = \sigma_1 K_1 + ... \) and \(z = U&lt;sup&gt;{-1}&lt;/sup&gt; x \) .
-TODO:&lt;/p&gt;
+&lt;p&gt;where \(U = \sigma_1 K_1 + ... \) and \(z = U&lt;sup&gt;{-1}&lt;/sup&gt; x \).&lt;/p&gt;
+
+&lt;p&gt;TODO:&lt;/p&gt;
 
 &lt;ol&gt;
 &lt;li&gt;get curve indices from reconstruction&lt;/li&gt;
 &lt;li&gt;group by view; get corresponding ordinal; add to set&lt;/li&gt;
 &lt;li&gt;construct energy function over set of curves using functions above&lt;/li&gt;
 &lt;li&gt;initial fit of rate and offset using direct means;&lt;/li&gt;
-&lt;li&gt;refine all using N-R&lt;/li&gt;
+&lt;li&gt;refine all using Newton-Raphson&lt;/li&gt;
 &lt;/ol&gt;
 
 </content>
