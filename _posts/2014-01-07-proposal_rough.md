@@ -210,7 +210,7 @@ The branching Gaussian process's covariance function takes the form of a recursi
     
     k(x_i,x_j) = \delta_{c_ic_j} k_\text{within}(x_i, x_j) + k_\text{inherited}(x_i, x_j)
 
-where \(c_k\) is the index of the curve associated with index \(x_k\).  Without loss of generality, assume \(c_a < c_b\) implies curve \(c_a\)'s topological depth is no greater than that of \(c_b\), and \(c_a = 1\) denotes the root curve.  The recursive term \(k_\text{inherited}\) is defined as
+where \(c_k\) is the index of the curve associated with index \(x_k\). Without loss of generality, assume \(c_a < c_b\) implies curve \(c_a\)'s topological depth is no greater than that of \(c_b\), and \(c_a = 1\) denotes the root curve.  The \(k_\text{within}\) implements a smooth-curve Gaussian process that contrains the initial point to be at the origin.  The recursive term \(k_\text{inherited}\) implements a constant offset for each curve, causing curves to initiate from the branch point of their parent curve.      
 
     k_\text{inherited}(x_i, x_j) = 
     \begin{cases}
@@ -219,16 +219,9 @@ where \(c_k\) is the index of the curve associated with index \(x_k\).  Without 
         k(x_i, b(x_j)) & \text{otherwise}
     \end{cases}
 
- Note that if \(c_i \le c_j\), then \(k_\text{inherited}\) is constant with respect to \(x_j\).   Thus, with respect to the points within a particular curve, we can interpret k_inherited as a process that generates constant offsets equal to the curve's branch point on its parent.  Here, \(sigma_o\) is the root offset variance.  (Memoization can be used to compute each entry in the covariance matrix in amortize constant time.) 
+ Here, \b(x_k\) denotes the index of the branch point on the parent curve.  Note that if \(c_i \le c_j\), then \(k_\text{inherited}\) is constant with respect to \(x_j\).   Thus, each point on a curve inherits a constant covariance from the branch point on its parent.   Here, \(sigma_o\) is the root offset variance.  (Memoization can be used to compute each entry in the covariance matrix in amortize constant time.) 
 
-Since a sum of covariance represents a sum of random variables (or here, random processes), we can interpret \(k()\) as a sum of two processes.  The first process generates smooth curves that initiate at the origin (from \(k_\text{within}\)).  The second process generates a constant offset equal to the position  which shifts the curve's initial point to lie along the parent curve according to the topology encoded by "b()".
-
-This is an additive model, where each curve's initial point originates from the branch point on its parent
-
-Each individual curve modeleach branch point on a parent curve is added to the 
-    
-    and \(b(x_j)\) denotes 
-
+####Temporal model####
 
 likelihood + tests
 
