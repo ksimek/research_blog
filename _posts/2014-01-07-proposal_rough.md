@@ -7,20 +7,88 @@ tags: []
 ---
 {% include JB/setup %}
 
+Simultaneous stereo and tracking of nonrigid structure for semantic reconstruction
+
 Summary
 ----------
 
-Problem Statement
+With recent developments in high-throughput genotyping, it has become relatively easy to extract ana analyze entire plant genomes.  
+
+a wealth of data has emerged describing 
+
+In order to understand the complex relationship between genotypes and phenotypes, researchers 
+
+By understanding the complex relationship between genotype and phenotype, researchers can better understand the genetic components to practical issues 
+
+The complex relationship between genetic variation and plant traits like drought resistance and crop yields remains a topic of active study.  
+Relationship between a plant's genotype (hereditary information) and phenotype (observable properties).
+
+
+One major impediment to progress is the gap between the success of high-throughput genotyping methods have provided a wealth of genetic information, while much phenotyping remains manual an painstaking
+
+new interest in image-based phenotyping
+    upsides
+        inexpensive cameras
+        precise measurement
+        minimal invaseveness
+    downsides
+        human interaction
+        dataset dependent
+        largely 2D
+            no 3d angle, torsion, bushiness, 
+
+We propose a method for reconstructing 3D 
+
+Computer vision techniques for 3D reconstruction
+    
+
+
+We seek a system that will construct a full 3D model of a plant from a images at several angles.  
+We seek to construct a system for high-throughput 3D 
+
+Problem statement
 -------------------
 
-Difficulties
+We have collected a dataset consisting of multiple specimens of Arabidopsis Thaliana, imaged at several angles.  Specimens come from two different genetic strains, and imaging occurred at various stages of development.  The elapsed time between the first and last image is several minutes, and in many cases, plants exhibit noticible motion between the first and last image.  Our primary goal is to recover the full 3D branching structure of each specimen, but we also seek to recover the motion between frames as it may contain useful phenotype information.  Our reconstrution will be composed of geometric primitives, from which plant scientists may extract valuable phenotype traits like branch angle and curvature.
 
-* Unknown dimensionality
-* irregular topology
-* 
-* Nonrigid motion
-* thin, High curvature surfaces with little texture
-* 
+In a sense, our problem encompasses two complementary areas in computer vision, tracking and multi-view stereo.  In classical tracking, the camera is fixed and the goal is to recover motion; in stereo, the camera is moving and the goal is to recover the fixed structure.  In our problem, both structure and camera undergo motion, with each object's motion confounding inference of the other.  Is an object's 2D motion best explained by parallax or by motion in 3D?   Either of these conclusions (or both) could the case; underconstrained problems like these require additional assumptions to be solved uniquely.  We propose encoding these assumptions in the form of a prior distribution over structure and motion, and using Bayesian inference to recover both the optimal solution and a distribution over alternative solutions.  
+
+Phenotype traits:
+* branch depth,
+* branch angles,
+* stem curvature,
+* torsion,
+* phototropism,
+* interbranch distances,
+* biomass,
+* etc.
+
+
+In modelling branching stem structures, we propose a representation that is simultaneously expressive and tractible.
+
+(The following might be best posed in related work, after describing SfM and SfS backgroun)
+
+In addition to the difficulties interent to simultaneous inference of structure and motion, the nature of plant structure poses specific challenges to the reconstruction task.  Our primary structures of interest are plant stems, which are nearly absent of texture features.  Most structure-from-motion algorithms use so-called keypoints to find matches between images, and high quality keypoints cannot be found without strong texture features.   The thin geometry of plant stems also poses difficulties, especially with popular shape-from-silhouette algorithms.  The thin backprojection cones that arise from stems often fail to intersect, because cameras are imperfectly calibrated and stems undergo motion between views.  Algorithms exist to improve camera pose estimates by minimizing reconstruction error, but these algorithms assume structure is stationary.  
+
+Plant structure also poses challenges on the on the tracking side, 
+
+      * nonrigid/nonparametric structure
+      * nonrigid motion
+
+Modelling challenges
+      * unknown topology, cardinality
+      
+the primary difficulty is that the object and camera move simultaneously.  Since our goal is 3D tracking, 
+
+
+**By jointly modeling camera error, 3D spatial structure, and temporal motion, we seek to improve upon existing approaches that ignore one or more of these aspects, while providing a rich description of the 4D scene.**
+
+We propose a Bayesian 
+
+
+
+
+Model camera, structure, motion directly
 
 
 The proposed work will
@@ -114,7 +182,7 @@ RSA, Hypotrace, etc.
 * Misc Structure from Motion
 * Model-based Reconstruction
 * Evaluation
-    In the seminal work of Seitz et al., several multiple-view reconstruction algorithms are compared using a novel metric that 
+    Middlebury metric.
     Evaluation of 
 * Gaussian Process
 * Miscellaneous
@@ -124,10 +192,43 @@ Preliminary Work
 
 ###Data and Ground Truth Collection###
 
-A 
+####Image Collection####
 
+We have collected 36-view turntable images of 23 Arabidopsis specimens, each with an accompnying camera calibration image set.  For one of these specimens, we collected time-lapse images at 10 time-points spanning 12 days; other specimens were collected at only one time-point.  Nine specimens were deemed unusable either due to either poor image quality or the lack of relevant structure, leaving 14 total specimens.
 
-data collection
+####Ground Truth Collection####
+
+We developed software in Matlab for semi-manual camera calibration and used it to calibrate cameras for all datasets.  Due to imperfections in both the calibration target and during the calibration procedure, camera calibrations contain minor errors, which our algorithm will be designed to be robust to.   
+
+We also developed a GUI tool in C++/OpenGL for manual tracing of plant stems in 2D.  2D ground-truth is collected by drawing Bezier curves on each stem, and establishing correspondences of stems between views.  In addition, curve topology is collected by specifying each curve's parent.   We have collected 2D ground-truth for every fourth view in 11 of the 14 valid specimens, for a total of 44 fully annotated images.  In order to evaluate the quality of our algorithm's 3D reconstruction, we have developed an initial prototype that will triangulate 2D tracings into 3D, which will be used for our evaluation metrics.
+
+####Branching Model####
+
+We have developed a Gaussian process model to represent smooth curves arranged in a tree topology.  Within curves, the Gaussian process allows us to model continuous curves in a general way, while enforcing smoothness.  Between curves, we have adapted the traditional GP model to enforce connectivity constraints while retaining the linear-Gaussian property that enables tractibility.  
+
+The branching Gaussian process's covariance function takes the form of a recursive function: 
+    
+    k(x_i,x_j) = \delta_{c_ic_j} k_\text{within}(x_i, x_j) + k_\text{inherited}(x_i, x_j)
+
+where \(c_k\) is the index of the curve associated with index \(x_k\).  Without loss of generality, assume \(c_a < c_b\) implies curve \(c_a\)'s topological depth is no greater than that of \(c_b\), and \(c_a = 1\) denotes the root curve.  The recursive term \(k_\text{inherited}\) is defined as
+
+    k_\text{inherited}(x_i, x_j) = 
+    \begin{cases}
+        k_\text{inherited}(x_j, x_i) & \text{if } c_i > c_j \\
+        \sigma_o^2 & \text{if } c_j = 1 \\
+        k(x_i, b(x_j)) & \text{otherwise}
+    \end{cases}
+
+ Note that if \(c_i \le c_j\), then \(k_\text{inherited}\) is constant with respect to \(x_j\).   Thus, with respect to the points within a particular curve, we can interpret k_inherited as a process that generates constant offsets equal to the curve's branch point on its parent.  Here, \(sigma_o\) is the root offset variance.  (Memoization can be used to compute each entry in the covariance matrix in amortize constant time.) 
+
+Since a sum of covariance represents a sum of random variables (or here, random processes), we can interpret \(k()\) as a sum of two processes.  The first process generates smooth curves that initiate at the origin (from \(k_\text{within}\)).  The second process generates a constant offset equal to the position  which shifts the curve's initial point to lie along the parent curve according to the topology encoded by "b()".
+
+This is an additive model, where each curve's initial point originates from the branch point on its parent
+
+Each individual curve modeleach branch point on a parent curve is added to the 
+    
+    and \(b(x_j)\) denotes 
+
 
 likelihood + tests
 
@@ -169,6 +270,10 @@ Species identification
 Limitations or Key Assumptions
 ------------------------------
 
+foliage doesn't significantly obscure branching structure.
+
+
+
 Potential Outcomes, Contributions to Knowledge
 -------------------------
 
@@ -176,3 +281,5 @@ Potential Outcomes, Contributions to Knowledge
 
 Proposed Chapters
 ------------------
+
+
