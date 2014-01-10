@@ -223,6 +223,20 @@ where \(c_k\) is the index of the curve associated with index \(x_k\). Without l
 
 ####Temporal model####
 
+To accomodate motion between views, we generalize the branching Gaussian process covariance function to include a temporal term.  We first replace spacial index \(x_i\) with the ordered pair \((x_i, t_i)\), where \(t_i\) is the temporal index associated with a particular view.  The covariance function for the temporal branching Gaussian process is then
+
+    k\left((x_i, t_i), (x_j, t_j) \right) = k_\mu(x_i, x_j) + f(t_i, t_j) k_\delta(x_i, x_j)
+
+where \(k_\mu\) and \(k_\delta\) are both branching Gaussian process covariance functions, but with different metaparameters.  \(k_\mu\) models the mean process, while \(k_\delta\) models perturbations from the mean over time.  The temporal covariance function \(f\) modulates the perturbation based on temporal locality.  We have experimented with several possible choices for \(f\), and have found the Ornstein-Uhlenbeck process to be effective:
+    
+    f(t_i, t_j) = \exp\{-|t_i - t_j|/l_t \}
+
+This covariance is similar to white-noise, but with a tendency to revert to the mean over time.  This places few constraints on the shape of the motion, aside from it being continuous and not drifting too far from the general shape defined by \(k_\mu\).  Note that for any value of f(), \(k()\) becomes is the sum of two branching Gaussian processes, which is itself a branching Gaussian process.  For any particular point, its self-covariance over time is greatest when \(|t_i - t_j| = 0\), with correlation weakening as indices become more separated in time.  In the limit, the covariance of the second term becomes zero, leaving only the mean process \(k_\mu\) remaining, indicating the views are independence conditioned on the mean structure.
+
+Laplace approximation
+
+We model image observations as i.i.d. Gaussian perturbations of the corresponding projected curve-tree points into the image plane.  The perspective transformation from 3D to 2D is nonlinear, so the product of the 3D prior distribution and 2D likelihood distribution does not posess the linear-Gaussian property needed for inference to be tractible.  However, we observe that under certain conditions, the i.i.d. likelihood terms in 2D can be well approximated by Gaussian functions in 3D with a rank-deficient precision matrix.   
+
 likelihood + tests
 
 Correspondence heuristic
