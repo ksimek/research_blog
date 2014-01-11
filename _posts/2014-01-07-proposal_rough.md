@@ -235,27 +235,47 @@ This covariance is similar to white-noise, but with a tendency to revert to the 
 
 Laplace approximation
 
-We model image observations as i.i.d. Gaussian perturbations of the corresponding projected curve-tree points into the image plane.  The perspective transformation from 3D to 2D is nonlinear, so the product of the 3D prior distribution and 2D likelihood distribution does not posess the linear-Gaussian property needed for inference to be tractible.  However, we observe that under certain conditions, the i.i.d. likelihood terms in 2D can be well approximated by Gaussian functions in 3D with a rank-deficient precision matrix.   
+TODO: this isn't Laplace per-se, but Taylor-series approximation that exploits the independence of 
 
-likelihood + tests
+We model the log-likelihood as the negative sum of squared reprojection error.
 
-Correspondence heuristic
+TODO: EQUATION HERE
+ 
+While our GP prior distribution is Gaussian, this image likelihood function involves nonlinear perspective projection, causing the posterior to have nonlinear form.  In general, maximization of nonlinear functions is inefficient in high dimensions and marginalization of such functions is intractible, even with numerical approximations.  Our 3D reconstruction method will require both of these operations, so we seek an approximation that permits efficient inference.
+
+As shown in figure XXXa, the likelihood for an individual point forms a cone-shaped isosurface.  We observe that if the true posterior is sufficiently peaked, the shape of the point-likelihood is irrelevant in regions with low posterior support.  Thus, we can replace the true likelihood with a denerate Gaussian function, which has cylindrical-shaped isosurfaces.  As shown in figure XXXc, the maximum relevant error is small if the point's angular size is small and the posterior is peaked.  The former condition holds if the point is reasonably far from camera, and the latter holds if there are multiple views of the scene.  
+
+The smoothness prior acts to resolve the one-dimensional ambiguity in the point-wise likelihood, by sharing position information between nearby views. The resulting posterior is a non-degenerate Gaussian distribution.
+
+We have implemented maximum a-posteriori 3D reconstruction of 2D ground-truth data, and initial results are promising (see figure XXX).  Ultimately, we plan on 
+
+####Extending to general likelihood functions####
+
+Often additional evidence is available in the form of non-linear likelihood functions that aren't well approximated by a Gaussian.  Many functions over pixel maps fall into this category, for example intensity-, silhouette-, texture-, or edge-based likelihood functions \cite{TODO}.   We have developed a sampling approach for approximate inference in these scenarios, using the Gaussian posterior we developed in the previous section as a proposal distribution.
+
+Consider the case of marginalizing over 3D reconstructions.  Let \(\theta\) be the 3D point positions, \(D_1\) be the corresponding observed points in 2D, and \(D_2\) be arbitrary additional evidence.  Assuming \(D_1\) and \(D_2\) are conditionally independent given \(\theta\), the marginal likelihood is given by
+
+    p(D_1, D_2) = \int p(\theta) p(D_1 | \theta) p(D_2 | \theta) d\theta
+
+We can exploit the linear-Gaussian form of the partial-data posterior, \(p(\theta | D_1)\), to perform Monte-Carlo intergration of the full posterior:
+
+    p(D_1, D_2) = \int p(\theta | D_1) p(D_1) p(D_2 | \theta) d\theta \\
+                = p(D_1) \int p(\theta | D_1) p(D_2 | \theta) d\theta \\
+                \approx p(D_1) \sum_\theta^{(i)} p(D_2 | \theta^{(i)}) 
+
+where \(\{\theta^{(i)}\}_i\) are i.i.d. samples from \(p(\theta | D_1)\).  The number of smaples needed for a good approximation is problem-specific.  However, in many cases, \(p(\theta | D_1)\) is strongly peaked in a region where \(p(D_2 |\ \theta)\) is relatively constant, and a single sample is sufficient for a good approximation.
+
+Maximum \it{a posteriori} inference of \(\theta\) can be performed by replacing the sum operation with an argmax operation.  Thus, arbitrary nonlinear likelihoods can be incorporated into our modelling framework, without sacrificing tractibility of approximate inference.
+
+###Likelihoods###
+
+-- non-rigid, self-intersecting silhouette rendering (with figure)
+-- GPU likelihood function
+
+
+
+###Correspondence heuristic###
     
-    
-Branching model + tests
-    discrete, continuous
-
-Temporal model + tests
-    
-
-
-
-
-    
-
-Model, etc (research approach)
--------------
-
 Proposed Work
 ---------------
 
@@ -289,4 +309,6 @@ Potential Outcomes, Contributions to Knowledge
 Proposed Chapters
 ------------------
 
-
+TODO
+---
+* We model stems as a set of points along the medial axis of a tube with circular cross-sections.
