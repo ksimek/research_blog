@@ -247,7 +247,7 @@ As shown in figure XXXa, the likelihood for an individual point forms a cone-sha
 
 The smoothness prior acts to resolve the one-dimensional ambiguity in the point-wise likelihood, by sharing position information between nearby views. The resulting posterior is a non-degenerate Gaussian distribution.
 
-We have implemented maximum a-posteriori 3D reconstruction of 2D ground-truth data, and initial results are promising (see figure XXX).  Ultimately, we plan on 
+We have implemented maximum a-posteriori 3D reconstruction of 2D ground-truth data, and initial results are promising (see figure XXX).  Ultimately, we propose this formulation as the basis for a fully-automatic reconstruction system; details in section XXX.
 
 ####Extending to general likelihood functions####
 
