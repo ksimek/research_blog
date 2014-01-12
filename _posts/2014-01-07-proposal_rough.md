@@ -12,46 +12,12 @@ Simultaneous stereo and tracking of nonrigid structure for semantic reconstructi
 Summary
 ----------
 
-With recent developments in high-throughput genotyping, it has become relatively easy to extract ana analyze entire plant genomes.  
-
-a wealth of data has emerged describing 
-
-In order to understand the complex relationship between genotypes and phenotypes, researchers 
-
-By understanding the complex relationship between genotype and phenotype, researchers can better understand the genetic components to practical issues 
-
-The complex relationship between genetic variation and plant traits like drought resistance and crop yields remains a topic of active study.  
-Relationship between a plant's genotype (hereditary information) and phenotype (observable properties).
-
-
-One major impediment to progress is the gap between the success of high-throughput genotyping methods have provided a wealth of genetic information, while much phenotyping remains manual an painstaking
-
-new interest in image-based phenotyping
-    upsides
-        inexpensive cameras
-        precise measurement
-        minimal invaseveness
-    downsides
-        human interaction
-        dataset dependent
-        largely 2D
-            no 3d angle, torsion, bushiness, 
-
-We propose a method for reconstructing 3D 
-
-Computer vision techniques for 3D reconstruction
-    
-
-
-We seek a system that will construct a full 3D model of a plant from a images at several angles.  
-We seek to construct a system for high-throughput 3D 
-
 Problem statement
 -------------------
 
 We have collected a dataset consisting of multiple specimens of Arabidopsis Thaliana, imaged at several angles.  Specimens come from two different genetic strains, and imaging occurred at various stages of development.  The elapsed time between the first and last image is several minutes, and in many cases, plants exhibit noticible motion between the first and last image.  Our primary goal is to recover the full 3D branching structure of each specimen, but we also seek to recover the motion between frames as it may contain useful phenotype information.  Our reconstrution will be composed of geometric primitives, from which plant scientists may extract valuable phenotype traits like branch angle and curvature.
 
-In a sense, our problem encompasses two complementary areas in computer vision, tracking and multi-view stereo.  In classical tracking, the camera is fixed and the goal is to recover motion; in stereo, the camera is moving and the goal is to recover the fixed structure.  In our problem, both structure and camera undergo motion, with each object's motion confounding inference of the other.  Is an object's 2D motion best explained by parallax or by motion in 3D?   Either of these conclusions (or both) could the case; underconstrained problems like these require additional assumptions to be solved uniquely.  We propose encoding these assumptions in the form of a prior distribution over structure and motion, and using Bayesian inference to recover both the optimal solution and a distribution over alternative solutions.  
+In a sense, our problem encompasses two complementary areas in computer vision, tracking and multi-view stereo.  In classical tracking, the camera is fixed and the goal is to recover motion; in stereo, the camera is moving and the goal is to recover the fixed structure.  In our problem, both structure and camera undergo motion, with each object's motion confounding inference of the other.  Is an object's 2D motion best explained by parallax or by motion in 3D?   Either of these conclusions (or both) could the case; underconstrained problems like these require additional assumptions to be solved uniquely.  We a Bayesian approach to the problem, encoding these assumptions in the form of a prior distribution over structure and motion, and using Bayesian inference to recover both the optimal solution and a distribution over alternative solutions.  
 
 Phenotype traits:
 * branch depth,
