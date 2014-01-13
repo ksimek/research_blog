@@ -217,7 +217,7 @@ We have implemented maximum a-posteriori 3D reconstruction of 2D ground-truth da
 
 ####Extending to general likelihood functions####
 
-Often additional evidence is available in the form of non-linear likelihood functions that aren't well approximated by a Gaussian.  Many functions over pixel maps fall into this category, for example intensity-, silhouette-, texture-, or edge-based likelihood functions \cite{TODO}.   We have developed a sampling approach for approximate inference in these scenarios, using the Gaussian posterior we developed in the previous section as a proposal distribution.
+Often additional evidence is available in the form of non-linear likelihood functions that are not well approximated by a Gaussian.  Many functions over pixel maps fall into this category, for example intensity-, silhouette-, texture-, or edge-based likelihood functions \cite{TODO}.   We have developed a sampling approach for approximate inference in these scenarios, using the Gaussian posterior we developed in the previous section as a proposal distribution.
 
 Consider the case of marginalizing over 3D reconstructions.  Let \(\theta\) be the 3D point positions, \(D_1\) be the corresponding observed points in 2D, and \(D_2\) be arbitrary additional evidence.  Assuming \(D_1\) and \(D_2\) are conditionally independent given \(\theta\), the marginal likelihood is given by
 
