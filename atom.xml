@@ -4,13 +4,425 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2014-01-06T18:56:23-07:00</updated>
+ <updated>2014-01-17T23:34:50-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Planning - Spring Interdisciplanry Computational Intelligence Seminar</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/01/17/work-log"/>
+   <updated>2014-01-17T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/01/17/work-log</id>
+   <content type="html">&lt;h2&gt;Spring Topics of Interest&lt;/h2&gt;
+
+&lt;p&gt;&lt;em&gt;Active learning / Deep Learning&lt;/em&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Active Learning of an Action Detector from Untrimmed Videos - Grauman&lt;/li&gt;
+&lt;li&gt;A Convex Optimization Framework for Active Learning?&lt;/li&gt;
+&lt;li&gt;ImageNet Classification with Deep Convolutional Neural Networks (hinton)&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Optimization (not mcmc)&lt;/h2&gt;
+
+&lt;p&gt;e.g. &quot;relaxation&quot; methods&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Estimating the 3D Layout of Indoor Scenes and its Clutter from Depth Sensors&lt;/li&gt;
+&lt;li&gt;Holistic Scene Understanding for 3D Object Detection with RGBD cameras&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Scenes and captions&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;From Large Scale Image Categorization to Entry-Level Categories - &quot;best paper, iccv 2013&quot;&lt;/li&gt;
+&lt;li&gt;NEIL: Extracting Visual Knowledge from Web Data&lt;/li&gt;
+&lt;li&gt;A Sentence is Worth a Thousand Pixels&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Detection&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;HOGgles: Visualizing Object Detection Features&lt;/li&gt;
+&lt;li&gt;Finding the Best from the Second Bests -- Inhibiting Subjective Bias in Evaluation of Visual Tracking Algorithms&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Miscellaneous&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Latent Data Association: Bayesian Model Selection for Multi-target Tracking - ian reid  (possibly of interest to Ernesto?)&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Relative Attributes For Large-scale Abandoned Object Detection (Quanfu and Prasad's paper) &lt;a href=&quot;http://www.cv-foundation.org/openaccess/content_iccv_2013/papers/Fan_Relative_Attributes_for_2013_ICCV_paper.pdf&quot;&gt;pdf&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Inferring “Dark Matter” and “Dark Energy” from Videos&lt;/p&gt;
+
+&lt;h2&gt;Schedule &lt;/h2&gt;
+
+&lt;p&gt;Rough schedule for first 7 weeks&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Practice Talk - Colin&lt;/li&gt;
+&lt;li&gt;Practice Talk - Kyle&lt;/li&gt;
+&lt;li&gt;Practice talk - Andrew&lt;/li&gt;
+&lt;li&gt;Learning TBD  (Deep learning or active learning) - Kobus&lt;/li&gt;
+&lt;li&gt;Learning TBD - Qiyam&lt;/li&gt;
+&lt;li&gt;Fast object segmentation in unconstrained video - Kate?&lt;/li&gt;
+&lt;li&gt;(ECCV, no session?)&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Remaining order TBD&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Parallel Markov Chain Monte Carlo for Nonparametric Mixture Models - Colin&lt;/li&gt;
+&lt;li&gt;Tree Shape Priors with Connectivity Constraints using Convex Relaxation on General Graphs - kyle?&lt;/li&gt;
+&lt;li&gt;MCMC Sampling - Jinyan&lt;/li&gt;
+&lt;li&gt;TBD - Ernesto&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>HPC meeting</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/01/17/hpc-meeting"/>
+   <updated>2014-01-17T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/01/17/hpc-meeting</id>
+   <content type="html">&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://sites.google.com/a/case.edu/hpc-upgraded-cluster/cluster-faq#TOC-What-are-modules-&quot;&gt;Modules&lt;/a&gt; automatically set path and library paths for specific libraries.&lt;/li&gt;
+&lt;li&gt;HPC has a nice &lt;a href=&quot;&quot;&gt;web interface&lt;/a&gt; for subitting and managing jobs.  ATM, the only way to get stdout and stderr outputs.&lt;/li&gt;
+&lt;li&gt;Intel compiler can use openMP to automatically leverage coprocessor cards.  Can use same code&lt;/li&gt;
+&lt;li&gt;Thrust already installed (&lt;code&gt;module cuda&lt;/code&gt;); boost is header-only.&lt;/li&gt;
+&lt;li&gt;Apparently, the copropocessor cards run linux, and I can ssh into them!  Still unsure what the host address is.&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Dis Prop (ctd); new HPC </title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/01/15/work-log"/>
+   <updated>2014-01-15T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/01/15/work-log</id>
+   <content type="html">&lt;p&gt;Continue writing dissertation proposal.  Worked on SfM, MVS literature review.  Spent quite some time trying to understand self-calibration.  The issue is that with a general perspective camera, SfM can only perform reconstruction up to a projective ambiguity (most of the SfM literature of late is apparently reticent about this?).  It turns out, if we fix at least one intrinsic parameter (how about skew = 0? or aspect ration = 1?) then we get a metric reconstruction (which maybe explains why it's no longer covered in SfM papers).&lt;/p&gt;
+
+&lt;p&gt;This shows that bundle adjustment can give a metric reconstruction, but the question remains how to initialize it.  Pollefeys et. al (1998) propose an analytical self-calibration solution.  Snavely et al. (2007) apparently just use bundle adjustment anyway, presumably using a simplified pinhole camera (no skew or ppo) with a reasonable default for &lt;em&gt;f&lt;/em&gt;, or EXIF tags when possible.  Brown and Lowe (2005) initialize each new camera with the old camera's intrinsics, no word on how the first pair is initialized (maybe obvious but I missed it?).&lt;/p&gt;
+
+&lt;h2&gt;New HPC &lt;/h2&gt;
+
+&lt;p&gt;UA just installed their new 80-node HPC cluster and by a stroke of luck, Ive gotten early access to it!  It looks like all machines have 16 CPU cores and 256 GB RAM; 60 nodes have multiple GPU cards while the other 20 have Intel PHI general purpose compute cards.  It's amazing to query the cluster and see the entire thing at 0% utilization... that won't last long!  Having fun poking around it and reading the IBM LSF manuals &lt;a href=&quot;http://publibfp.dhe.ibm.com/epubs/pdf/c2253460.pdf&quot;&gt;2&lt;/a&gt; (the job queueing system).&lt;/p&gt;
+
+&lt;p&gt;I found the following resource to be very useful, even though it's from University of Miami's personal LSF installation:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.ccs.miami.edu/hpc/lsf/9.1.1/&quot;&gt;unofficial LSF 9.1.1 Documentation site&lt;/a&gt; (University of maimi)
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.ccs.miami.edu/hpc/lsf/9.1.1/print/lsf_foundations.pdf&quot;&gt;Basics&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.ccs.miami.edu/hpc/lsf/9.1.1/print/lsf_admin.pdf&quot;&gt;Jobs&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;The hew official documents I could find were less useful:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Command Reference [&lt;a href=&quot;http://publibfp.dhe.ibm.com/epubs/pdf/c2753051.pdf&quot;&gt;pdf&lt;/a&gt;]&lt;/li&gt;
+&lt;li&gt;Administration Reference [&lt;a href=&quot;http://publibfp.dhe.ibm.com/epubs/pdf/c2253460.pdf&quot;&gt;pdf&lt;/a&gt;]&lt;/li&gt;
+&lt;li&gt;Configuration Reference[&lt;a href=&quot;http://publibfp.dhe.ibm.com/epubs/pdf/c2753061.pdf&quot;&gt;pdf&lt;/a&gt;]&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;Notes&lt;/h3&gt;
+
+&lt;p&gt;Okay great!  Got a general idea of how to use the system from the &lt;a href=&quot;http://www.ccs.miami.edu/hpc/lsf/9.1.1/print/lsf_users_guide.pdf&quot;&gt;user guide&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;bsub&lt;/code&gt; - submit default job queue&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bsub -q &amp;lt;queue-name&amp;gt;&lt;/code&gt; - submit specific job queue&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bsub -I&lt;/code&gt; - interactive job&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bjobs&lt;/code&gt; - view submitted jobs&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bqueues&lt;/code&gt; - list info for all queues&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bparams&lt;/code&gt; - details for default queue&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;lsload&lt;/code&gt; - list load on hosts&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;lshosts&lt;/code&gt; - list hosts w/ configuration&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bhosts&lt;/code&gt; - view batch server hosts (what's a batch server?)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;lsid&lt;/code&gt; - cluster info (name and master host)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;lsrun&lt;/code&gt; - run a command on a free host&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;lsgrun&lt;/code&gt; - run a command on a group of free hosts&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;lsltakss&lt;/code&gt; - view and add local tasks (huh?)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;lsrtasks&lt;/code&gt; - view and add remote tasks (huh?)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bkill 1234&lt;/code&gt; -  kill job 1234&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bkill -r&lt;/code&gt; - force removal of job (if hung after kill?)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bstop&lt;/code&gt; - suspend job&lt;/li&gt;
+&lt;li&gt;`bresume - resume job&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;btop 1234&lt;/code&gt; - move job 1234 to top of queue&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bbot 1234&lt;/code&gt; - move job 1234 to bottom of queue&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;On gpu* machines&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;nvidia-smi&lt;/code&gt; list details for all gpu cards (and running processes?)&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;On phi* machines&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;micinfo&lt;/code&gt; lists details for all coprocessor cards&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Also MPI is supported&lt;/p&gt;
+
+&lt;p&gt;Discovered two large gsfs disks (192 TB and 43 TB, resp.).  Apparently GSFS is a GPU-enabled encrypted disk.  No write permissions ATM&lt;/p&gt;
+
+&lt;h3&gt;Questions&lt;/h3&gt;
+
+&lt;p&gt;Some random thoughts while using the system&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;can/should we get Matlab?  Octave?&lt;/li&gt;
+&lt;li&gt;Subversion?&lt;/li&gt;
+&lt;li&gt;write permissions on GSFS disks?&lt;/li&gt;
+&lt;li&gt;No job report email after calling &lt;code&gt;bsub -u ksimek@email.arizona.edu&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Talk w/ Kobus Re: Dissertation Proposal</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/01/13/work-log"/>
+   <updated>2014-01-13T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/01/13/work-log</id>
+   <content type="html">&lt;p&gt;Met w/ Kobus today to discuss the proposal for the first time.&lt;/p&gt;
+
+&lt;h4&gt;Organization&lt;/h4&gt;
+
+&lt;p&gt;&lt;strong&gt;Key idea&lt;/strong&gt;: Branching GP.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Close 2nd&lt;/strong&gt;: Model selection&lt;/p&gt;
+
+&lt;p&gt;Other stuff like high-throughput phenotyping, biological modeling, multi-view stereo, etc. take a back seat (but should be mentioned)&lt;/p&gt;
+
+&lt;h4&gt;Key sections&lt;/h4&gt;
+
+&lt;p&gt;The structure isn't rigid, but the three main sections that need to be strong are: (1) Literature review, (2) current progress, (3) future work.&lt;/p&gt;
+
+&lt;p&gt;Didn't ask about &quot;Assumptions and Limitations&quot;.  Kobus mentioned that things like that can protect you, but they don't come up very often.  Seems not critical, use best judgement.&lt;/p&gt;
+
+&lt;p&gt;&quot;Broader impacts&quot; or &quot;Importance of Topic&quot; section could be a heading to what would otherwise just fall into the introduction.&lt;/p&gt;
+
+&lt;p&gt;It seems the &quot;Outcomes&quot; section is probably best weaved into the &quot;proposed work&quot;.&lt;/p&gt;
+
+&lt;p&gt;It seems listing the dissertation chapters isn't strictly necessarilly, either.&lt;/p&gt;
+
+&lt;h4&gt;Future work&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;Full automatic system
+Automatic camera detection
+Apply to another domain (can be vague; can change later)
+
+Less likely:
+    leafs, flowers, etc.  Stick to GP's
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4&gt;Miscellaneous&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;Don't stress about correctness.  This is a proposal, i.e. *pre* investigation.  
+Let's wait until the end of the week to decide if we need to reschedule.
+&lt;/code&gt;&lt;/pre&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/01/07/work-log"/>
+   <updated>2014-01-07T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/01/07/work-log</id>
+   <content type="html">&lt;p&gt;Layout organization, pick a section, start writing.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.ohio.edu/eecs/graduate/documents/upload/PhDDissertationProposalOutline2-06.pdf&quot;&gt;Proposal guide, CS department, Ohio University&lt;/a&gt; [pdf]&lt;/p&gt;
+
+&lt;p&gt;In researching multiple-view plant datasets, I came across the &lt;a href=&quot;http://www.imageclef.org/node/179&quot;&gt;LifeCLEF 2014 challenge&lt;/a&gt;.  The goal is plant-species identification from single images.  Images are of several different organs (leafs, fruit, stems, branches) or entire structures (branches, entire plant).  Most images are in the wild, but some (leafs) are from a flatbed scanner.  All images are given a one-to-five rating based on their quality.  Even this isn't the type of task we're focusing on, it's valuable to note what types of tasks the community is focusing on.&lt;/p&gt;
+
+&lt;p&gt;Also available is a fish classification task from videos.  It might be interesting to try to track GP curves in an image and classify fish based on their GP parameters (temporal and spatial).  The cubic spline model is already scale-invariant, so scale issues might not be a big deal.  GP-LVM model might be even more interesting.&lt;/p&gt;
+
+&lt;p&gt;TODO - look into CVPR 2013 &quot;thin branch&quot; paper.  Existing datasets?  Their dataset?  Literature reivew?&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Roughing out Proposal</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/01/07/proposal_rough"/>
+   <updated>2014-01-07T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/01/07/proposal_rough</id>
+   <content type="html">&lt;p&gt;Simultaneous stereo and tracking of nonrigid structure for semantic reconstruction&lt;/p&gt;
+
+&lt;h2&gt;Summary&lt;/h2&gt;
+
+&lt;h2&gt;Problem statement&lt;/h2&gt;
+
+&lt;p&gt;We have collected a dataset consisting of multiple specimens of Arabidopsis Thaliana, imaged at several angles.  Specimens come from two different genetic strains, and imaging occurred at various stages of development.  The elapsed time between the first and last image is several minutes, and in many cases, plants exhibit noticible motion between the first and last image.  Our primary goal is to recover the full 3D branching structure of each specimen, but we also seek to recover the motion between frames as it may contain useful phenotype information.  Our reconstrution will be composed of geometric primitives, from which plant scientists may extract valuable phenotype traits like branch angle and curvature.&lt;/p&gt;
+
+&lt;p&gt;In a sense, our problem encompasses two complementary areas in computer vision, tracking and multi-view stereo.  In classical tracking, the camera is fixed and the goal is to recover motion; in stereo, the camera is moving and the goal is to recover the fixed structure.  In our problem, both structure and camera undergo motion, with each object's motion confounding inference of the other.  Is an object's 2D motion best explained by parallax or by motion in 3D?   Either of these conclusions (or both) could the case; underconstrained problems like these require additional assumptions to be solved uniquely.  We a Bayesian approach to the problem, encoding these assumptions in the form of a prior distribution over structure and motion, and using Bayesian inference to recover both the optimal solution and a distribution over alternative solutions.&lt;/p&gt;
+
+&lt;p&gt;Phenotype traits:
+* branch depth,
+* branch angles,
+* stem curvature,
+* torsion,
+* phototropism,
+* interbranch distances,
+* biomass,
+* etc.&lt;/p&gt;
+
+&lt;p&gt;In modelling branching stem structures, we propose a representation that is simultaneously expressive and tractible.&lt;/p&gt;
+
+&lt;p&gt;(The following might be best posed in related work, after describing SfM and SfS backgroun)&lt;/p&gt;
+
+&lt;p&gt;In addition to the difficulties interent to simultaneous inference of structure and motion, the nature of plant structure poses specific challenges to the reconstruction task.  Our primary structures of interest are plant stems, which are nearly absent of texture features.  Most structure-from-motion algorithms use so-called keypoints to find matches between images, and high quality keypoints cannot be found without strong texture features.   The thin geometry of plant stems also poses difficulties, especially with popular shape-from-silhouette algorithms.  The thin backprojection cones that arise from stems often fail to intersect, because cameras are imperfectly calibrated and stems undergo motion between views.  Algorithms exist to improve camera pose estimates by minimizing reconstruction error, but these algorithms assume structure is stationary.&lt;/p&gt;
+
+&lt;p&gt;Plant structure also poses challenges on the on the tracking side,&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  * nonrigid/nonparametric structure
+  * nonrigid motion
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Modelling challenges&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  * unknown topology, cardinality
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;the primary difficulty is that the object and camera move simultaneously.  Since our goal is 3D tracking,&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;By jointly modeling camera error, 3D spatial structure, and temporal motion, we seek to improve upon existing approaches that ignore one or more of these aspects, while providing a rich description of the 4D scene.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;We propose a Bayesian&lt;/p&gt;
+
+&lt;p&gt;Model camera, structure, motion directly&lt;/p&gt;
+
+&lt;p&gt;The proposed work will&lt;/p&gt;
+
+&lt;p&gt;The primary contribution of this research will be a novel method for robust reconstruction of thin, textureless structure from multiple views, a specific case of multiple view reconstruction that is rarely considered.  To this end, our work will make novel contributions in several areas, including&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;A probabilistic generative model for branching structure in 3D that is applicable across many domains and problem settings.&lt;/li&gt;
+&lt;li&gt;A Bayesian formulation of multiple-view 4D reconstruction of thin branching structure that is robust to camera miscalibration and nonrigid motion.&lt;/li&gt;
+&lt;li&gt;Several novel edge-based likelihood functions, which are robust to noise and missing data and can be evaluated efficiently on GPU hardware.&lt;/li&gt;
+&lt;li&gt;A novel formulation of multiple-view reconstruction as a Bayesian data-association problem, and an approach for appoximate inference.&lt;/li&gt;
+&lt;li&gt;An efficient dynamic programming algorithm for dense multiple-view point correspondences of linear structure.&lt;/li&gt;
+&lt;li&gt;A novel, principled approach to the problem of Bayesian model selection in the presence of nonlinear likelihood terms.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Importance of Topic&lt;/h2&gt;
+
+&lt;h3&gt;Plant biology, food source&lt;/h3&gt;
+
+&lt;p&gt;Researchers estimate that global food production must double by 2050 to meet the expected growth in demand \cite{tilman2011}.  Advances in high-throughput genotyping have yielded great advancements in the understanding of plant biology at the micro- level, but without efficient methods for macro-level analysis, the relationship between genetic variation and practical measures like crop yields or drought resistance remains difficult to study.  High-throughput phenotyping provides a way to bridge this micro-/macro- gap by automatically quantifying observable traits (e.g morphology, behavior), allowing macro-level study of plants from different genetic strains at a large scale.&lt;/p&gt;
+
+&lt;p&gt;Existing high-throughput systems&lt;/p&gt;
+
+&lt;p&gt;and demand for simpler, lower-cost systems has increased in recent years&lt;/p&gt;
+
+&lt;p&gt;The earliest high throughput phenotyping platforms (HTPPs) used expensive sensing equipment, proving the effectiveness of HTPPs but illustrating a need for lower-cost solutions \cite{TODO}.  TODO:  Make an argument about the lack of 3D analysis of full branching architecture.  Use \cite{fiorani2013} to survey existing methods,  use \cite{biskup2007} as example similar to ours.&lt;/p&gt;
+
+&lt;p&gt;High-throughput phenotyping&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;understanding mutatations
+phenotyping is a limiting factor in breeding
+high-throughput genotyping has left a gap in the phenotyping 
+relating genes to biological traits (e.g. crop yields, drought resistance, root system efficiency)
+Understand the effects of genetic variation in terms of practical measures like crop yields or drought resistance.
+understand connections between genetics and macro structure
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;Reconstruction&lt;/h3&gt;
+
+&lt;p&gt;Multiple view 3D reconstruction is a widely-studied area in computer vision.  While this area has seen great success in recent years, most research has focused on reconstructing large structures with considerable surface area \cite{TODO}.  Most of these approaches fail in the presence of thin, textureless structure like those exhibited by plant stems.  The applications for multiple-view reconstruction are&lt;/p&gt;
+
+&lt;h2&gt;#&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;By separating the concerns of modelling and inference, our approach should generalize well to other research areas that involve branching linear systems, like neuron tracing \cite{TODO}, vascular segmentation \cite{TODO}, and root structure architecture \cite{TODO}.  We intend to 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Prior Research&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Biological application&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;RSA, Hypotrace, etc.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Multi-view Reconstruction&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;&lt;em&gt;PMVS first attempt&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;The well-known patch-based multiple view stereo algorithm (PMVS) uses full-color images to reconstruct a 3D mesh \cite{furukawa2010}, making them effective when a silhouette is unavailable.  For each image patch, a similar image patch is sought in other views such that both appearance and depth are roughly consistent between matches.  However, due to ambiguities that arise in flat image regionts, the algorithm starts by matching special keypoints whose surface exhibit distinct texture, and filling-in patches in-between.  In our situation, our surfaces are extremely thin (often three pixels or fewer in width) and exhibit no notable texture features, causing patch-based reconstructions to fail.  Further, PMVS assumes rigid structure and perfectly calibrated cameras; our plant's slight movements and our miscalibrated cameras would likely cause the algorithm's consistency checks to fail.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;em&gt;PMVS Second attempt&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;The well known asdfjl;kj uses appearance consistency to estimate the depth of image patches.  It relies heavilly on texture data to find inital matches, which makes it ineffective at reconstructing textureless structure like plant stems.  Futhermore, like the visual-hull based methods, our miscalibrated cameras and slightly moving plant structure would cause the consistency checks in this algorithm to fail.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Tracking&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Bayesian Model Choice&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Curve prior model&lt;/p&gt;
+
+&lt;p&gt;  Methods for modeling smooth curves and surfaces have been widely studied since the early days of computer vision.  The popular active countour or &quot;snakes&quot; algorithm models smoothness by an energy functional penalizing discontinuities in position or higher-order derivatives \cite{asdf}.  When the energy function penalizes the second-derivative, the model becomes equivalent to Euler's &quot;elastica&quot; model of an ideal elastic rod, which also mimicks the classic mechanical splines used in traditional drafting and shipbuilding \cite{levien2008}.  Other spline models have been developed for different applications, including visual modelling, data interpolation (e.g. cubic splines), data smoothing (cubic smoothing splines), and visual modelling (B-splines).  In computer vision, splines provide a convenient representation for nonrigid structure and motion.  Thin-plate splines \cite{wood2003} have been applied to reconstruction of deformable surfaces \cite{schmid} \cite{mcinerney1993} \cite{perriollat2011}.&lt;/p&gt;
+
+&lt;p&gt;  Gaussian process (GP) theory provides an elegant probabilistic representation of continous curves and surfaces\cite{williams2006}.  As shown in \cite{wahba1990}, classic cubic smoothing splines can be reformulated as the maximum posterior curve under a particular GP prior and i.i.d. Gaussian noise.  Other GP models can acheive different types of smoothness, like simple continuity (white noise process), or (C&lt;sup&gt;\inf)&lt;/sup&gt; smoothness (squared-exponential covariance process).  By formulating the curve model probabilisitically, GP's can represent and propagate uncertainty in continuous curves in a principled and tractible manner .&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Curve models&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;Edge-based likelihoods / energy functions&lt;/li&gt;
+&lt;li&gt;Thin plate splines&lt;/li&gt;
+&lt;li&gt;Deformable models&lt;/li&gt;
+&lt;li&gt;Sampling-based Structure From Motion&lt;/li&gt;
+&lt;li&gt;Misc Structure from Motion&lt;/li&gt;
+&lt;li&gt;Model-based Reconstruction&lt;/li&gt;
+&lt;li&gt;Evaluation
+  Middlebury metric.
+  Evaluation of&lt;/li&gt;
+&lt;li&gt;Gaussian Process&lt;/li&gt;
+&lt;li&gt;Miscellaneous&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Limitations or Key Assumptions&lt;/h2&gt;
+
+&lt;p&gt;foliage doesn't significantly obscure branching structure.&lt;/p&gt;
+
+&lt;h2&gt;Potential Outcomes, Contributions to Knowledge&lt;/h2&gt;
+
+&lt;h2&gt;Proposed Chapters&lt;/h2&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;We model stems as a set of points along the medial axis of a tube with circular cross-sections.&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Dissertation Proposal - Preparation, Organization</title>

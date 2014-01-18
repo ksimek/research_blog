@@ -1,0 +1,344 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Roughing out Proposal &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Roughing out Proposal
+    </h1>
+
+  <div class="date emphnext">January 07, 2014</div>
+    
+
+
+  
+    <p>Simultaneous stereo and tracking of nonrigid structure for semantic reconstruction</p>
+
+<h2>Summary</h2>
+
+<h2>Problem statement</h2>
+
+<p>We have collected a dataset consisting of multiple specimens of Arabidopsis Thaliana, imaged at several angles.  Specimens come from two different genetic strains, and imaging occurred at various stages of development.  The elapsed time between the first and last image is several minutes, and in many cases, plants exhibit noticible motion between the first and last image.  Our primary goal is to recover the full 3D branching structure of each specimen, but we also seek to recover the motion between frames as it may contain useful phenotype information.  Our reconstrution will be composed of geometric primitives, from which plant scientists may extract valuable phenotype traits like branch angle and curvature.</p>
+
+<p>In a sense, our problem encompasses two complementary areas in computer vision, tracking and multi-view stereo.  In classical tracking, the camera is fixed and the goal is to recover motion; in stereo, the camera is moving and the goal is to recover the fixed structure.  In our problem, both structure and camera undergo motion, with each object's motion confounding inference of the other.  Is an object's 2D motion best explained by parallax or by motion in 3D?   Either of these conclusions (or both) could the case; underconstrained problems like these require additional assumptions to be solved uniquely.  We a Bayesian approach to the problem, encoding these assumptions in the form of a prior distribution over structure and motion, and using Bayesian inference to recover both the optimal solution and a distribution over alternative solutions.</p>
+
+<p>Phenotype traits:
+* branch depth,
+* branch angles,
+* stem curvature,
+* torsion,
+* phototropism,
+* interbranch distances,
+* biomass,
+* etc.</p>
+
+<p>In modelling branching stem structures, we propose a representation that is simultaneously expressive and tractible.</p>
+
+<p>(The following might be best posed in related work, after describing SfM and SfS backgroun)</p>
+
+<p>In addition to the difficulties interent to simultaneous inference of structure and motion, the nature of plant structure poses specific challenges to the reconstruction task.  Our primary structures of interest are plant stems, which are nearly absent of texture features.  Most structure-from-motion algorithms use so-called keypoints to find matches between images, and high quality keypoints cannot be found without strong texture features.   The thin geometry of plant stems also poses difficulties, especially with popular shape-from-silhouette algorithms.  The thin backprojection cones that arise from stems often fail to intersect, because cameras are imperfectly calibrated and stems undergo motion between views.  Algorithms exist to improve camera pose estimates by minimizing reconstruction error, but these algorithms assume structure is stationary.</p>
+
+<p>Plant structure also poses challenges on the on the tracking side,</p>
+
+<pre><code>  * nonrigid/nonparametric structure
+  * nonrigid motion
+</code></pre>
+
+<p>Modelling challenges</p>
+
+<pre><code>  * unknown topology, cardinality
+</code></pre>
+
+<p>the primary difficulty is that the object and camera move simultaneously.  Since our goal is 3D tracking,</p>
+
+<p><strong>By jointly modeling camera error, 3D spatial structure, and temporal motion, we seek to improve upon existing approaches that ignore one or more of these aspects, while providing a rich description of the 4D scene.</strong></p>
+
+<p>We propose a Bayesian</p>
+
+<p>Model camera, structure, motion directly</p>
+
+<p>The proposed work will</p>
+
+<p>The primary contribution of this research will be a novel method for robust reconstruction of thin, textureless structure from multiple views, a specific case of multiple view reconstruction that is rarely considered.  To this end, our work will make novel contributions in several areas, including</p>
+
+<ul>
+<li>A probabilistic generative model for branching structure in 3D that is applicable across many domains and problem settings.</li>
+<li>A Bayesian formulation of multiple-view 4D reconstruction of thin branching structure that is robust to camera miscalibration and nonrigid motion.</li>
+<li>Several novel edge-based likelihood functions, which are robust to noise and missing data and can be evaluated efficiently on GPU hardware.</li>
+<li>A novel formulation of multiple-view reconstruction as a Bayesian data-association problem, and an approach for appoximate inference.</li>
+<li>An efficient dynamic programming algorithm for dense multiple-view point correspondences of linear structure.</li>
+<li>A novel, principled approach to the problem of Bayesian model selection in the presence of nonlinear likelihood terms.</li>
+</ul>
+
+
+<h2>Importance of Topic</h2>
+
+<h3>Plant biology, food source</h3>
+
+<p>Researchers estimate that global food production must double by 2050 to meet the expected growth in demand \cite{tilman2011}.  Advances in high-throughput genotyping have yielded great advancements in the understanding of plant biology at the micro- level, but without efficient methods for macro-level analysis, the relationship between genetic variation and practical measures like crop yields or drought resistance remains difficult to study.  High-throughput phenotyping provides a way to bridge this micro-/macro- gap by automatically quantifying observable traits (e.g morphology, behavior), allowing macro-level study of plants from different genetic strains at a large scale.</p>
+
+<p>Existing high-throughput systems</p>
+
+<p>and demand for simpler, lower-cost systems has increased in recent years</p>
+
+<p>The earliest high throughput phenotyping platforms (HTPPs) used expensive sensing equipment, proving the effectiveness of HTPPs but illustrating a need for lower-cost solutions \cite{TODO}.  TODO:  Make an argument about the lack of 3D analysis of full branching architecture.  Use \cite{fiorani2013} to survey existing methods,  use \cite{biskup2007} as example similar to ours.</p>
+
+<p>High-throughput phenotyping</p>
+
+<pre><code>understanding mutatations
+phenotyping is a limiting factor in breeding
+high-throughput genotyping has left a gap in the phenotyping 
+relating genes to biological traits (e.g. crop yields, drought resistance, root system efficiency)
+Understand the effects of genetic variation in terms of practical measures like crop yields or drought resistance.
+understand connections between genetics and macro structure
+</code></pre>
+
+<h3>Reconstruction</h3>
+
+<p>Multiple view 3D reconstruction is a widely-studied area in computer vision.  While this area has seen great success in recent years, most research has focused on reconstructing large structures with considerable surface area \cite{TODO}.  Most of these approaches fail in the presence of thin, textureless structure like those exhibited by plant stems.  The applications for multiple-view reconstruction are</p>
+
+<h2>#</h2>
+
+<pre><code>By separating the concerns of modelling and inference, our approach should generalize well to other research areas that involve branching linear systems, like neuron tracing \cite{TODO}, vascular segmentation \cite{TODO}, and root structure architecture \cite{TODO}.  We intend to 
+</code></pre>
+
+<h2>Prior Research</h2>
+
+<ul>
+<li>Biological application</li>
+</ul>
+
+
+<p>RSA, Hypotrace, etc.</p>
+
+<ul>
+<li>Multi-view Reconstruction</li>
+</ul>
+
+
+<p><em>PMVS first attempt</em></p>
+
+<pre><code>The well-known patch-based multiple view stereo algorithm (PMVS) uses full-color images to reconstruct a 3D mesh \cite{furukawa2010}, making them effective when a silhouette is unavailable.  For each image patch, a similar image patch is sought in other views such that both appearance and depth are roughly consistent between matches.  However, due to ambiguities that arise in flat image regionts, the algorithm starts by matching special keypoints whose surface exhibit distinct texture, and filling-in patches in-between.  In our situation, our surfaces are extremely thin (often three pixels or fewer in width) and exhibit no notable texture features, causing patch-based reconstructions to fail.  Further, PMVS assumes rigid structure and perfectly calibrated cameras; our plant's slight movements and our miscalibrated cameras would likely cause the algorithm's consistency checks to fail.
+</code></pre>
+
+<p><em>PMVS Second attempt</em></p>
+
+<pre><code>The well known asdfjl;kj uses appearance consistency to estimate the depth of image patches.  It relies heavilly on texture data to find inital matches, which makes it ineffective at reconstructing textureless structure like plant stems.  Futhermore, like the visual-hull based methods, our miscalibrated cameras and slightly moving plant structure would cause the consistency checks in this algorithm to fail.
+</code></pre>
+
+<ul>
+<li>Tracking</li>
+<li><p>Bayesian Model Choice</p></li>
+<li><p>Curve prior model</p>
+
+<p>  Methods for modeling smooth curves and surfaces have been widely studied since the early days of computer vision.  The popular active countour or "snakes" algorithm models smoothness by an energy functional penalizing discontinuities in position or higher-order derivatives \cite{asdf}.  When the energy function penalizes the second-derivative, the model becomes equivalent to Euler's "elastica" model of an ideal elastic rod, which also mimicks the classic mechanical splines used in traditional drafting and shipbuilding \cite{levien2008}.  Other spline models have been developed for different applications, including visual modelling, data interpolation (e.g. cubic splines), data smoothing (cubic smoothing splines), and visual modelling (B-splines).  In computer vision, splines provide a convenient representation for nonrigid structure and motion.  Thin-plate splines \cite{wood2003} have been applied to reconstruction of deformable surfaces \cite{schmid} \cite{mcinerney1993} \cite{perriollat2011}.</p>
+
+<p>  Gaussian process (GP) theory provides an elegant probabilistic representation of continous curves and surfaces\cite{williams2006}.  As shown in \cite{wahba1990}, classic cubic smoothing splines can be reformulated as the maximum posterior curve under a particular GP prior and i.i.d. Gaussian noise.  Other GP models can acheive different types of smoothness, like simple continuity (white noise process), or (C<sup>\inf)</sup> smoothness (squared-exponential covariance process).  By formulating the curve model probabilisitically, GP's can represent and propagate uncertainty in continuous curves in a principled and tractible manner .</p></li>
+<li><p>Curve models</p></li>
+<li>Edge-based likelihoods / energy functions</li>
+<li>Thin plate splines</li>
+<li>Deformable models</li>
+<li>Sampling-based Structure From Motion</li>
+<li>Misc Structure from Motion</li>
+<li>Model-based Reconstruction</li>
+<li>Evaluation
+  Middlebury metric.
+  Evaluation of</li>
+<li>Gaussian Process</li>
+<li>Miscellaneous</li>
+</ul>
+
+
+<h2>Limitations or Key Assumptions</h2>
+
+<p>foliage doesn't significantly obscure branching structure.</p>
+
+<h2>Potential Outcomes, Contributions to Knowledge</h2>
+
+<h2>Proposed Chapters</h2>
+
+<h2>TODO</h2>
+
+<ul>
+<li>We model stems as a set of points along the medial axis of a tube with circular cross-sections.</li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/01/07/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2014/01/06/work-log" class="prev" title="Dissertation Proposal - Preparation, Organization">&larr; Dissertation Proposal - Preparation, Organization</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

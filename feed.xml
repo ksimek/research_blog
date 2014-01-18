@@ -7,6 +7,418 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Planning - Spring Interdisciplanry Computational Intelligence Seminar</title>
+				<description>&lt;h2&gt;Spring Topics of Interest&lt;/h2&gt;
+
+&lt;p&gt;&lt;em&gt;Active learning / Deep Learning&lt;/em&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Active Learning of an Action Detector from Untrimmed Videos - Grauman&lt;/li&gt;
+&lt;li&gt;A Convex Optimization Framework for Active Learning?&lt;/li&gt;
+&lt;li&gt;ImageNet Classification with Deep Convolutional Neural Networks (hinton)&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Optimization (not mcmc)&lt;/h2&gt;
+
+&lt;p&gt;e.g. &quot;relaxation&quot; methods&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Estimating the 3D Layout of Indoor Scenes and its Clutter from Depth Sensors&lt;/li&gt;
+&lt;li&gt;Holistic Scene Understanding for 3D Object Detection with RGBD cameras&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Scenes and captions&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;From Large Scale Image Categorization to Entry-Level Categories - &quot;best paper, iccv 2013&quot;&lt;/li&gt;
+&lt;li&gt;NEIL: Extracting Visual Knowledge from Web Data&lt;/li&gt;
+&lt;li&gt;A Sentence is Worth a Thousand Pixels&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Detection&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;HOGgles: Visualizing Object Detection Features&lt;/li&gt;
+&lt;li&gt;Finding the Best from the Second Bests -- Inhibiting Subjective Bias in Evaluation of Visual Tracking Algorithms&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Miscellaneous&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Latent Data Association: Bayesian Model Selection for Multi-target Tracking - ian reid  (possibly of interest to Ernesto?)&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Relative Attributes For Large-scale Abandoned Object Detection (Quanfu and Prasad's paper) &lt;a href=&quot;http://www.cv-foundation.org/openaccess/content_iccv_2013/papers/Fan_Relative_Attributes_for_2013_ICCV_paper.pdf&quot;&gt;pdf&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Inferring “Dark Matter” and “Dark Energy” from Videos&lt;/p&gt;
+
+&lt;h2&gt;Schedule &lt;/h2&gt;
+
+&lt;p&gt;Rough schedule for first 7 weeks&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Practice Talk - Colin&lt;/li&gt;
+&lt;li&gt;Practice Talk - Kyle&lt;/li&gt;
+&lt;li&gt;Practice talk - Andrew&lt;/li&gt;
+&lt;li&gt;Learning TBD  (Deep learning or active learning) - Kobus&lt;/li&gt;
+&lt;li&gt;Learning TBD - Qiyam&lt;/li&gt;
+&lt;li&gt;Fast object segmentation in unconstrained video - Kate?&lt;/li&gt;
+&lt;li&gt;(ECCV, no session?)&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Remaining order TBD&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Parallel Markov Chain Monte Carlo for Nonparametric Mixture Models - Colin&lt;/li&gt;
+&lt;li&gt;Tree Shape Priors with Connectivity Constraints using Convex Relaxation on General Graphs - kyle?&lt;/li&gt;
+&lt;li&gt;MCMC Sampling - Jinyan&lt;/li&gt;
+&lt;li&gt;TBD - Ernesto&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Fri, 17 Jan 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/01/17/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/01/17/work-log</guid>
+			</item>
+		
+			<item>
+				<title>HPC meeting</title>
+				<description>&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://sites.google.com/a/case.edu/hpc-upgraded-cluster/cluster-faq#TOC-What-are-modules-&quot;&gt;Modules&lt;/a&gt; automatically set path and library paths for specific libraries.&lt;/li&gt;
+&lt;li&gt;HPC has a nice &lt;a href=&quot;&quot;&gt;web interface&lt;/a&gt; for subitting and managing jobs.  ATM, the only way to get stdout and stderr outputs.&lt;/li&gt;
+&lt;li&gt;Intel compiler can use openMP to automatically leverage coprocessor cards.  Can use same code&lt;/li&gt;
+&lt;li&gt;Thrust already installed (&lt;code&gt;module cuda&lt;/code&gt;); boost is header-only.&lt;/li&gt;
+&lt;li&gt;Apparently, the copropocessor cards run linux, and I can ssh into them!  Still unsure what the host address is.&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Fri, 17 Jan 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/01/17/hpc-meeting</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/01/17/hpc-meeting</guid>
+			</item>
+		
+			<item>
+				<title>Dis Prop (ctd); new HPC </title>
+				<description>&lt;p&gt;Continue writing dissertation proposal.  Worked on SfM, MVS literature review.  Spent quite some time trying to understand self-calibration.  The issue is that with a general perspective camera, SfM can only perform reconstruction up to a projective ambiguity (most of the SfM literature of late is apparently reticent about this?).  It turns out, if we fix at least one intrinsic parameter (how about skew = 0? or aspect ration = 1?) then we get a metric reconstruction (which maybe explains why it's no longer covered in SfM papers).&lt;/p&gt;
+
+&lt;p&gt;This shows that bundle adjustment can give a metric reconstruction, but the question remains how to initialize it.  Pollefeys et. al (1998) propose an analytical self-calibration solution.  Snavely et al. (2007) apparently just use bundle adjustment anyway, presumably using a simplified pinhole camera (no skew or ppo) with a reasonable default for &lt;em&gt;f&lt;/em&gt;, or EXIF tags when possible.  Brown and Lowe (2005) initialize each new camera with the old camera's intrinsics, no word on how the first pair is initialized (maybe obvious but I missed it?).&lt;/p&gt;
+
+&lt;h2&gt;New HPC &lt;/h2&gt;
+
+&lt;p&gt;UA just installed their new 80-node HPC cluster and by a stroke of luck, Ive gotten early access to it!  It looks like all machines have 16 CPU cores and 256 GB RAM; 60 nodes have multiple GPU cards while the other 20 have Intel PHI general purpose compute cards.  It's amazing to query the cluster and see the entire thing at 0% utilization... that won't last long!  Having fun poking around it and reading the IBM LSF manuals &lt;a href=&quot;http://publibfp.dhe.ibm.com/epubs/pdf/c2253460.pdf&quot;&gt;2&lt;/a&gt; (the job queueing system).&lt;/p&gt;
+
+&lt;p&gt;I found the following resource to be very useful, even though it's from University of Miami's personal LSF installation:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.ccs.miami.edu/hpc/lsf/9.1.1/&quot;&gt;unofficial LSF 9.1.1 Documentation site&lt;/a&gt; (University of maimi)
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.ccs.miami.edu/hpc/lsf/9.1.1/print/lsf_foundations.pdf&quot;&gt;Basics&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.ccs.miami.edu/hpc/lsf/9.1.1/print/lsf_admin.pdf&quot;&gt;Jobs&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;The hew official documents I could find were less useful:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Command Reference [&lt;a href=&quot;http://publibfp.dhe.ibm.com/epubs/pdf/c2753051.pdf&quot;&gt;pdf&lt;/a&gt;]&lt;/li&gt;
+&lt;li&gt;Administration Reference [&lt;a href=&quot;http://publibfp.dhe.ibm.com/epubs/pdf/c2253460.pdf&quot;&gt;pdf&lt;/a&gt;]&lt;/li&gt;
+&lt;li&gt;Configuration Reference[&lt;a href=&quot;http://publibfp.dhe.ibm.com/epubs/pdf/c2753061.pdf&quot;&gt;pdf&lt;/a&gt;]&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;Notes&lt;/h3&gt;
+
+&lt;p&gt;Okay great!  Got a general idea of how to use the system from the &lt;a href=&quot;http://www.ccs.miami.edu/hpc/lsf/9.1.1/print/lsf_users_guide.pdf&quot;&gt;user guide&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;bsub&lt;/code&gt; - submit default job queue&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bsub -q &amp;lt;queue-name&amp;gt;&lt;/code&gt; - submit specific job queue&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bsub -I&lt;/code&gt; - interactive job&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bjobs&lt;/code&gt; - view submitted jobs&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bqueues&lt;/code&gt; - list info for all queues&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bparams&lt;/code&gt; - details for default queue&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;lsload&lt;/code&gt; - list load on hosts&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;lshosts&lt;/code&gt; - list hosts w/ configuration&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bhosts&lt;/code&gt; - view batch server hosts (what's a batch server?)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;lsid&lt;/code&gt; - cluster info (name and master host)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;lsrun&lt;/code&gt; - run a command on a free host&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;lsgrun&lt;/code&gt; - run a command on a group of free hosts&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;lsltakss&lt;/code&gt; - view and add local tasks (huh?)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;lsrtasks&lt;/code&gt; - view and add remote tasks (huh?)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bkill 1234&lt;/code&gt; -  kill job 1234&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bkill -r&lt;/code&gt; - force removal of job (if hung after kill?)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bstop&lt;/code&gt; - suspend job&lt;/li&gt;
+&lt;li&gt;`bresume - resume job&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;btop 1234&lt;/code&gt; - move job 1234 to top of queue&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bbot 1234&lt;/code&gt; - move job 1234 to bottom of queue&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;On gpu* machines&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;nvidia-smi&lt;/code&gt; list details for all gpu cards (and running processes?)&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;On phi* machines&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;micinfo&lt;/code&gt; lists details for all coprocessor cards&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Also MPI is supported&lt;/p&gt;
+
+&lt;p&gt;Discovered two large gsfs disks (192 TB and 43 TB, resp.).  Apparently GSFS is a GPU-enabled encrypted disk.  No write permissions ATM&lt;/p&gt;
+
+&lt;h3&gt;Questions&lt;/h3&gt;
+
+&lt;p&gt;Some random thoughts while using the system&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;can/should we get Matlab?  Octave?&lt;/li&gt;
+&lt;li&gt;Subversion?&lt;/li&gt;
+&lt;li&gt;write permissions on GSFS disks?&lt;/li&gt;
+&lt;li&gt;No job report email after calling &lt;code&gt;bsub -u ksimek@email.arizona.edu&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Wed, 15 Jan 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/01/15/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/01/15/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Talk w/ Kobus Re: Dissertation Proposal</title>
+				<description>&lt;p&gt;Met w/ Kobus today to discuss the proposal for the first time.&lt;/p&gt;
+
+&lt;h4&gt;Organization&lt;/h4&gt;
+
+&lt;p&gt;&lt;strong&gt;Key idea&lt;/strong&gt;: Branching GP.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Close 2nd&lt;/strong&gt;: Model selection&lt;/p&gt;
+
+&lt;p&gt;Other stuff like high-throughput phenotyping, biological modeling, multi-view stereo, etc. take a back seat (but should be mentioned)&lt;/p&gt;
+
+&lt;h4&gt;Key sections&lt;/h4&gt;
+
+&lt;p&gt;The structure isn't rigid, but the three main sections that need to be strong are: (1) Literature review, (2) current progress, (3) future work.&lt;/p&gt;
+
+&lt;p&gt;Didn't ask about &quot;Assumptions and Limitations&quot;.  Kobus mentioned that things like that can protect you, but they don't come up very often.  Seems not critical, use best judgement.&lt;/p&gt;
+
+&lt;p&gt;&quot;Broader impacts&quot; or &quot;Importance of Topic&quot; section could be a heading to what would otherwise just fall into the introduction.&lt;/p&gt;
+
+&lt;p&gt;It seems the &quot;Outcomes&quot; section is probably best weaved into the &quot;proposed work&quot;.&lt;/p&gt;
+
+&lt;p&gt;It seems listing the dissertation chapters isn't strictly necessarilly, either.&lt;/p&gt;
+
+&lt;h4&gt;Future work&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;Full automatic system
+Automatic camera detection
+Apply to another domain (can be vague; can change later)
+
+Less likely:
+    leafs, flowers, etc.  Stick to GP's
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4&gt;Miscellaneous&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;Don't stress about correctness.  This is a proposal, i.e. *pre* investigation.  
+Let's wait until the end of the week to decide if we need to reschedule.
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+				<pubDate>Mon, 13 Jan 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/01/13/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/01/13/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>&lt;p&gt;Layout organization, pick a section, start writing.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.ohio.edu/eecs/graduate/documents/upload/PhDDissertationProposalOutline2-06.pdf&quot;&gt;Proposal guide, CS department, Ohio University&lt;/a&gt; [pdf]&lt;/p&gt;
+
+&lt;p&gt;In researching multiple-view plant datasets, I came across the &lt;a href=&quot;http://www.imageclef.org/node/179&quot;&gt;LifeCLEF 2014 challenge&lt;/a&gt;.  The goal is plant-species identification from single images.  Images are of several different organs (leafs, fruit, stems, branches) or entire structures (branches, entire plant).  Most images are in the wild, but some (leafs) are from a flatbed scanner.  All images are given a one-to-five rating based on their quality.  Even this isn't the type of task we're focusing on, it's valuable to note what types of tasks the community is focusing on.&lt;/p&gt;
+
+&lt;p&gt;Also available is a fish classification task from videos.  It might be interesting to try to track GP curves in an image and classify fish based on their GP parameters (temporal and spatial).  The cubic spline model is already scale-invariant, so scale issues might not be a big deal.  GP-LVM model might be even more interesting.&lt;/p&gt;
+
+&lt;p&gt;TODO - look into CVPR 2013 &quot;thin branch&quot; paper.  Existing datasets?  Their dataset?  Literature reivew?&lt;/p&gt;
+</description>
+				<pubDate>Tue, 07 Jan 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/01/07/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/01/07/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Roughing out Proposal</title>
+				<description>&lt;p&gt;Simultaneous stereo and tracking of nonrigid structure for semantic reconstruction&lt;/p&gt;
+
+&lt;h2&gt;Summary&lt;/h2&gt;
+
+&lt;h2&gt;Problem statement&lt;/h2&gt;
+
+&lt;p&gt;We have collected a dataset consisting of multiple specimens of Arabidopsis Thaliana, imaged at several angles.  Specimens come from two different genetic strains, and imaging occurred at various stages of development.  The elapsed time between the first and last image is several minutes, and in many cases, plants exhibit noticible motion between the first and last image.  Our primary goal is to recover the full 3D branching structure of each specimen, but we also seek to recover the motion between frames as it may contain useful phenotype information.  Our reconstrution will be composed of geometric primitives, from which plant scientists may extract valuable phenotype traits like branch angle and curvature.&lt;/p&gt;
+
+&lt;p&gt;In a sense, our problem encompasses two complementary areas in computer vision, tracking and multi-view stereo.  In classical tracking, the camera is fixed and the goal is to recover motion; in stereo, the camera is moving and the goal is to recover the fixed structure.  In our problem, both structure and camera undergo motion, with each object's motion confounding inference of the other.  Is an object's 2D motion best explained by parallax or by motion in 3D?   Either of these conclusions (or both) could the case; underconstrained problems like these require additional assumptions to be solved uniquely.  We a Bayesian approach to the problem, encoding these assumptions in the form of a prior distribution over structure and motion, and using Bayesian inference to recover both the optimal solution and a distribution over alternative solutions.&lt;/p&gt;
+
+&lt;p&gt;Phenotype traits:
+* branch depth,
+* branch angles,
+* stem curvature,
+* torsion,
+* phototropism,
+* interbranch distances,
+* biomass,
+* etc.&lt;/p&gt;
+
+&lt;p&gt;In modelling branching stem structures, we propose a representation that is simultaneously expressive and tractible.&lt;/p&gt;
+
+&lt;p&gt;(The following might be best posed in related work, after describing SfM and SfS backgroun)&lt;/p&gt;
+
+&lt;p&gt;In addition to the difficulties interent to simultaneous inference of structure and motion, the nature of plant structure poses specific challenges to the reconstruction task.  Our primary structures of interest are plant stems, which are nearly absent of texture features.  Most structure-from-motion algorithms use so-called keypoints to find matches between images, and high quality keypoints cannot be found without strong texture features.   The thin geometry of plant stems also poses difficulties, especially with popular shape-from-silhouette algorithms.  The thin backprojection cones that arise from stems often fail to intersect, because cameras are imperfectly calibrated and stems undergo motion between views.  Algorithms exist to improve camera pose estimates by minimizing reconstruction error, but these algorithms assume structure is stationary.&lt;/p&gt;
+
+&lt;p&gt;Plant structure also poses challenges on the on the tracking side,&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  * nonrigid/nonparametric structure
+  * nonrigid motion
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Modelling challenges&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  * unknown topology, cardinality
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;the primary difficulty is that the object and camera move simultaneously.  Since our goal is 3D tracking,&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;By jointly modeling camera error, 3D spatial structure, and temporal motion, we seek to improve upon existing approaches that ignore one or more of these aspects, while providing a rich description of the 4D scene.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;We propose a Bayesian&lt;/p&gt;
+
+&lt;p&gt;Model camera, structure, motion directly&lt;/p&gt;
+
+&lt;p&gt;The proposed work will&lt;/p&gt;
+
+&lt;p&gt;The primary contribution of this research will be a novel method for robust reconstruction of thin, textureless structure from multiple views, a specific case of multiple view reconstruction that is rarely considered.  To this end, our work will make novel contributions in several areas, including&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;A probabilistic generative model for branching structure in 3D that is applicable across many domains and problem settings.&lt;/li&gt;
+&lt;li&gt;A Bayesian formulation of multiple-view 4D reconstruction of thin branching structure that is robust to camera miscalibration and nonrigid motion.&lt;/li&gt;
+&lt;li&gt;Several novel edge-based likelihood functions, which are robust to noise and missing data and can be evaluated efficiently on GPU hardware.&lt;/li&gt;
+&lt;li&gt;A novel formulation of multiple-view reconstruction as a Bayesian data-association problem, and an approach for appoximate inference.&lt;/li&gt;
+&lt;li&gt;An efficient dynamic programming algorithm for dense multiple-view point correspondences of linear structure.&lt;/li&gt;
+&lt;li&gt;A novel, principled approach to the problem of Bayesian model selection in the presence of nonlinear likelihood terms.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Importance of Topic&lt;/h2&gt;
+
+&lt;h3&gt;Plant biology, food source&lt;/h3&gt;
+
+&lt;p&gt;Researchers estimate that global food production must double by 2050 to meet the expected growth in demand \cite{tilman2011}.  Advances in high-throughput genotyping have yielded great advancements in the understanding of plant biology at the micro- level, but without efficient methods for macro-level analysis, the relationship between genetic variation and practical measures like crop yields or drought resistance remains difficult to study.  High-throughput phenotyping provides a way to bridge this micro-/macro- gap by automatically quantifying observable traits (e.g morphology, behavior), allowing macro-level study of plants from different genetic strains at a large scale.&lt;/p&gt;
+
+&lt;p&gt;Existing high-throughput systems&lt;/p&gt;
+
+&lt;p&gt;and demand for simpler, lower-cost systems has increased in recent years&lt;/p&gt;
+
+&lt;p&gt;The earliest high throughput phenotyping platforms (HTPPs) used expensive sensing equipment, proving the effectiveness of HTPPs but illustrating a need for lower-cost solutions \cite{TODO}.  TODO:  Make an argument about the lack of 3D analysis of full branching architecture.  Use \cite{fiorani2013} to survey existing methods,  use \cite{biskup2007} as example similar to ours.&lt;/p&gt;
+
+&lt;p&gt;High-throughput phenotyping&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;understanding mutatations
+phenotyping is a limiting factor in breeding
+high-throughput genotyping has left a gap in the phenotyping 
+relating genes to biological traits (e.g. crop yields, drought resistance, root system efficiency)
+Understand the effects of genetic variation in terms of practical measures like crop yields or drought resistance.
+understand connections between genetics and macro structure
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;Reconstruction&lt;/h3&gt;
+
+&lt;p&gt;Multiple view 3D reconstruction is a widely-studied area in computer vision.  While this area has seen great success in recent years, most research has focused on reconstructing large structures with considerable surface area \cite{TODO}.  Most of these approaches fail in the presence of thin, textureless structure like those exhibited by plant stems.  The applications for multiple-view reconstruction are&lt;/p&gt;
+
+&lt;h2&gt;#&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;By separating the concerns of modelling and inference, our approach should generalize well to other research areas that involve branching linear systems, like neuron tracing \cite{TODO}, vascular segmentation \cite{TODO}, and root structure architecture \cite{TODO}.  We intend to 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Prior Research&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Biological application&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;RSA, Hypotrace, etc.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Multi-view Reconstruction&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;&lt;em&gt;PMVS first attempt&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;The well-known patch-based multiple view stereo algorithm (PMVS) uses full-color images to reconstruct a 3D mesh \cite{furukawa2010}, making them effective when a silhouette is unavailable.  For each image patch, a similar image patch is sought in other views such that both appearance and depth are roughly consistent between matches.  However, due to ambiguities that arise in flat image regionts, the algorithm starts by matching special keypoints whose surface exhibit distinct texture, and filling-in patches in-between.  In our situation, our surfaces are extremely thin (often three pixels or fewer in width) and exhibit no notable texture features, causing patch-based reconstructions to fail.  Further, PMVS assumes rigid structure and perfectly calibrated cameras; our plant's slight movements and our miscalibrated cameras would likely cause the algorithm's consistency checks to fail.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;em&gt;PMVS Second attempt&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;The well known asdfjl;kj uses appearance consistency to estimate the depth of image patches.  It relies heavilly on texture data to find inital matches, which makes it ineffective at reconstructing textureless structure like plant stems.  Futhermore, like the visual-hull based methods, our miscalibrated cameras and slightly moving plant structure would cause the consistency checks in this algorithm to fail.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Tracking&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Bayesian Model Choice&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Curve prior model&lt;/p&gt;
+
+&lt;p&gt;  Methods for modeling smooth curves and surfaces have been widely studied since the early days of computer vision.  The popular active countour or &quot;snakes&quot; algorithm models smoothness by an energy functional penalizing discontinuities in position or higher-order derivatives \cite{asdf}.  When the energy function penalizes the second-derivative, the model becomes equivalent to Euler's &quot;elastica&quot; model of an ideal elastic rod, which also mimicks the classic mechanical splines used in traditional drafting and shipbuilding \cite{levien2008}.  Other spline models have been developed for different applications, including visual modelling, data interpolation (e.g. cubic splines), data smoothing (cubic smoothing splines), and visual modelling (B-splines).  In computer vision, splines provide a convenient representation for nonrigid structure and motion.  Thin-plate splines \cite{wood2003} have been applied to reconstruction of deformable surfaces \cite{schmid} \cite{mcinerney1993} \cite{perriollat2011}.&lt;/p&gt;
+
+&lt;p&gt;  Gaussian process (GP) theory provides an elegant probabilistic representation of continous curves and surfaces\cite{williams2006}.  As shown in \cite{wahba1990}, classic cubic smoothing splines can be reformulated as the maximum posterior curve under a particular GP prior and i.i.d. Gaussian noise.  Other GP models can acheive different types of smoothness, like simple continuity (white noise process), or (C&lt;sup&gt;\inf)&lt;/sup&gt; smoothness (squared-exponential covariance process).  By formulating the curve model probabilisitically, GP's can represent and propagate uncertainty in continuous curves in a principled and tractible manner .&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Curve models&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;Edge-based likelihoods / energy functions&lt;/li&gt;
+&lt;li&gt;Thin plate splines&lt;/li&gt;
+&lt;li&gt;Deformable models&lt;/li&gt;
+&lt;li&gt;Sampling-based Structure From Motion&lt;/li&gt;
+&lt;li&gt;Misc Structure from Motion&lt;/li&gt;
+&lt;li&gt;Model-based Reconstruction&lt;/li&gt;
+&lt;li&gt;Evaluation
+  Middlebury metric.
+  Evaluation of&lt;/li&gt;
+&lt;li&gt;Gaussian Process&lt;/li&gt;
+&lt;li&gt;Miscellaneous&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Limitations or Key Assumptions&lt;/h2&gt;
+
+&lt;p&gt;foliage doesn't significantly obscure branching structure.&lt;/p&gt;
+
+&lt;h2&gt;Potential Outcomes, Contributions to Knowledge&lt;/h2&gt;
+
+&lt;h2&gt;Proposed Chapters&lt;/h2&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;We model stems as a set of points along the medial axis of a tube with circular cross-sections.&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Tue, 07 Jan 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/01/07/proposal_rough</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/01/07/proposal_rough</guid>
+			</item>
+		
+			<item>
 				<title>Dissertation Proposal - Preparation, Organization</title>
 				<description>&lt;p&gt;Spent morning and early afternoon doing preparation for my dissertation proposal by doing some background reading and laying out a rough sketch of what I'd like to cover.&lt;/p&gt;
 
@@ -414,452 +826,6 @@ dataset 9: overextension in red  top curve&lt;/p&gt;
 				<pubDate>Tue, 24 Dec 2013 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2013/12/24/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/12/24/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>&lt;p&gt;Lost matlab workspace during reboot, because I accidentally saved the current figure instead of the workspace.  Working on reloading them.&lt;/p&gt;
-
-&lt;p&gt;Realized I never documented why I abandoned the hyperprior GP (which models index smoothness) is failing.  Looking through the matlab logs to recreate the failing test.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Done; added notes to previous entries to better illustrate the story as it originally developed.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Implemented new constant-length energy function in &lt;code&gt;wacv-2012/cl_energy.m&lt;/code&gt;.  Need to test.&lt;/p&gt;
-</description>
-				<pubDate>Mon, 23 Dec 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/12/23/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/12/23/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Constant-length energy function - Hessian</title>
-				<description>&lt;p&gt;Recall energy function&lt;/p&gt;
-
-&lt;div&gt;
-\[
-\begin{align}
-    E &amp;= \frac{1}{2} x^\top D^\top D x + \frac 12 \mu^\top D^\top D \mu  - x^\top D^\top \eta \\
-
-\end{align}
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;and its gradient,&lt;/p&gt;
-
-&lt;div&gt;
-\[
-    E' = \frac{\partial E}{\partial x} = x^\top D^\top D + \mu^\top D^\top D J_\mu - \eta^\top D - x^\top D^\top J_\eta
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;The derivative w.r.t. t_i of E' (i.e. the i-th row of the Hessian) is given by:&lt;/p&gt;
-
-&lt;div&gt;
-\[
-\begin{align}
-    \frac{\partial E'}{\partial t_i} &amp;=
-        (D^\top D)_{:i} + 
-        (J_\mu^\top D^\top D J_\mu)_{:i} + 
-        \frac{\partial J_\mu^\top}{\partial t_i} D^\top D \mu - 
-        (D^\top J_\eta)_{:i} -  
-        (J_\eta^\top D^\top)_{:i} - 
-        \left \{ x^\top D^\top \frac{\partial J_\eta}{\partial t_i} \right \}^\top
-\end{align}
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;Of the six terms, the third and sixth are particularly problematic when generalizing to the full hessian, because they involve the Jacobian of a Jacobian, which is a 3D tensor.&lt;/p&gt;
-
-&lt;p&gt;To keep running time to \(O(n&lt;sup&gt;3)\),&lt;/sup&gt; we'll use diagonal approximations for those terms.&lt;/p&gt;
-
-&lt;div&gt;
-\[
-\begin{align}
-    \frac{\partial^2 \mu}{(\partial t_i)^2} &amp;= \frac{\partial}{\partial t_i} (J_\mu)_{:i} \\
-
-                                            &amp;= \frac{\partial}{\partial t_i} \left [\operatorname{diag_{3x1}}(\Delta_{3x3} z) + \left( \Delta_{1x3} \right)^\top \odot \operatorname{repmat}(z_3 , N/3, 1) + K_* J_z \right ]_{:i} \\
-                                            &amp;= \frac{\partial}{\partial t_i} \left( 
-                                                    \begin{array}{c}
-                                                    0 \\ 0 \\ \vdots \\ \delta^\top_{i3x3} z \\ \vdots \\ 0 \\ 0
-                                                    \end{array} \right )
-                                                    + \delta_{i,3x1} \odot \operatorname{repmat}(z^{(3)}_i, N/3, 1) 
-    + K_* (J_z )_{:i} \\
-                                            &amp;= \left( 
-                                                    \begin{array}{c}
-                                                    0 \\ 0 \\ \vdots \\ C^\top_{i3x3} z \\ \vdots \\ 0 \\ 0
-                                                    \end{array} \right ) + 
-                                                \left (
-                                                    \begin{array}{c}
-                                                    0 \\ 0 \\ \vdots \\ \delta^\top_{i3x3} z'_i \\ \vdots \\ 0 \\ 0
-                                                    \end{array} \right )
-                                                    + C_{i,3x1} \odot \operatorname{repmat}(z^{(3)}_i, N/3, 1) 
-                                                    + \delta_{i,3x1} \odot \operatorname{repmat}(z'^{(3)}_i, N/3, 1) 
-                                                        + K_* (J'_z )_{:i} \\
-                                                        + K'_* (J_z )_{:i} \\
-\end{align}
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;Started deriving \(J'_z\), but was stymied by the complexity.  For now, we'll resort to ignoring these terms and see how the optimization goes.&lt;/p&gt;
-</description>
-				<pubDate>Mon, 23 Dec 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/12/23/reference</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/12/23/reference</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15864&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Troubleshooting Jacobians of z and mu.&lt;/p&gt;
-
-&lt;p&gt;Analytical and numerical versions of z's Jacobian differ significantly in some entries.  To troubleshoot, stepping backward through the derivations of J_z outlined in &lt;a href=&quot;/ksimek/research/2013/12/12/reference/&quot;&gt;the reference post&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;I will refer to the final equation from that post and count backward from the final line, describing the result of implementing each line.  E.g. line 0 is the final result, the one used to compute z_ana; line 1 is the one labelled &quot;(3D version)&quot; .&lt;/p&gt;
-
-&lt;p&gt;Setup:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Track = detach(trash_Tracks_11(end), params_test);
-K = get_K(Track); 
-S = Track.ll_S;
-U = speye(size(K)) + S * K * S';
-Ui = inv(U);
-kern = get_model_kernel_derivative(params_test);
-ind = get_curve_indices(Track);
-views = Track.ll_views_flat;
-Delta = eval_kernel(kern, ind, ind, views, views);
-Delta3 = one_d_to_three_d(Delta);
-
-i = 1;   
-i3 = 3*(i-1)+1;
-I = i3:i3+2;
-
-delta_i = Delta(i,:)';
-delta_i3 = one_d_to_three_d(delta_i);
-
-dK = zeros(size(K));
-dK(I,:) = dK(I,:) + Delta3(I,:);
-dK(:,I) = dK(:,I) + Delta3(I,:)';
-
-A = A = S' * Ui * S;
-z = z = A * y;
-N = length(K);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Implementing line 1:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;line_1 = -A(:,I) *delta_i3' * z - A * delta_i3 * z(i3:i3+2);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;It actually looks pretty good.  So why is line_0 wrong?&lt;/p&gt;
-
-&lt;p&gt;Let's isolate the first term.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;line_1_a = -A(:,I) *delta_i3' * z;
-line_0_a = -sum_1xN(A .* repmat((Delta3 * z)', N,1), 3);
-plot(xx, line_1_a - line_0_a(:,i))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Error within 1e-12.  Great!  Error must be in the second term...&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;line_1_b = A * delta_i3 * z(i3:i3+2);
-line_0_b =  - A * (Delta3(1:3:end, :)' .* repmat(reshape(z,3,[]), N/3, 1));
-plot(xx, line_1_b - line_0_b(:,i))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Yep.  it's a mess.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Found the bug.  Was incorrectly trying to implement Delta&lt;em&gt;{1x3} by taking Delta&lt;/em&gt;{3x3}(1:3:end, :), which is totally wrong.  Also, was mis-associating the matrix multiplication and elementwise multiplication.  That is, I was taking (A * Delta_1x3) .&lt;em&gt; XXX  instead of A * (Delta_1x3 .&lt;/em&gt; XXX).&lt;/p&gt;
-
-&lt;p&gt;Those two fixes, and the dZ test now passes.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Still getting bad results for dmu.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Same bug as for dZ.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Developed new constant-width energy function, and derived its gradient.  Writeup &lt;a href=&quot;/ksimek/research/2013/12/19/reference&quot;&gt;is here&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;TODO:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Derive Hessian of energy function&lt;/li&gt;
-&lt;li&gt;implement and test gradient and hessian.&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Thu, 19 Dec 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/12/19/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/12/19/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Constant-length energy function -- revisited</title>
-				<description>&lt;p&gt;My &lt;a href=&quot;/ksimek/research/2013/12/12/reference/&quot;&gt;earlier derivation&lt;/a&gt; of the constant-length energy function was flawed, because it pooled the individual lengths before comparing them to the pooled index-spacing.  Thus, this energy function enforces the &lt;em&gt;sum&lt;/em&gt; of squared lengths but not the individual lengths.  Chalk it up to trying to be too clever in avoiding a square root.&lt;/p&gt;
-
-&lt;p&gt;In what follows, I derive a new energy function and its gradient.  The Jacobians of \(\mu\) and \(z\) are re-used from the earlier treatment.&lt;/p&gt;
-
-&lt;div&gt;
-&lt;p&gt;
-  Let \(\mu\) be the maximum posterior curve, given an index set, \(\mathbf{x}\), arranged as a single column in &quot;xyzxyz&quot; format.  Let \(\mu^{(3)}\) be the 3 by N/3 matrix obtained by rearranging the points of \(\mu\) into column vectors.  That is, the i-th column \(\mu^{(3)}_i\) is the i-th reconstructed point.  
-  &lt;/p&gt;
-
-&lt;p&gt;
-  Let \(\eta\) be the vector of absolute distances between adjacent points in \(mu^{3}\). Formally,
-  
-\[
-    \eta_i = \| \mu^{(3)}_i - \mu^{(3)}_{i-1} \|.
-\]
-
-Note that \(\eta^\top \eta = \|\eta\|^2 = \mu^\top D^\top D \mu\), where \(D\) is the adjacent differences matrix, adapted to operate on column vectors in the &quot;xyzxyz&quot; format.
-
-&lt;/p&gt;
-&lt;/div&gt;
-
-
-&lt;p&gt;The constant width energy function is defined as&lt;/p&gt;
-
-&lt;div&gt;
-\[
-\begin{align}
-    E &amp;= \frac{1}{2} \left ( Dx  - \eta \right ) ^2 \\
-      &amp;= \frac{1}{2} x^\top D^\top D x + \frac 12 \eta^\top \eta  - x^\top D^\top \eta \\
-      &amp;= \frac{1}{2} x^\top D^\top D x + \frac 12 \mu^\top D^\top D \mu  - x^\top D^\top \eta \\
-
-\end{align}
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;Gradient is given by&lt;/p&gt;
-
-&lt;div&gt;
-\[
-    \frac{\partial E}{\partial x} = x^\top D^\top D + \mu^\top D^\top D J_\mu - \eta^\top D - x^\top D^\top J_\eta
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;where \(J_z\) is the Jacobian of \(\mathbf{z}\) w.r.t. \(\mathbf{x}\).&lt;/p&gt;
-
-&lt;p&gt;The Jacobian of \(z\) and \(\mu\) are derived in &lt;a href=&quot;/ksimek/research/2013/12/12/reference/&quot;&gt;this earlier post&lt;/a&gt;.  It remains to find the Jacobian of \(\eta\).&lt;/p&gt;
-
-&lt;div&gt;
-Note the identity \( \eta_i^2 = \| \mu^{(3)}_i - \mu^{(3)}_{i-1} \|^2 \) can be rewritten in terms of the full vector \(\eta\) as 
-
-\[
-\eta \odot \eta = \operatorname{sum_{3x1}}(D \mu \odot D \mu)
-\]
-
-where \(\operatorname{sum_{kx1}}\) implements k-way blockwise summation over columns of a matrix.  Formally, it is the function \(f : \mathbb{R}^{NxM} \rightarrow R^{(N/k)xM}\) (for any N divisible by k), such that 
-
-\[
-    (f(A))_{ij} = \sum_{s = (i-1)\times k+1}^{i \times k} A_{sj}
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;The Jacobian of \(\mathbf{\eta}\) can then be given by&lt;/p&gt;
-
-&lt;div&gt;
-\[
-
-\begin{align}
-\frac{\partial \eta}{\partial x_i} &amp;= \frac{\partial}{\partial x_i} \left ( \eta \odot \eta \right)^{\circ\frac12} \\
-                                 &amp;= \frac{\partial}{\partial x_i} \left ( \operatorname{sum_{3x1}}(D \mu \odot D \mu) \right)^{\circ\frac12} \\
-                                &amp;= \frac12 \left ( \eta \odot \eta \right)^{\circ \frac{-1}{2}} \odot \frac{\partial}{\partial x_i} 
-                                    \left ( \operatorname{sum_{3x1}}(D \mu \odot D \mu )\right) \\
-                                &amp;= \frac12 \eta^{\circ (-1)}  \odot
-                                     \left ( \operatorname{sum_{3x1}}(\frac{\partial}{\partial x_i} D \mu \odot D \mu )\right) \\
-                        J_\mu &amp;= \frac12 \eta^{\circ (-1)}  \odot
-                                     \left ( \operatorname{sum_{3x1}}( 2 D \mu \odot D J_\mu )\right) \\
-                                &amp;= \eta^{\circ (-1)} \odot \left ( \operatorname{sum_{3x1}}( D \mu \odot D J_\mu )\right) \\
-
-\end{align}
-\]
-
-where \(x^{\circ(-1)} = \left( \frac{1}{x_{ij}} \right)\) is the Hadamard (i.e. element-wise) inverse, and \(x^{\circ \frac12}\) is the Hadamard root.
-&lt;/div&gt;
-
-
-
-</description>
-				<pubDate>Thu, 19 Dec 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/12/19/reference</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/12/19/reference</guid>
-			</item>
-		
-			<item>
-				<title>Constant-length energy function</title>
-				<description>&lt;p&gt;&lt;strong&gt;Update: What follows is an early working of the constant-length energy function and much of which I learned to be invalid.&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Energy function and its gradient are:&lt;/p&gt;
-
-&lt;div&gt;
-\[
-E = 0.5 (0.5 \mu^\top D^\top D \mu - 0.5 t^\top D^\top D t)^2 \\
-\frac{\partial E}{\partial t_i} = 2E \left [ 0.5 \mu^\top D^\top D J_\mu - t^\top D^\top D  \right ]
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;Mu and it's jacobian are:&lt;/p&gt;
-
-&lt;div&gt;
-\[
-\begin{align}
-\mu &amp;= K_* S^\top \left( S K S^\top + I\right)^{-1} S y \\
-    &amp;= K_* S^\top U^{-1} S y \\
-    &amp;= K_* z \\
-\frac{\partial \mu}{\partial t_i} 
-    &amp;= K'_* z + K_* z' \\
-J_\mu &amp;= \operatorname{diag_{3x1}}(\Delta_{3x3} z) + \left( \Delta_{1x3} \right)^\top \odot \operatorname{repmat}(z_3 N/3, 1) + K_* J_z 
-\end{align}
-\]
-
-where \(J_z\) is the Jacobian of \(z\), and \(z_3\) is the re-arrangement of \(z\) into columns of xyz vectors.  \(\Delta_{3x3}\) is the conversion of \(\Delta\) to 3D by block-diagonalizing three copies of \(\Delta\) and permuting rows and columns so each (x,y,z) is grouped together.  \(\Delta_{1x3}\) repeats \(\Delta\) over three columns and permuting columns.  \(\operatorname{diag_{3x1}}\) is a modified diagonalization operator where x is split into 3x1 matrices, which are arranged into block-diagonal form.
-&lt;/div&gt;
-
-
-
-
-&lt;div&gt;
-Let \(A = S^\top U^{-1} S \), so \(z = Ay \).
-\[
-\begin{align}
-\frac{\partial z}{\partial t_i} &amp;= \frac{\partial }{\partial t_i} D^\top U^{-1} S y \\
-                              &amp;= - S^\top U^{-1} \frac{\partial U}{\partial t_i} U^{-1} S y \\
-                              &amp;= - S^\top U^{-1} S \frac{\partial K}{\partial t_i} S^\top U^{-1} S y \\
-                              &amp;= - A \frac{\partial K}{\partial t_i} z \\
-                              &amp;= - A \left \{
-                                      \left (
-                                      \begin{array}{c} 
-                                          \mathbf{0}             \\
-                                          \vdots        \\
-                                          \delta_i^\top \\
-                                          \vdots        \\
-                                          \mathbf{0}             \\
-                                      \end{array} \right ) + 
-                                      \left (
-                                          \begin{array}{c}
-                                          \mathbf{0} &amp; \cdots &amp; \delta_i &amp; \cdots &amp; \mathbf{0}
-                                          \end{array} 
-                                      \right) 
-                                    \right \} z \\
-         &amp;= - A_i (\delta_i^\top z) - A \delta_i z_i \\
-         &amp;= - A_{3i:3i+2} (\delta_{i,3x3}^\top z) - A \delta_{i,3x3} z_{3i:3i+1} &amp; \text{(3D version)} \\
-J_z &amp;= - \operatorname{sum_{1x3}}\left(A \odot \left( \Delta_{3x3} z \right)^\top \right) - A \left [ \left( \Delta_{1x3}  \right )^\top \odot \operatorname{repmat}(z_3, N/3, 1) \right ]
-\end{align}
-\]
-&lt;/div&gt;
-
-
-
-</description>
-				<pubDate>Thu, 12 Dec 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/12/12/reference</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/12/12/reference</guid>
-			</item>
-		
-			<item>
-				<title>Optimizing indices: Length constraints</title>
-				<description>&lt;p&gt;Continuing along the inspiration from the yesterday's Pascal Fua paper investigating length constraint terms for index optimization.&lt;/p&gt;
-
-&lt;p&gt;It's difficult, because length implies known structure, which in turn implies known indices.  So constraining indices based on length feels like a circular argument.  This has been a sticking point in my thinking for a long time.  But we can formulate this in terms of expectations, namely, given an index set, the &lt;em&gt;expected segment length&lt;/em&gt; should be equal to difference of their indices.&lt;/p&gt;
-
-&lt;p&gt;Let \( L_i = \|x_i - x_{i-1}\| \) be the distance between points with adjacent indices.&lt;/p&gt;
-
-&lt;p&gt;Expected length given and index set, \(t\) is:&lt;/p&gt;
-
-&lt;div&gt;
-\[
-\begin{align}
-\mathrm{E}[L_i^2] &amp;= \mathrm{E}[\| x_i - x_{i-1}\|^2] \\
-                &amp;= \mathrm{E}[x_i^2 - 2 x_i x_{i-1} + x_{i-1}^2 ] \\
-                &amp;= \mathrm{E}[x_i^2] - 2 \mathrm{E}[x_i x_{i-1}] + \mathrm{E}[x_{i-1}^2 ] \\
-                &amp;= \left( \mathrm{Cov}[x_i]  + \left( \mathrm{E}[x_i] \right) \right) - 2 \left( \mathrm{Cov}[x_i, x_{i-1}] + \mathrm{E}[x_i]\mathrm{E}[x_{i-1}] \right) + \left( \mathrm{Cov}[x_{i-1}]  + \left( \mathrm{E}[x_{i-1}] \right) \right)\\
-                &amp;= \left(k(x_i,x_i) + k(x_{i-1}, x_{i-1} - 2 k(x_i, x_{i-1}) \right) + \left( \mu_i^2 + \mu_{i-1}^2 - 2 \mu_i \mu_{i-1} \right)\\
-                &amp;= D K_i D^\top + (D \mu_{i,i-1})^\top D \mu_{i,i-1}
-\end{align}
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;Where D is the differencing matrix, \(D = (1, -1)\).&lt;/p&gt;
-
-&lt;p&gt;Observe that each dimension is independent in the squared distance equation, so we can treat each dimension separately in the equation above.&lt;/p&gt;
-
-&lt;p&gt;For now, we'll aproximate by ignoring the first term, since nearby indices should be nearly 100% corellated.  So all that remains is the squared difference of the reconstructed points.&lt;/p&gt;
-
-&lt;p&gt;We'll consider two different energy functions.  The first is exactly what we'd like to minimize, but it needs an approximation.&lt;/p&gt;
-
-&lt;div&gt;
-\[
-
-E_i = \left( \mathrm{E}[L_i] - \Delta_{t_i} \right)^2
-    \approx \left( \sqrt{\mathrm{E}[L_i^2]} - \Delta_{t_i} \right)^2
-
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;We can't compute \(\mathrm{E}[L_i] \) directly, so we approximate it by taking the square root of the expected square length.  The square root function is concave, so Jensen's inequality tells us that this approximation will never under-estimate the expected length, and since our main objective is to prevent index shrinkage, overestimating is preferred to underestimating.    The result is \(D \mu \), the adjacent differences of the posterior mean.&lt;/p&gt;
-
-&lt;p&gt;TODO: writeup derivation for gradient for \(E\) and \(\mu\)&lt;/p&gt;
-
-&lt;p&gt;Implemented analytical Jacobian for \(\mu\) in &lt;code&gt;posterior_mu_gradient.m&lt;/code&gt;.  Some error in results, according to &lt;code&gt;test/test_mu_deriv.m&lt;/code&gt;, but passes the inspection test.  Overall, diagonal term looks okay, so error is probably in derivation of dZ.  Particularly damning is that the quality metric isn't sensitive to the delta step size.&lt;/p&gt;
-
-&lt;p&gt;Should probably test Jacobian dZ.  It's undergone some changes today.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Yep, subtle but significant error.  Inspection suggests &lt;code&gt;term2&lt;/code&gt; is the culprit.  Can we focus on the individual faulty elements and check the partial derivatives?&lt;/p&gt;
-</description>
-				<pubDate>Tue, 10 Dec 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/12/10/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/12/10/work-log</guid>
 			</item>
 		
 	</channel>

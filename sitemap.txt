@@ -35,7 +35,14 @@ http://vision.sista.arizona.edu/ksimek/research/page10/index.html
 http://vision.sista.arizona.edu/ksimek/research/page11/index.html
 http://vision.sista.arizona.edu/ksimek/research/page12/index.html
 http://vision.sista.arizona.edu/ksimek/research/page13/index.html
+http://vision.sista.arizona.edu/ksimek/research/page14/index.html
 
+http://vision.sista.arizona.edu/ksimek/research/2014/01/17/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/01/17/hpc-meeting
+http://vision.sista.arizona.edu/ksimek/research/2014/01/15/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/01/13/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/01/07/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/01/07/proposal_rough
 http://vision.sista.arizona.edu/ksimek/research/2014/01/06/work-log
 http://vision.sista.arizona.edu/ksimek/research/2014/01/03/work-log
 http://vision.sista.arizona.edu/ksimek/research/2013/12/27/work-log
