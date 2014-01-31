@@ -8,3 +8,10 @@
 1391106560: proposal presentation - background
 1391109785: dissertation proposal - beamer image issues
 1391111922: dissertation proposal - intro outline
+1391115380: dissertation proposal - intro slides
+1391117344: dissertation proposal - phenotyping, problem statement
+1391119921: dissertation proposal - problem statement
+1391121760: dissertation proposal - problem statement
+1391123844: dissertation proposal - data animation
+1391125778: dissertation proposal - data animation
+1391128283: telecom - ICML deadline
