@@ -16,3 +16,6 @@
 1391125778: dissertation proposal - data animation
 1391128283: telecom - ICML deadline
 1391151414: dissertation oral - triangulation slides, structure from motion.
+1391188711: dissertation oral - texture image
+1391191716: dissertation oral - reconstruction animation
+1391194494: dissertation oral - multi-view model progression
