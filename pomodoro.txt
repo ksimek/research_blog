@@ -30,3 +30,6 @@
 1391289256: TIES GP writeup
 1391367705: ICML reading write-up
 1391369572: titsias paper and haario paper
+1391376755: haario paper
+1391380681: help laura with blackboard
+1391382979: help laura with blackboard
