@@ -37,3 +37,6 @@
 1391453931: haario and thompson papers
 1391457339: haario and thompson papers
 1391469017: linear ODE estimation background
+1391534103: get detached reconstruction
+1391536135: start prior math
+1391538707: diss prop: unresolved issues
