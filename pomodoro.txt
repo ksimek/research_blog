@@ -46,3 +46,6 @@
 1391553074: diss prop: finish GP intro
 1391556891: diss prop: BGP covariance
 1391558994: diss prop: BGP covariance
+1391576537: assess literature datasets, etc
+1391578387: assess literature inference, etc
+1391580201: assess literature inference, etc
