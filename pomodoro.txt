@@ -41,3 +41,8 @@
 1391536135: start prior math
 1391538707: diss prop: unresolved issues
 1391540775: diss prop: start GP intro
+1391548849: diss prop: start GP intro
+1391550649: diss prop: start GP intro
+1391553074: diss prop: finish GP intro
+1391556891: diss prop: BGP covariance
+1391558994: diss prop: BGP covariance
