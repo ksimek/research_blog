@@ -58,3 +58,4 @@
 1391639458: diss prop: constructing BGP slides
 1391641313: diss prop: constructing offset illustration
 1391645879: diss prop: perturbed curve GP
+1391650168: diss prop: compiling
