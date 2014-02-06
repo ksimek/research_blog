@@ -59,3 +59,5 @@
 1391641313: diss prop: constructing offset illustration
 1391645879: diss prop: perturbed curve GP
 1391650168: diss prop: compiling
+1391667990: diss prop: timing bgp
+1391669804: diss prop: polish bgp
