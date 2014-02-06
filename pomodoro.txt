@@ -52,3 +52,9 @@
 1391621929: diss prop: index diagrams
 1391624924: diss prop: index time, branch
 1391630055: diss prop: planning
+1391632537: diss prop: scripting internal covariance, temporal model
+1391635334: diss prop: scripting likelihood
+1391637656: diss prop: constructing BGP slides
+1391639458: diss prop: constructing BGP slides
+1391641313: diss prop: constructing offset illustration
+1391645879: diss prop: perturbed curve GP
