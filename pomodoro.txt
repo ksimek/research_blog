@@ -66,3 +66,8 @@
 1391708945: diss prop: data graphic
 1391711014: diss prop: likelihood
 1391714169: diss prop: likelihood graphics
+1391722144: diss prop: likelihood final
+1391724547: diss prop: likelihood - iterative
+1391726373: diss prop: posterior and ML
+1391729486: diss prop: compile and index estimation
+1391731503: diss prop: initial index estimation
