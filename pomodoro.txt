@@ -71,3 +71,9 @@
 1391726373: diss prop: posterior and ML
 1391729486: diss prop: compile and index estimation
 1391731503: diss prop: initial index estimation
+1391746144: diss prop: compile, practice
+1391747958: diss prop: compile, practice
+1391750071: diss prop: todos
+1391751889: diss prop: practice
+1391753740: diss prop: practice
+1391755571: diss prop: practice bgp slides
