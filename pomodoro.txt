@@ -80,3 +80,6 @@
 1391757834: diss prop: compile all. end-to-end run
 1391759640: diss prop: compile all. end-to-end run
 1391804321: diss prop: proposed work
+1392003740: diss prop: review notes from practice talk
+1392005955: diss prop: reorganization - lay out parts, outline structure
+1392010157: diss prop: reorganization - lay out parts, outline structure
