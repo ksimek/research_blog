@@ -87,3 +87,4 @@
 1392066023: diss prop: get into svn, start new document
 1392068135: diss prop: intro section
 1392070471: diss prop: modeling section
+1392141235: diss prop: modeling section - graphical model
