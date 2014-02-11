@@ -83,3 +83,7 @@
 1392003740: diss prop: review notes from practice talk
 1392005955: diss prop: reorganization - lay out parts, outline structure
 1392010157: diss prop: reorganization - lay out parts, outline structure
+1392047220: diss prop: reorganization - inference, to be done
+1392066023: diss prop: get into svn, start new document
+1392068135: diss prop: intro section
+1392070471: diss prop: modeling section
