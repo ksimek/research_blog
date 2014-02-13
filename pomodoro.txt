@@ -92,3 +92,4 @@
 1392243377: diss prop: compile new presentation
 1392312468: diss prop: compile new presentation
 1392316642: diss prop: highlight in GLE
+1392318973: diss prop:compile inference
