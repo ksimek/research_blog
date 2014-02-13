@@ -88,3 +88,5 @@
 1392068135: diss prop: intro section
 1392070471: diss prop: modeling section
 1392141235: diss prop: modeling section - graphical model
+1392240670: diss prop: comparison table, compile
+1392243377: diss prop: compile new presentation
