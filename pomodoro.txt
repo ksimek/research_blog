@@ -90,3 +90,5 @@
 1392141235: diss prop: modeling section - graphical model
 1392240670: diss prop: comparison table, compile
 1392243377: diss prop: compile new presentation
+1392312468: diss prop: compile new presentation
+1392316642: diss prop: highlight in GLE
