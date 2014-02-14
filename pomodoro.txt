@@ -100,3 +100,5 @@
 1392335422: diss prop: run-through, debug
 1392360253: diss prop: run-through, debug
 1392362685: diss prop: run-through, debug
+1392365648: diss prop: finish inference polish
+1392367751: diss prop: finish inference polish
