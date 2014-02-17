@@ -102,3 +102,6 @@
 1392362685: diss prop: run-through, debug
 1392365648: diss prop: finish inference polish
 1392367751: diss prop: finish inference polish
+1392615524: diss prop: sprial image
+1392618243: diss prop: sprial image
+1392620056: diss prop: sprial image
