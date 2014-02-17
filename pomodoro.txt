@@ -108,3 +108,6 @@
 1392621868: diss prop: sprial image
 1392623669: diss prop: sprial image
 1392625771: diss prop: sprial image
+1392658358: diss prop: BGP covariance
+1392660534: diss prop: BGP covariance recursion graphic
+1392662344: diss prop: BGP covariance recursion equations
