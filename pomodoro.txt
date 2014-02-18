@@ -112,3 +112,8 @@
 1392660534: diss prop: BGP covariance recursion graphic
 1392662344: diss prop: BGP covariance recursion equations
 1392664638: diss prop: BGP covariance recursion equations
+1392667234: diss prop: BGP covariance example: part 2
+1392673994: diss prop: compile
+1392677616: diss prop: practice model
+1392681313: diss prop: practice
+1392683127: polish
