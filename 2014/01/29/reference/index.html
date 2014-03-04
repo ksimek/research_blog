@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>KLS Research Blog &larr; Kyle Simek</title>
+   <title>GPLVM & GPDM notes &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -77,226 +77,83 @@
 
 
   
-
-<div id="page">
+<div id="page" class="article">
 	
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/10/26/work-log">
-      <li class="title">
-            [Work log] Testing likelihood #2 (2-day)
-        </li>
-      </a>
-      <div class="date emphnext">October 26, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/10/26/params-cvpr-2014">
-      <li class="title">
-            [Reference] params, CVPR 2014
-        </li>
-      </a>
-      <div class="date emphnext">October 26, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/10/24/work-log">
-      <li class="title">
-            [Work log] Refactor: one-model-per-view likelihood
-        </li>
-      </a>
-      <div class="date emphnext">October 24, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/10/23/work-log">
-      <li class="title">
-            [Work log] Implementing Two-term likelihood
-        </li>
-      </a>
-      <div class="date emphnext">October 23, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/10/22/work-log">
-      <li class="title">
-            [Work log] GPU debugging
-        </li>
-      </a>
-      <div class="date emphnext">October 22, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/10/21/work-log">
-      <li class="title">
-            [Work log] Linux NVidia/Cuda/X11 erorrs; Cuda server; matlab integration
-        </li>
-      </a>
-      <div class="date emphnext">October 21, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/10/20/work-log">
-      <li class="title">
-            [Work log] KJB EM GMM
-        </li>
-      </a>
-      <div class="date emphnext">October 20, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/10/19/work-log">
-      <li class="title">
-            [Work log] Likelihood Training
-        </li>
-      </a>
-      <div class="date emphnext">October 19, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/10/17/work-log">
-      <li class="title">
-            [Work log] Work Log - Uninformative likelihood?
-        </li>
-      </a>
-      <div class="date emphnext">October 17, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/10/16/work-log">
-      <li class="title">
-            [Work log] Work Log - silhouettes, training likelihood, evaluating likelihood
-        </li>
-      </a>
-      <div class="date emphnext">October 16, 2013</div>
-</ul>
-
-
-<!-- Pagination links -->
-<div class="pagination">
-  
-    <a href="/ksimek/research/page5" class="previous">&lt;&lt; Read Newer Posts</a>
   
   
-    |
+    
+
+
+  <h1 class="title">
+        [Reference] GPLVM & GPDM notes
+    </h1>
+
+  <div class="date emphnext">January 29, 2014</div>
+    
+
+
+  
+    <p>[1] N. Lawrence, “Probabilistic Non-linear Principal Component Analysis with Gaussian Process Latent Variable Models,” The Journal of Machine Learning Research, vol. 6, Dec. 2005.</p>
+
+<p>Beautifully illustrates the relationship between GPLVM and kernel PCA with a unifying objective function.  PPCA marginalizes the input values and maximizes the linear parameters.  GPLVM marginalizes the "linear parameters" (more generally, the kernel that generalizes the linear parameters), and maximizes the inputs.</p>
+
+<p>Paper provides the derivative of the marginal likelihood w.r.t. K, which greatly simplifies our derivations in <a href="/ksimek/research/2013/11/25/reference/">this post</a> and this one(/ksimek/research/2013/11/10/reference/).  We used inside-out derivation, Lawrences uses forward method, which is clearer.</p>
+
+<p>[2] R. Urtasun, D. J. Fleet, A. Hertzmann, and P. Fua, “Priors for people tracking from small training sets,” presented at the Computer Vision, 2005. ICCV 2005. Tenth IEEE International Conference on, 2005, vol. 1, pp. 403–410.</p>
+
+<p>Application: golf swing, walk</p>
+
+<p>Learn inputs, (\mathbf{x}), with independent prior, (exp(-\mathbf{x}<sup>\top</sup> \mathbf{x})/2).</p>
+
+<p>\partial L / \partial K = K<sup>{-1}</sup> Y Y<sup>\yop</sup> K<sup>{-1}</sup> - D K<sup>{-1}</sup></p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
   
   
-    <a href="/ksimek/research/page7" class="next ">Read Older Posts &gt;&gt;</a>
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/02/08/work-log" class="next" title="Proposal Practice Post-mortem">Proposal Practice Post-mortem &rarr;</a>
   
+  
+    <a href="/ksimek/research/2014/01/17/work-log" class="prev" title="Planning - Spring Interdisciplanry Computational Intelligence Seminar">&larr; Planning - Spring Interdisciplanry Computational Intelligence Seminar</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
 </div>
 
 
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
 </div><!-- End Page -->
+
 
 
   

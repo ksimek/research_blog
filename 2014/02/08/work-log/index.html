@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Planning - Spring Interdisciplanry Computational Intelligence Seminar &larr; </title>
+   <title>Proposal Practice Post-mortem &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -85,86 +85,85 @@
 
 
   <h1 class="title">
-        [Work Log] Planning - Spring Interdisciplanry Computational Intelligence Seminar
+        [Work Log] Proposal Practice Post-mortem
     </h1>
 
-  <div class="date emphnext">January 17, 2014</div>
+  <div class="date emphnext">February 08, 2014</div>
     
 
 
   
-    <h2>Spring Topics of Interest</h2>
+    <h2>General Advice</h2>
 
-<p><em>Active learning / Deep Learning</em></p>
+<p>Take a more top-down approach; split into "Modeling" and "Inference" sections.  give details on request.</p>
+
+<p>Tailor more toward committee audience and less to a general audience.</p>
+
+<p>Questions to ask yourself:</p>
 
 <ul>
-<li>Active Learning of an Action Detector from Untrimmed Videos - Grauman</li>
-<li>A Convex Optimization Framework for Active Learning?</li>
-<li>ImageNet Classification with Deep Convolutional Neural Networks (hinton)</li>
+<li>What is the purpose of this talk to this audience?</li>
+<li>What do you want the audience to remember?</li>
 </ul>
 
 
-<h2>Optimization (not mcmc)</h2>
+<p>Structure the talk and paper more tree, with details on the leafs.</p>
 
-<p>e.g. "relaxation" methods</p>
+<p>Get the the Arabidopsis application faster.</p>
 
-<ul>
-<li>Estimating the 3D Layout of Indoor Scenes and its Clutter from Depth Sensors</li>
-<li>Holistic Scene Understanding for 3D Object Detection with RGBD cameras</li>
-</ul>
+<p>Have a "map" of the various research parts; show how they connect and where we are currently.    <strong>Need a stronger big picture.</strong></p>
 
+<p>Focus on the key pieces of research, ditch the rest (e.g. drop DTW focus).</p>
 
-<h2>Scenes and captions</h2>
+<h2>Probably okay?  (not comments)</h2>
 
-<ul>
-<li>From Large Scale Image Categorization to Entry-Level Categories - "best paper, iccv 2013"</li>
-<li>NEIL: Extracting Visual Knowledge from Web Data</li>
-<li>A Sentence is Worth a Thousand Pixels</li>
-</ul>
+<p>Related work (SfM and SfS).  I was worried I left out too many recent developments, but no one commented on it (but it's in the paper).</p>
 
+<h2>Issues</h2>
 
-<h2>Detection</h2>
+<p>Need stronger transitions between topics.</p>
 
-<ul>
-<li>HOGgles: Visualizing Object Detection Features</li>
-<li>Finding the Best from the Second Bests -- Inhibiting Subjective Bias in Evaluation of Visual Tracking Algorithms</li>
-</ul>
+<p>Unclear how much left there is to do.</p>
 
+<p>Unclear what the key contributions are, and what is just "other stuff we did".</p>
 
-<h2>Miscellaneous</h2>
+<p>Too much time talking about alternative approaches.  (I can probably cut quite a bit, time-wise by taking this advice).</p>
 
-<ul>
-<li><p>Latent Data Association: Bayesian Model Selection for Multi-target Tracking - ian reid  (possibly of interest to Ernesto?)</p></li>
-<li><p>Relative Attributes For Large-scale Abandoned Object Detection (Quanfu and Prasad's paper) <a href="http://www.cv-foundation.org/openaccess/content_iccv_2013/papers/Fan_Relative_Attributes_for_2013_ICCV_paper.pdf">pdf</a></p></li>
-</ul>
+<p>Graphics: backprojection lines too light.</p>
 
+<h2>Too Much:</h2>
 
-<p>Inferring “Dark Matter” and “Dark Energy” from Videos</p>
+<p>Phenotyping</p>
 
-<h2>Schedule </h2>
+<p>projective geometry (a few good pictures would be better)</p>
 
-<p>Rough schedule for first 7 weeks</p>
+<p>Linear approximation details (e.g. emphasis on running time).</p>
 
-<ol>
-<li>Practice Talk - Colin</li>
-<li>Practice Talk - Kyle</li>
-<li>Practice talk - Andrew</li>
-<li>Learning TBD  (Deep learning or active learning) - Kobus</li>
-<li>Learning TBD - Qiyam</li>
-<li>Fast object segmentation in unconstrained video - Kate?</li>
-<li>(ECCV, no session?)</li>
-</ol>
+<h2>Confusion</h2>
 
+<p>Temporal component of model is not for camera motion, but for trackingnonrigid deformation.</p>
 
-<p>Remaining order TBD</p>
+<p>3-tuple slide: add a ground plane to images to convey 3D, maybe eliminate hard black outlines what falsely convey 2D image-plane context.</p>
 
-<ul>
-<li>Parallel Markov Chain Monte Carlo for Nonparametric Mixture Models - Colin</li>
-<li>Tree Shape Priors with Connectivity Constraints using Convex Relaxation on General Graphs - kyle?</li>
-<li>MCMC Sampling - Jinyan</li>
-<li>TBD - Ernesto</li>
-</ul>
+<p>How is DTW section connected to the rest?</p>
 
+<p>When I say parts are "given" or "assumed", what does that mean?  i.e. how are they given?  (This should be clearer when I re-orgainze top-down.  Natually handled in inference)</p>
+
+<p>What does it mean that CS model is more "expressive" than squared exponential model?</p>
+
+<p>Likelihood linearization was confusing, esp. the justification.  Since local linearization isn't novel, could just say we linearize, and exploit conditional independence of points to do it in linear running time.</p>
+
+<h2>Misc TODO:</h2>
+
+<p>In paper, mention that index estimation is currently slow and ucnlear if fit for MCMCDA approach.</p>
+
+<h2>Questions</h2>
+
+<p>What constraints are there on data collection?  Are cameras required to be on a turntable?</p>
+
+<p>What is the connection between the covariance function and the species?  Do you think the cubic spline covariance function this is generally applicable?</p>
+
+<p>What is the connection to the science?  What can we learn about species from this?  (I could probably talk about two aspects - (a) can build models using data recovered from 3D reconstruction and (b) learning population models in heirarchical BGP (phenotypes as parameters))</p>
 
       <address class="signature">
         Posted by
@@ -176,10 +175,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2014/01/29/reference" class="next" title="GPLVM & GPDM notes">GPLVM & GPDM notes &rarr;</a>
+    <a href="/ksimek/research/2014/03/04/work-log" class="next" title="FIRE - background reading, thinking and planning">FIRE - background reading, thinking and planning &rarr;</a>
   
   
-    <a href="/ksimek/research/2014/01/17/hpc-meeting" class="prev" title="HPC meeting">&larr; HPC meeting</a>
+    <a href="/ksimek/research/2014/01/29/reference" class="prev" title="GPLVM & GPDM notes">&larr; GPLVM & GPDM notes</a>
   
   </div>
   <div class="clearer"> </div>

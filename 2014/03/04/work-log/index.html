@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Planning - Spring Interdisciplanry Computational Intelligence Seminar &larr; </title>
+   <title>FIRE - background reading, thinking and planning &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -85,84 +85,65 @@
 
 
   <h1 class="title">
-        [Work Log] Planning - Spring Interdisciplanry Computational Intelligence Seminar
+        [Work Log] FIRE - background reading, thinking and planning
     </h1>
 
-  <div class="date emphnext">January 17, 2014</div>
+  <div class="date emphnext">March 04, 2014</div>
     
 
 
   
-    <h2>Spring Topics of Interest</h2>
+    <h2>Structure Learning</h2>
 
-<p><em>Active learning / Deep Learning</em></p>
+<p>The fact that we have a 500-dimensional dynamical system offers opportunities to learn high-dimensional relationships.  I spent some time looking into structure learning.<br/>
+<strong>Variational Bayes</strong></p>
+
+<p><a href="http://mlg.eng.cam.ac.uk/zoubin">Zoubin Ghahramani slides on variational bayes</a></p>
+
+<p>Variational EM could learn LDS with unknown structure or switching state space model.</p>
+
+<p><strong>Dirichlet Process</strong></p>
+
+<p>Video: <a href="http://videolectures.net/mlss2010_griffiths_isfd/">Inferring structure from data</a>, Tom Griffiths, Cognitive Science and Machine Learning Summer School, 2010</p>
+
+<p>Maybe could be used to learn LDS structure. Griffiths shows a noisy-or model with unknown dimension, using a Dirichlet process prior.  At its center is a rank-defficient matrix constructed from product of NxM and MxN matrices, where M &lt; N.  Could use something similar to learn sparse dynamics matrix, but we're dealing with continuous-valued data rather than binary-valued.  If this can be done, there must be existing literature on it, will dig further.</p>
+
+<p><strong>Parameter Learning</strong></p>
+
+<p>This tech report from Ghahramani and Hinton derives the EM for learning LDS parameters and latent states jointly.  For the M step, they derive expressions for the full transition matrix, plus the system and observation noise covariance, and initial state.  For the E step, they use Kalman for forward estimation followed by a backward recursion.  We're more interested in a sparse representation of dynamics.</p>
+
+<p><a href="http://www.learning.eng.cam.ac.uk/zoubin/papers/tr-96-2.pdf">Parameter Estimation for Linear Dynamical Systems</a>[pdf]</p>
+
+<p><strong>MARRS</strong></p>
+
+<p><a href="http://journal.r-project.org/archive/2012-1/RJournal_2012-1_Holmes~et~al.pdf">Multiple Auto-regressive State-Space models for Analyzing Time-series Data</a> by Elizabeth E. Holmes, Eric J. Ward, Kellie Wills</p>
+
+<p>This <a href="http://cran.r-project.org/web/packages/MARSS/index.html">R package</a> handles learning and inference in general state-space models, with unspecified or semi-specified model structure.  It uses EM to infer the model and latent state jointly.  On the plus side, it handles missing data, and the model is very flexible.  On the down side, it doesn't handle i.i.d. data in an obvious way (although could handle a small number by repeating matrix blocks).  Could probably implement some form of the TIES model, sans prior.</p>
+
+<p><strong>Other R Packages</strong></p>
 
 <ul>
-<li>Active Learning of an Action Detector from Untrimmed Videos - Grauman</li>
-<li>A Convex Optimization Framework for Active Learning?</li>
-<li>ImageNet Classification with Deep Convolutional Neural Networks (hinton)</li>
+<li><a href="http://www.jstatsoft.org/v36/i12/">dlm - An R Package for Dynamic Linear Models</a></li>
+<li><a href="http://cran.r-project.org/web/packages/KFAS/index.html">KFAS -  Kalman Filter and Smoother for Exponential Family State Space Models</a></li>
+<li><a href="http://cran.r-project.org/web/packages/FKF/FKF.pdf">FKF: Fast Kalman Filter</a></li>
 </ul>
 
 
-<h2>Optimization (not mcmc)</h2>
+<h2>Modeling</h2>
 
-<p>e.g. "relaxation" methods</p>
+<p>Kobus pointed out that the short time-frame means second-order dynamics likely won't emerge.</p>
 
-<ul>
-<li>Estimating the 3D Layout of Indoor Scenes and its Clutter from Depth Sensors</li>
-<li>Holistic Scene Understanding for 3D Object Detection with RGBD cameras</li>
-</ul>
+<h2>Matlab CSV File parsing</h2>
 
+<p>Matlab only handles CSV files with numeric-valued fields.  We have dates and strings (and possibly others), so we need to write our own CSV parser.</p>
 
-<h2>Scenes and captions</h2>
+<p>Creating a <em>.meta file for each </em>.csv file, which describes column names and datatypes.  Currently only three ways to parse a column: "numeric", "mm/dd/yy/ date", and "ignore".  Possibly more in the future.</p>
 
-<ul>
-<li>From Large Scale Image Categorization to Entry-Level Categories - "best paper, iccv 2013"</li>
-<li>NEIL: Extracting Visual Knowledge from Web Data</li>
-<li>A Sentence is Worth a Thousand Pixels</li>
-</ul>
-
-
-<h2>Detection</h2>
+<p>Wrote code for parsing meta files and csv files (all code is in projects/fire/trunk/src):</p>
 
 <ul>
-<li>HOGgles: Visualizing Object Detection Features</li>
-<li>Finding the Best from the Second Bests -- Inhibiting Subjective Bias in Evaluation of Visual Tracking Algorithms</li>
-</ul>
-
-
-<h2>Miscellaneous</h2>
-
-<ul>
-<li><p>Latent Data Association: Bayesian Model Selection for Multi-target Tracking - ian reid  (possibly of interest to Ernesto?)</p></li>
-<li><p>Relative Attributes For Large-scale Abandoned Object Detection (Quanfu and Prasad's paper) <a href="http://www.cv-foundation.org/openaccess/content_iccv_2013/papers/Fan_Relative_Attributes_for_2013_ICCV_paper.pdf">pdf</a></p></li>
-</ul>
-
-
-<p>Inferring “Dark Matter” and “Dark Energy” from Videos</p>
-
-<h2>Schedule </h2>
-
-<p>Rough schedule for first 7 weeks</p>
-
-<ol>
-<li>Practice Talk - Colin</li>
-<li>Practice Talk - Kyle</li>
-<li>Practice talk - Andrew</li>
-<li>Learning TBD  (Deep learning or active learning) - Kobus</li>
-<li>Learning TBD - Qiyam</li>
-<li>Fast object segmentation in unconstrained video - Kate?</li>
-<li>(ECCV, no session?)</li>
-</ol>
-
-
-<p>Remaining order TBD</p>
-
-<ul>
-<li>Parallel Markov Chain Monte Carlo for Nonparametric Mixture Models - Colin</li>
-<li>Tree Shape Priors with Connectivity Constraints using Convex Relaxation on General Graphs - kyle?</li>
-<li>MCMC Sampling - Jinyan</li>
-<li>TBD - Ernesto</li>
+<li><code>io/fire_read_meta.m</code> - Reads a .meta file into a 1xN structure array.</li>
+<li><code>io/fire_read_csv.m</code> - Reads a .csv file, using the corresponding .meta file to determine names and datatypes.</li>
 </ul>
 
 
@@ -175,11 +156,8 @@
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2014/01/29/reference" class="next" title="GPLVM & GPDM notes">GPLVM & GPDM notes &rarr;</a>
   
-  
-    <a href="/ksimek/research/2014/01/17/hpc-meeting" class="prev" title="HPC meeting">&larr; HPC meeting</a>
+    <a href="/ksimek/research/2014/02/08/work-log" class="prev" title="Proposal Practice Post-mortem">&larr; Proposal Practice Post-mortem</a>
   
   </div>
   <div class="clearer"> </div>

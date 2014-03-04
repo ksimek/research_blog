@@ -7,6 +7,167 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>FIRE - background reading, thinking and planning</title>
+				<description>&lt;h2&gt;Structure Learning&lt;/h2&gt;
+
+&lt;p&gt;The fact that we have a 500-dimensional dynamical system offers opportunities to learn high-dimensional relationships.  I spent some time looking into structure learning.&lt;br/&gt;
+&lt;strong&gt;Variational Bayes&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://mlg.eng.cam.ac.uk/zoubin&quot;&gt;Zoubin Ghahramani slides on variational bayes&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Variational EM could learn LDS with unknown structure or switching state space model.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Dirichlet Process&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Video: &lt;a href=&quot;http://videolectures.net/mlss2010_griffiths_isfd/&quot;&gt;Inferring structure from data&lt;/a&gt;, Tom Griffiths, Cognitive Science and Machine Learning Summer School, 2010&lt;/p&gt;
+
+&lt;p&gt;Maybe could be used to learn LDS structure. Griffiths shows a noisy-or model with unknown dimension, using a Dirichlet process prior.  At its center is a rank-defficient matrix constructed from product of NxM and MxN matrices, where M &amp;lt; N.  Could use something similar to learn sparse dynamics matrix, but we're dealing with continuous-valued data rather than binary-valued.  If this can be done, there must be existing literature on it, will dig further.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Parameter Learning&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;This tech report from Ghahramani and Hinton derives the EM for learning LDS parameters and latent states jointly.  For the M step, they derive expressions for the full transition matrix, plus the system and observation noise covariance, and initial state.  For the E step, they use Kalman for forward estimation followed by a backward recursion.  We're more interested in a sparse representation of dynamics.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.learning.eng.cam.ac.uk/zoubin/papers/tr-96-2.pdf&quot;&gt;Parameter Estimation for Linear Dynamical Systems&lt;/a&gt;[pdf]&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;MARRS&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://journal.r-project.org/archive/2012-1/RJournal_2012-1_Holmes~et~al.pdf&quot;&gt;Multiple Auto-regressive State-Space models for Analyzing Time-series Data&lt;/a&gt; by Elizabeth E. Holmes, Eric J. Ward, Kellie Wills&lt;/p&gt;
+
+&lt;p&gt;This &lt;a href=&quot;http://cran.r-project.org/web/packages/MARSS/index.html&quot;&gt;R package&lt;/a&gt; handles learning and inference in general state-space models, with unspecified or semi-specified model structure.  It uses EM to infer the model and latent state jointly.  On the plus side, it handles missing data, and the model is very flexible.  On the down side, it doesn't handle i.i.d. data in an obvious way (although could handle a small number by repeating matrix blocks).  Could probably implement some form of the TIES model, sans prior.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Other R Packages&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.jstatsoft.org/v36/i12/&quot;&gt;dlm - An R Package for Dynamic Linear Models&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://cran.r-project.org/web/packages/KFAS/index.html&quot;&gt;KFAS -  Kalman Filter and Smoother for Exponential Family State Space Models&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://cran.r-project.org/web/packages/FKF/FKF.pdf&quot;&gt;FKF: Fast Kalman Filter&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Modeling&lt;/h2&gt;
+
+&lt;p&gt;Kobus pointed out that the short time-frame means second-order dynamics likely won't emerge.&lt;/p&gt;
+
+&lt;h2&gt;Matlab CSV File parsing&lt;/h2&gt;
+
+&lt;p&gt;Matlab only handles CSV files with numeric-valued fields.  We have dates and strings (and possibly others), so we need to write our own CSV parser.&lt;/p&gt;
+
+&lt;p&gt;Creating a &lt;em&gt;.meta file for each &lt;/em&gt;.csv file, which describes column names and datatypes.  Currently only three ways to parse a column: &quot;numeric&quot;, &quot;mm/dd/yy/ date&quot;, and &quot;ignore&quot;.  Possibly more in the future.&lt;/p&gt;
+
+&lt;p&gt;Wrote code for parsing meta files and csv files (all code is in projects/fire/trunk/src):&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;io/fire_read_meta.m&lt;/code&gt; - Reads a .meta file into a 1xN structure array.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;io/fire_read_csv.m&lt;/code&gt; - Reads a .csv file, using the corresponding .meta file to determine names and datatypes.&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Tue, 04 Mar 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/03/04/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/03/04/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Proposal Practice Post-mortem</title>
+				<description>&lt;h2&gt;General Advice&lt;/h2&gt;
+
+&lt;p&gt;Take a more top-down approach; split into &quot;Modeling&quot; and &quot;Inference&quot; sections.  give details on request.&lt;/p&gt;
+
+&lt;p&gt;Tailor more toward committee audience and less to a general audience.&lt;/p&gt;
+
+&lt;p&gt;Questions to ask yourself:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;What is the purpose of this talk to this audience?&lt;/li&gt;
+&lt;li&gt;What do you want the audience to remember?&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Structure the talk and paper more tree, with details on the leafs.&lt;/p&gt;
+
+&lt;p&gt;Get the the Arabidopsis application faster.&lt;/p&gt;
+
+&lt;p&gt;Have a &quot;map&quot; of the various research parts; show how they connect and where we are currently.    &lt;strong&gt;Need a stronger big picture.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Focus on the key pieces of research, ditch the rest (e.g. drop DTW focus).&lt;/p&gt;
+
+&lt;h2&gt;Probably okay?  (not comments)&lt;/h2&gt;
+
+&lt;p&gt;Related work (SfM and SfS).  I was worried I left out too many recent developments, but no one commented on it (but it's in the paper).&lt;/p&gt;
+
+&lt;h2&gt;Issues&lt;/h2&gt;
+
+&lt;p&gt;Need stronger transitions between topics.&lt;/p&gt;
+
+&lt;p&gt;Unclear how much left there is to do.&lt;/p&gt;
+
+&lt;p&gt;Unclear what the key contributions are, and what is just &quot;other stuff we did&quot;.&lt;/p&gt;
+
+&lt;p&gt;Too much time talking about alternative approaches.  (I can probably cut quite a bit, time-wise by taking this advice).&lt;/p&gt;
+
+&lt;p&gt;Graphics: backprojection lines too light.&lt;/p&gt;
+
+&lt;h2&gt;Too Much:&lt;/h2&gt;
+
+&lt;p&gt;Phenotyping&lt;/p&gt;
+
+&lt;p&gt;projective geometry (a few good pictures would be better)&lt;/p&gt;
+
+&lt;p&gt;Linear approximation details (e.g. emphasis on running time).&lt;/p&gt;
+
+&lt;h2&gt;Confusion&lt;/h2&gt;
+
+&lt;p&gt;Temporal component of model is not for camera motion, but for trackingnonrigid deformation.&lt;/p&gt;
+
+&lt;p&gt;3-tuple slide: add a ground plane to images to convey 3D, maybe eliminate hard black outlines what falsely convey 2D image-plane context.&lt;/p&gt;
+
+&lt;p&gt;How is DTW section connected to the rest?&lt;/p&gt;
+
+&lt;p&gt;When I say parts are &quot;given&quot; or &quot;assumed&quot;, what does that mean?  i.e. how are they given?  (This should be clearer when I re-orgainze top-down.  Natually handled in inference)&lt;/p&gt;
+
+&lt;p&gt;What does it mean that CS model is more &quot;expressive&quot; than squared exponential model?&lt;/p&gt;
+
+&lt;p&gt;Likelihood linearization was confusing, esp. the justification.  Since local linearization isn't novel, could just say we linearize, and exploit conditional independence of points to do it in linear running time.&lt;/p&gt;
+
+&lt;h2&gt;Misc TODO:&lt;/h2&gt;
+
+&lt;p&gt;In paper, mention that index estimation is currently slow and ucnlear if fit for MCMCDA approach.&lt;/p&gt;
+
+&lt;h2&gt;Questions&lt;/h2&gt;
+
+&lt;p&gt;What constraints are there on data collection?  Are cameras required to be on a turntable?&lt;/p&gt;
+
+&lt;p&gt;What is the connection between the covariance function and the species?  Do you think the cubic spline covariance function this is generally applicable?&lt;/p&gt;
+
+&lt;p&gt;What is the connection to the science?  What can we learn about species from this?  (I could probably talk about two aspects - (a) can build models using data recovered from 3D reconstruction and (b) learning population models in heirarchical BGP (phenotypes as parameters))&lt;/p&gt;
+</description>
+				<pubDate>Sat, 08 Feb 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/02/08/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/02/08/work-log</guid>
+			</item>
+		
+			<item>
+				<title>GPLVM & GPDM notes</title>
+				<description>&lt;p&gt;[1] N. Lawrence, “Probabilistic Non-linear Principal Component Analysis with Gaussian Process Latent Variable Models,” The Journal of Machine Learning Research, vol. 6, Dec. 2005.&lt;/p&gt;
+
+&lt;p&gt;Beautifully illustrates the relationship between GPLVM and kernel PCA with a unifying objective function.  PPCA marginalizes the input values and maximizes the linear parameters.  GPLVM marginalizes the &quot;linear parameters&quot; (more generally, the kernel that generalizes the linear parameters), and maximizes the inputs.&lt;/p&gt;
+
+&lt;p&gt;Paper provides the derivative of the marginal likelihood w.r.t. K, which greatly simplifies our derivations in &lt;a href=&quot;/ksimek/research/2013/11/25/reference/&quot;&gt;this post&lt;/a&gt; and this one(/ksimek/research/2013/11/10/reference/).  We used inside-out derivation, Lawrences uses forward method, which is clearer.&lt;/p&gt;
+
+&lt;p&gt;[2] R. Urtasun, D. J. Fleet, A. Hertzmann, and P. Fua, “Priors for people tracking from small training sets,” presented at the Computer Vision, 2005. ICCV 2005. Tenth IEEE International Conference on, 2005, vol. 1, pp. 403–410.&lt;/p&gt;
+
+&lt;p&gt;Application: golf swing, walk&lt;/p&gt;
+
+&lt;p&gt;Learn inputs, (\mathbf{x}), with independent prior, (exp(-\mathbf{x}&lt;sup&gt;\top&lt;/sup&gt; \mathbf{x})/2).&lt;/p&gt;
+
+&lt;p&gt;\partial L / \partial K = K&lt;sup&gt;{-1}&lt;/sup&gt; Y Y&lt;sup&gt;\yop&lt;/sup&gt; K&lt;sup&gt;{-1}&lt;/sup&gt; - D K&lt;sup&gt;{-1}&lt;/sup&gt;&lt;/p&gt;
+</description>
+				<pubDate>Wed, 29 Jan 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/01/29/reference</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/01/29/reference</guid>
+			</item>
+		
+			<item>
 				<title>Planning - Spring Interdisciplanry Computational Intelligence Seminar</title>
 				<description>&lt;h2&gt;Spring Topics of Interest&lt;/h2&gt;
 
@@ -718,114 +879,6 @@ understand connections between genetics and macro structure
 				<pubDate>Mon, 06 Jan 2014 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2014/01/06/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/01/06/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Reading: Semantic SLAM w/ GPLVM shape priors; FIRE reading</title>
-				<description>&lt;p&gt;Read two papers.  The first was David Sbarra's paper for the FIRE project, modeling sleep disturbances vs. depression symptoms.  The second is a dense SLAM paper from CVPR 2013.&lt;/p&gt;
-
-&lt;p&gt;Decomposing&lt;/p&gt;
-
-&lt;h2&gt;Decomposing Depression: On the Prospective and Reciprocal Dynamics of Mood and Sleep Disturbances&lt;/h2&gt;
-
-&lt;p&gt;by David A. Sbarra and John J. B. Allen&lt;/p&gt;
-
-&lt;p&gt;David's paper, which will likely play a role in the FIRE project this Spring semester.  Uses time-series data of ~100 people at 5 time points describing two variables: mood and sleep disruptions.  A dynamical model (first order diff-eq) is developed to model the data, which captures drift, self-regulation, and inter-variable coupling.&lt;/p&gt;
-
-&lt;p&gt;Since the model is trained and evaluated on the same data, it isn't clear how predictive this model would be on held-out data.  Chi-squared test is used to determine which parameters are meaningful; I'm not familiar enough with this method to comment on it, but the Bayesian literatures constant struggle with model selection suggests that the classical (i.e. frequentist) methods like this may need scruitiny.&lt;/p&gt;
-
-&lt;p&gt;Synthetic data is drawn from the resulting fit for 5 subjects, using observations for initial values. I couldn't compare it to the true data or maybe I misunderstood the plot -- perhaps David can elaborate on this.&lt;/p&gt;
-
-&lt;p&gt;A vector-field plot nicely illustrates the flow of the dynamical system.&lt;/p&gt;
-
-&lt;p&gt;Can 6 parameters really model this data well?  Need to get familiar with the data.  Perhaps a good candidate nonparametric modeling?&lt;/p&gt;
-
-&lt;p&gt;Ideas:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Make Bayesian by using LDS similar to Jinyan's work.&lt;/li&gt;
-&lt;li&gt;Model the direction at each grid-point independently, using GP to enforce smoothness and avoid overfitting.&lt;/li&gt;
-&lt;li&gt;Consider higher-order diff-eq.&lt;/li&gt;
-&lt;li&gt;Use a GP-LVM model to handle non-linear dynamics.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;h2&gt;Dense Reconstruction Using 3D Ojbect Shape Priors&lt;/h2&gt;
-
-&lt;p&gt;Uses GP-LVM-based shape priors (cars) to improve existing dense SLAM implementation.  Manages to heavilly leverage parallelism in CPU and GPU to achieve (arguably) real-time performance.  Use Feltzenswalb car detector to find consistent detections in two views and perform rough pose estimation.  Uses color-based (3D histogram) and depth-based energy functions to refine pose and shape; authors derive the gradient of these energy functions w.r.t. rigid transformations and GP-LVM latent variables.  Tractibility of GP-LVM addressed by taking lowest N frequencies from a DCT; reduced 128x128x128 to 25x25x25.&lt;/p&gt;
-
-&lt;p&gt;How is the GP-LVM trained?  Where is the training data coming from?&lt;/p&gt;
-
-&lt;p&gt;Related papers:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;R. A. Newcombe, A. J. Davison, S. Izadi, P. Kohli, O. Hilliges, J. Shotton, D. Molyneaux, S. Hodges, D. Kim, and A. Fitzgibbon, “KinectFusion: Real-time dense surface mapping and tracking,” Mixed and Augmented Reality (ISMAR), 2011 10th IEEE International Symposium on, pp. 127–136, 2011.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;The implicit level-set representation and the merging of depth images are the same as those from KinectFusion.  Also, KinectFusion's stereo results are used to evaluate their monocular results.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;S. Y. Bao and S. Savarese, “Semantic structure from motion,” presented at the Computer Vision and Pattern Recognition (CVPR), 2011 IEEE Conference on, 2011, pp. 2025–2032.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Spiritual predecessor of this paper -- use detectors to improve structure from motion.&lt;/p&gt;
-</description>
-				<pubDate>Fri, 03 Jan 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/01/03/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/01/03/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>&lt;h2&gt;Debugging&lt;/h2&gt;
-
-&lt;p&gt;New energy function causes much worse index ordering.  Ordering before optimization is terrible; new energy function seems to introduce new local minima that we can't overcome.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Running old version to recall problems.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Significant offset from LL reconstruction.  &lt;strong&gt;Increasing perturb_scale improves significantly&lt;/strong&gt; (from 2.5 to 81).  When influsence of wide-baseline views is small, pulling toward camera is significant; increasing perturb_scale increasing that influence.&lt;/p&gt;
-
-&lt;p&gt;Side effect of increasing perturb_scale is massive increase of tip extension in the direction of the camera.  This is because the posterior is more peaked, decreasing the size of the global optimum.&lt;/p&gt;
-
-&lt;p&gt;Adding index smoothness metaprior seems to help, but I'm not confident in the implementation, since there's no unit test for it.  Also getting a small amount of index extension, possibly because end-caps arent a full unit away from previous point.  can this be fixed?  Can't really use chord-length in 2D, because this could contain significant noise.  Although using ordinal isn't much different.  Could store fraction of last point.  Also need to acknowledge that different sub-sampling periods cause GP parameters to change meaning.  Should re-number ordinals based on resampling.  Store in data?&lt;/p&gt;
-
-&lt;p&gt;TODO:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;unit test index metaprior&lt;/li&gt;
-&lt;li&gt;experiment with constant length energy function?&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;dataset 6: overextension in teal top curve, red mid curve
-dataset 7: overextension in dk green top curve
-dataset 8: extreme overextension in teal top curve; bad ll localization
-dataset 9: overextension in red  top curve&lt;/p&gt;
-
-&lt;p&gt;and others.  Always when ll point is in direction of previous curve.&lt;/p&gt;
-</description>
-				<pubDate>Fri, 27 Dec 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/12/27/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/12/27/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Testing CL energy</title>
-				<description>&lt;p&gt;Testing constant-length energy function.  First test: \(\eta\) and it's Jacobian, implemented in &lt;code&gt;test/test_eta_deriv.m&lt;/code&gt;.  Test passes.  Interesting observation: jacobian is nearly bidiagonal.  Hopefully the hessian will have similar form, so ignoring the off-diagonal terms won't be too detrimental.&lt;/p&gt;
-
-&lt;p&gt;Need to implement end-to-end test for \(E\) and its gradient/hessian.  Compare against analytical Hessian estimate and the crude \(J'J\) Hessian approximator.&lt;/p&gt;
-
-&lt;p&gt;need to update likelihood means?&lt;/p&gt;
-</description>
-				<pubDate>Tue, 24 Dec 2013 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2013/12/24/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2013/12/24/work-log</guid>
 			</item>
 		
 	</channel>

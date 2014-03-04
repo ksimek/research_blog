@@ -37,6 +37,9 @@ http://vision.sista.arizona.edu/ksimek/research/page12/index.html
 http://vision.sista.arizona.edu/ksimek/research/page13/index.html
 http://vision.sista.arizona.edu/ksimek/research/page14/index.html
 
+http://vision.sista.arizona.edu/ksimek/research/2014/03/04/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/02/08/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/01/29/reference
 http://vision.sista.arizona.edu/ksimek/research/2014/01/17/work-log
 http://vision.sista.arizona.edu/ksimek/research/2014/01/17/hpc-meeting
 http://vision.sista.arizona.edu/ksimek/research/2014/01/15/work-log

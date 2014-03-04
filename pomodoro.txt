@@ -1,0 +1,126 @@
+1391020287: motion diagram - sheets pt 2
+1391028234: gp background reading
+1391030158: GPDM reading
+1391032417: GPDM reading
+1391035221: GPDM reading
+1391040918: GPDM reading
+1391104707: proposal presentation
+1391106560: proposal presentation - background
+1391109785: dissertation proposal - beamer image issues
+1391111922: dissertation proposal - intro outline
+1391115380: dissertation proposal - intro slides
+1391117344: dissertation proposal - phenotyping, problem statement
+1391119921: dissertation proposal - problem statement
+1391121760: dissertation proposal - problem statement
+1391123844: dissertation proposal - data animation
+1391125778: dissertation proposal - data animation
+1391128283: telecom - ICML deadline
+1391151414: dissertation oral - triangulation slides, structure from motion.
+1391188711: dissertation oral - texture image
+1391191716: dissertation oral - reconstruction animation
+1391194494: dissertation oral - multi-view model progression
+1391207385: disseration scheduling, UA paperwork
+1391213233: dissertation presentation - background, prior
+1391216892: dissertation presentation - prior: temporal and spatial
+1391277853: building tcmalloc
+1391279931: building tcmalloc
+1391282355: building tcmalloc
+1391284331: ICML reading write-up
+1391287435: ICML reading write-up
+1391289256: TIES GP writeup
+1391367705: ICML reading write-up
+1391369572: titsias paper and haario paper
+1391376755: haario paper
+1391380681: help laura with blackboard
+1391382979: help laura with blackboard
+1391451263: haario and thompson papers
+1391453931: haario and thompson papers
+1391457339: haario and thompson papers
+1391469017: linear ODE estimation background
+1391534103: get detached reconstruction
+1391536135: start prior math
+1391538707: diss prop: unresolved issues
+1391540775: diss prop: start GP intro
+1391548849: diss prop: start GP intro
+1391550649: diss prop: start GP intro
+1391553074: diss prop: finish GP intro
+1391556891: diss prop: BGP covariance
+1391558994: diss prop: BGP covariance
+1391576537: assess literature datasets, etc
+1391578387: assess literature inference, etc
+1391580201: assess literature inference, etc
+1391621929: diss prop: index diagrams
+1391624924: diss prop: index time, branch
+1391630055: diss prop: planning
+1391632537: diss prop: scripting internal covariance, temporal model
+1391635334: diss prop: scripting likelihood
+1391637656: diss prop: constructing BGP slides
+1391639458: diss prop: constructing BGP slides
+1391641313: diss prop: constructing offset illustration
+1391645879: diss prop: perturbed curve GP
+1391650168: diss prop: compiling
+1391667990: diss prop: timing bgp
+1391669804: diss prop: polish bgp
+1391671920: diss prop: bgp timing
+1391673875: diss prop: bgp timing
+1391708945: diss prop: data graphic
+1391711014: diss prop: likelihood
+1391714169: diss prop: likelihood graphics
+1391722144: diss prop: likelihood final
+1391724547: diss prop: likelihood - iterative
+1391726373: diss prop: posterior and ML
+1391729486: diss prop: compile and index estimation
+1391731503: diss prop: initial index estimation
+1391746144: diss prop: compile, practice
+1391747958: diss prop: compile, practice
+1391750071: diss prop: todos
+1391751889: diss prop: practice
+1391753740: diss prop: practice
+1391755571: diss prop: practice bgp slides
+1391757834: diss prop: compile all. end-to-end run
+1391759640: diss prop: compile all. end-to-end run
+1391804321: diss prop: proposed work
+1392003740: diss prop: review notes from practice talk
+1392005955: diss prop: reorganization - lay out parts, outline structure
+1392010157: diss prop: reorganization - lay out parts, outline structure
+1392047220: diss prop: reorganization - inference, to be done
+1392066023: diss prop: get into svn, start new document
+1392068135: diss prop: intro section
+1392070471: diss prop: modeling section
+1392141235: diss prop: modeling section - graphical model
+1392240670: diss prop: comparison table, compile
+1392243377: diss prop: compile new presentation
+1392312468: diss prop: compile new presentation
+1392316642: diss prop: highlight in GLE
+1392318973: diss prop:compile inference
+1392325407: diss prop: finish images/diagrams
+1392327328: diss prop: tracking match diagram, MCMC moves
+1392329239: diss prop: compile inference and MCMC diagram
+1392332227: diss prop: compile full, add overview images
+1392335422: diss prop: run-through, debug
+1392360253: diss prop: run-through, debug
+1392362685: diss prop: run-through, debug
+1392365648: diss prop: finish inference polish
+1392367751: diss prop: finish inference polish
+1392615524: diss prop: sprial image
+1392618243: diss prop: sprial image
+1392620056: diss prop: sprial image
+1392621868: diss prop: sprial image
+1392623669: diss prop: sprial image
+1392625771: diss prop: sprial image
+1392658358: diss prop: BGP covariance
+1392660534: diss prop: BGP covariance recursion graphic
+1392662344: diss prop: BGP covariance recursion equations
+1392664638: diss prop: BGP covariance recursion equations
+1392667234: diss prop: BGP covariance example: part 2
+1392673994: diss prop: compile
+1392677616: diss prop: practice model
+1392681313: diss prop: practice
+1392683127: polish
+1392697739: diss prop - MCMCDA
+1392699541: diss prop - MCMCDA
+1392754431: iPlant - references
+1392757637: diss-prop: finish next cut on slides
+1392854168: diss prop: proofing, add images and related work
+1392857104: diss prop: fix proofing mistakes
+1393969979: FIRE: read data into matlab
