@@ -125,3 +125,7 @@
 1392857104: diss prop: fix proofing mistakes
 1393969979: FIRE: read data into matlab
 1394478687: XXX
+1394659980: gmm w missing data - debug
+1394661800: gmm w missing data - debug
+1394668355: GMM EM cleanup
+1394670249: GMM EM cleanup
