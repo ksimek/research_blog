@@ -130,3 +130,8 @@
 1394668355: GMM EM cleanup
 1394670249: GMM EM cleanup
 1394674025: GMM EM - refactoring tests
+1394723273: reading - FIRE
+1394725478: reading - misc
+1394727507: reading - misc
+1394729313: gmm test refactor
+1394731224: gmm test refactor, tulips planning
