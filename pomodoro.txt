@@ -129,3 +129,4 @@
 1394661800: gmm w missing data - debug
 1394668355: GMM EM cleanup
 1394670249: GMM EM cleanup
+1394674025: GMM EM - refactoring tests
