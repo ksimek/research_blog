@@ -135,3 +135,5 @@
 1394727507: reading - misc
 1394729313: gmm test refactor
 1394731224: gmm test refactor, tulips planning
+1394740861: tulips - clean up gt
+1394743708: tulips - recalling history of index estimation
