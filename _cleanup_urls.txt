@@ -1,0 +1,2 @@
+# This command will replace absolute urls with relative urls.  Need to figure out how to get this into the build chain
+sed 's/\(\[.*\]\)\((http:\/\/[a-z.]*\/ksimek\/research\(.*\))\)/\1({{site.baseurl}}\3)/'
