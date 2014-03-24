@@ -1,19 +1,14 @@
 ---
-layout: post
-title: "Track stages"
+layout: page
+title: "TULIPS data pipeline"
 description: ""
-category: 'Reference'
-tags: []
-meta: 
-#    "SVN Revision": 15229
 ---
 {% include JB/setup %}
 
-**Update:** The information that follows may be out of date.  The most recent version of this information is available [in the TULIPS documentation]({{site.baseurl}}/project/tulips/pipeline).  
+The Track processing pipeline is split into 7 stages.  This allows us to avoid recomputing everything when a single field changes; if a "stage 3 field" changes, only stages 4 through 7 need to be re-run.  
 
-A track's "stage" is a description of where it is in the processing pipeline. 
+This information was originally discussed [in this blog post]({{site.baseurl}}/2013/09/26/reference).
 
-Each stage has one or more track fields associated with it.  No stage may modify fields from the previous stages.
 
 Stage 0
 ----------
@@ -72,6 +67,7 @@ Stage three consists of inexpensive post-processing of the likelihood fields.  C
 
 This is also where the likelihood covariance blocks are computed; since this is somewhat time-costly, it may be moved into stage 2 in the future.
 
+
 Associated fields
 
     ll_views_flat
@@ -109,28 +105,40 @@ Associated functions
     att_set_branch_distance (called from attach)
     att_set_start_index (called from attach/detach)
 
-Stage 5
+Stage 5: Index refinement
 ---------
 
-Marginal likelihood has been computed for this track, conditioned on its parent.
+In stage 5, the Tracks are ready for index refinement, in which Tracks.ll_distances_flat is optimized wrt the marginal likelihood.  This allows us to recover from mis-matching at stage 2, and most notably, mitigates the "stretching and twisting" phenomenon, discussed briefly [here](http://vision.sista.arizona.edu/ksimek/research/2013/11/11/work-log/).
 
-Note: in the current implementation, ml field is not set, and curve_ml simply returns the ml value.  This will change in the near future to comply with the multi-stage model described in this post.
+This is an expensive iterative minimization operation, requiring O(n^3) each iteration. 
+
+
+Associated_fields 
+    
+    ll_distances_flat
+
+Associated functions 
+
+    optimize_ml_wrt_indices
+
+
+Stage 6: Marginal likelihood
+---------
+
+Marginal likelihood is ready to be computed for this track, conditioned on its parent.
+
+This stage is still in flux; it is unclear which likelihood terms will be included in the final project.  In the current implementation, ml field is not set, and curve_ml simply returns the ml value.  
 
 Associated fields
 
     ml
 
-Associated function
+Associated functions
     
     curve_ml
+    curve_tree_ml_5 (speculative)
 
-Running all stages
-------------------
+Stage 7: complete
+---------
 
-In many cases, it's not necessary to construct tracks from scratch.   Reversing a curve only requires re-running stages 3 through 5.  Attaching or detaching a curve only requires re-running Stages 4 and 5.
-
-However, some cases require a full end-to-end running of stages 1 through 5.  The function that does this is:
-    
-    build_track
-
-This function is also a nice reference of how to run each stage.
+All processing is finished.

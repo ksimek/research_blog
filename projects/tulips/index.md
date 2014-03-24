@@ -27,6 +27,7 @@ Project Links
 Miscellaneous TULIPS-related pages
 
 * [CVPR2014 page]({{site.baseurl}}/events/CVPR2014)
+* [Data pipeline]({{site.baseurl}}/projects/tulips/pipeline)
 
 
 Project Overview
