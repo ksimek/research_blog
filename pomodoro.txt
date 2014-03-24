@@ -142,3 +142,5 @@
 1395597926: fire data validation
 1395599783: fire data validation
 1395601600: fire data validation
+1395616758: TULIPS - debugging training
+1395618861: TULIPS - debugging training
