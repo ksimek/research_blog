@@ -1,0 +1,246 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Debugging WACV errors &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Debugging WACV errors
+    </h1>
+
+  <div class="date emphnext">March 17, 2014</div>
+    
+
+
+  
+    <p>Troubleshooting reconstruction anomalies.</p>
+
+<ul>
+<li>significant translational offset</li>
+<li>Why is reconstructed base point moving?  Initial points should be 100% corellated.</li>
+</ul>
+
+
+<p>Observations during debugging:</p>
+
+<ul>
+<li>Observation indices start at negative values</li>
+<li>Initial point in view 2 is 5mm past initial point in view 9</li>
+<li>translational offset was due to auto-centering feature of <code>view_all_wacv.m</code>.  Changed default to "no auto centering"</li>
+<li>Solved: Base point movement was due to auto-centering.</li>
+</ul>
+
+
+<p>Okay, now on to bigger issues:  why is tip moving so much?</p>
+
+<p>Theory: converging center-lines without converging uncertainty causes drift toward camera and is untenable.</p>
+
+<p>Could re-shaping the uncertainty cylinders help?</p>
+
+<p>Also strange:  perturb variance is huge - probably to allow curves to shift toward the camera, exploiting the "singular region" phenomenon <a href="http://vision.sista.arizona.edu/ksimek/research/2013/08/06/work-log/">studied earlier</a>.</p>
+
+<h2>Singular regions</h2>
+
+<p>These are becoming the main struggling point.    It is likely that the <a href="http://vision.sista.arizona.edu/ksimek/research/2013/12/05/work-log/">endpoint drift</a> is caused by this too. We could use fully linear cameras, which would avoid converging of uncertainty cones, but we lose some of the novelty of point-wise linearization.</p>
+
+<p>Had the idea of iteratively reconstructing and re-estimating the uncertainty cylinders, but this is not guaranteed to be monotonic -- in fact it seems likely to reduce the solution's true likelihood at each iteration.  First it would drift toward the camera; then we shrink the covariance cylinders, which reduces the likelihood; repeat.</p>
+
+<p>Perhaps the reason point-wise linearization is "novel" is because everyone knows it doesn't work, but no one has published on that fact.  Or I haven't reviewed that early literature enough.</p>
+
+<p>Maybe PWL (point-wise linearization) is bad for reconstruction but still okay for marginalization?  Or maybe it's just causing our learning to fail, but once we learn reasonable parameters, the pathological behavior disappears?  Assuming reasonable values on perturbation variance, we shouldn't see significant drift toward cameras (how much?).</p>
+
+<h2>Full-camera Linearization</h2>
+
+<p>Should try full-camera linearization.  Can we implement this quickly without changing much infrastructure?  Probably.  Find the mean direction and replace all data covariances with the one in that direction.  New matrix -- First eigenvector: mean direction;  second and third: doesn't matter (Gram-Schmidt from old eigenvectors?).  If original second and third eigenvalues aren't equal, use their mean for new ones.</p>
+
+<p>This is kind of a hybrid of point-wise linearization and full-camera linearization, because the global direction is camera-wise, but each point's variance is different.  Equivalently, this is full-camera linearization with nonuniform point weights (far points have lower weight, higher variance).</p>
+
+<p>As long as we're abandoning some novelty, could go with traditional full-camera linearization, which might yield a more efficient index optimization scheme?  Should compare the different approaches.</p>
+
+<p>Diagonal data covaraince means we can use the technique from <a href="http://papers.nips.cc/paper/4281-efficient-inference-in-matrix-variate-gaussian-models-with-iid-observation-noise">this 2011 NIPS paper</a>.</p>
+
+<p>TODO</p>
+
+<ul>
+<li>Implement</li>
+<li>re-train, re-run reconstruction, check for</li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/03/18/work-log" class="next" title="Experiment - Full-camera linearization">Experiment - Full-camera linearization &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2014/03/13/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

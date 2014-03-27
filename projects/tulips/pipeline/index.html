@@ -1,0 +1,276 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>TULIPS data pipeline &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page">
+	
+
+<h1 class="emphnext">TULIPS data pipeline</h1>
+
+<p>The Track processing pipeline is split into 7 stages.  This allows us to avoid recomputing everything when a single field changes; if a "stage 3 field" changes, only stages 4 through 7 need to be re-run.</p>
+
+<p>This information was originally discussed <a href="/ksimek/research/2013/09/26/reference">in this blog post</a>.</p>
+
+<h2>Stage 0</h2>
+
+<p>Track is ready to be processed.   At this stage, the only valid fields are those set by the user, namely:</p>
+
+<pre><code>Track.assoc
+Track.reversed
+</code></pre>
+
+<p>To construct a stage-zero track:</p>
+
+<pre><code>init_track
+</code></pre>
+
+<h2>Stage 1</h2>
+
+<p>A stage 1 track has passed the correspondence stage.</p>
+
+<p>Three functions can prepare a track for stage 1:</p>
+
+<pre><code>init_trivial_track
+merge_correspondence
+build_full_correspondence
+</code></pre>
+
+<p>Associated fields are:</p>
+
+<pre><code>corr
+means
+precisions
+cov_error
+</code></pre>
+
+<h2>Stage 2:</h2>
+
+<p>In stage 2, raw curve likelihood fields have been constructed, and are ready for post-processing.</p>
+
+<p>The transition from stage 1 to stage 2 is relatively expensive, as every point requires backprojection, a pass of dynamic time warping, and a few iterations newton's method to find the index set.</p>
+
+<p>Associated fields</p>
+
+<pre><code>ll_means
+ll_precisions
+ll_distances
+sm_lambda
+curve_sm
+curve_sm_t
+</code></pre>
+
+<p>Associated functions</p>
+
+<pre><code>corr_to_likelihood
+</code></pre>
+
+<h2>Stage 3</h2>
+
+<p>Stage three consists of inexpensive post-processing of the likelihood fields.  Curve reversal is handled here; flattening and sorting is lumped into this stage too.  Reversing and re-evaluating curves is a common use-case, and this can be done efficiently by keeping stage 3 separate from stage 2.</p>
+
+<p>This is also where the likelihood covariance blocks are computed; since this is somewhat time-costly, it may be moved into stage 2 in the future.</p>
+
+<p>Associated fields</p>
+
+<pre><code>ll_views_flat
+ll_means_flat
+ll_precisions_flat
+ll_distances_flat
+ll_S
+</code></pre>
+
+<p>Associated functions</p>
+
+<pre><code>flatten_sort_and_reverse
+</code></pre>
+
+<h2>Stage 4: Attachment</h2>
+
+<p>Stage 4 is where topology is handled.  The predictive distribution of the branch point is computed and stored for efficient computation of the marginal likelihood later.</p>
+
+<p>Stage 4 needs to be applied recursively to all children.</p>
+
+<p>Associated fields</p>
+
+<pre><code>parent_ci
+start_index
+prior_K
+branch_distance
+mu_b
+Sigma_b
+branch_mu
+branch_K
+</code></pre>
+
+<p>Associated functions</p>
+
+<pre><code>attach
+detach
+att_set_branch_distance (called from attach)
+att_set_start_index (called from attach/detach)
+</code></pre>
+
+<h2>Stage 5: Index refinement</h2>
+
+<p>In stage 5, the Tracks are ready for index refinement, in which Tracks.ll_distances_flat is optimized wrt the marginal likelihood.  This allows us to recover from mis-matching at stage 2, and most notably, mitigates the "stretching and twisting" phenomenon, discussed briefly <a href="http://vision.sista.arizona.edu/ksimek/research/2013/11/11/work-log/">here</a>.</p>
+
+<p>This is an expensive iterative minimization operation, requiring O(n<sup>3)</sup> each iteration.</p>
+
+<p>Associated_fields</p>
+
+<pre><code>ll_distances_flat
+</code></pre>
+
+<p>Associated functions</p>
+
+<pre><code>optimize_ml_wrt_indices
+</code></pre>
+
+<h2>Stage 6: Marginal likelihood</h2>
+
+<p>Marginal likelihood is ready to be computed for this track, conditioned on its parent.</p>
+
+<p>This stage is still in flux; it is unclear which likelihood terms will be included in the final project.  In the current implementation, ml field is not set, and curve_ml simply returns the ml value.</p>
+
+<p>Associated fields</p>
+
+<pre><code>ml
+</code></pre>
+
+<p>Associated functions</p>
+
+<pre><code>curve_ml
+curve_tree_ml_5 (speculative)
+</code></pre>
+
+<h2>Stage 7: complete</h2>
+
+<p>All processing is finished.</p>
+
+
+</div><!-- End Page -->
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

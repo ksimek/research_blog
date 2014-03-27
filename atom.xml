@@ -4,13 +4,772 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2014-03-04T16:41:41-07:00</updated>
+ <updated>2014-03-27T08:49:08-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Debugging Index optimization</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/03/27/work-log"/>
+   <updated>2014-03-27T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/03/27/work-log</id>
+   <content type="html">
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Debugging reconstruction anomalies</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/03/25/work-log"/>
+   <updated>2014-03-25T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/03/25/work-log</id>
+   <content type="html">&lt;p&gt;Continuing from yesterday.  Issue: strange reconstruction results after retraining.&lt;/p&gt;
+
+&lt;h2&gt;Issue: Reconstruction anomalies&lt;/h2&gt;
+
+&lt;h3&gt;Experiment #1&lt;/h3&gt;
+
+&lt;p&gt;Add a small amount to the diagonal of the covariance and re-run reconstruction.&lt;/p&gt;
+
+&lt;p&gt;Result:  Adding a moderate amount of covariance to the diagonal seems to fix the results but probably due to additional smoothing.&lt;/p&gt;
+
+&lt;p&gt;Adding 1.5 - makes results worse, bizarre jutting sections. This counterintuitive if the phenomenon is due to increasing noise variance.
+Adding 2 - makes reconstruction look good.
+Adding 10000 - reconstruction becomes straight sticks.&lt;/p&gt;
+
+&lt;p&gt;Discussion: analytically this is equivalent to multiplying the noise variance by a constant.  We already know that increasing noise variance solves the issue.  The question remains: why did our training algorithm prefer this? Also, why does decreasing noise variance force the reconstruction &lt;em&gt;away&lt;/em&gt; from the data?  Strong contradiction between data and&lt;/p&gt;
+
+&lt;h3&gt;Experiment #2&lt;/h3&gt;
+
+&lt;p&gt;Add a small amount to the diagonal of the prior covariance matrix&lt;/p&gt;
+
+&lt;p&gt;Result: no obvious improvement (inconclusive)&lt;/p&gt;
+
+&lt;h3&gt;Experiment #4&lt;/h3&gt;
+
+&lt;p&gt;Disable attachment&lt;/p&gt;
+
+&lt;p&gt;Result:  &lt;em&gt;significant improvement&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Discussion:  This was totally unexpected.  Almost all issues seem to be caused by bad attachment.  The affect of bad attachment is probably exacerbated by small noise variance -- the hardness of the constraints lead to contradictions that are resolved by anomalous reconstructions.&lt;/p&gt;
+
+&lt;h3&gt;Conclusion&lt;/h3&gt;
+
+&lt;p&gt;Bad attachment guess, combined with nonrobust choice of nosie variance causes contradiction in posterior and strange reconstructions.  Need to develop a better approach to infer attachment.  Issue there is partly that reconstructed individual curves have tails that extend past the attachment point, likely due to bad index estimatization.  If we fix index estimation, we'll be closer to a good branch estimation procedure.&lt;/p&gt;
+
+&lt;h2&gt;Misstep - index optimization &quot;bug&quot;&lt;/h2&gt;
+
+&lt;p&gt;Noticed camera linearization was occuring &lt;em&gt;after&lt;/em&gt; index optimization, which is likely causing the looping.&lt;/p&gt;
+
+&lt;p&gt;Added optional camera linearization to &lt;code&gt;process_tracks.m&lt;/code&gt;.  Issues seemed to get worse, but in fact, linearization wasn't running -- forget to set flag to 'true'.&lt;/p&gt;
+
+&lt;h2&gt;Overextension&lt;/h2&gt;
+
+&lt;h3&gt;Experiment #1&lt;/h3&gt;
+
+&lt;p&gt;Hypothesis: overrestrictive noise variance results in contradictions requiring contortion to resolve.&lt;/p&gt;
+
+&lt;p&gt;Approach: relax noise&lt;/p&gt;
+
+&lt;p&gt;Results:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;2x - much worse&lt;/li&gt;
+&lt;li&gt;4x - different, still bad&lt;/li&gt;
+&lt;li&gt;8x - still bad&lt;/li&gt;
+&lt;li&gt;16x - mostly resolved; weak tails&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Is linearization causing it?  is model 5 causing it?  Is linearization trsutworthy?&lt;/p&gt;
+
+&lt;p&gt;Linearization seems to make it a little worse.&lt;/p&gt;
+
+&lt;p&gt;Should we take linearization into account when optimizing depth?&lt;/p&gt;
+
+&lt;p&gt;scenario: curve points toward camera, high uncertainty as to index, because BP line is in direction of curve.  After linearization, BP lines change; no longer in direction of curve, index optimization can't fix bad 3d position.&lt;/p&gt;
+
+&lt;h3&gt;Experiment #3&lt;/h3&gt;
+
+&lt;p&gt;Plot likelihood (reference implementation) against noise variance.&lt;/p&gt;
+
+&lt;h2&gt;Miscellaneous thoughts&lt;/h2&gt;
+
+&lt;p&gt;It kind of makes sense that iid noise would be zero, since the data we're drawing from is so smooth to begin with, and basically noiseless. Any errors arise from mistracing and are strongly correlated due to the smoothness of the Bezier curves.&lt;/p&gt;
+
+&lt;p&gt;If the issue is near-singular matrices, the traditional solution to this is adding a tiny amount of covariance to the diagonal of the prior matrix.&lt;/p&gt;
+
+&lt;h2&gt;Open issues&lt;/h2&gt;
+
+&lt;p&gt;Index optimization resulting in weird loops at endpoints&lt;/p&gt;
+
+&lt;p&gt;Camera linearization reuslts in extensive stretching and looping during index optimization&lt;/p&gt;
+
+&lt;p&gt;T&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>TULIPS - Debugging training</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/03/24/work-log"/>
+   <updated>2014-03-24T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/03/24/work-log</id>
+   <content type="html">&lt;p&gt;Issue: after training, still getting a very large perturb_smoothing_variance:  1e-4 instead of more reasonable 1e-6.&lt;/p&gt;
+
+&lt;p&gt;Need to update tracks to reflect new noise parameter.&lt;/p&gt;
+
+&lt;h2&gt;Cleanup: building data pipeline&lt;/h2&gt;
+
+&lt;p&gt;Most of the processing pipeline is currently implemented in &lt;code&gt;wacv_2014/run_wacv_4.m&lt;/code&gt;.  Moving the track-processing part into &lt;code&gt;process_tracks.m&lt;/code&gt;.  Using the '7-stage' pipeline [as documented here].&lt;/p&gt;
+
+&lt;h2&gt;Retraining&lt;/h2&gt;
+
+&lt;p&gt;updated tracks, retrained.  New trained parameters look reasonable, but the reconstruction is terrible:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-03-24-retrain_reconstruction.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Maybe index optimization is failing, because the model #5 gradient has a bug?  Or hitting the iteration limit?  Running reconstruction with model #3 (whose gradient is proven).&lt;/p&gt;
+
+&lt;p&gt;Nope, it seems to be the new parameters:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-03-24-retrain_reconstruction_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;It's weird, because the noise variance dropped signficantly, but we're seeing greater drift away from the data.&lt;/p&gt;
+
+&lt;p&gt;Lets try relaxing the iteration limit anyway...&lt;/p&gt;
+
+&lt;p&gt;More iterations makes it more crazy.&lt;/p&gt;
+
+&lt;p&gt;Sanity check time.  Roll back to old parameters and reconstruct.&lt;/p&gt;
+
+&lt;p&gt;Check.  Old parameters give a sensible reconstruction.&lt;/p&gt;
+
+&lt;p&gt;Differences: (1) much lower noise variance, and (2) much lower perturb smoothing variance.&lt;/p&gt;
+
+&lt;p&gt;The noise variance seems to be the issue here -- raising it to pre-training levels returns us to sensible reconstructions.&lt;/p&gt;
+
+&lt;p&gt;Running out of steam -- time to take a break.  Next steps -&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;manual test noise variance; hypothesis: large variance gives higher likelihood.&lt;/li&gt;
+&lt;li&gt;ensure we aren't suffering from near-singular matrix during reconstruction. (piece-wise reconstruction?)&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Debugging training</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/03/23/work-log"/>
+   <updated>2014-03-23T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/03/23/work-log</id>
+   <content type="html">&lt;p&gt;There must be something wrong with the training marginal likelihood function, because the normal ML function pulls &lt;code&gt;perturb_smoothing_variance&lt;/code&gt; lower, but training ML does not.&lt;/p&gt;
+
+&lt;p&gt;Can we refactor-out the training ML to test it independently of the training process?&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Found a problem&lt;/strong&gt; - perturbation scale was artificially constrained to be in (0,5).  Training set perturb scale to 4.99996, unsurprisingly.  I can't remember why I constrained it in this way, or why I chose 5 as the max, but it makex sense to relax it now.  Setting to 50, with intent to remove constraint altogether.  Still doesn't explain why perturb_smoothing_variance remains so high.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Test #1&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Approach&lt;/em&gt;: plot tr_curves_ml vs. perturb_smoothing_variance.  Compare against curve_tree_ml vs. perturb_smooth_variance&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Results&lt;/em&gt;: Confirmed curves have different shape (ignoring offset).  training ML plot:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-03-23-train_ml_vs_perturb_smoothing_variance.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Reference ML plot:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-03-23-reference_ml_vs_perturb_smoothing_variance.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Is attachment the issue?&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Test&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Approach:&lt;/em&gt; re-run test #1 after detaching curves&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Result:&lt;/em&gt; no qualitative change&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Observations&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Prior covariances seem equivalent.
+Likelihood covariances differ.  Investigating...  turns out noise variance was being handled wrongly in &lt;strong&gt;two places&lt;/strong&gt;.  Was dividing when I should have multiplied (cognitive issue: variance vs. precision); was using value instead of sqrt (cognitive issue: variance vs. standard deviation).&lt;/p&gt;
+
+&lt;p&gt;Bingo!  Results are within a factor of 1.6e-5 of constant offset (for model #3)&lt;/p&gt;
+
+&lt;p&gt;Still getting differences with model #5.&lt;/p&gt;
+
+&lt;p&gt;prior is different in the perturb offset component -- differences are unstructured but large (on the order of +-5e-1).  Numerical instability?  Why here and not with model 3?&lt;/p&gt;
+
+&lt;p&gt;HUGE BUG in model #5: should have used 'independent' temporal model, not constant model.&lt;/p&gt;
+
+&lt;p&gt;Fixed, model #5 now agrees in both implementations (training and refernce).&lt;/p&gt;
+
+&lt;h2&gt;Retraining&lt;/h2&gt;
+
+&lt;p&gt;Running training now that we've worked out the apparent bugs.&lt;/p&gt;
+
+&lt;p&gt;perturb_scale is exploding to 49.999 (near max).  unclear why.  lets cap it lower for now, investigate later.&lt;/p&gt;
+
+&lt;p&gt;Capped scale to 10; it seems to settle lower, so we were probably just seeing a transient before.  Possibly just return NaN in this case and it should take a smaller step.&lt;/p&gt;
+
+&lt;h2&gt;Adding a new model&lt;/h2&gt;
+
+&lt;p&gt;get_model_kernel
+get_model_kernel_derive
+get_base_covariance
+tr_curve_ml&lt;/p&gt;
+
+&lt;p&gt;Changes:
+* relaxed scale maximum
+* fixed bug in training marginal likelihood
+* fixed bug in model 5&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Experiment - Full-camera linearization</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/03/18/work-log"/>
+   <updated>2014-03-18T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/03/18/work-log</id>
+   <content type="html">&lt;ul&gt;
+&lt;li&gt;Write function to make point covariances parallel&lt;/li&gt;
+&lt;li&gt;re-run training - did values improve?
+
+&lt;ul&gt;
+&lt;li&gt;reduced perturbation variance.&lt;/li&gt;
+&lt;li&gt;noise variance change?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;re-run reconstruction - are pathologies present?
+
+&lt;ul&gt;
+&lt;li&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Okay done.  Initial pass at linearization &lt;strong&gt;fails to affect&lt;/strong&gt; training or reconstruciton results.  Basically a no-op.  Are these results legit?  Let's visualize the linearized model's direction vectors to see if we've resolve convergence issues.  Is it possible the linearization is being overridden somewhere?&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Visualization&lt;/strong&gt;
+&lt;code&gt;in_progress/visualize_bp_lines.m&lt;/code&gt; - quiver plot of backprojection lines, as defined by the smallest eigenvector of the precision matrix.&lt;/p&gt;
+
+&lt;p&gt;After plotting, it's clear the mean direction isn't right.  Before:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-03-18-bp_lines.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;After running &quot;linearize_cameras.m&quot;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-03-18-bp_lines_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Notice how the lines shift upward without explanation.&lt;/p&gt;
+
+&lt;p&gt;Found bug: didn't align direction vectors before taking mean.  Added dot-product check.&lt;/p&gt;
+
+&lt;p&gt;BP lines now look good:  parallel versions of originals, minimal shifting.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Test&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Re-running reconstruction...  no noticible change.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Experiment&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Nothing seems to change the reconstruction.  I suspect a bug that is nullifying all our changes.  Strategy: make a dramatic change and see if reconstruction changes.  if not, there's a bug somewhere.&lt;/p&gt;
+
+&lt;p&gt;Approach:  Change bp-direction eigenvalue from 0 to be the same as the others.&lt;/p&gt;
+
+&lt;p&gt;Expected outcome: Drifting in reconstruction should be nearly eliminated.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Outcome:  Expected change was observed - drift mostly eliminated.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next steps: trace the construction of GP posterior covariance, end-to-end.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Exploration&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Rolling back changes from last experiment bit-by-bit until desired reconstruction vanishes.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Weird, now everything works as expected -- no drift using camera linearization.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Observations&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Tried running linearization per-curve instead of per-camera, and the former shows more drifting than the latter but less drifting than per-point.  Basically as expected.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Experiment&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Run on datasets 7-11.&lt;/p&gt;
+
+&lt;p&gt;Outcome: Results seem legitimate.&lt;/p&gt;
+
+&lt;h2&gt;Cleanup&lt;/h2&gt;
+
+&lt;p&gt;We have tried several things to fix this drifting issue, all of which mostly failed until now.  Now that we've found a cause of drifting and a fix, need to roll back each of the earlier changes one by one.&lt;/p&gt;
+
+&lt;h3&gt;Re-add index optimization&lt;/h3&gt;
+
+&lt;p&gt;(Disabled smooth index metaprior, because it is likely to have a bug.)&lt;/p&gt;
+
+&lt;p&gt;Seems to help some places, hurt others.  Some &quot;binding&quot; (?), causing bulging away from data:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-03-18-binding.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Looks red curve has a start index of -2, which is probably causing the bulge.  issue with attachment inference code, not index estimation.&lt;/p&gt;
+
+&lt;p&gt;In other places, originally over-extended curves are properly trimmed after index optimization. Before:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-03-18-trimming_after.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;After:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-03-18-trimming_before.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;Training&lt;/h2&gt;
+
+&lt;p&gt;Re-ran training using linearized cameras, and no notable change in results.  This was unexpected; we expected far less perturbation variance, since the linearized cameras don't want to drift anymore.&lt;/p&gt;
+
+&lt;p&gt;Ran a manual test, plotting marginal likelihood vs. perturbation variance between the trained value (2.3023e-04) and our anticipated ideal value (~1e-6).  Indeed, the optimal marginal likelihood is achieved at lower variances, suggesting the training routine has a bug.&lt;/p&gt;
+
+&lt;p&gt;The training routine uses a different routine for computing the likelihood, which may be flawed (possibly due to the new model we're using).  Work on it tomorrow.&lt;/p&gt;
+
+&lt;p&gt;BUG: training routine assumes precisions are based on noise variance of 1.0.  Fixed; no affect on perturb_smoothing_variance.&lt;/p&gt;
+
+&lt;h2&gt;Training hypothesis - Index compression&lt;/h2&gt;
+
+&lt;p&gt;Idea:  possibly the indices are compressed, requiring deformation (stretching) to fit the data.  Thus, training would want the deformation variance to be higher.&lt;/p&gt;
+
+&lt;p&gt;What is the best way to get unit-rate spacing of indices?&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;oracle reconstruct, chord-length parameterize&lt;/li&gt;
+&lt;li&gt;chicken-egg: reconstruct, chord-length parameterize, repeat&lt;/li&gt;
+&lt;li&gt;chicken egg w/ independent curves&lt;/li&gt;
+&lt;li&gt;heuristic reconstruct w/ independent curves&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Fix training routine.  Goal: perturb_smoothing_variance ~= 1e-6&lt;/li&gt;
+&lt;li&gt;compare model #5 vs. model #3 under the parallel camera model&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Open issues&lt;/h2&gt;
+
+&lt;p&gt;How best to compute marginal likleihood during model selection?  (point-wise linearized or camera-wise?)&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Debugging WACV errors</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/03/17/work-log"/>
+   <updated>2014-03-17T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/03/17/work-log</id>
+   <content type="html">&lt;p&gt;Troubleshooting reconstruction anomalies.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;significant translational offset&lt;/li&gt;
+&lt;li&gt;Why is reconstructed base point moving?  Initial points should be 100% corellated.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Observations during debugging:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Observation indices start at negative values&lt;/li&gt;
+&lt;li&gt;Initial point in view 2 is 5mm past initial point in view 9&lt;/li&gt;
+&lt;li&gt;translational offset was due to auto-centering feature of &lt;code&gt;view_all_wacv.m&lt;/code&gt;.  Changed default to &quot;no auto centering&quot;&lt;/li&gt;
+&lt;li&gt;Solved: Base point movement was due to auto-centering.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Okay, now on to bigger issues:  why is tip moving so much?&lt;/p&gt;
+
+&lt;p&gt;Theory: converging center-lines without converging uncertainty causes drift toward camera and is untenable.&lt;/p&gt;
+
+&lt;p&gt;Could re-shaping the uncertainty cylinders help?&lt;/p&gt;
+
+&lt;p&gt;Also strange:  perturb variance is huge - probably to allow curves to shift toward the camera, exploiting the &quot;singular region&quot; phenomenon &lt;a href=&quot;http://vision.sista.arizona.edu/ksimek/research/2013/08/06/work-log/&quot;&gt;studied earlier&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2&gt;Singular regions&lt;/h2&gt;
+
+&lt;p&gt;These are becoming the main struggling point.    It is likely that the &lt;a href=&quot;http://vision.sista.arizona.edu/ksimek/research/2013/12/05/work-log/&quot;&gt;endpoint drift&lt;/a&gt; is caused by this too. We could use fully linear cameras, which would avoid converging of uncertainty cones, but we lose some of the novelty of point-wise linearization.&lt;/p&gt;
+
+&lt;p&gt;Had the idea of iteratively reconstructing and re-estimating the uncertainty cylinders, but this is not guaranteed to be monotonic -- in fact it seems likely to reduce the solution's true likelihood at each iteration.  First it would drift toward the camera; then we shrink the covariance cylinders, which reduces the likelihood; repeat.&lt;/p&gt;
+
+&lt;p&gt;Perhaps the reason point-wise linearization is &quot;novel&quot; is because everyone knows it doesn't work, but no one has published on that fact.  Or I haven't reviewed that early literature enough.&lt;/p&gt;
+
+&lt;p&gt;Maybe PWL (point-wise linearization) is bad for reconstruction but still okay for marginalization?  Or maybe it's just causing our learning to fail, but once we learn reasonable parameters, the pathological behavior disappears?  Assuming reasonable values on perturbation variance, we shouldn't see significant drift toward cameras (how much?).&lt;/p&gt;
+
+&lt;h2&gt;Full-camera Linearization&lt;/h2&gt;
+
+&lt;p&gt;Should try full-camera linearization.  Can we implement this quickly without changing much infrastructure?  Probably.  Find the mean direction and replace all data covariances with the one in that direction.  New matrix -- First eigenvector: mean direction;  second and third: doesn't matter (Gram-Schmidt from old eigenvectors?).  If original second and third eigenvalues aren't equal, use their mean for new ones.&lt;/p&gt;
+
+&lt;p&gt;This is kind of a hybrid of point-wise linearization and full-camera linearization, because the global direction is camera-wise, but each point's variance is different.  Equivalently, this is full-camera linearization with nonuniform point weights (far points have lower weight, higher variance).&lt;/p&gt;
+
+&lt;p&gt;As long as we're abandoning some novelty, could go with traditional full-camera linearization, which might yield a more efficient index optimization scheme?  Should compare the different approaches.&lt;/p&gt;
+
+&lt;p&gt;Diagonal data covaraince means we can use the technique from &lt;a href=&quot;http://papers.nips.cc/paper/4281-efficient-inference-in-matrix-variate-gaussian-models-with-iid-observation-noise&quot;&gt;this 2011 NIPS paper&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;TODO&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Implement&lt;/li&gt;
+&lt;li&gt;re-train, re-run reconstruction, check for&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/03/13/work-log"/>
+   <updated>2014-03-13T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/03/13/work-log</id>
+   <content type="html">&lt;p&gt;Finished cleanup and committing of code for GMM EM with missing data.&lt;/p&gt;
+
+&lt;p&gt;Reviewing where we left off after WACV, hopefully looking at this indexing issue with fresh eyes should help.&lt;/p&gt;
+
+&lt;p&gt;As it stands, we never put a nail in the coffin of the drifting index.  The marginal likelihood should discourage dramatic stretching of endpoint indices like we see in the image below.&lt;/p&gt;
+
+&lt;p&gt;Recalling the problem history.  Was getting weird loops in reconstruction; bad indices were causing the curve to bind and twist to fit the spacing.  Point-wise correspondence matching (the DTW part of the pipeline) assumes (naively) no motion in the scene.  In some geometric configurations, this causes drifting offsets in the matching &lt;a href=&quot;http://vision.sista.arizona.edu/ksimek/research/2013/11/11/work-log/&quot;&gt;as described here&lt;/a&gt;.  The hacks to improve indices post-hoc (described &lt;a href=&quot;http://vision.sista.arizona.edu/ksimek/research/2013/08/15/work-log&quot;&gt;here&lt;/a&gt;) also assumes no motion, so doesn't help.  Needed an optimization scheme that accounts for motion, and the natural choice is to maximize the marginal likelihood.&lt;/p&gt;
+
+&lt;p&gt;After adding likelihood maximization, started getting a new problem: the final point's likelihood is extremely far from the previous point's, resulting in &lt;a href=&quot;http://vision.sista.arizona.edu/ksimek/research/2013/12/05/work-log/&quot;&gt;results described on this page&lt;/a&gt;, example below.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2013-12-05-drift_ds5.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Tried several heuristic energy functions to the optimization &lt;a href=&quot;http://vision.sista.arizona.edu/ksimek/research/2013/12/07/work-log/&quot;&gt;here&lt;/a&gt; (and several entried following it), including (a) keeping the index spacing equal to the distance between points, (b) keeping the index spacing between points smooth.  The latter seemed to help, but reflecting on the code, it seems there may be a bug in the gradient computation, and I question the validity of the results.  Needs more investigation.&lt;/p&gt;
+
+&lt;p&gt;Also issue of mean curve drifing far from maximum likelihood curve:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-03-13-reconstruction_offset.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;According to &lt;a href=&quot;http://vision.sista.arizona.edu/ksimek/research/2013/12/27/work-log/&quot;&gt;this entry&lt;/a&gt;, increasing the temporal correlation between views improved it.  I also recall decreasing the perturb_position_variance helps too.  It's disappointing that the trained values for these parameters are causing these problems.  It's possible our model is them problem:  camera perturbations are independent, while scene perturbations are correlated, but we're lumping both sources of noise into the scene perturbation model.&lt;/p&gt;
+
+&lt;p&gt;Separate perturbation process into two processes: scene perturbation (with perturb_smoothing_variance) and camera noise (with perturb_position_variance and perturb_rate_variance).  This should allow the scene perturbation to have longer temporal correlations, because the i.i.d. camera noise is separated out from it.&lt;/p&gt;
+
+&lt;p&gt;It is interesting that the perturb_position_variance is so low (0.64) but we get such variation.  Is this because the likelihood is so much stronger?  Or a side-effect of the marginal likelihood preferring data points to bunch together, so pulling toward the camera is common.&lt;/p&gt;
+
+&lt;p&gt;Training didn't use good indices.  need to optimize indices jointly with parameters&lt;/p&gt;
+
+&lt;h2&gt;Re-running training&lt;/h2&gt;
+
+&lt;p&gt;Files in the &lt;code&gt;train/&lt;/code&gt; subdirectory is really old and use out-of-date data structures. Working on getting it running again.&lt;/p&gt;
+
+&lt;p&gt;Done.  Added new model &quot;#5&quot; that separates camera perturbation into a separate process.&lt;/p&gt;
+
+&lt;p&gt;Retrained on new model.  Changes:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;perturbation scale doubled&lt;/li&gt;
+&lt;li&gt;perturb smoothing variance increased by two orders of magnitude&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Offsetting isn't resolved, and reconstructed scene moves around like crazy!&lt;/p&gt;
+
+&lt;h2&gt;Next Steps&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Separate out camera perturbation process&lt;/li&gt;
+&lt;li&gt;We're due for a retraining
+&lt;strong&gt; Fix training to use better index optimization
+&lt;/strong&gt;&lt;em&gt; start with linear index spacing, learn, re-fit indices using ML, learn again
+&lt;/em&gt;** use new model w/ camera perturbation process&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Future steps&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;adapt camera parameters per-dataset?&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Debugging log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/03/12/work-log"/>
+   <updated>2014-03-12T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/03/12/work-log</id>
+   <content type="html">&lt;p&gt;Debugging new implementation of EM GMM fitting with handling of missing data.&lt;/p&gt;
+
+&lt;p&gt;After first iteration, likelihood weights (in p_sum_mp) are grossly uneven.  Likely issue is in the E step.&lt;/p&gt;
+
+&lt;p&gt;Variances in (var_mp) are suspect in the E step.  So are means (in u_mp).  Preceeding M step now looks suspect.  How are mean and variance computed?&lt;/p&gt;
+
+&lt;p&gt;Was resetting accumulators for x and x&lt;sup&gt;2&lt;/sup&gt; after each point.  Part of mis-guided refactoring attempt yesterday.  Rebuilding and re-running; are mean, variance, and likelihood weights reasonable after first iteration?&lt;/p&gt;
+
+&lt;p&gt;Okay, results are identical to reference implementation when no missing data.  Adding missing data to the dataset...&lt;/p&gt;
+
+&lt;p&gt;Results look good at 50% missing, but occasionally getting local optima (~10% of the time).  In those cases, the final likleihood is lower, so no evidence of bug.&lt;/p&gt;
+
+&lt;p&gt;Time for clean up.  A bit of clean up to the test, adding run-time flags for missing, held-out, etc.&lt;/p&gt;
+
+&lt;p&gt;Did signfiicant rework of the GMM EM test suite.  Now can specify which of five tests to run, and non-interactive mode tests all five tests.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>FIRE - notes: joint meeting</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/03/07/work-log"/>
+   <updated>2014-03-07T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/03/07/work-log</id>
+   <content type="html">&lt;h3&gt;Q: how to align data?&lt;/h3&gt;
+
+&lt;p&gt;David - align by first treatment&lt;/p&gt;
+
+&lt;p&gt;Emily - end point is also interesting - release point&lt;/p&gt;
+
+&lt;p&gt;Emily - Three most interesting time-syncs:  line up at first,  line up at last, line up since diagnosis&lt;/p&gt;
+
+&lt;p&gt;Rebecca - Surgery date? (diagnosis date could be a proxy for this)&lt;/p&gt;
+
+&lt;p&gt;Question for karen:  if surgery, when did it happen?&lt;/p&gt;
+
+&lt;p&gt;David:  what is being studied?  adjustment to diagnonis, or adjustment to treatment?&lt;/p&gt;
+
+&lt;h3&gt;Rebecca plots&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;refacttot over time by treatment group&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;Ambivalence&lt;/h3&gt;
+
+&lt;p&gt;This idea of ambivalence seems to be an interesting avenue of study.  The main idea is having high &quot;helpfulness&quot; and high &quot;upsetting&quot; indicates an &quot;ambivalent&quot; relationship;  there seems to be much variability between how these two variables covary, may cluster well.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Dataset: SRI&lt;/li&gt;
+&lt;li&gt;we see evidence of this in our data&lt;/li&gt;
+&lt;li&gt;how do these dimensions track over time?  (this would be novel)&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Different dynamics of interest:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;healthy: float low vs flat high&lt;/li&gt;
+&lt;li&gt;healthy: one doesn’t affect the other much.&lt;/li&gt;
+&lt;li&gt;uncertain:  okay but wobbly, and connected&lt;/li&gt;
+&lt;li&gt;unhealthy:  high &quot;upsetting&quot; but low &quot;helpfulness&quot;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Experiment&lt;/strong&gt;: can ambivalence (sri) model predict &quot;health&quot;?&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;health could be measured by physical functioning (fact), or stress (pss)&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Next steps&lt;/h2&gt;
+
+&lt;p&gt;Investigae ambivalence as a two-dimensional model.  2D dynamical states-space model?  Cluster on a few different state space models?&lt;/p&gt;
+
+&lt;p&gt;…but continue with exploratory.  Remember to split up SRI dataset into two columns.&lt;/p&gt;
+
+&lt;p&gt;Miscellanous
+———————
+Might be interesting to fit a 5-dim first order auto-regressive model on the 5 datasets of interest, with iid observations.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>FIRE discussion</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/03/06/work-log"/>
+   <updated>2014-03-06T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/03/06/work-log</id>
+   <content type="html">&lt;h2&gt;Skype w/ Kobus&lt;/h2&gt;
+
+&lt;p&gt;Below are some random notes from the discussion.&lt;/p&gt;
+
+&lt;p&gt;Generally speaking, the eventual goal is growth curve that indicates whether subject is getting better or worse over time.  This might split into three time-regions with different dynamics:  pre-treatment, treatment, recovery.&lt;/p&gt;
+
+&lt;p&gt;The population could be split into three groups: radiation, chemo, untreated;  start by picking one and modeling it (probably chemo is a good start).  For now, untreated participant will probably be left out until we have a better idea of what we're modeling.&lt;/p&gt;
+
+&lt;p&gt;Absolute elapsed time may be less interesting than relative progress through treatment (but need to investigate).&lt;/p&gt;
+
+&lt;p&gt;Will probably want to synchronize sequential data on an event (e.g. first treatment), since the first visit holds no strong meaning.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Immediate taks:&lt;/strong&gt;  Cluster trajectories using GMM with missing data. Use visit-number as time index, syncing on (x \in) {first-treatment, final treatment}.  Split into chemo and radiation groups and handle separately. Be smart about choosing dataset to minimize missing data.  Visualize by plotting single dimension, one curve per cluster.&lt;/p&gt;
+
+&lt;h2&gt;Misc. TODO:&lt;/h2&gt;
+
+&lt;p&gt;Send kobus MARRS paper, Hinton tech report
+Read relevant chapters of murphy&lt;/p&gt;
+
+&lt;h2&gt;Gathering data for clustering&lt;/h2&gt;
+
+&lt;p&gt;Emily says to use these datasets specifically for the first approach:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt; ['sri3.csv', 'das4.csv', 'ea4.csv', 'fact4.csv', 'pss4.csv']
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;SRI&lt;/h3&gt;
+
+&lt;p&gt;Several redundant columns here.  Questions 4 and 5 ( &quot;PartnerUpsetting4&quot; and  &quot;Conflicted5&quot;) are recoded as &quot;repartnerupsetting4&quot; and &quot;reconflicted5&quot;, and then all columns are cloned into XXXn_conv, for n in {1,...,5}.  Thus, the relevant columns are:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;partnerimp1_conv
+partnerpredictable2_conv
+partnerhelpful3_conv    
+repartnerupsetting4_conv
+reconflicted5_conv
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;DAS&lt;/h3&gt;
+
+&lt;p&gt;Relevant columns:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Affection1 
+Sex2
+Kiss3
+TooTired4
+ShowLove5
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;EA&lt;/h3&gt;
+
+&lt;p&gt;Relevant columns:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;FigureOut1
+Comfortable2
+GladPleased3
+Worthwhile4
+Cherish5
+AttendTo6
+Enjoy7
+Appreciate8
+LetGo9
+TakeCareOf10
+EnergyFigureOut11
+Like12
+InTouch13
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;FACT&lt;/h3&gt;
+
+&lt;p&gt;Relevant columns (all should be reversed)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;LackEnergy1
+Nausea2
+TrblMeetNeedsFam3
+HavePain4
+SideEffectsBother5
+FeelSick6
+TimeInBed7
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;PSS&lt;/h3&gt;
+
+&lt;p&gt;Like SRI, we used the recoded &lt;code&gt;*_conv&lt;/code&gt; fields:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;upsetunexpectantly1_conv
+unabletocontrol2_conv
+stressed3_conv
+redealtwithhassles4_conv
+ineffectivecoping5_conv
+reconfidenthandleprob6_conv
+regoingyourway7_conv
+notcopewithall8_conv
+recontrolirritations9_conv
+reontopofthings10_conv
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;Summary&lt;/h3&gt;
+
+&lt;p&gt;Forty total dimensions.&lt;/p&gt;
+
+&lt;p&gt;These datasets apply to everyone, and should have minimal missing data (30 total):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;PSS
+FACT
+EA
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;These datasets apply only to those in a relationship (10 total):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;DAS
+SRI
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Take three approaches:&lt;/p&gt;
+
+&lt;p&gt;(1) look for nontemporal relationships among these dimensions (PCA).  Several of these dimensions may collapse into one.
+(2) concatenate all visits into a vector and cluster (40 * 9 = 360 dimensional points)
+(3) repeat (2) but re-center based on treatment date&lt;/p&gt;
+
+&lt;h2&gt;Misc&lt;/h2&gt;
+
+&lt;p&gt;999 nonempty records in the full 40-dimensional model.&lt;/p&gt;
+
+&lt;p&gt;651 records are missing-data-free in the full 40-dimensional model.&lt;/p&gt;
+
+&lt;p&gt;863 records are missing-data-free in the 30-dimensional relationship-free model.&lt;/p&gt;
+
+&lt;p&gt;TODO:  concatenate for approach (2) above, and re-evaluate coverage.&lt;/p&gt;
+
+&lt;h2&gt;PCA&lt;/h2&gt;
+
+&lt;p&gt;We didn't really expect PCA to give interesting results, but I ran it anyway.  Definitely no obvious clusters.&lt;/p&gt;
+
+&lt;p&gt;About 20 of the 40 dimensions seem relevant?&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>FIRE - initial analysis</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/03/05/work-log"/>
+   <updated>2014-03-05T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/03/05/work-log</id>
+   <content type="html">&lt;h2&gt;Merging datasets into database &lt;/h2&gt;
+
+&lt;p&gt;To perform interesting queries across datasets, we'll need to merge them into a consistent format.  The &quot;structure array&quot; dataset doesn't seem to be suited to complex queries, so we'll use a cell array with rows corresponding to records and columns corresponding to fields.  We will merge records from different datasets using (Subject_ID, Visit) as a unique key.  We'll also merge the metadata structures of all datasets.&lt;/p&gt;
+
+&lt;p&gt;New files:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;data/fire_read_all.m&lt;/code&gt;  - calls &lt;code&gt;fire_read_csv&lt;/code&gt; on all .csv files in path&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;data/merge_datasets.m&lt;/code&gt; converts output of &lt;code&gt;fire_read_all.m&lt;/code&gt; into a NxM cell array and a metadata structure describing each columns.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;data/fire_classify_data_columns.m&lt;/code&gt; - infers the subtype of each numeric fields (bool, int, float).  Also computes coverage. Stores in column metadata.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Can now do rudimentary table queries using matlab operators.  For example, the code below loads the database and queries, &quot;how many bool fields have coverage above 95%?&quot;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;cd /Users/ksimek/work/src/fire/src
+% read data
+[data, meta] = fire_read_all('../data');
+% merge into single &quot;database&quot; table
+[db, db_meta] = merge_datasets(data, meta);
+% idenitfy column types and measure coverage
+db_meta_2 = fire_classify_data_columns(db, db_meta);
+% perform query: number of bool fields with 95% or greater coverage
+I = ([db_meta_2.coverage] &amp;gt; 95); 
+sum(cellfun(@(x) strcmp(x,'bool'), {db_meta_2(I).subtype}))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Miscellaneous thoughts&lt;/h2&gt;
+
+&lt;p&gt;If doing dynamical analysis, consider re-aligning time, using one of the following as origin:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;first treatment&lt;/li&gt;
+&lt;li&gt;first chemo treament&lt;/li&gt;
+&lt;li&gt;first rad treament&lt;/li&gt;
+&lt;li&gt;inflamation threshold&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>FIRE - background reading, thinking and planning</title>
@@ -70,6 +829,76 @@
 &lt;li&gt;&lt;code&gt;io/fire_read_csv.m&lt;/code&gt; - Reads a .csv file, using the corresponding .meta file to determine names and datatypes.&lt;/li&gt;
 &lt;/ul&gt;
 
+
+&lt;h2&gt;Misc notes about data&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Most datasets seem to be uniquely indexed on the pair (Subject_ID, Visit).&lt;/li&gt;
+&lt;li&gt;There are 136 subjects and 9 visits&lt;/li&gt;
+&lt;li&gt;Most datasets have 998 entries, except
+&lt;strong&gt; fcsfq5.csv - missing first visit
+&lt;/strong&gt; poms4.csv - missing 12 subjects
+&lt;strong&gt; sri3.csv - 8 missing records (misc.)
+&lt;/strong&gt; fcsfq5.csv - missing 3 subjects
+&lt;strong&gt; demograph.csv - Extra records (investigating...)
+&lt;/strong&gt;* Several missing Visit ID's&lt;/li&gt;
+&lt;li&gt;Total of 1009 (Subject_Id, Visit) pairs (some non-overlapping occurrances)&lt;/li&gt;
+&lt;li&gt;Subject_ID scheme: 575 + a 2 or 3 digit number&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;Coverage&lt;/h3&gt;
+
+&lt;p&gt;The following applies only to parsable fields only&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;161 (numeric or date) fields w/ full coverage (ignoring the index fields)
+** Unclear if all time-points are covered by all subjects&lt;/li&gt;
+&lt;li&gt;Median coverage per record is &lt;strong&gt;163/547&lt;/strong&gt; fields&lt;/li&gt;
+&lt;li&gt;Median coverage per fields is 97.0%.&lt;/li&gt;
+&lt;li&gt;303 / 547 fields have over 95% coverage.
+&lt;strong&gt; 273 numeric fields
+&lt;/strong&gt;&lt;em&gt; 193 int
+&lt;/em&gt;&lt;strong&gt; 10 double
+&lt;/strong&gt;* 70 bool&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Coverage map is below (rows are fields, columns are records)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-03-05-fire_coverage.png&quot; alt=&quot;Data coverage&quot; /&gt;&lt;/p&gt;
+
+&lt;h3&gt;Datatypes statistics&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;32 float fields&lt;/li&gt;
+&lt;li&gt;160 bool fields&lt;/li&gt;
+&lt;li&gt;323 int fields&lt;/li&gt;
+&lt;li&gt;30 date fields&lt;/li&gt;
+&lt;li&gt;The rest are text, inconsistent, or unknown format&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;How many fully covered fields have more than two values?&lt;/p&gt;
+
+&lt;p&gt;Next pass:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;merge all columns into a large cell array&lt;/li&gt;
+&lt;li&gt;for each column, store pointer back to column metadata
+** i.e. dataset name, column name &amp;amp; type&lt;/li&gt;
+&lt;li&gt;infer numeric type (boolean, int, float)&lt;/li&gt;
+&lt;li&gt;Example query: get all int/float columns, excluding ID and visit
+&lt;strong&gt; Try clustering them (how to visualize?)
+&lt;/strong&gt; Try PCA on them - do visible clusters emerge? can we name them?)&lt;/li&gt;
+&lt;li&gt;Example Query: get all numerical columns vs. time
+&lt;strong&gt; Dynamic factor analysis?
+&lt;/strong&gt; split into subjects and visit indices&lt;/li&gt;
+&lt;li&gt;consider boolean fields&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Should probably read the unreadable fields as text.&lt;/p&gt;
 </content>
  </entry>
  
@@ -6932,7 +7761,9 @@ make_trivial_correspondence -&amp;gt; init_trivial_corespondence
    <link href="http://vision.sista.arizona.edu/ksimek/research/2013/09/26/reference"/>
    <updated>2013-09-26T00:00:00-07:00</updated>
    <id>http://vision.sista.arizona.edu/ksimek/research/2013/09/26/reference</id>
-   <content type="html">&lt;p&gt;A track's &quot;stage&quot; is a description of where it is in the processing pipeline.&lt;/p&gt;
+   <content type="html">&lt;p&gt;&lt;strong&gt;Update:&lt;/strong&gt; The information that follows may be out of date.  The most recent version of this information is available &lt;a href=&quot;/ksimek/research/project/tulips/pipeline&quot;&gt;in the TULIPS documentation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;A track's &quot;stage&quot; is a description of where it is in the processing pipeline.&lt;/p&gt;
 
 &lt;p&gt;Each stage has one or more track fields associated with it.  No stage may modify fields from the previous stages.&lt;/p&gt;
 

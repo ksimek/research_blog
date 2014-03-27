@@ -1,0 +1,322 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Experiment - Full-camera linearization &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Experiment - Full-camera linearization
+    </h1>
+
+  <div class="date emphnext">March 18, 2014</div>
+    
+
+
+  
+    <ul>
+<li>Write function to make point covariances parallel</li>
+<li>re-run training - did values improve?
+
+<ul>
+<li>reduced perturbation variance.</li>
+<li>noise variance change?</li>
+</ul>
+</li>
+<li>re-run reconstruction - are pathologies present?
+
+<ul>
+<li></li>
+</ul>
+</li>
+</ul>
+
+
+<p>Okay done.  Initial pass at linearization <strong>fails to affect</strong> training or reconstruciton results.  Basically a no-op.  Are these results legit?  Let's visualize the linearized model's direction vectors to see if we've resolve convergence issues.  Is it possible the linearization is being overridden somewhere?</p>
+
+<p><strong>Visualization</strong>
+<code>in_progress/visualize_bp_lines.m</code> - quiver plot of backprojection lines, as defined by the smallest eigenvector of the precision matrix.</p>
+
+<p>After plotting, it's clear the mean direction isn't right.  Before:</p>
+
+<p><img src="/ksimek/research/img/2014-03-18-bp_lines.png" alt="" /></p>
+
+<p>After running "linearize_cameras.m":</p>
+
+<p><img src="/ksimek/research/img/2014-03-18-bp_lines_2.png" alt="" /></p>
+
+<p>Notice how the lines shift upward without explanation.</p>
+
+<p>Found bug: didn't align direction vectors before taking mean.  Added dot-product check.</p>
+
+<p>BP lines now look good:  parallel versions of originals, minimal shifting.</p>
+
+<p><strong>Test</strong></p>
+
+<p>Re-running reconstruction...  no noticible change.</p>
+
+<p><strong>Experiment</strong></p>
+
+<p>Nothing seems to change the reconstruction.  I suspect a bug that is nullifying all our changes.  Strategy: make a dramatic change and see if reconstruction changes.  if not, there's a bug somewhere.</p>
+
+<p>Approach:  Change bp-direction eigenvalue from 0 to be the same as the others.</p>
+
+<p>Expected outcome: Drifting in reconstruction should be nearly eliminated.</p>
+
+<pre><code>Outcome:  Expected change was observed - drift mostly eliminated.
+</code></pre>
+
+<p>Next steps: trace the construction of GP posterior covariance, end-to-end.</p>
+
+<p><strong>Exploration</strong></p>
+
+<p>Rolling back changes from last experiment bit-by-bit until desired reconstruction vanishes.</p>
+
+<p>...</p>
+
+<p>Weird, now everything works as expected -- no drift using camera linearization.</p>
+
+<p><strong>Observations</strong></p>
+
+<p>Tried running linearization per-curve instead of per-camera, and the former shows more drifting than the latter but less drifting than per-point.  Basically as expected.</p>
+
+<p><strong>Experiment</strong></p>
+
+<p>Run on datasets 7-11.</p>
+
+<p>Outcome: Results seem legitimate.</p>
+
+<h2>Cleanup</h2>
+
+<p>We have tried several things to fix this drifting issue, all of which mostly failed until now.  Now that we've found a cause of drifting and a fix, need to roll back each of the earlier changes one by one.</p>
+
+<h3>Re-add index optimization</h3>
+
+<p>(Disabled smooth index metaprior, because it is likely to have a bug.)</p>
+
+<p>Seems to help some places, hurt others.  Some "binding" (?), causing bulging away from data:</p>
+
+<p><img src="/ksimek/research/img/2014-03-18-binding.png" alt="" /></p>
+
+<p>Looks red curve has a start index of -2, which is probably causing the bulge.  issue with attachment inference code, not index estimation.</p>
+
+<p>In other places, originally over-extended curves are properly trimmed after index optimization. Before:</p>
+
+<p><img src="/ksimek/research/img/2014-03-18-trimming_after.png" alt="" /></p>
+
+<p>After:</p>
+
+<p><img src="/ksimek/research/img/2014-03-18-trimming_before.png" alt="" /></p>
+
+<h2>Training</h2>
+
+<p>Re-ran training using linearized cameras, and no notable change in results.  This was unexpected; we expected far less perturbation variance, since the linearized cameras don't want to drift anymore.</p>
+
+<p>Ran a manual test, plotting marginal likelihood vs. perturbation variance between the trained value (2.3023e-04) and our anticipated ideal value (~1e-6).  Indeed, the optimal marginal likelihood is achieved at lower variances, suggesting the training routine has a bug.</p>
+
+<p>The training routine uses a different routine for computing the likelihood, which may be flawed (possibly due to the new model we're using).  Work on it tomorrow.</p>
+
+<p>BUG: training routine assumes precisions are based on noise variance of 1.0.  Fixed; no affect on perturb_smoothing_variance.</p>
+
+<h2>Training hypothesis - Index compression</h2>
+
+<p>Idea:  possibly the indices are compressed, requiring deformation (stretching) to fit the data.  Thus, training would want the deformation variance to be higher.</p>
+
+<p>What is the best way to get unit-rate spacing of indices?</p>
+
+<ol>
+<li>oracle reconstruct, chord-length parameterize</li>
+<li>chicken-egg: reconstruct, chord-length parameterize, repeat</li>
+<li>chicken egg w/ independent curves</li>
+<li>heuristic reconstruct w/ independent curves</li>
+</ol>
+
+
+<h2>TODO</h2>
+
+<ul>
+<li>Fix training routine.  Goal: perturb_smoothing_variance ~= 1e-6</li>
+<li>compare model #5 vs. model #3 under the parallel camera model</li>
+</ul>
+
+
+<h2>Open issues</h2>
+
+<p>How best to compute marginal likleihood during model selection?  (point-wise linearized or camera-wise?)</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/03/23/work-log" class="next" title="Debugging training">Debugging training &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2014/03/17/work-log" class="prev" title="Debugging WACV errors">&larr; Debugging WACV errors</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

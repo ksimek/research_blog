@@ -124,3 +124,23 @@
 1392854168: diss prop: proofing, add images and related work
 1392857104: diss prop: fix proofing mistakes
 1393969979: FIRE: read data into matlab
+1394478687: XXX
+1394659980: gmm w missing data - debug
+1394661800: gmm w missing data - debug
+1394668355: GMM EM cleanup
+1394670249: GMM EM cleanup
+1394674025: GMM EM - refactoring tests
+1394723273: reading - FIRE
+1394725478: reading - misc
+1394727507: reading - misc
+1394729313: gmm test refactor
+1394731224: gmm test refactor, tulips planning
+1394740861: tulips - clean up gt
+1394743708: tulips - recalling history of index estimation
+1395594009: fire data validation script
+1395595816: fire data validation script
+1395597926: fire data validation
+1395599783: fire data validation
+1395601600: fire data validation
+1395616758: TULIPS - debugging training
+1395618861: TULIPS - debugging training

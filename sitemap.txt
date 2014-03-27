@@ -18,6 +18,7 @@ http://vision.sista.arizona.edu/ksimek/research/pages.html
 http://vision.sista.arizona.edu/ksimek/research/projects/index.html
 http://vision.sista.arizona.edu/ksimek/research/projects/iplant/index.html
 http://vision.sista.arizona.edu/ksimek/research/projects/tulips/index.html
+http://vision.sista.arizona.edu/ksimek/research/projects/tulips/pipeline/index.html
 http://vision.sista.arizona.edu/ksimek/research/projects/tulips.html
 http://vision.sista.arizona.edu/ksimek/research/sitemap.txt
 http://vision.sista.arizona.edu/ksimek/research/tags.html
@@ -36,7 +37,19 @@ http://vision.sista.arizona.edu/ksimek/research/page11/index.html
 http://vision.sista.arizona.edu/ksimek/research/page12/index.html
 http://vision.sista.arizona.edu/ksimek/research/page13/index.html
 http://vision.sista.arizona.edu/ksimek/research/page14/index.html
+http://vision.sista.arizona.edu/ksimek/research/page15/index.html
 
+http://vision.sista.arizona.edu/ksimek/research/2014/03/27/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/03/25/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/03/24/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/03/23/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/03/18/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/03/17/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/03/13/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/03/12/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/03/07/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/03/06/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/03/05/work-log
 http://vision.sista.arizona.edu/ksimek/research/2014/03/04/work-log
 http://vision.sista.arizona.edu/ksimek/research/2014/02/08/work-log
 http://vision.sista.arizona.edu/ksimek/research/2014/01/29/reference

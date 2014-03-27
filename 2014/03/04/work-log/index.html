@@ -147,6 +147,76 @@
 </ul>
 
 
+<h2>Misc notes about data</h2>
+
+<ul>
+<li>Most datasets seem to be uniquely indexed on the pair (Subject_ID, Visit).</li>
+<li>There are 136 subjects and 9 visits</li>
+<li>Most datasets have 998 entries, except
+<strong> fcsfq5.csv - missing first visit
+</strong> poms4.csv - missing 12 subjects
+<strong> sri3.csv - 8 missing records (misc.)
+</strong> fcsfq5.csv - missing 3 subjects
+<strong> demograph.csv - Extra records (investigating...)
+</strong>* Several missing Visit ID's</li>
+<li>Total of 1009 (Subject_Id, Visit) pairs (some non-overlapping occurrances)</li>
+<li>Subject_ID scheme: 575 + a 2 or 3 digit number</li>
+</ul>
+
+
+<h3>Coverage</h3>
+
+<p>The following applies only to parsable fields only</p>
+
+<ul>
+<li>161 (numeric or date) fields w/ full coverage (ignoring the index fields)
+** Unclear if all time-points are covered by all subjects</li>
+<li>Median coverage per record is <strong>163/547</strong> fields</li>
+<li>Median coverage per fields is 97.0%.</li>
+<li>303 / 547 fields have over 95% coverage.
+<strong> 273 numeric fields
+</strong><em> 193 int
+</em><strong> 10 double
+</strong>* 70 bool</li>
+</ul>
+
+
+<p>Coverage map is below (rows are fields, columns are records)</p>
+
+<p><img src="/ksimek/research/img/2014-03-05-fire_coverage.png" alt="Data coverage" /></p>
+
+<h3>Datatypes statistics</h3>
+
+<ul>
+<li>32 float fields</li>
+<li>160 bool fields</li>
+<li>323 int fields</li>
+<li>30 date fields</li>
+<li>The rest are text, inconsistent, or unknown format</li>
+</ul>
+
+
+<p>How many fully covered fields have more than two values?</p>
+
+<p>Next pass:</p>
+
+<ul>
+<li>merge all columns into a large cell array</li>
+<li>for each column, store pointer back to column metadata
+** i.e. dataset name, column name &amp; type</li>
+<li>infer numeric type (boolean, int, float)</li>
+<li>Example query: get all int/float columns, excluding ID and visit
+<strong> Try clustering them (how to visualize?)
+</strong> Try PCA on them - do visible clusters emerge? can we name them?)</li>
+<li>Example Query: get all numerical columns vs. time
+<strong> Dynamic factor analysis?
+</strong> split into subjects and visit indices</li>
+<li>consider boolean fields</li>
+</ul>
+
+
+<p>Should probably read the unreadable fields as text.</p>
+
       <address class="signature">
         Posted by
         <a class="author" href="/ksimek/research/">Kyle Simek</a> 
@@ -155,6 +225,9 @@
 
 
   
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/03/05/work-log" class="next" title="FIRE - initial analysis">FIRE - initial analysis &rarr;</a>
   
   
     <a href="/ksimek/research/2014/02/08/work-log" class="prev" title="Proposal Practice Post-mortem">&larr; Proposal Practice Post-mortem</a>

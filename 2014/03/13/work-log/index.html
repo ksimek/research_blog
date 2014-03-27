@@ -1,0 +1,252 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Work Log &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Work Log
+    </h1>
+
+  <div class="date emphnext">March 13, 2014</div>
+    
+
+
+  
+    <p>Finished cleanup and committing of code for GMM EM with missing data.</p>
+
+<p>Reviewing where we left off after WACV, hopefully looking at this indexing issue with fresh eyes should help.</p>
+
+<p>As it stands, we never put a nail in the coffin of the drifting index.  The marginal likelihood should discourage dramatic stretching of endpoint indices like we see in the image below.</p>
+
+<p>Recalling the problem history.  Was getting weird loops in reconstruction; bad indices were causing the curve to bind and twist to fit the spacing.  Point-wise correspondence matching (the DTW part of the pipeline) assumes (naively) no motion in the scene.  In some geometric configurations, this causes drifting offsets in the matching <a href="http://vision.sista.arizona.edu/ksimek/research/2013/11/11/work-log/">as described here</a>.  The hacks to improve indices post-hoc (described <a href="http://vision.sista.arizona.edu/ksimek/research/2013/08/15/work-log">here</a>) also assumes no motion, so doesn't help.  Needed an optimization scheme that accounts for motion, and the natural choice is to maximize the marginal likelihood.</p>
+
+<p>After adding likelihood maximization, started getting a new problem: the final point's likelihood is extremely far from the previous point's, resulting in <a href="http://vision.sista.arizona.edu/ksimek/research/2013/12/05/work-log/">results described on this page</a>, example below.</p>
+
+<p><img src="/ksimek/research/img/2013-12-05-drift_ds5.png" alt="" /></p>
+
+<p>Tried several heuristic energy functions to the optimization <a href="http://vision.sista.arizona.edu/ksimek/research/2013/12/07/work-log/">here</a> (and several entried following it), including (a) keeping the index spacing equal to the distance between points, (b) keeping the index spacing between points smooth.  The latter seemed to help, but reflecting on the code, it seems there may be a bug in the gradient computation, and I question the validity of the results.  Needs more investigation.</p>
+
+<p>Also issue of mean curve drifing far from maximum likelihood curve:</p>
+
+<p><img src="/ksimek/research/img/2014-03-13-reconstruction_offset.png" alt="" /></p>
+
+<p>According to <a href="http://vision.sista.arizona.edu/ksimek/research/2013/12/27/work-log/">this entry</a>, increasing the temporal correlation between views improved it.  I also recall decreasing the perturb_position_variance helps too.  It's disappointing that the trained values for these parameters are causing these problems.  It's possible our model is them problem:  camera perturbations are independent, while scene perturbations are correlated, but we're lumping both sources of noise into the scene perturbation model.</p>
+
+<p>Separate perturbation process into two processes: scene perturbation (with perturb_smoothing_variance) and camera noise (with perturb_position_variance and perturb_rate_variance).  This should allow the scene perturbation to have longer temporal correlations, because the i.i.d. camera noise is separated out from it.</p>
+
+<p>It is interesting that the perturb_position_variance is so low (0.64) but we get such variation.  Is this because the likelihood is so much stronger?  Or a side-effect of the marginal likelihood preferring data points to bunch together, so pulling toward the camera is common.</p>
+
+<p>Training didn't use good indices.  need to optimize indices jointly with parameters</p>
+
+<h2>Re-running training</h2>
+
+<p>Files in the <code>train/</code> subdirectory is really old and use out-of-date data structures. Working on getting it running again.</p>
+
+<p>Done.  Added new model "#5" that separates camera perturbation into a separate process.</p>
+
+<p>Retrained on new model.  Changes:</p>
+
+<ul>
+<li>perturbation scale doubled</li>
+<li>perturb smoothing variance increased by two orders of magnitude</li>
+</ul>
+
+
+<p>Offsetting isn't resolved, and reconstructed scene moves around like crazy!</p>
+
+<h2>Next Steps</h2>
+
+<ul>
+<li>Separate out camera perturbation process</li>
+<li>We're due for a retraining
+<strong> Fix training to use better index optimization
+</strong><em> start with linear index spacing, learn, re-fit indices using ML, learn again
+</em>** use new model w/ camera perturbation process</li>
+</ul>
+
+
+<p>Future steps</p>
+
+<ul>
+<li>adapt camera parameters per-dataset?</li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/03/17/work-log" class="next" title="Debugging WACV errors">Debugging WACV errors &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2014/03/12/work-log" class="prev" title="Debugging log">&larr; Debugging log</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

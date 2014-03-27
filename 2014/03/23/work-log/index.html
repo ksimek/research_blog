@@ -1,0 +1,253 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Debugging training &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Debugging training
+    </h1>
+
+  <div class="date emphnext">March 23, 2014</div>
+    
+
+
+  
+    <p>There must be something wrong with the training marginal likelihood function, because the normal ML function pulls <code>perturb_smoothing_variance</code> lower, but training ML does not.</p>
+
+<p>Can we refactor-out the training ML to test it independently of the training process?</p>
+
+<p><strong>Found a problem</strong> - perturbation scale was artificially constrained to be in (0,5).  Training set perturb scale to 4.99996, unsurprisingly.  I can't remember why I constrained it in this way, or why I chose 5 as the max, but it makex sense to relax it now.  Setting to 50, with intent to remove constraint altogether.  Still doesn't explain why perturb_smoothing_variance remains so high.</p>
+
+<p><strong>Test #1</strong></p>
+
+<p><em>Approach</em>: plot tr_curves_ml vs. perturb_smoothing_variance.  Compare against curve_tree_ml vs. perturb_smooth_variance</p>
+
+<p><em>Results</em>: Confirmed curves have different shape (ignoring offset).  training ML plot:</p>
+
+<p><img src="/ksimek/research/img/2014-03-23-train_ml_vs_perturb_smoothing_variance.png" alt="" /></p>
+
+<p>Reference ML plot:</p>
+
+<p><img src="/ksimek/research/img/2014-03-23-reference_ml_vs_perturb_smoothing_variance.png" alt="" /></p>
+
+<p>Is attachment the issue?</p>
+
+<p><strong>Test</strong></p>
+
+<p><em>Approach:</em> re-run test #1 after detaching curves</p>
+
+<p><em>Result:</em> no qualitative change</p>
+
+<p><strong>Observations</strong></p>
+
+<p>Prior covariances seem equivalent.
+Likelihood covariances differ.  Investigating...  turns out noise variance was being handled wrongly in <strong>two places</strong>.  Was dividing when I should have multiplied (cognitive issue: variance vs. precision); was using value instead of sqrt (cognitive issue: variance vs. standard deviation).</p>
+
+<p>Bingo!  Results are within a factor of 1.6e-5 of constant offset (for model #3)</p>
+
+<p>Still getting differences with model #5.</p>
+
+<p>prior is different in the perturb offset component -- differences are unstructured but large (on the order of +-5e-1).  Numerical instability?  Why here and not with model 3?</p>
+
+<p>HUGE BUG in model #5: should have used 'independent' temporal model, not constant model.</p>
+
+<p>Fixed, model #5 now agrees in both implementations (training and refernce).</p>
+
+<h2>Retraining</h2>
+
+<p>Running training now that we've worked out the apparent bugs.</p>
+
+<p>perturb_scale is exploding to 49.999 (near max).  unclear why.  lets cap it lower for now, investigate later.</p>
+
+<p>Capped scale to 10; it seems to settle lower, so we were probably just seeing a transient before.  Possibly just return NaN in this case and it should take a smaller step.</p>
+
+<h2>Adding a new model</h2>
+
+<p>get_model_kernel
+get_model_kernel_derive
+get_base_covariance
+tr_curve_ml</p>
+
+<p>Changes:
+* relaxed scale maximum
+* fixed bug in training marginal likelihood
+* fixed bug in model 5</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/03/24/work-log" class="next" title="TULIPS - Debugging training">TULIPS - Debugging training &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2014/03/18/work-log" class="prev" title="Experiment - Full-camera linearization">&larr; Experiment - Full-camera linearization</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

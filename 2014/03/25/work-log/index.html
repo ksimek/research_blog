@@ -1,0 +1,276 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Debugging reconstruction anomalies &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Debugging reconstruction anomalies
+    </h1>
+
+  <div class="date emphnext">March 25, 2014</div>
+    
+
+
+  
+    <p>Continuing from yesterday.  Issue: strange reconstruction results after retraining.</p>
+
+<h2>Issue: Reconstruction anomalies</h2>
+
+<h3>Experiment #1</h3>
+
+<p>Add a small amount to the diagonal of the covariance and re-run reconstruction.</p>
+
+<p>Result:  Adding a moderate amount of covariance to the diagonal seems to fix the results but probably due to additional smoothing.</p>
+
+<p>Adding 1.5 - makes results worse, bizarre jutting sections. This counterintuitive if the phenomenon is due to increasing noise variance.
+Adding 2 - makes reconstruction look good.
+Adding 10000 - reconstruction becomes straight sticks.</p>
+
+<p>Discussion: analytically this is equivalent to multiplying the noise variance by a constant.  We already know that increasing noise variance solves the issue.  The question remains: why did our training algorithm prefer this? Also, why does decreasing noise variance force the reconstruction <em>away</em> from the data?  Strong contradiction between data and</p>
+
+<h3>Experiment #2</h3>
+
+<p>Add a small amount to the diagonal of the prior covariance matrix</p>
+
+<p>Result: no obvious improvement (inconclusive)</p>
+
+<h3>Experiment #4</h3>
+
+<p>Disable attachment</p>
+
+<p>Result:  <em>significant improvement</em>.</p>
+
+<p>Discussion:  This was totally unexpected.  Almost all issues seem to be caused by bad attachment.  The affect of bad attachment is probably exacerbated by small noise variance -- the hardness of the constraints lead to contradictions that are resolved by anomalous reconstructions.</p>
+
+<h3>Conclusion</h3>
+
+<p>Bad attachment guess, combined with nonrobust choice of nosie variance causes contradiction in posterior and strange reconstructions.  Need to develop a better approach to infer attachment.  Issue there is partly that reconstructed individual curves have tails that extend past the attachment point, likely due to bad index estimatization.  If we fix index estimation, we'll be closer to a good branch estimation procedure.</p>
+
+<h2>Misstep - index optimization "bug"</h2>
+
+<p>Noticed camera linearization was occuring <em>after</em> index optimization, which is likely causing the looping.</p>
+
+<p>Added optional camera linearization to <code>process_tracks.m</code>.  Issues seemed to get worse, but in fact, linearization wasn't running -- forget to set flag to 'true'.</p>
+
+<h2>Overextension</h2>
+
+<h3>Experiment #1</h3>
+
+<p>Hypothesis: overrestrictive noise variance results in contradictions requiring contortion to resolve.</p>
+
+<p>Approach: relax noise</p>
+
+<p>Results:</p>
+
+<ul>
+<li>2x - much worse</li>
+<li>4x - different, still bad</li>
+<li>8x - still bad</li>
+<li>16x - mostly resolved; weak tails</li>
+</ul>
+
+
+<p>Is linearization causing it?  is model 5 causing it?  Is linearization trsutworthy?</p>
+
+<p>Linearization seems to make it a little worse.</p>
+
+<p>Should we take linearization into account when optimizing depth?</p>
+
+<p>scenario: curve points toward camera, high uncertainty as to index, because BP line is in direction of curve.  After linearization, BP lines change; no longer in direction of curve, index optimization can't fix bad 3d position.</p>
+
+<h3>Experiment #3</h3>
+
+<p>Plot likelihood (reference implementation) against noise variance.</p>
+
+<h2>Miscellaneous thoughts</h2>
+
+<p>It kind of makes sense that iid noise would be zero, since the data we're drawing from is so smooth to begin with, and basically noiseless. Any errors arise from mistracing and are strongly correlated due to the smoothness of the Bezier curves.</p>
+
+<p>If the issue is near-singular matrices, the traditional solution to this is adding a tiny amount of covariance to the diagonal of the prior matrix.</p>
+
+<h2>Open issues</h2>
+
+<p>Index optimization resulting in weird loops at endpoints</p>
+
+<p>Camera linearization reuslts in extensive stretching and looping during index optimization</p>
+
+<p>T</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/03/27/work-log" class="next" title="Debugging Index optimization">Debugging Index optimization &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2014/03/24/work-log" class="prev" title="TULIPS - Debugging training">&larr; TULIPS - Debugging training</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+
