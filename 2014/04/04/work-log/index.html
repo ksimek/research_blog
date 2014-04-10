@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>KLS Research Blog &larr; Kyle Simek</title>
+   <title>Work Log &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -77,226 +77,94 @@
 
 
   
-
-<div id="page">
+<div id="page" class="article">
 	
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/24/work-log">
-      <li class="title">
-            [Work log] Testing CL energy
-        </li>
-      </a>
-      <div class="date emphnext">December 24, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/23/work-log">
-      <li class="title">
-            [Work log] Work Log
-        </li>
-      </a>
-      <div class="date emphnext">December 23, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/23/reference">
-      <li class="title">
-            [Reference] Constant-length energy function - Hessian
-        </li>
-      </a>
-      <div class="date emphnext">December 23, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/19/work-log">
-      <li class="title">
-            [Work log] Work Log
-        </li>
-      </a>
-      <div class="date emphnext">December 19, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/19/reference">
-      <li class="title">
-            [Reference] Constant-length energy function -- revisited
-        </li>
-      </a>
-      <div class="date emphnext">December 19, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/12/reference">
-      <li class="title">
-            [Reference] Constant-length energy function
-        </li>
-      </a>
-      <div class="date emphnext">December 12, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/10/work-log">
-      <li class="title">
-            [Work log] Optimizing indices: Length constraints
-        </li>
-      </a>
-      <div class="date emphnext">December 10, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/09/work-log">
-      <li class="title">
-            [Work log] Hyperprior
-        </li>
-      </a>
-      <div class="date emphnext">December 09, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/07/work-log">
-      <li class="title">
-            [Work log] Struggling with index offset and shrinkage
-        </li>
-      </a>
-      <div class="date emphnext">December 07, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/05/work-log">
-      <li class="title">
-            [Work log] Troubleshooting excessive index drift in endpoints; fixing Hessian under variable transformation.
-        </li>
-      </a>
-      <div class="date emphnext">December 05, 2013</div>
-</ul>
-
-
-<!-- Pagination links -->
-<div class="pagination">
-  
-    <a href="/ksimek/research/page3" class="previous">&lt;&lt; Read Newer Posts</a>
   
   
-    |
+    
+
+
+  <h1 class="title">
+        [Work Log] Work Log
+    </h1>
+
+  <div class="date emphnext">April 04, 2014</div>
+    
+
+
+  
+    <p>Question: is curve stretching only present in last point?  If so, can we hack it away?</p>
+
+<ol>
+<li>detect index stretching (threshold on diff)</li>
+<li>for each, visualize with test_optim</li>
+<li>fun on full dataset, count (1) how many stretching occur and (2) how many are the last point?</li>
+</ol>
+
+
+<p>Example</p>
+
+<pre><code>[data, parents] = load_wacv_data(5, [397 530]', params, 1:4:36); %'
+[mu, Tracks, params] = get_wacv_result(5, params.model_type, 'deleteme_new4');
+out = test_for_wandering_index(Tracks,20);
+[wander_is_last, wander_view_num] = exp_2014_04_04_test_wandering_index(Tracks, data, params, 20)
+</code></pre>
+
+<p>Answer: Usually, wandering is present in last point, but not always.  Curve 1 in the example has 15 internal wandering events.  All other curves are last point.</p>
+
+<p>Question: Can we correct the bad indices in curve 1 by using a numerical hessian?</p>
+
+<p>Question: could we avoid internal wandering by preventing endpoint wandering?  e.g. is internal wandering occurring because endpoint wandering is so extreme?</p>
+
+<p>Question: does stretched point have higher likelihood than hand-picked index?  If so, what adjustments to params reverses this case?</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
   
   
-    <a href="/ksimek/research/page5" class="next ">Read Older Posts &gt;&gt;</a>
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/04/07/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
+  
+    <a href="/ksimek/research/2014/04/03/work-log" class="prev" title="Crash recovery; Index estimation - the saga continues">&larr; Crash recovery; Index estimation - the saga continues</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
 </div>
 
 
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
 </div><!-- End Page -->
+
 
 
   

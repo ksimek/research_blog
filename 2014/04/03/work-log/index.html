@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>KLS Research Blog &larr; Kyle Simek</title>
+   <title>Crash recovery; Index estimation - the saga continues &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -77,226 +77,96 @@
 
 
   
-
-<div id="page">
+<div id="page" class="article">
 	
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/24/work-log">
-      <li class="title">
-            [Work log] Testing CL energy
-        </li>
-      </a>
-      <div class="date emphnext">December 24, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/23/work-log">
-      <li class="title">
-            [Work log] Work Log
-        </li>
-      </a>
-      <div class="date emphnext">December 23, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/23/reference">
-      <li class="title">
-            [Reference] Constant-length energy function - Hessian
-        </li>
-      </a>
-      <div class="date emphnext">December 23, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/19/work-log">
-      <li class="title">
-            [Work log] Work Log
-        </li>
-      </a>
-      <div class="date emphnext">December 19, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/19/reference">
-      <li class="title">
-            [Reference] Constant-length energy function -- revisited
-        </li>
-      </a>
-      <div class="date emphnext">December 19, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/12/reference">
-      <li class="title">
-            [Reference] Constant-length energy function
-        </li>
-      </a>
-      <div class="date emphnext">December 12, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/10/work-log">
-      <li class="title">
-            [Work log] Optimizing indices: Length constraints
-        </li>
-      </a>
-      <div class="date emphnext">December 10, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/09/work-log">
-      <li class="title">
-            [Work log] Hyperprior
-        </li>
-      </a>
-      <div class="date emphnext">December 09, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/07/work-log">
-      <li class="title">
-            [Work log] Struggling with index offset and shrinkage
-        </li>
-      </a>
-      <div class="date emphnext">December 07, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/05/work-log">
-      <li class="title">
-            [Work log] Troubleshooting excessive index drift in endpoints; fixing Hessian under variable transformation.
-        </li>
-      </a>
-      <div class="date emphnext">December 05, 2013</div>
-</ul>
-
-
-<!-- Pagination links -->
-<div class="pagination">
-  
-    <a href="/ksimek/research/page3" class="previous">&lt;&lt; Read Newer Posts</a>
   
   
-    |
+    
+
+
+  <h1 class="title">
+        [Work Log] Crash recovery; Index estimation - the saga continues
+    </h1>
+
+  <div class="date emphnext">April 03, 2014</div>
+    
+
+
+  
+    <p>Machine crashed; need to get matlab environment back to where it was yesterday</p>
+
+<p>TODO:</p>
+
+<ul>
+<li>load save tracks files</li>
+<li>re-run training (compare against any recorded values)</li>
+<li>re-run wacv with hessian disabled</li>
+</ul>
+
+
+<p>Done.  Process saved in <code>setups/setup_workspace_2014_04.m</code> for future reference.</p>
+
+<h2>Index estimation</h2>
+
+<p>Using <code>wacv-2012/test_optim.m</code> to visualize the correspondence between triangulated points and reconstructed curve.  This is a rough proxy for visualizing curve indices -- bad indices result in a bad reconstruction, and the matching will look bizarre.</p>
+
+<p>...</p>
+
+<p>After much debugging, found that test_optim.m had a regressed, and was displaying a bad reconstruction</p>
+
+<p>I learned an excellent approach for visually assessing indices: run <code>test_optim</code> with centered_mode=true and split_views=true.  The resulting plot will connect triangulated points to posterior points, WITH an arrow indicating the backprojection direction.  For each curve, rotate the plot so the backprojection arrow disappears (looking in the backprojection direction) -- the connecting line for that point should be nearly perpendicular to the reconstructed curve if the reconstruction is good.</p>
+
+<p>A second key observation: although minimizing the marginal likelihood does result in index shrinkage, the ratio of distances between adjacent points is equal to the ratio of differences between adjacent indices.  Thus, the scale component</p>
+
+<p>Third:  When bad index estimates cause terrible recponstructions, the per-view reconstructions actually look not bad (i.e. not marginalizing over offset perturbations).  Position of per-view reconstructed curves is suspect.</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
   
   
-    <a href="/ksimek/research/page5" class="next ">Read Older Posts &gt;&gt;</a>
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/04/04/work-log" class="next" title="Work Log">Work Log &rarr;</a>
   
+  
+    <a href="/ksimek/research/2014/04/02/work-log" class="prev" title="TULIPS: index issue">&larr; TULIPS: index issue</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
 </div>
 
 
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
 </div><!-- End Page -->
+
 
 
   

@@ -159,10 +159,6 @@ Adding 10000 - reconstruction becomes straight sticks.</p>
 
 <p>scenario: curve points toward camera, high uncertainty as to index, because BP line is in direction of curve.  After linearization, BP lines change; no longer in direction of curve, index optimization can't fix bad 3d position.</p>
 
-<h3>Experiment #3</h3>
-
-<p>Plot likelihood (reference implementation) against noise variance.</p>
-
 <h2>Miscellaneous thoughts</h2>
 
 <p>It kind of makes sense that iid noise would be zero, since the data we're drawing from is so smooth to begin with, and basically noiseless. Any errors arise from mistracing and are strongly correlated due to the smoothness of the Bezier curves.</p>

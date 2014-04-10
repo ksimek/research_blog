@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>KLS Research Blog &larr; Kyle Simek</title>
+   <title>TULIPS: index issue &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -77,226 +77,90 @@
 
 
   
-
-<div id="page">
+<div id="page" class="article">
 	
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/24/work-log">
-      <li class="title">
-            [Work log] Testing CL energy
-        </li>
-      </a>
-      <div class="date emphnext">December 24, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/23/work-log">
-      <li class="title">
-            [Work log] Work Log
-        </li>
-      </a>
-      <div class="date emphnext">December 23, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/23/reference">
-      <li class="title">
-            [Reference] Constant-length energy function - Hessian
-        </li>
-      </a>
-      <div class="date emphnext">December 23, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/19/work-log">
-      <li class="title">
-            [Work log] Work Log
-        </li>
-      </a>
-      <div class="date emphnext">December 19, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/19/reference">
-      <li class="title">
-            [Reference] Constant-length energy function -- revisited
-        </li>
-      </a>
-      <div class="date emphnext">December 19, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/12/reference">
-      <li class="title">
-            [Reference] Constant-length energy function
-        </li>
-      </a>
-      <div class="date emphnext">December 12, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/10/work-log">
-      <li class="title">
-            [Work log] Optimizing indices: Length constraints
-        </li>
-      </a>
-      <div class="date emphnext">December 10, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/09/work-log">
-      <li class="title">
-            [Work log] Hyperprior
-        </li>
-      </a>
-      <div class="date emphnext">December 09, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/07/work-log">
-      <li class="title">
-            [Work log] Struggling with index offset and shrinkage
-        </li>
-      </a>
-      <div class="date emphnext">December 07, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/05/work-log">
-      <li class="title">
-            [Work log] Troubleshooting excessive index drift in endpoints; fixing Hessian under variable transformation.
-        </li>
-      </a>
-      <div class="date emphnext">December 05, 2013</div>
-</ul>
-
-
-<!-- Pagination links -->
-<div class="pagination">
-  
-    <a href="/ksimek/research/page3" class="previous">&lt;&lt; Read Newer Posts</a>
   
   
-    |
+    
+
+
+  <h1 class="title">
+        [Work Log] TULIPS: index issue
+    </h1>
+
+  <div class="date emphnext">April 02, 2014</div>
+    
+
+
+  
+    <p>Tested gradient and hessian -- is it correct with new model?  ... Yes.</p>
+
+<p>Is index optimization working?  Quick test:  ran this code twice, once using analytical hessian, once with hessian-free algorithm:</p>
+
+<pre><code>[mu_, Tracks_] = get_wacv_result(5, params_trained.model_type, 'deleteme_new2');
+out = optimize_ml_wrt_indices(Tracks_(14), [], data, params_trained);
+</code></pre>
+
+<p>Analytical method halts early -- can't improve.  Final gradient is noticibly non-zero</p>
+
+<p><img src="/ksimek/research/img/2014-04-02-grad_1.png" alt="" /></p>
+
+<p>Hessian-free method seems very effective:</p>
+
+<p><img src="/ksimek/research/img/2014-04-02-grad_2.png" alt="" /></p>
+
+<p>Perhaps the optimization is failing; let's run end-to-end with hessian-free algorithm.  It will be super slow, but if it gives better results, we may have our solution.</p>
+
+<pre><code>[mu_, Tracks_] = get_wacv_result(5, params_trained.model_type, 'deleteme_new3');
+</code></pre>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
   
   
-    <a href="/ksimek/research/page5" class="next ">Read Older Posts &gt;&gt;</a>
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/04/03/work-log" class="next" title="Crash recovery; Index estimation - the saga continues">Crash recovery; Index estimation - the saga continues &rarr;</a>
   
+  
+    <a href="/ksimek/research/2014/04/01/work-log" class="prev" title="FIRE: Verifying date bug, export-to-csv">&larr; FIRE: Verifying date bug, export-to-csv</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
 </div>
 
 
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
 </div><!-- End Page -->
+
 
 
   

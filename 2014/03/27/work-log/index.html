@@ -93,7 +93,83 @@
 
 
   
-    
+    <p>Still getting terrible stretching due to extreme index drift during optimization.</p>
+
+<h3>Experiment 1</h3>
+
+<p>Theory: camera linearization is messing with our 3D point localization.  Propose solving by increasing noise covariance for noisy.</p>
+
+<p>Assuming an effective depth uncertainty of (h), and in-plane uncertainty of (w), the in-plane uncertainty of the adjusted covariance matrix (w') is given by</p>
+
+<p>[
+w' = w \mathrm{cos}<sup>2</sup> \theta + h \mathrm{sin}<sup>2</sup> \theta
+]</p>
+
+<p>This is illustrated roughly below.</p>
+
+<p><img src="/ksimek/research/img/2014-03-27-covariance_adjustment.jpg" alt="" /></p>
+
+<p>Implemented this using hand-set depth uncertainty (h = 3)mm.  Didn't resolve the issue for extremely stretched curves, but the weak stretching seems improved.</p>
+
+<p><em>Discussion</em></p>
+
+<p>Noise variance is CRAZY low.  Small deviation from true curve is causing huge contortions to resolve.  Why is it trained this low if contradictions result?  This smells like overfitting, except we're testing and training on the same date at the moment so that seems to be ruled out.</p>
+
+<p>Loosen and retrain?</p>
+
+<p>We apparently need to multiply standard deviation by 4 to recover; according to <a href="/ksimek/research/2014/03/25/work-log/">yesterday's experiment</a>.</p>
+
+<h3>Experiment #2</h3>
+
+<p>Plot likelihood (reference implementation) against noise variance.</p>
+
+<p>Apparently it does want a higher noise variance, but only 2.5x more, not 4x. is this enough to improve reconstruction?</p>
+
+<p>Nope.</p>
+
+<h3>Experiment #3</h3>
+
+<p>Repeat yesterday's "Overextension" experiment #1.  Multiplying variance by 16x seemed to fix issues, but now I suspect that we just got lucky.  Try a few values near 16x.</p>
+
+<p>With linearization enabled:</p>
+
+<ul>
+<li>15x terrible</li>
+<li>15.5x resolved</li>
+<li>16x resolved</li>
+<li>16.5x terrible</li>
+<li>50x terrible</li>
+</ul>
+
+
+<p>Without linearization:</p>
+
+<ul>
+<li>15x resolved</li>
+<li>15.5x resolved</li>
+<li>16x terrible</li>
+<li>16.5x  resolved</li>
+<li>50x resolved</li>
+</ul>
+
+
+<p>Yes, tiny tweaks to variance cause us to revert to bad reconstructions.  We probably just got lucky when we observed 16x working well yesterday.</p>
+
+<p>Now we're back to square one.  noise variance doesn't seem to be connected to this issue of extended</p>
+
+<p><em>Discussion</em></p>
+
+<p>It seems linearization is a bane to index refinement.  We introduced it to address reconstruction issues; perhaps we should only apply it in that case.</p>
+
+<h1>FIRE</h1>
+
+<p>Re-merging and rechecking new datasets</p>
+
+<p>Only one error, fixed and sent changes to Rebecca.</p>
+
+<p>Regularizing immunity CSV; adding new column type: "numeric_missing:XXX", where missing data is represented by one of a few possible strings.  Split the "date(other date)" column into "date" column and "other date" column.  Parsed in matlab.  comparing immunity dates to self-report dates for each subject; interpolating as needed.   Only 9 notable anomalies out of 710.</p>
+
+<p>Next: discretize, measure and visualize discretization errors, export to csv</p>
 
       <address class="signature">
         Posted by
@@ -103,6 +179,9 @@
 
 
   
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/03/31/work-log" class="next" title="Fire: mergin immunity data">Fire: mergin immunity data &rarr;</a>
   
   
     <a href="/ksimek/research/2014/03/25/work-log" class="prev" title="Debugging reconstruction anomalies">&larr; Debugging reconstruction anomalies</a>

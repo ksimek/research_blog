@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>KLS Research Blog &larr; Kyle Simek</title>
+   <title>Fire: mergin immunity data &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -77,226 +77,75 @@
 
 
   
-
-<div id="page">
+<div id="page" class="article">
 	
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/24/work-log">
-      <li class="title">
-            [Work log] Testing CL energy
-        </li>
-      </a>
-      <div class="date emphnext">December 24, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/23/work-log">
-      <li class="title">
-            [Work log] Work Log
-        </li>
-      </a>
-      <div class="date emphnext">December 23, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/23/reference">
-      <li class="title">
-            [Reference] Constant-length energy function - Hessian
-        </li>
-      </a>
-      <div class="date emphnext">December 23, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/19/work-log">
-      <li class="title">
-            [Work log] Work Log
-        </li>
-      </a>
-      <div class="date emphnext">December 19, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/19/reference">
-      <li class="title">
-            [Reference] Constant-length energy function -- revisited
-        </li>
-      </a>
-      <div class="date emphnext">December 19, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/12/reference">
-      <li class="title">
-            [Reference] Constant-length energy function
-        </li>
-      </a>
-      <div class="date emphnext">December 12, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/10/work-log">
-      <li class="title">
-            [Work log] Optimizing indices: Length constraints
-        </li>
-      </a>
-      <div class="date emphnext">December 10, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/09/work-log">
-      <li class="title">
-            [Work log] Hyperprior
-        </li>
-      </a>
-      <div class="date emphnext">December 09, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/07/work-log">
-      <li class="title">
-            [Work log] Struggling with index offset and shrinkage
-        </li>
-      </a>
-      <div class="date emphnext">December 07, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/12/05/work-log">
-      <li class="title">
-            [Work log] Troubleshooting excessive index drift in endpoints; fixing Hessian under variable transformation.
-        </li>
-      </a>
-      <div class="date emphnext">December 05, 2013</div>
-</ul>
-
-
-<!-- Pagination links -->
-<div class="pagination">
-  
-    <a href="/ksimek/research/page3" class="previous">&lt;&lt; Read Newer Posts</a>
   
   
-    |
+    
+
+
+  <h1 class="title">
+        [Work Log] Fire: mergin immunity data
+    </h1>
+
+  <div class="date emphnext">March 31, 2014</div>
+    
+
+
+  
+    <p>Having written code for guessing visit-number from dates in the Immunity dataset, I ran it and found several records with significant error.  Spent a long time inspecting each one in detail, and found lots of data-entry errors (wrong year, wrong month, transposed digits, miskeyed subject id's, etc).  In one case, the visit number was off-by-one in the self-report data, which was only apparent when the immunity data was introduced and an extra "halways-between" visit was present.   Was able to correct about 30 of these errors confidently; in the end only about 10 out of 700 records remained error greater than 10 days.</p>
+
+<p>Wrote code to merge new datasets into the full database; used it to merge newly-cleaned immunity data into the full database.</p>
+
+<p>Next step: write export-to-CSV routine</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
   
   
-    <a href="/ksimek/research/page5" class="next ">Read Older Posts &gt;&gt;</a>
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/04/01/work-log" class="next" title="FIRE: Verifying date bug, export-to-csv">FIRE: Verifying date bug, export-to-csv &rarr;</a>
   
+  
+    <a href="/ksimek/research/2014/03/27/work-log" class="prev" title="Debugging Index optimization">&larr; Debugging Index optimization</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
 </div>
 
 
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
 </div><!-- End Page -->
+
 
 
   
