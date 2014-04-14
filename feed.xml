@@ -8,6 +8,60 @@
 		
 			<item>
 				<title>Work Log</title>
+				<description>&lt;p&gt;asdf /ksimek/research/pomodoro.html#2014_04_14&lt;/p&gt;
+</description>
+				<pubDate>Mon, 14 Apr 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/14/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/14/work-log</guid>
+			</item>
+		
+			<item>
+				<title>FIRE date analysis</title>
+				<description>&lt;ol&gt;
+&lt;li&gt;awk script to replace blanks with -99&lt;/li&gt;
+&lt;li&gt;awk script to replace dates with epoch numbers&lt;/li&gt;
+&lt;li&gt;decide which columns to use and how to pool&lt;/li&gt;
+&lt;li&gt;clustering&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Something is wrong with the scripts that generate the database -- some values are missing from the goldStandardDateCRF key field. It's because some records exist solely to hold immunity data, which doesn't have an official gold standard date column.  Can probably ignore for now.&lt;/p&gt;
+
+&lt;h2&gt;Clustering&lt;/h2&gt;
+
+&lt;p&gt;For now, use pooled scores for each of 5 databses:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sri3.csv sritot
+das4.csv dastot
+ea4.csv  easumtot
+fact4.csv facttot
+pss4.csv psstot
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The datasets were originally &lt;a href=&quot;http://vision.sista.arizona.edu/ksimek/research/2014/03/06/work-log/&quot;&gt;named here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Read data, isolated columns of interest, and concatenated each subjects' visits into long rows, then write to csv file for processing:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;fire_data_path = '../../data/'
+[db, db_meta] = fire_build_self_report_database(fire_data_path);
+[cluster_db, cluster_db_meta] = fire_gather_columns('../../experiments/2014_04_10_cluster_3/columns.txt', db_meta, db);
+wide_db = e_2014_03_merge_visits(cluster_db)
+fire_write_csv(wide_db(:,2:end), [], 'test.csv')
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;EXPERIMENT PATH&lt;/strong&gt;: experiments/2014_04_10_cluster_3&lt;/p&gt;
+
+&lt;p&gt;README file in experiment path describe how to prepare data and run experiment.&lt;/p&gt;
+
+&lt;p&gt;Result: 3-cluster model, with apparently very good separation. reulsts are in $EXPERIMENT_PATH/out/cluster_results.txt&lt;/p&gt;
+</description>
+				<pubDate>Thu, 10 Apr 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/10/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/10/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
 				<description>&lt;p&gt;Rewrote training procedure from scratch and now getting much more sensible results.  The overall goal is to isolate parameters to try to make them as independent as possible; and then use one or two-dimensional optimization to estimate them.&lt;/p&gt;
 
 &lt;p&gt;First, I hard-coded several variables.&lt;/p&gt;
@@ -276,142 +330,6 @@ w' = w \mathrm{cos}&lt;sup&gt;2&lt;/sup&gt; \theta + h \mathrm{sin}&lt;sup&gt;2&
 				<pubDate>Thu, 27 Mar 2014 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2014/03/27/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/03/27/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Debugging reconstruction anomalies</title>
-				<description>&lt;p&gt;Continuing from yesterday.  Issue: strange reconstruction results after retraining.&lt;/p&gt;
-
-&lt;h2&gt;Issue: Reconstruction anomalies&lt;/h2&gt;
-
-&lt;h3&gt;Experiment #1&lt;/h3&gt;
-
-&lt;p&gt;Add a small amount to the diagonal of the covariance and re-run reconstruction.&lt;/p&gt;
-
-&lt;p&gt;Result:  Adding a moderate amount of covariance to the diagonal seems to fix the results but probably due to additional smoothing.&lt;/p&gt;
-
-&lt;p&gt;Adding 1.5 - makes results worse, bizarre jutting sections. This counterintuitive if the phenomenon is due to increasing noise variance.
-Adding 2 - makes reconstruction look good.
-Adding 10000 - reconstruction becomes straight sticks.&lt;/p&gt;
-
-&lt;p&gt;Discussion: analytically this is equivalent to multiplying the noise variance by a constant.  We already know that increasing noise variance solves the issue.  The question remains: why did our training algorithm prefer this? Also, why does decreasing noise variance force the reconstruction &lt;em&gt;away&lt;/em&gt; from the data?  Strong contradiction between data and&lt;/p&gt;
-
-&lt;h3&gt;Experiment #2&lt;/h3&gt;
-
-&lt;p&gt;Add a small amount to the diagonal of the prior covariance matrix&lt;/p&gt;
-
-&lt;p&gt;Result: no obvious improvement (inconclusive)&lt;/p&gt;
-
-&lt;h3&gt;Experiment #4&lt;/h3&gt;
-
-&lt;p&gt;Disable attachment&lt;/p&gt;
-
-&lt;p&gt;Result:  &lt;em&gt;significant improvement&lt;/em&gt;.&lt;/p&gt;
-
-&lt;p&gt;Discussion:  This was totally unexpected.  Almost all issues seem to be caused by bad attachment.  The affect of bad attachment is probably exacerbated by small noise variance -- the hardness of the constraints lead to contradictions that are resolved by anomalous reconstructions.&lt;/p&gt;
-
-&lt;h3&gt;Conclusion&lt;/h3&gt;
-
-&lt;p&gt;Bad attachment guess, combined with nonrobust choice of nosie variance causes contradiction in posterior and strange reconstructions.  Need to develop a better approach to infer attachment.  Issue there is partly that reconstructed individual curves have tails that extend past the attachment point, likely due to bad index estimatization.  If we fix index estimation, we'll be closer to a good branch estimation procedure.&lt;/p&gt;
-
-&lt;h2&gt;Misstep - index optimization &quot;bug&quot;&lt;/h2&gt;
-
-&lt;p&gt;Noticed camera linearization was occuring &lt;em&gt;after&lt;/em&gt; index optimization, which is likely causing the looping.&lt;/p&gt;
-
-&lt;p&gt;Added optional camera linearization to &lt;code&gt;process_tracks.m&lt;/code&gt;.  Issues seemed to get worse, but in fact, linearization wasn't running -- forget to set flag to 'true'.&lt;/p&gt;
-
-&lt;h2&gt;Overextension&lt;/h2&gt;
-
-&lt;h3&gt;Experiment #1&lt;/h3&gt;
-
-&lt;p&gt;Hypothesis: overrestrictive noise variance results in contradictions requiring contortion to resolve.&lt;/p&gt;
-
-&lt;p&gt;Approach: relax noise&lt;/p&gt;
-
-&lt;p&gt;Results:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;2x - much worse&lt;/li&gt;
-&lt;li&gt;4x - different, still bad&lt;/li&gt;
-&lt;li&gt;8x - still bad&lt;/li&gt;
-&lt;li&gt;16x - mostly resolved; weak tails&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Is linearization causing it?  is model 5 causing it?  Is linearization trsutworthy?&lt;/p&gt;
-
-&lt;p&gt;Linearization seems to make it a little worse.&lt;/p&gt;
-
-&lt;p&gt;Should we take linearization into account when optimizing depth?&lt;/p&gt;
-
-&lt;p&gt;scenario: curve points toward camera, high uncertainty as to index, because BP line is in direction of curve.  After linearization, BP lines change; no longer in direction of curve, index optimization can't fix bad 3d position.&lt;/p&gt;
-
-&lt;h2&gt;Miscellaneous thoughts&lt;/h2&gt;
-
-&lt;p&gt;It kind of makes sense that iid noise would be zero, since the data we're drawing from is so smooth to begin with, and basically noiseless. Any errors arise from mistracing and are strongly correlated due to the smoothness of the Bezier curves.&lt;/p&gt;
-
-&lt;p&gt;If the issue is near-singular matrices, the traditional solution to this is adding a tiny amount of covariance to the diagonal of the prior matrix.&lt;/p&gt;
-
-&lt;h2&gt;Open issues&lt;/h2&gt;
-
-&lt;p&gt;Index optimization resulting in weird loops at endpoints&lt;/p&gt;
-
-&lt;p&gt;Camera linearization reuslts in extensive stretching and looping during index optimization&lt;/p&gt;
-
-&lt;p&gt;T&lt;/p&gt;
-</description>
-				<pubDate>Tue, 25 Mar 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/03/25/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/03/25/work-log</guid>
-			</item>
-		
-			<item>
-				<title>TULIPS - Debugging training</title>
-				<description>&lt;p&gt;Issue: after training, still getting a very large perturb_smoothing_variance:  1e-4 instead of more reasonable 1e-6.&lt;/p&gt;
-
-&lt;p&gt;Need to update tracks to reflect new noise parameter.&lt;/p&gt;
-
-&lt;h2&gt;Cleanup: building data pipeline&lt;/h2&gt;
-
-&lt;p&gt;Most of the processing pipeline is currently implemented in &lt;code&gt;wacv_2014/run_wacv_4.m&lt;/code&gt;.  Moving the track-processing part into &lt;code&gt;process_tracks.m&lt;/code&gt;.  Using the '7-stage' pipeline [as documented here].&lt;/p&gt;
-
-&lt;h2&gt;Retraining&lt;/h2&gt;
-
-&lt;p&gt;updated tracks, retrained.  New trained parameters look reasonable, but the reconstruction is terrible:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-03-24-retrain_reconstruction.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Maybe index optimization is failing, because the model #5 gradient has a bug?  Or hitting the iteration limit?  Running reconstruction with model #3 (whose gradient is proven).&lt;/p&gt;
-
-&lt;p&gt;Nope, it seems to be the new parameters:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-03-24-retrain_reconstruction_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;It's weird, because the noise variance dropped signficantly, but we're seeing greater drift away from the data.&lt;/p&gt;
-
-&lt;p&gt;Lets try relaxing the iteration limit anyway...&lt;/p&gt;
-
-&lt;p&gt;More iterations makes it more crazy.&lt;/p&gt;
-
-&lt;p&gt;Sanity check time.  Roll back to old parameters and reconstruct.&lt;/p&gt;
-
-&lt;p&gt;Check.  Old parameters give a sensible reconstruction.&lt;/p&gt;
-
-&lt;p&gt;Differences: (1) much lower noise variance, and (2) much lower perturb smoothing variance.&lt;/p&gt;
-
-&lt;p&gt;The noise variance seems to be the issue here -- raising it to pre-training levels returns us to sensible reconstructions.&lt;/p&gt;
-
-&lt;p&gt;Running out of steam -- time to take a break.  Next steps -&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;manual test noise variance; hypothesis: large variance gives higher likelihood.&lt;/li&gt;
-&lt;li&gt;ensure we aren't suffering from near-singular matrix during reconstruction. (piece-wise reconstruction?)&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Mon, 24 Mar 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/03/24/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/03/24/work-log</guid>
 			</item>
 		
 	</channel>

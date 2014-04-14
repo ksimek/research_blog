@@ -15,6 +15,7 @@ http://vision.sista.arizona.edu/ksimek/research/feed.xml
 http://vision.sista.arizona.edu/ksimek/research/feeds.html
 http://vision.sista.arizona.edu/ksimek/research/index.html
 http://vision.sista.arizona.edu/ksimek/research/pages.html
+http://vision.sista.arizona.edu/ksimek/research/pomodoro.html
 http://vision.sista.arizona.edu/ksimek/research/projects/index.html
 http://vision.sista.arizona.edu/ksimek/research/projects/iplant/index.html
 http://vision.sista.arizona.edu/ksimek/research/projects/tulips/index.html
@@ -40,6 +41,8 @@ http://vision.sista.arizona.edu/ksimek/research/page14/index.html
 http://vision.sista.arizona.edu/ksimek/research/page15/index.html
 http://vision.sista.arizona.edu/ksimek/research/page16/index.html
 
+http://vision.sista.arizona.edu/ksimek/research/2014/04/14/work-log
+http://vision.sista.arizona.edu/ksimek/research/2014/04/10/work-log
 http://vision.sista.arizona.edu/ksimek/research/2014/04/08/work-log
 http://vision.sista.arizona.edu/ksimek/research/2014/04/07/work-log
 http://vision.sista.arizona.edu/ksimek/research/2014/04/04/work-log

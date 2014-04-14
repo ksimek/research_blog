@@ -4,13 +4,67 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2014-04-10T09:33:50-07:00</updated>
+ <updated>2014-04-14T11:51:36-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/04/14/work-log"/>
+   <updated>2014-04-14T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/04/14/work-log</id>
+   <content type="html">&lt;p&gt;asdf /ksimek/research/pomodoro.html#2014_04_14&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>FIRE date analysis</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/04/10/work-log"/>
+   <updated>2014-04-10T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/04/10/work-log</id>
+   <content type="html">&lt;ol&gt;
+&lt;li&gt;awk script to replace blanks with -99&lt;/li&gt;
+&lt;li&gt;awk script to replace dates with epoch numbers&lt;/li&gt;
+&lt;li&gt;decide which columns to use and how to pool&lt;/li&gt;
+&lt;li&gt;clustering&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Something is wrong with the scripts that generate the database -- some values are missing from the goldStandardDateCRF key field. It's because some records exist solely to hold immunity data, which doesn't have an official gold standard date column.  Can probably ignore for now.&lt;/p&gt;
+
+&lt;h2&gt;Clustering&lt;/h2&gt;
+
+&lt;p&gt;For now, use pooled scores for each of 5 databses:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sri3.csv sritot
+das4.csv dastot
+ea4.csv  easumtot
+fact4.csv facttot
+pss4.csv psstot
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The datasets were originally &lt;a href=&quot;http://vision.sista.arizona.edu/ksimek/research/2014/03/06/work-log/&quot;&gt;named here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Read data, isolated columns of interest, and concatenated each subjects' visits into long rows, then write to csv file for processing:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;fire_data_path = '../../data/'
+[db, db_meta] = fire_build_self_report_database(fire_data_path);
+[cluster_db, cluster_db_meta] = fire_gather_columns('../../experiments/2014_04_10_cluster_3/columns.txt', db_meta, db);
+wide_db = e_2014_03_merge_visits(cluster_db)
+fire_write_csv(wide_db(:,2:end), [], 'test.csv')
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;EXPERIMENT PATH&lt;/strong&gt;: experiments/2014_04_10_cluster_3&lt;/p&gt;
+
+&lt;p&gt;README file in experiment path describe how to prepare data and run experiment.&lt;/p&gt;
+
+&lt;p&gt;Result: 3-cluster model, with apparently very good separation. reulsts are in $EXPERIMENT_PATH/out/cluster_results.txt&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Work Log</title>
