@@ -12,7 +12,13 @@
 {% else %}
   <h1 class="title">{{ post_title }}</h1>
 {% endif %}
-  <div class="date emphnext">{{ post.date | date: "%B %d, %Y" }}</div>
+  <div class="date emphnext">
+    {{ post.date | date: "%B %d, %Y" }}
+      {% if page.pomodoro %}
+          <a  href="{% pomodoro_path %}"><img src="{{ site.baseurl }}/img/pom.png" /></a>
+      {% endif %}
+ 
+  </div>
     {% if page.edit %}
     <div class="edit-disclosure">
     {{page.edit}}

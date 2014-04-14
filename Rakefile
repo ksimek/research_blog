@@ -184,6 +184,13 @@ end # task :page
 
 desc "Launch preview environment"
 task :preview do
+  system "cd _tasks; make; cd .."
+  system "jekyll serve -d /tmp/research_blog_preview --watch --config _config.yml,_config_test.yml "
+end # task :preview
+
+desc "Launch preview environment"
+task :preview do
+  system "cd _tasks; make; cd .."
   system "jekyll serve -d /tmp/research_blog_preview --watch --config _config.yml,_config_test.yml "
 end # task :preview
 
