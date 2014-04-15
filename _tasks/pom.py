@@ -1,4 +1,17 @@
 #!/usr/bin/env python
+# parse pomodoro.txt into pomodoro.md
+# Currently puts everything into one web page, with separate headers for each date.
+#
+# Eventually will want to organize heirarchically to avoid over-long page.  Also would
+# be nice to paste pomodoro accomplishements at the end of daily work logs.  
+
+# TODO: reversed dates, but forward times 
+# TODO: one file per date, table of contents page, 
+# Generator plugin to add "pomodoro_file_path" field to appropriate files
+# modify post.html include to add pomodoro section at end of file.
+# update "pomodoro_path" tag?
+
+
 from __future__ import print_function
 import fileinput
 from datetime import datetime
@@ -25,12 +38,6 @@ print('{% include JB/setup %}', file=of);
 
 print('Below is an automated list of my completed [Pomodoro sessions](http://en.wikipedia.org/wiki/Pomodoro_Technique).  I use the excellent Pomodoro app by Ugo Landini, which sadly appears to be no longer in development.  If anyone knows of a newer Pomodoro app with shell script automation, [let me know]({{site.baseurl}}/contact.html).\n\nThe list below only accounts for a fraction of my actual work -- many days I forego the Pomodoro technique entirely, or use it sparingly.', file=of);
 
-# TODO: reversed dates, but forward times 
-# TODO: one file per date, table of contents page, 
-# Generator plugin to add "pomodoro_file_path" field to appropriate files
-# modify post.html include to add pomodoro section at end of file.
-# update "pomodoro_path" tag?
-#for line in reversed(open("../pomodoro.txt").readlines()):
 for line in open("../pomodoro.txt").readlines():
     i += 1;
     fields = line.split(None, 1);
@@ -40,7 +47,10 @@ for line in open("../pomodoro.txt").readlines():
     desc = fields[1].rstrip()
 
     if desc == cur_desc:
-        desc = '"'
+        desc_text = '"'
+    else:
+        desc_text = desc
+
 
     dt = datetime.fromtimestamp(timestamp);
 
@@ -60,7 +70,7 @@ for line in open("../pomodoro.txt").readlines():
         print('##{:s}'.format(dt.strftime('%B %d, %Y')), file=of);
 
     # list accomplished tasks
-    print('{:s} {:s}  '.format(dt.strftime('%X'), desc), file=of);
+    print('*{:s}* &nbsp; {:s}  '.format(dt.strftime('%I:%M %p'), desc_text), file=of);
 
     cur_year = dt.year;
     cur_month = dt.month;
