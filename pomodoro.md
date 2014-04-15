@@ -213,3 +213,9 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *02:52 PM* &nbsp; test suite - octave setup  
 *03:41 PM* &nbsp; "  
 *05:05 PM* &nbsp; test suite - engine  
+<a id="2014_04_15"></a>
+##April 15, 2014
+*09:14 AM* &nbsp; review immunity plots  
+*09:49 AM* &nbsp; review graph-cut slides  
+*10:20 AM* &nbsp; TULIPS testing framework: index discontinuity  
+*11:13 AM* &nbsp; TULIPS testing framework - evaluations: accuracy, motion  
