@@ -219,3 +219,4 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *09:49 AM* &nbsp; review graph-cut slides  
 *10:20 AM* &nbsp; TULIPS testing framework: index discontinuity  
 *11:13 AM* &nbsp; TULIPS testing framework - evaluations: accuracy, motion  
+*06:19 PM* &nbsp; TULIPS testing framework - visualization  

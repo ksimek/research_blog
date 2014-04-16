@@ -151,3 +151,4 @@
 1397580594: review graph-cut slides
 1397582410: TULIPS testing framework: index discontinuity
 1397585615: TULIPS testing framework - evaluations: accuracy, motion
+1397611153: TULIPS testing framework - visualization
