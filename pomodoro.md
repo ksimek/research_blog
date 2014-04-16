@@ -221,3 +221,7 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *11:13 AM* &nbsp; TULIPS testing framework - evaluations: accuracy, motion  
 *06:19 PM* &nbsp; TULIPS testing framework - visualization  
 *06:56 PM* &nbsp; "  
+<a id="2014_04_16"></a>
+##April 16, 2014
+*09:46 AM* &nbsp; TULIPS testing framework - calling framework  
+*10:22 AM* &nbsp; "  
