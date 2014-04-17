@@ -234,3 +234,6 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *05:28 PM* &nbsp; "  
 *05:58 PM* &nbsp; TULIPS testing framework - tes end-to-end  
 *06:47 PM* &nbsp; TULIPS testing framework - test end-to-end  
+*07:31 PM* &nbsp; "  
+*10:10 PM* &nbsp; TULIPS testing framework - test end-to-end, start HTML  
+*10:58 PM* &nbsp; TULIPS testing framework - making new tests  
