@@ -226,3 +226,10 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *09:46 AM* &nbsp; TULIPS testing framework - calling framework  
 *10:22 AM* &nbsp; "  
 *12:16 PM* &nbsp; TULIPS testing framework - testing engine  
+*01:10 PM* &nbsp; TULIPS testing framework - testing engine  
+*01:53 PM* &nbsp; "  
+*02:36 PM* &nbsp; TULIPS testing framework - finishing engine  
+*03:07 PM* &nbsp; TULIPS testing framework - debugging visualization feature  
+*04:12 PM* &nbsp; TULIPS testing framework - finishing calling code  
+*05:28 PM* &nbsp; "  
+*05:58 PM* &nbsp; TULIPS testing framework - tes end-to-end  
