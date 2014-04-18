@@ -251,3 +251,4 @@ The list below only accounts for a fraction of my actual work -- many days I for
 <a id="2014_04_18"></a>
 ##April 18, 2014
 *12:23 AM* &nbsp; ICI seminar - alpha expansion - testing  
+*12:53 AM* &nbsp; "  
