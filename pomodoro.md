@@ -244,3 +244,7 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *03:35 PM* &nbsp; "  
 *04:05 PM* &nbsp; "  
 *05:07 PM* &nbsp; "  
+*10:18 PM* &nbsp; ICI seminar - alpha expansion - graph construction  
+*10:48 PM* &nbsp; "  
+*11:18 PM* &nbsp; ICI seminar - alpha expansion - results  
+*11:48 PM* &nbsp; "  
