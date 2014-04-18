@@ -248,3 +248,6 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *10:48 PM* &nbsp; "  
 *11:18 PM* &nbsp; ICI seminar - alpha expansion - results  
 *11:48 PM* &nbsp; "  
+<a id="2014_04_18"></a>
+##April 18, 2014
+*12:23 AM* &nbsp; ICI seminar - alpha expansion - testing  
