@@ -237,3 +237,10 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *07:31 PM* &nbsp; "  
 *10:10 PM* &nbsp; TULIPS testing framework - test end-to-end, start HTML  
 *10:58 PM* &nbsp; TULIPS testing framework - making new tests  
+<a id="2014_04_17"></a>
+##April 17, 2014
+*02:30 PM* &nbsp; ICI seminar - alpha expansion  
+*03:05 PM* &nbsp; "  
+*03:35 PM* &nbsp; "  
+*04:05 PM* &nbsp; "  
+*05:07 PM* &nbsp; "  

@@ -167,3 +167,8 @@
 1397701876: TULIPS testing framework - test end-to-end
 1397711402: TULIPS testing framework - test end-to-end, start HTML
 1397714328: TULIPS testing framework - making new tests
+1397770250: ICI seminar - alpha expansion
+1397772351: ICI seminar - alpha expansion
+1397774155: ICI seminar - alpha expansion
+1397775957: ICI seminar - alpha expansion
+1397779620: ICI seminar - alpha expansion
