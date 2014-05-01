@@ -185,3 +185,8 @@
 1398922165: FIRE - model
 1398923971: FIRE - compiling
 1398926090: FIRE - main
+1398953271: FIRE - main
+1398955081: FIRE - est initial model
+1398956890: FIRE - est initial model
+1398958991: FIRE - est initial model
+1398970284: FIRE - est initial model
