@@ -179,3 +179,9 @@
 1397805800: ICI seminar - alpha expansion - testing
 1397807602: ICI seminar - alpha expansion - testing
 1398181130: experiment log visualizsation
+1398916438: TIES: piecewise linear model - model.h and inference.h
+1398918541: TIES: piecewise linear model - model.h and inference.h
+1398920353: TIES: piecewise linear model - inference.h
+1398922165: FIRE - model
+1398923971: FIRE - compiling
+1398926090: FIRE - main

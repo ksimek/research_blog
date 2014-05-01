@@ -255,3 +255,11 @@ The list below only accounts for a fraction of my actual work -- many days I for
 <a id="2014_04_22"></a>
 ##April 22, 2014
 *08:38 AM* &nbsp; experiment log visualizsation  
+<a id="2014_04_30"></a>
+##April 30, 2014
+*08:53 PM* &nbsp; TIES: piecewise linear model - model.h and inference.h  
+*09:29 PM* &nbsp; "  
+*09:59 PM* &nbsp; TIES: piecewise linear model - inference.h  
+*10:29 PM* &nbsp; FIRE - model  
+*10:59 PM* &nbsp; FIRE - compiling  
+*11:34 PM* &nbsp; FIRE - main  
