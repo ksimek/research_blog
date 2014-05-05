@@ -194,3 +194,8 @@
 1398986010: FIRE - compiling
 1399007599: Fire - compiling
 1399009406: Fire - tests
+1399302308: Fire - synthetic data
+1399304158: Fire - synthetic data
+1399306270: Fire - debugging inference test
+1399314442: Fire - debugging kjb::Vector::insert
+1399316252: Fire - troubleshooting long run times

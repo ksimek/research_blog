@@ -267,3 +267,18 @@ The list below only accounts for a fraction of my actual work -- many days I for
 <a id="2014_05_01"></a>
 ##May 01, 2014
 *07:07 AM* &nbsp; "  
+*07:38 AM* &nbsp; FIRE - est initial model  
+*08:08 AM* &nbsp; "  
+*08:43 AM* &nbsp; "  
+*11:51 AM* &nbsp; "  
+*02:29 PM* &nbsp; "  
+*04:13 PM* &nbsp; FIRE - compiling  
+*10:13 PM* &nbsp; Fire - compiling  
+*10:43 PM* &nbsp; Fire - tests  
+<a id="2014_05_05"></a>
+##May 05, 2014
+*08:05 AM* &nbsp; Fire - synthetic data  
+*08:35 AM* &nbsp; "  
+*09:11 AM* &nbsp; Fire - debugging inference test  
+*11:27 AM* &nbsp; Fire - debugging kjb::Vector::insert  
+*11:57 AM* &nbsp; Fire - troubleshooting long run times  
