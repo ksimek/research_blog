@@ -301,3 +301,4 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *09:59 AM* &nbsp; Fire - inverstigating possibility of overdefined model  
 *10:30 AM* &nbsp; "  
 *11:05 AM* &nbsp; Fire - debugging initial model estimate  
+*12:01 PM* &nbsp; FIRE - initial model estimation experiments  

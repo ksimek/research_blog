@@ -216,3 +216,4 @@
 1399395594: Fire - inverstigating possibility of overdefined model
 1399397400: Fire - inverstigating possibility of overdefined model
 1399399515: Fire - debugging initial model estimate
+1399402908: FIRE - initial model estimation experiments
