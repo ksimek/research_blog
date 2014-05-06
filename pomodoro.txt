@@ -199,3 +199,9 @@
 1399306270: Fire - debugging inference test
 1399314442: Fire - debugging kjb::Vector::insert
 1399316252: Fire - troubleshooting long run times
+1399323907: Fire - optimizing gradient
+1399326020: Fire - troubleshooting bad results
+1399329405: Fire - troubleshooting bad results
+1399331978: Fire - troubleshooting bad results
+1399333797: FIRE - troubleshooting parallel gradient
+1399335922: FIRE - openmp

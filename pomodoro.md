@@ -282,3 +282,9 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *09:11 AM* &nbsp; Fire - debugging inference test  
 *11:27 AM* &nbsp; Fire - debugging kjb::Vector::insert  
 *11:57 AM* &nbsp; Fire - troubleshooting long run times  
+*02:05 PM* &nbsp; Fire - optimizing gradient  
+*02:40 PM* &nbsp; Fire - troubleshooting bad results  
+*03:36 PM* &nbsp; "  
+*04:19 PM* &nbsp; "  
+*04:49 PM* &nbsp; FIRE - troubleshooting parallel gradient  
+*05:25 PM* &nbsp; FIRE - openmp  
