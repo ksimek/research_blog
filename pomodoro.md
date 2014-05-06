@@ -288,3 +288,6 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *04:19 PM* &nbsp; "  
 *04:49 PM* &nbsp; FIRE - troubleshooting parallel gradient  
 *05:25 PM* &nbsp; FIRE - openmp  
+*07:41 PM* &nbsp; FIRE - openmp comparison  
+*08:13 PM* &nbsp; "  
+*08:43 PM* &nbsp; "  
