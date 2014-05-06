@@ -291,3 +291,13 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *07:41 PM* &nbsp; FIRE - openmp comparison  
 *08:13 PM* &nbsp; "  
 *08:43 PM* &nbsp; "  
+<a id="2014_05_06"></a>
+##May 06, 2014
+*07:20 AM* &nbsp; FIRE - review results  
+*07:51 AM* &nbsp; FIRE - re-run w/ recorder, re-run with everything enabled. investigate tuning  
+*08:21 AM* &nbsp; FIRE - visualize run, re-run with everything enabled. investigate tuning  
+*08:59 AM* &nbsp; FIRE - improv initial estimate  
+*09:29 AM* &nbsp; Fire - improve initial model  
+*09:59 AM* &nbsp; Fire - inverstigating possibility of overdefined model  
+*10:30 AM* &nbsp; "  
+*11:05 AM* &nbsp; Fire - debugging initial model estimate  

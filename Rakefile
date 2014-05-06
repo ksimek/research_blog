@@ -14,8 +14,8 @@ CONFIG = {
 }
 
 PROJECT_CONFIG = {
-  'working_directory' => '~/work/src/tulips/src/matlab/data_association_3',
-  'project_metafile' => 'tulips_da3_meta'
+  'working_directory' => nil, #'~/work/src/tulips/src/matlab/data_association_3',
+  'project_metafile' => 'fire_plm1_test_meta'
 }
 
 # Path configuration helper
@@ -62,8 +62,12 @@ task :post do
     abort("rake aborted!") if ask("#{filename} already exists. Do you want to overwrite?", ['y', 'n']) == 'n'
   end
 
-  revision_cmd = "svn info #{PROJECT_CONFIG['working_directory']} | grep Revision | sed \"s/Revision: //\""
-  revision = `#{revision_cmd}`
+  if PROJECT_CONFIG['working_directory'].nil?
+    revision = "unknown (see text)"
+  else
+    revision_cmd = "svn info #{PROJECT_CONFIG['working_directory']} | grep Revision | sed \"s/Revision: //\""
+    revision = `#{revision_cmd}`
+  end
 
   puts "Creating new post: #{filename}"
   open(filename, 'w') do |post|
@@ -74,7 +78,7 @@ task :post do
     post.puts "category: 'Work Log'"
     post.puts "tags: []"
     post.puts "meta: "
-    post.puts "    \"SVN Revision\": #{revision}"
+    post.puts "    \"SVN Revision\": \"#{revision}\""
     post.puts "---"
     post.puts "{% include JB/setup %}"
     post.puts "{% include research/#{PROJECT_CONFIG['project_metafile']} %}"

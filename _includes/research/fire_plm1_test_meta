@@ -1,0 +1,25 @@
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="{{site.baseurl}}/projects/fire.html">FIRE</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Piecewise Linear Clustering (tests)</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;fire/&#8203;trunk/&#8203;src/&#8203;piecewise_linear/&#8203;test</td>
+    </tr>
+{% for entry in page.meta %}
+    <tr>
+        <th>{{entry[0]}}</th>
+        <td>{{entry[1]}}</td>
+    </tr>
+{% endfor %}
+
+</table>
+
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>

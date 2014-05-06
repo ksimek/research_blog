@@ -208,3 +208,11 @@
 1399344070: FIRE - openmp comparison
 1399345980: FIRE - openmp comparison
 1399347795: FIRE - openmp comparison
+1399386042: FIRE - review results
+1399387888: FIRE - re-run w/ recorder, re-run with everything enabled. investigate tuning
+1399389703: FIRE - visualize run, re-run with everything enabled. investigate tuning
+1399391973: FIRE - improv initial estimate
+1399393778: Fire - improve initial model
+1399395594: Fire - inverstigating possibility of overdefined model
+1399397400: Fire - inverstigating possibility of overdefined model
+1399399515: Fire - debugging initial model estimate
