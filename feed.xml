@@ -8,328 +8,561 @@
 		
 			<item>
 				<title>Work Log</title>
-				<description>&lt;p&gt;asdf /ksimek/research/pomodoro.html#2014_04_14&lt;/p&gt;
-</description>
-				<pubDate>Mon, 14 Apr 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/14/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/14/work-log</guid>
-			</item>
-		
-			<item>
-				<title>FIRE date analysis</title>
-				<description>&lt;ol&gt;
-&lt;li&gt;awk script to replace blanks with -99&lt;/li&gt;
-&lt;li&gt;awk script to replace dates with epoch numbers&lt;/li&gt;
-&lt;li&gt;decide which columns to use and how to pool&lt;/li&gt;
-&lt;li&gt;clustering&lt;/li&gt;
-&lt;/ol&gt;
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
 
 
-&lt;p&gt;Something is wrong with the scripts that generate the database -- some values are missing from the goldStandardDateCRF key field. It's because some records exist solely to hold immunity data, which doesn't have an official gold standard date column.  Can probably ignore for now.&lt;/p&gt;
+&lt;/table&gt;
 
-&lt;h2&gt;Clustering&lt;/h2&gt;
-
-&lt;p&gt;For now, use pooled scores for each of 5 databses:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;sri3.csv sritot
-das4.csv dastot
-ea4.csv  easumtot
-fact4.csv facttot
-pss4.csv psstot
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The datasets were originally &lt;a href=&quot;http://vision.sista.arizona.edu/ksimek/research/2014/03/06/work-log/&quot;&gt;named here&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Read data, isolated columns of interest, and concatenated each subjects' visits into long rows, then write to csv file for processing:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;fire_data_path = '../../data/'
-[db, db_meta] = fire_build_self_report_database(fire_data_path);
-[cluster_db, cluster_db_meta] = fire_gather_columns('../../experiments/2014_04_10_cluster_3/columns.txt', db_meta, db);
-wide_db = e_2014_03_merge_visits(cluster_db)
-fire_write_csv(wide_db(:,2:end), [], 'test.csv')
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;EXPERIMENT PATH&lt;/strong&gt;: experiments/2014_04_10_cluster_3&lt;/p&gt;
-
-&lt;p&gt;README file in experiment path describe how to prepare data and run experiment.&lt;/p&gt;
-
-&lt;p&gt;Result: 3-cluster model, with apparently very good separation. reulsts are in $EXPERIMENT_PATH/out/cluster_results.txt&lt;/p&gt;
-</description>
-				<pubDate>Thu, 10 Apr 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/10/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/10/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>&lt;p&gt;Rewrote training procedure from scratch and now getting much more sensible results.  The overall goal is to isolate parameters to try to make them as independent as possible; and then use one or two-dimensional optimization to estimate them.&lt;/p&gt;
-
-&lt;p&gt;First, I hard-coded several variables.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Rate variance is set to its theoretical value of 0.333 &lt;a href=&quot;http://vision.sista.arizona.edu/ksimek/research/2013/08/13/work-log/&quot;&gt;as described here&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;perturb_rate_variance is now zero -- it seems to be causing weird results probably due to overfitting.  Results are very sensitive to small changes of rate perturbatyion.  Could re-introduce later.&lt;/li&gt;
-&lt;/ul&gt;
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
 
 
-&lt;p&gt;Second, I estimated perturb_position_variance directly, by measuring the variance of all groups of initial points.&lt;/p&gt;
+&lt;p&gt;Ran 10,000 iterations, keeping observation model fixed.&lt;/p&gt;
 
-&lt;p&gt;Third, estimated noise and smoothness variance under the assumption of near-infinite position and rate variance.  This follows from the theory of cubic-spline models, which places no penalty over initial position and rate.  Used gradient-free minimizer, &lt;code&gt;fminsearch&lt;/code&gt;, which works well for two-dimensional problems.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Update&lt;/strong&gt;: The three plots below are incorrect.  corrected plot follows.
+Ground truth model:&lt;br/&gt;
+&lt;img src=&quot;/ksimek/research/img/2014-05-06-run1_gt_model.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;Fourth, estimated perturb smoothing and perturb scale, using noise and smoothness variance.&lt;/p&gt;
+&lt;p&gt;Initial model:&lt;br/&gt;
+&lt;img src=&quot;/ksimek/research/img/2014-05-06-run1_initial_model.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;Fifth, estimated position mean and variance directly.&lt;/p&gt;
+&lt;p&gt;Final model:&lt;br/&gt;
+&lt;img src=&quot;/ksimek/research/img/2014-05-06-run1_final_model.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;Note: all this is done using heuristic indexing, not the marginal likelihood optimization.  This is another key change from earlier training.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Update&lt;/strong&gt;: There was a bug in my plotting code for the plots above. Here is the corrected plot, which is more sensible:&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Result&lt;/strong&gt;: Much more sensible perturb smoothing parameter (~1e-5 vs 1e-4) and perturb scale (2.06 vs 0.9).  End-to-end reconstruction is much more sensible; curve is centered among triangulated points.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-06-run1_fixed.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;TODO:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;train on run dataset with significant motion (wacv dataset #10; i.e. arab_6)&lt;/li&gt;
-&lt;li&gt;iteratively update noise/smoothness and perturb smoothness&lt;/li&gt;
-&lt;li&gt;iteratively update indexing after setting params&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;PERTURB_POSITION_VARIANCE MAY BE THE OVERFITTER!&lt;/p&gt;
-</description>
-				<pubDate>Tue, 08 Apr 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/08/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/08/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>&lt;p&gt;I've been experimenting with alternative methods for inferring the index set and have several good options.  When equipped with a good index set, it seems most of the problems we've been seeing disappear.  As sad as it seems, its seeming like index optimization should be tossed out, despite all the time I spent deriving the equations.&lt;/p&gt;
-
-&lt;p&gt;I've observed that too high of a perturb smoothing variance causes the mean curve to drift toward the linear-initial model.  Manually lowering perturb smoothing variance and raising smoothing variance causes better reconstruction and much higher marginal likelihood.&lt;/p&gt;
-
-&lt;p&gt;Centering matters -- too low of a position_variance causes rate variance to take over, which causes weird results in some cases.&lt;/p&gt;
-
-&lt;p&gt;Should refact tr_train to use new index estimation scheme; goal: getting better higher smoothness variance and lower perturb_smoothness variance&lt;/p&gt;
-
-&lt;p&gt;Open question: is camera linearization beneficial in training?&lt;/p&gt;
-
-&lt;p&gt;Refactored proces_tracks to recieve index estimation method.&lt;/p&gt;
-
-&lt;p&gt;Refactored run_wacv_5 to use iterative index estimation.&lt;/p&gt;
-</description>
-				<pubDate>Mon, 07 Apr 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/07/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/07/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>&lt;p&gt;Question: is curve stretching only present in last point?  If so, can we hack it away?&lt;/p&gt;
+&lt;p&gt;Observations:&lt;/p&gt;
 
 &lt;ol&gt;
-&lt;li&gt;detect index stretching (threshold on diff)&lt;/li&gt;
-&lt;li&gt;for each, visualize with test_optim&lt;/li&gt;
-&lt;li&gt;fun on full dataset, count (1) how many stretching occur and (2) how many are the last point?&lt;/li&gt;
+&lt;li&gt;Initial estimate is bad, esp y-offset.  Should review this code.&lt;/li&gt;
+&lt;li&gt;Recovered results are noticably better.  Not perfect, but this may be because&lt;/li&gt;
+&lt;li&gt;Keeping observation model fixed seems to improve speed by two orders of magnitude (???)&lt;/li&gt;
 &lt;/ol&gt;
 
 
-&lt;p&gt;Example&lt;/p&gt;
+&lt;h2&gt;Run 2:  Keep best model&lt;/h2&gt;
 
-&lt;pre&gt;&lt;code&gt;[data, parents] = load_wacv_data(5, [397 530]', params, 1:4:36); %'
-[mu, Tracks, params] = get_wacv_result(5, params.model_type, 'deleteme_new4');
-out = test_for_wandering_index(Tracks,20);
-[wander_is_last, wander_view_num] = exp_2014_04_04_test_wandering_index(Tracks, data, params, 20)
+&lt;p&gt;Added a &#39;best_sample_recorder&#39; to keep track of the best model we&#39;ve seen.&lt;/p&gt;
+
+&lt;h3&gt;Results&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-06-run2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h3&gt;Observations&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Best model is pretty good&lt;/li&gt;
+&lt;li&gt;Why is initial model so different from that in the previous run?  same model, same random seed.&lt;/li&gt;
+&lt;li&gt;Keep in mind, on average only 1/3 of the [0,1] domain is represented in the dataset, because it&#39;s divided into &quot;before&quot;, &quot;during&quot; and &quot;after&quot; regions.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;h3&gt;Discussion&lt;/h3&gt;
+
+&lt;p&gt;Initial model uses a different observation model, so it&#39;s hard to say whether it&#39;s good or not.  I get the feeling that there&#39;s a lot of slack in this model, meaning several different combinations of observed and latent parameters can give nearly equal results.&lt;/p&gt;
+
+&lt;p&gt;Also, initial model estimation doesn&#39;t correctly handle x-offsets for &quot;during&quot; and &quot;after&quot; regions.  TODO: fix this.&lt;/p&gt;
+
+&lt;p&gt;Note that the noise epsilon is very large relative to the model&#39;s dynamic range.  It&#39;s hard to visualize, since the plots above are sent through an observation model before noise is added. But the observation model&#39;s scaling is around 0.5.&lt;/p&gt;
+
+&lt;p&gt;Variability in the latent variable is around 0.3.  Observation model scales that to 0.15, then adds noise on the order of 1.0.  So signal-to-noise ratio is around 0.15 -- not great.  Luckilly we have lots of observations (150 people x 9 time points x 7 observed dimensions), but in our non-synthetic model, I hope our noise is smaller.&lt;/p&gt;
+
+&lt;h2&gt;Run 3: Improved initial model estimate&lt;/h2&gt;
+
+&lt;p&gt;&lt;em&gt;SVN REVISION&lt;/em&gt;: 16742&lt;br/&gt;
+&lt;em&gt;Description&lt;/em&gt;: Fixed initial model estimate by centering each region at x=0.  See &lt;code&gt;model.cpp:partition_observations()&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;# iterations: 10,000 iterations&lt;br/&gt;
+Running time: 0:18.53&lt;br/&gt;
+Results:&lt;br/&gt;
+&lt;img src=&quot;/ksimek/research/img/2014-05-06-run3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Summary:&lt;br/&gt;
+Initial model has changed, but initial offset is still way off.  Other models (initia, final and best are the same).&lt;/p&gt;
+
+&lt;p&gt;Discussion:&lt;br/&gt;
+Need to dig more into the initial estimation code.  Is boost&#39;s RNG seeded with current time?&lt;/p&gt;
+
+&lt;h2&gt;Run 4: fixed observation parameters&lt;/h2&gt;
+
+&lt;p&gt;&lt;em&gt;SVN REVISION&lt;/em&gt;: 16743&lt;br/&gt;
+Goal: See if fixing observation parameters (A, B) improve line-fits.  If so, issue is in observation parameters.  If not, issue is with line-fitting.&lt;br/&gt;
+Running time: 0:18.26&lt;/p&gt;
+
+&lt;p&gt;Results:&lt;br/&gt;
+&lt;img src=&quot;/ksimek/research/img/2014-05-06-run4.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;Run 5: fixed observation parameters (take 2)&lt;/h2&gt;
+
+&lt;p&gt;Descrijption: Found a bug when using fixed offset B -- wasn&#39;t subtracting offset before doing PCA to find A.&lt;br/&gt;
+Revision: 16744&lt;br/&gt;
+Results:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-06-run5.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Discussion:
+No change.  In retrospect, this change only applies when not using fixed observation parameters, so no change is to be expected.  But a good bug to fix for later on!&lt;/p&gt;
+
+&lt;h2&gt;Run 6:&lt;/h2&gt;
+
+&lt;h3&gt;Description:&lt;/h3&gt;
+
+&lt;p&gt;Found another bug: when projecting points onto pincipal component, if the direction vector (d) isn&#39;t normalized to 1, the projected points are off by a factor of (|d|^2).   The observation equation is given by:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+y = Ax + B
+\]
+
+The goal is to solve for \(x\), which means we need the Moore-Penrose pseudoinverse, \(A^+ = (A^\top A)^{-1} A \).  When \(A\) is a column vector, the term in perentheses on the right-hand size is the squared magnitude of \(A\), which was ommitted in the original equation.
+&lt;/div&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Revision&lt;/strong&gt;:  16745&lt;br/&gt;
+&lt;strong&gt;Invocation&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# On bayes01
+cd ~ksimek/src/fire/src/piecewise_linear/test
+./test_inference &amp;gt; /dev/null
+cat results.txt | \
+    awk &#39;{row=NR%7; if(row == 3 || row == 4) print;}&#39; \
+    &amp;gt; ~/tmp/lin.txt
+
+# on local machine
+rsync -avz v01:tmp/lin*.txt ~/tmp/
+
+# in matlab on local machine
+cd ~ksimek/work/src/fire/src/matlab/in_progress
+figure
+lin = load(&#39;~/tmp/lin7_1.txt&#39;)&#39;
+lin3 = reshape(lin, [3, 2, 4])
+visualize_pl_result(lin3, ...
+    {&#39;ground truth&#39;, ...
+    &#39;initial model&#39;, ...
+    &#39;final model&#39;, ...
+    &#39;best model&#39;})
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Answer: Usually, wandering is present in last point, but not always.  Curve 1 in the example has 15 internal wandering events.  All other curves are last point.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;br/&gt;
+&lt;img src=&quot;/ksimek/research/img/2014-05-06-run6.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;Question: Can we correct the bad indices in curve 1 by using a numerical hessian?&lt;/p&gt;
+&lt;h3&gt;Discussion:&lt;/h3&gt;
 
-&lt;p&gt;Question: could we avoid internal wandering by preventing endpoint wandering?  e.g. is internal wandering occurring because endpoint wandering is so extreme?&lt;/p&gt;
+&lt;p&gt;Finally getting good initial estimates.  In fact, initial estimate is the &lt;strong&gt;optimal estimate&lt;/strong&gt; when A and B are known.  The best model doesn&#39;t look perfect, especially in the red curve, but there seems to be significant variance in the red curve estimator, as shorn in &quot;final model&quot;.&lt;/p&gt;
 
-&lt;p&gt;Question: does stretched point have higher likelihood than hand-picked index?  If so, what adjustments to params reverses this case?&lt;/p&gt;
-</description>
-				<pubDate>Fri, 04 Apr 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/04/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/04/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Crash recovery; Index estimation - the saga continues</title>
-				<description>&lt;p&gt;Machine crashed; need to get matlab environment back to where it was yesterday&lt;/p&gt;
+&lt;h2&gt;Run 7: Initial estimate of A&lt;/h2&gt;
 
-&lt;p&gt;TODO:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Time to add initial estimation of A.  Sampling will still only estimate latent parameters.    I&#39;m curious how close this will be to optimal.  I&#39;m forcing the ground-truth A to have unit-length so the experimental results are comparable to the ground truth.&lt;br/&gt;
+&lt;strong&gt;Invocation&lt;/strong&gt;: see previous&lt;br/&gt;
+&lt;strong&gt;Revision&lt;/strong&gt;: 16746&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Baseline&lt;/strong&gt;:  The results below are estimates of the linear model when A is known.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-06-run7_1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;: Below are results of sampling, using an estimate of A from the noisy data&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-06-run7_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion:&lt;/strong&gt;&lt;br/&gt;
+Initial estimate is slightly worse in the green and blue curves, but still in the ballpark, as we would hope.  As observation noise decreases, this estimate should improve.&lt;/p&gt;
+
+&lt;p&gt;It&#39;s notable that HMC still can&#39;t find a better model.  This is good news for the quality of our estimate.&lt;/p&gt;
+
+&lt;h2&gt;Run 8: initial estimate of A and B&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;:  Adding initial estimation of B to the test.
+&lt;strong&gt;Invocation&lt;/strong&gt;: see previous&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-06-run_8.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;:&lt;br/&gt;
+Much worse.  This could be caused by overestimating the magitude of (B), while understimating the magnitude of (b) (which can result in identical models due to our model being overdefined).  Since (b) currently adds positive offset to all observations, estimating (B) as the mean over observations could is likely to capture some of (b).&lt;/p&gt;
+
+&lt;p&gt;Probably the best way to evaluate is to measure prediction error.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Update&lt;/strong&gt; run 9 shows that this model predicts quite well, despite having different model parameters.&lt;/p&gt;
+
+&lt;h2&gt;Discussion - Scaling and offset&lt;/h2&gt;
+
+&lt;p&gt;I&#39;m starting to think we should consider preprocessing the immunity data bafore passing it through this model, for two reasons&lt;/p&gt;
+
+&lt;h3&gt;1. poorly scaled data; correlated noise&lt;/h3&gt;
+
+&lt;p&gt;It seems too easy that we can solve for &#39;A&#39; using simple PCA.  Said differently, dynamics are the interesting part of our model, but A is determined irrespective of dynamics.&lt;/p&gt;
+
+&lt;p&gt;The observation transformation A has an intuitive interpretation as the direction of greatest variation in the data, after taking dynamics into account.  The problem with this is that if data is badly scaled, the direction of greatest variation will come from the noise, not the dynamics.   If possible, we’d prefer to separate variation due to noise from variation due to dynamics.  That way, A can capture the dynamic relationships between variables (e.g. IL-6 and IL-5 both start low and end high), not just correlation (IL-6 and IL-5 co-vary, but no temporal information).&lt;/p&gt;
+
+&lt;p&gt;For this reason, it might help to &quot;whiten&quot; the data by PCA, so the inferred direction of A is more likely to capture dynamics only.&lt;/p&gt;
+
+&lt;h3&gt;2. Variability in immunity measurements&lt;/h3&gt;
+
+&lt;p&gt;Second, I’ve been thinking on the fact that individuals’ immunity values differ significantly in scale and offset.  From what I understand, much of this variation occurs within “plate”, i.e. its a byproduct of laboratory conditions, not immunity dynamics.   This could affect our clustering, as the latent slope and y-intercept parameters depend directly on the data’s scale and offset.  As a result, I fear our learned clusters will reflect different groups of “laboratory conditions”, rather than different groups of immunity dynamics.&lt;/p&gt;
+
+&lt;p&gt;We could replace readings with z-score within each person, but this has two problems:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;readings that are relatively constant but legitimately high would seem more typical than they are.&lt;/li&gt;
+&lt;li&gt;extremely steep changes over time would tend to flatten. similarly, relatively low slopes would tend to look higher after transforming.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;No obvious answer; may need to try several solutions.&lt;/p&gt;
+
+&lt;h2&gt;Run 9: Held-out error &lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Since our model is overdefined, comparing model parameters is no longer a good indicator of model quality.  Instead, we should&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Method&lt;/strong&gt;: hold out 20% of data, measure log-likelihood for (a) ground truth model, (b) initial model estimate.  Two cases: 1. using global mean for B, PCA for A, 2. using ground truth A and B.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Training error:
+------------
+
+    Ground truth:              -13301.3
+    Ana. Soln (Known A, B):    -13295.2
+    Ana. Soln (Inferred A, B): -13318.3
+
+Testing error:
+-----------
+
+    Ground Truth:               -1886.17
+    Ana. Soln (Known A, B):     -1887.3
+    Ana. Soln (Inferred A, B):  -1887.06
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;Training error is &lt;em&gt;better&lt;/em&gt; for analytical solution with known A and B, which what we&#39;d expect if the analytical solution was the true optimum.  When A and B are inferred, training error is worse, since PCA doesn&#39;t account for dynamics.&lt;/p&gt;
+
+&lt;p&gt;Prediction error is worse than ground truth for all models, which is a good sanity check.  But they&#39;re all in a very tight ballpark (less than 1.0), which suggests that we aren&#39;t overfitting.  A better test would be to compare against one or more simpler models, but these results are good enough to proceed.&lt;/p&gt;
+
+&lt;p&gt;One good conclusion is that even though inferring A and B results in vastly different latent models (see run #8), the prediction is just as good.&lt;/p&gt;
+
+&lt;h2&gt;Run XXX: Whitening before inference&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: transforming observations so they follow a standard m.v. Gaussian may help in infering.  Test prediction error and compare against run #9 errors (should be nearly identical).&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Method&lt;/strong&gt;: transform data by PCA.  Using linear regression to infer initial direction (since PCA is out).  Force B to be zero.  Fit model.  Evaluate held-out error after transforming back to data space.&lt;/p&gt;
+
+&lt;h2&gt;Mid-term TODO&lt;/h2&gt;
 
 &lt;ul&gt;
-&lt;li&gt;load save tracks files&lt;/li&gt;
-&lt;li&gt;re-run training (compare against any recorded values)&lt;/li&gt;
-&lt;li&gt;re-run wacv with hessian disabled&lt;/li&gt;
+&lt;li&gt;Tuning HMC&lt;/li&gt;
+&lt;li&gt;refactor model
+
+&lt;ul&gt;
+&lt;li&gt;Start and end times out of model&lt;/li&gt;
+&lt;li&gt;epsilon per-dimension&lt;/li&gt;
+&lt;li&gt;missing data&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Add offset constraints&lt;/li&gt;
+&lt;li&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 
-&lt;p&gt;Done.  Process saved in &lt;code&gt;setups/setup_workspace_2014_04.m&lt;/code&gt; for future reference.&lt;/p&gt;
+&lt;h2&gt;Meta-notes on experiments&lt;/h2&gt;
 
-&lt;h2&gt;Index estimation&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;always test on synthetic data first&lt;/li&gt;
+&lt;li&gt;always test on a simpler model first (fix some parameters)&lt;/li&gt;
+&lt;li&gt;always have a visualization in mind when running a test.&lt;/li&gt;
+&lt;/ol&gt;
 
-&lt;p&gt;Using &lt;code&gt;wacv-2012/test_optim.m&lt;/code&gt; to visualize the correspondence between triangulated points and reconstructed curve.  This is a rough proxy for visualizing curve indices -- bad indices result in a bad reconstruction, and the matching will look bizarre.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;After much debugging, found that test_optim.m had a regressed, and was displaying a bad reconstruction&lt;/p&gt;
-
-&lt;p&gt;I learned an excellent approach for visually assessing indices: run &lt;code&gt;test_optim&lt;/code&gt; with centered_mode=true and split_views=true.  The resulting plot will connect triangulated points to posterior points, WITH an arrow indicating the backprojection direction.  For each curve, rotate the plot so the backprojection arrow disappears (looking in the backprojection direction) -- the connecting line for that point should be nearly perpendicular to the reconstructed curve if the reconstruction is good.&lt;/p&gt;
-
-&lt;p&gt;A second key observation: although minimizing the marginal likelihood does result in index shrinkage, the ratio of distances between adjacent points is equal to the ratio of differences between adjacent indices.  Thus, the scale component&lt;/p&gt;
-
-&lt;p&gt;Third:  When bad index estimates cause terrible recponstructions, the per-view reconstructions actually look not bad (i.e. not marginalizing over offset perturbations).  Position of per-view reconstructed curves is suspect.&lt;/p&gt;
 </description>
-				<pubDate>Thu, 03 Apr 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/03/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/03/work-log</guid>
+				<pubDate>Tue, 06 May 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/06/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/06/work-log</guid>
 			</item>
 		
 			<item>
-				<title>TULIPS: index issue</title>
-				<description>&lt;p&gt;Tested gradient and hessian -- is it correct with new model?  ... Yes.&lt;/p&gt;
+				<title>FIRE - piecewise linear inference</title>
+				<description>&lt;p&gt;Finished compiling inference test with synthetic data.&lt;/p&gt;
 
-&lt;p&gt;Is index optimization working?  Quick test:  ran this code twice, once using analytical hessian, once with hessian-free algorithm:&lt;/p&gt;
+&lt;p&gt;Gradient is taking incredibly long, especially for a 7-dimensional model.  PErhaps 100 data points is too large, but I&#39;m guessing the cost of allocating vectors for each function evaluation is the botteneck (GDB seems to agree).&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;[mu_, Tracks_] = get_wacv_result(5, params_trained.model_type, 'deleteme_new2');
-out = optimize_ml_wrt_indices(Tracks_(14), [], data, params_trained);
+&lt;p&gt;&lt;div&gt;
+&lt;strong&gt;Time to run 1 iteration&lt;/strong&gt;&lt;br/&gt;
+&lt;em&gt;Single threaded, on bayes01&lt;/em&gt;
+&lt;table border=&quot;1&quot;&gt;
+&lt;tr&gt;
+&lt;td&gt;Baseline &lt;br/&gt;
+(Debugging mode, allocation checking enabled)&lt;/td&gt;
+&lt;td&gt;
+1:28.94
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Heap checking disabled
+&lt;/td&gt;
+&lt;td&gt;
+0:21.06 (-1:07.88, 4.22x)
+&lt;/td&gt;
+&lt;tr&gt;
+&lt;td&gt;Heap &amp;amp; initialization checking disabled
+&lt;/td&gt;
+&lt;td&gt;
+0:11.19 (-9.87 1.88x)
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;PRODUCTION=1 (with -O2)
+&lt;/td&gt;
+&lt;td&gt;
+0:07.24 (-3.95 1.55x)
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;-O3
+&lt;/td&gt;
+&lt;td&gt;
+0:07.86 (+0.62 0.92x)
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;&lt;/p&gt;
+
+&lt;p&gt;Used gprof with grpof2dot.py to get the following diagram:
+&lt;a href=&quot;/img/2014-05-05-gprof_1.pdf&quot;&gt;gprof.pdf&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;iso_mvn_lpdf is getting hit hard:&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;c&quot;&gt;    &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;iso_mvn_lpdf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;accum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;accum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;accum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;M_PI&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/p&gt;
+
+&lt;p&gt;It&#39;s already pretty lean (no alloc, all c-style).  But we can move the divide-by-epsilon out of the loop for an easy 1.8x speedup.&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;c&quot;&gt;    &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;iso_mvn_lpdf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;accum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;accum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;accum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;accum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;M_PI&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/p&gt;
+
+&lt;p&gt;Now the bottleneck is all the allocation, copying and freeing of kjb::Vector temporaries.&lt;/p&gt;
+
+&lt;p&gt;I tweaked the code for evaluating a piecewise linear function to avoid creating kjb::Vector temporaries, and running time dropped dramatically &lt;strong&gt;from 11.4s to 1.26s.&lt;/strong&gt;  This is in production mode, so its surprising that more temporaries aren&#39;t optimized out.&lt;/p&gt;
+
+&lt;p&gt;GProf after eliminating temporaries: &lt;a href=&quot;/img/2014-05-05-gprof_2.pdf&quot;&gt;gprof.pdf&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Since 1 iterations takes about 1.2s, bumping up to 10 iterations.&lt;/p&gt;
+
+&lt;p&gt;Remaining speed-up opportuntiies:  exploit gradient independence, parallel gradient&lt;/p&gt;
+
+&lt;h2&gt;Parallel gradient&lt;/h2&gt;
+
+&lt;p&gt;Enabled 8-way parallel gradient evaluation, and got &lt;strong&gt;worse&lt;/strong&gt; performance!&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;single threaded:  0:09.63
+multi threaded: 0:15.48
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Analytical method halts early -- can't improve.  Final gradient is noticibly non-zero&lt;/p&gt;
+&lt;p&gt;This despote &lt;code&gt;top&lt;/code&gt; displaying 550% CPU utilization.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-04-02-grad_1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;Maybe gnuprof is affecting performance&lt;/p&gt;
 
-&lt;p&gt;Hessian-free method seems very effective:&lt;/p&gt;
+&lt;h2&gt;Tuning&lt;/h2&gt;
 
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-04-02-grad_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Perhaps the optimization is failing; let's run end-to-end with hessian-free algorithm.  It will be super slow, but if it gives better results, we may have our solution.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[mu_, Tracks_] = get_wacv_result(5, params_trained.model_type, 'deleteme_new3');
-&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;step size
+gradient size&lt;/p&gt;
 </description>
-				<pubDate>Wed, 02 Apr 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/02/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/02/work-log</guid>
+				<pubDate>Mon, 05 May 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/05/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/05/work-log</guid>
 			</item>
 		
 			<item>
-				<title>FIRE: Verifying date bug, export-to-csv</title>
-				<description>&lt;p&gt;Continuing the process of resolving the &quot;rotated dates&quot; issue, in which the last gold-standard date was shifted to the beginning of each visit-set.&lt;/p&gt;
+				<title>Work Log</title>
+				<description>
 
-&lt;p&gt;Laura has corrected the issue on her end, but we've already made several changes to our copies of the databases, so I wrote a script to make the correction
-on our end.  But there was some confusion about whether the original or updated &quot;Visit&quot; values are correct.  Laura has sent me her databases so I can
-confirm that we're working with the same data, and hopefully I can determine if our visit values are correct and consistent with hers.&lt;/p&gt;
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Data Association v3&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
+    &lt;/tr&gt;
 
-&lt;p&gt;Data is in MS access, so will need to install it on my virtual machine.&lt;/p&gt;
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;15864&lt;/td&gt;
+    &lt;/tr&gt;
 
-&lt;h2&gt;Export to csv&lt;/h2&gt;
 
-&lt;p&gt;Finished merging records, confirming, and exporting to CSV.  Formalized the process into two files under &lt;code&gt;fire/src/matlab/scripts&lt;/code&gt;, which perform end-to-end converstion.&lt;/p&gt;
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+
 </description>
-				<pubDate>Tue, 01 Apr 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/01/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/01/work-log</guid>
+				<pubDate>Thu, 01 May 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/01/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/01/work-log</guid>
 			</item>
 		
 			<item>
-				<title>Fire: mergin immunity data</title>
-				<description>&lt;p&gt;Having written code for guessing visit-number from dates in the Immunity dataset, I ran it and found several records with significant error.  Spent a long time inspecting each one in detail, and found lots of data-entry errors (wrong year, wrong month, transposed digits, miskeyed subject id's, etc).  In one case, the visit number was off-by-one in the self-report data, which was only apparent when the immunity data was introduced and an extra &quot;halways-between&quot; visit was present.   Was able to correct about 30 of these errors confidently; in the end only about 10 out of 700 records remained error greater than 10 days.&lt;/p&gt;
+				<title>Work Log</title>
+				<description>&lt;p&gt;Tucson day.&lt;/p&gt;
 
-&lt;p&gt;Wrote code to merge new datasets into the full database; used it to merge newly-cleaned immunity data into the full database.&lt;/p&gt;
+&lt;p&gt;Attended Anh&#39;s dissertation defense.&lt;/p&gt;
 
-&lt;p&gt;Next step: write export-to-CSV routine&lt;/p&gt;
+&lt;p&gt;Sat in on Jinyan&#39;s practice Talk.&lt;/p&gt;
+
+&lt;p&gt;Finished coding model, data, and inference parts of FIRE piecewise linear model.  Started driver implementation.&lt;/p&gt;
 </description>
-				<pubDate>Mon, 31 Mar 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/03/31/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/03/31/work-log</guid>
+				<pubDate>Wed, 30 Apr 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/30/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/30/work-log</guid>
 			</item>
 		
 			<item>
-				<title>Debugging Index optimization</title>
-				<description>&lt;p&gt;Still getting terrible stretching due to extreme index drift during optimization.&lt;/p&gt;
+				<title>Work Log</title>
+				<description>&lt;p&gt;Submitted &lt;a href=&quot;https://code.google.com/p/yamlmatlab/issues/detail?id=14&amp;amp;thanks=14&amp;amp;ts=1398783433&quot;&gt;bug report and patch&lt;/a&gt; to YAMLMatlab, which fixes an issue where row vectors weren&#39;t being read correctly.&lt;/p&gt;
 
-&lt;h3&gt;Experiment 1&lt;/h3&gt;
+&lt;hr /&gt;
 
-&lt;p&gt;Theory: camera linearization is messing with our 3D point localization.  Propose solving by increasing noise covariance for noisy.&lt;/p&gt;
+&lt;p&gt;Started working on piecewise linear model proposed by Kobus.  Wrote out initial equations, started initial coding.&lt;/p&gt;
+</description>
+				<pubDate>Tue, 29 Apr 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/29/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/29/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Ellipse and Line Segment Detector ; Experiment Log</title>
+				<description>&lt;p&gt;Got &lt;a href=&quot;http://ubee.enseeiht.fr/vision/ELSD/&quot;&gt;ELSD&lt;/a&gt; compiling and running on OS X.  Details &lt;a href=&quot;http://ksimek.github.io/2014/04/28/compiling-elsd-on-osx/&quot;&gt;here&lt;/a&gt;.  &lt;a href=&quot;http://ksimek.github.io/misc/elsd_results.html&quot;&gt;Results were very nice&lt;/a&gt;; will try to use them for ECCV.&lt;/p&gt;
 
-&lt;p&gt;Assuming an effective depth uncertainty of (h), and in-plane uncertainty of (w), the in-plane uncertainty of the adjusted covariance matrix (w') is given by&lt;/p&gt;
-
-&lt;p&gt;[
-w' = w \mathrm{cos}&lt;sup&gt;2&lt;/sup&gt; \theta + h \mathrm{sin}&lt;sup&gt;2&lt;/sup&gt; \theta
-]&lt;/p&gt;
-
-&lt;p&gt;This is illustrated roughly below.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-03-27-covariance_adjustment.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Implemented this using hand-set depth uncertainty (h = 3)mm.  Didn't resolve the issue for extremely stretched curves, but the weak stretching seems improved.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Discussion&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;Noise variance is CRAZY low.  Small deviation from true curve is causing huge contortions to resolve.  Why is it trained this low if contradictions result?  This smells like overfitting, except we're testing and training on the same date at the moment so that seems to be ruled out.&lt;/p&gt;
-
-&lt;p&gt;Loosen and retrain?&lt;/p&gt;
-
-&lt;p&gt;We apparently need to multiply standard deviation by 4 to recover; according to &lt;a href=&quot;/ksimek/research/2014/03/25/work-log/&quot;&gt;yesterday's experiment&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h3&gt;Experiment #2&lt;/h3&gt;
-
-&lt;p&gt;Plot likelihood (reference implementation) against noise variance.&lt;/p&gt;
-
-&lt;p&gt;Apparently it does want a higher noise variance, but only 2.5x more, not 4x. is this enough to improve reconstruction?&lt;/p&gt;
-
-&lt;p&gt;Nope.&lt;/p&gt;
-
-&lt;h3&gt;Experiment #3&lt;/h3&gt;
-
-&lt;p&gt;Repeat yesterday's &quot;Overextension&quot; experiment #1.  Multiplying variance by 16x seemed to fix issues, but now I suspect that we just got lucky.  Try a few values near 16x.&lt;/p&gt;
-
-&lt;p&gt;With linearization enabled:&lt;/p&gt;
+&lt;p&gt;Working on &lt;code&gt;publish_results&lt;/code&gt; function in matlab to store results in Experiment Log.&lt;/p&gt;
+</description>
+				<pubDate>Mon, 28 Apr 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/28/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/28/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>&lt;p&gt;TODO:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;15x terrible&lt;/li&gt;
-&lt;li&gt;15.5x resolved&lt;/li&gt;
-&lt;li&gt;16x resolved&lt;/li&gt;
-&lt;li&gt;16.5x terrible&lt;/li&gt;
-&lt;li&gt;50x terrible&lt;/li&gt;
+&lt;li&gt;Auto SVN commit and record in run script&lt;/li&gt;
+&lt;li&gt;m-file to build a run after the fact with comments&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Sun, 27 Apr 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/27/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/27/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>&lt;p&gt;display visualization thumbnails
+    how is visualization YAML laid out?
+        2D array.  How is 2D array represented in YAML?
+        Running on two datasets to see
+            Added dataset 10 to list
+            Dataset 10 has many missing views (why?  didn&#39;t I fix this?)
+            Fixing unsuppressed output in process_gt2&lt;/p&gt;
+
+&lt;h2&gt;TODO:&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;investigate missing views in dataset 10&lt;/li&gt;
+&lt;li&gt;test end-to-end with multiple datasets&lt;/li&gt;
+&lt;li&gt;get visualization thumnails displaying&lt;/li&gt;
+&lt;li&gt;implement visualization details page&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Sun, 20 Apr 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/20/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/20/work-log</guid>
+			</item>
+		
+			<item>
+				<title>TULIPS testing framework</title>
+				<description>&lt;p&gt;Building calling framework.&lt;/p&gt;
+
+&lt;p&gt;create experiment
+run/rerun experiment&lt;/p&gt;
+
+&lt;p&gt;questions&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&quot;which params to run first&quot;&lt;/li&gt;
+&lt;li&gt;what do smoothness and continuity thresholds mean?&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Wed, 16 Apr 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/16/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/16/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Test suite</title>
+				<description>&lt;p&gt;Building evaluations&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;index spacing w.r.t. reconstruction spacing&lt;/li&gt;
+&lt;li&gt;index discontinuity&lt;/li&gt;
+&lt;li&gt;index smoothness&lt;/li&gt;
+&lt;li&gt;&quot;accuracy&quot; w.r.t. triangulation&lt;/li&gt;
+&lt;li&gt;point motion&lt;/li&gt;
 &lt;/ul&gt;
 
 
-&lt;p&gt;Without linearization:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;15x resolved&lt;/li&gt;
-&lt;li&gt;15.5x resolved&lt;/li&gt;
-&lt;li&gt;16x terrible&lt;/li&gt;
-&lt;li&gt;16.5x  resolved&lt;/li&gt;
-&lt;li&gt;50x resolved&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Yes, tiny tweaks to variance cause us to revert to bad reconstructions.  We probably just got lucky when we observed 16x working well yesterday.&lt;/p&gt;
-
-&lt;p&gt;Now we're back to square one.  noise variance doesn't seem to be connected to this issue of extended&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Discussion&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;It seems linearization is a bane to index refinement.  We introduced it to address reconstruction issues; perhaps we should only apply it in that case.&lt;/p&gt;
-
-&lt;h1&gt;FIRE&lt;/h1&gt;
-
-&lt;p&gt;Re-merging and rechecking new datasets&lt;/p&gt;
-
-&lt;p&gt;Only one error, fixed and sent changes to Rebecca.&lt;/p&gt;
-
-&lt;p&gt;Regularizing immunity CSV; adding new column type: &quot;numeric_missing:XXX&quot;, where missing data is represented by one of a few possible strings.  Split the &quot;date(other date)&quot; column into &quot;date&quot; column and &quot;other date&quot; column.  Parsed in matlab.  comparing immunity dates to self-report dates for each subject; interpolating as needed.   Only 9 notable anomalies out of 710.&lt;/p&gt;
-
-&lt;p&gt;Next: discretize, measure and visualize discretization errors, export to csv&lt;/p&gt;
+&lt;p&gt;Building experiment engine: &lt;code&gt;experiments/exp_2014_04_14_gt_reconstruct.m&lt;/code&gt;&lt;/p&gt;
 </description>
-				<pubDate>Thu, 27 Mar 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/03/27/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/03/27/work-log</guid>
+				<pubDate>Tue, 15 Apr 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/04/15/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/04/15/work-log</guid>
 			</item>
 		
 	</channel>

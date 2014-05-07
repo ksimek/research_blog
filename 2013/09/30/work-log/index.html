@@ -186,7 +186,7 @@
 
 <p>Thinking about split proposal distributions.</p>
 
-<p>I've been thinking about the combinitorics of partitions and realized I'v been counting wrong.  Given M curves and N observations, I was counting the number of partitions as \(M<sup>N\).</sup>  This doesn't account for the fact that order of cluster id's doesn't matter, so a better count would be \(M<sup>N</sup> / N! \), which divides by the number of permutations of the cluster id's.    However, this is still wrong, because it counts assignments with empty clusters (which is indistinquishible from a model with N-1 clusters.  The real number of partitions is given by <a href="http://en.wikipedia.org/wiki/Stirling_number_of_the_second_kind">Stirling numbers of the second kind</a>.</p>
+<p>I've been thinking about the combinitorics of partitions and realized I'v been counting wrong.  Given M curves and N observations, I was counting the number of partitions as \(M<sup>N</sup>\).  This doesn't account for the fact that order of cluster id's doesn't matter, so a better count would be \(M<sup>N</sup> / N! \), which divides by the number of permutations of the cluster id's.    However, this is still wrong, because it counts assignments with empty clusters (which is indistinquishible from a model with N-1 clusters.  The real number of partitions is given by <a href="http://en.wikipedia.org/wiki/Stirling_number_of_the_second_kind">Stirling numbers of the second kind</a>.</p>
 
 <p>The same goes for the partitioning that occurs during a split move.</p>
 

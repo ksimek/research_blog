@@ -146,7 +146,7 @@
 
 <h2>Optimizing direct method for ML</h2>
 
-<p>Need to get O(n) runtime instead of O(n<sup>3).</sup>  Will use existing code for markov-decomposed PDF evaluation.</p>
+<p>Need to get O(n) runtime instead of O(n<sup>3</sup>).  Will use existing code for markov-decomposed PDF evaluation.</p>
 
 <p>Bottleneck is 100% the Cholesky decomposition.  The direct method doesn't remove redundant dimensions, so it's slower than <code>curve_ml4.m</code>, which does.  Recall that this fact makes <code>curvE_ml4.m</code> not general enough to use the new foreground models with.</p>
 

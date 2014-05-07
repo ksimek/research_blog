@@ -130,10 +130,8 @@
   * nonrigid motion
 </code></pre>
 
-<p>Modelling challenges</p>
-
-<pre><code>  * unknown topology, cardinality
-</code></pre>
+<p>Modelling challenges
+      * unknown topology, cardinality</p>
 
 <p>the primary difficulty is that the object and camera move simultaneously.  Since our goal is 3D tracking,</p>
 
@@ -169,15 +167,13 @@
 
 <p>The earliest high throughput phenotyping platforms (HTPPs) used expensive sensing equipment, proving the effectiveness of HTPPs but illustrating a need for lower-cost solutions \cite{TODO}.  TODO:  Make an argument about the lack of 3D analysis of full branching architecture.  Use \cite{fiorani2013} to survey existing methods,  use \cite{biskup2007} as example similar to ours.</p>
 
-<p>High-throughput phenotyping</p>
-
-<pre><code>understanding mutatations
-phenotyping is a limiting factor in breeding
-high-throughput genotyping has left a gap in the phenotyping 
-relating genes to biological traits (e.g. crop yields, drought resistance, root system efficiency)
-Understand the effects of genetic variation in terms of practical measures like crop yields or drought resistance.
-understand connections between genetics and macro structure
-</code></pre>
+<p>High-throughput phenotyping
+    understanding mutatations
+    phenotyping is a limiting factor in breeding
+    high-throughput genotyping has left a gap in the phenotyping
+    relating genes to biological traits (e.g. crop yields, drought resistance, root system efficiency)
+    Understand the effects of genetic variation in terms of practical measures like crop yields or drought resistance.
+    understand connections between genetics and macro structure</p>
 
 <h3>Reconstruction</h3>
 
@@ -219,7 +215,7 @@ understand connections between genetics and macro structure
 
 <p>  Methods for modeling smooth curves and surfaces have been widely studied since the early days of computer vision.  The popular active countour or "snakes" algorithm models smoothness by an energy functional penalizing discontinuities in position or higher-order derivatives \cite{asdf}.  When the energy function penalizes the second-derivative, the model becomes equivalent to Euler's "elastica" model of an ideal elastic rod, which also mimicks the classic mechanical splines used in traditional drafting and shipbuilding \cite{levien2008}.  Other spline models have been developed for different applications, including visual modelling, data interpolation (e.g. cubic splines), data smoothing (cubic smoothing splines), and visual modelling (B-splines).  In computer vision, splines provide a convenient representation for nonrigid structure and motion.  Thin-plate splines \cite{wood2003} have been applied to reconstruction of deformable surfaces \cite{schmid} \cite{mcinerney1993} \cite{perriollat2011}.</p>
 
-<p>  Gaussian process (GP) theory provides an elegant probabilistic representation of continous curves and surfaces\cite{williams2006}.  As shown in \cite{wahba1990}, classic cubic smoothing splines can be reformulated as the maximum posterior curve under a particular GP prior and i.i.d. Gaussian noise.  Other GP models can acheive different types of smoothness, like simple continuity (white noise process), or (C<sup>\inf)</sup> smoothness (squared-exponential covariance process).  By formulating the curve model probabilisitically, GP's can represent and propagate uncertainty in continuous curves in a principled and tractible manner .</p></li>
+<p>  Gaussian process (GP) theory provides an elegant probabilistic representation of continous curves and surfaces\cite{williams2006}.  As shown in \cite{wahba1990}, classic cubic smoothing splines can be reformulated as the maximum posterior curve under a particular GP prior and i.i.d. Gaussian noise.  Other GP models can acheive different types of smoothness, like simple continuity (white noise process), or (C^\inf) smoothness (squared-exponential covariance process).  By formulating the curve model probabilisitically, GP's can represent and propagate uncertainty in continuous curves in a principled and tractible manner .</p></li>
 <li><p>Curve models</p></li>
 <li>Edge-based likelihoods / energy functions</li>
 <li>Thin plate splines</li>

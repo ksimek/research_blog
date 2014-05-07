@@ -217,20 +217,18 @@ $(function(){
 
 <h2>Optimality test (redux)</h2>
 
-<p>Code:</p>
-
-<pre><code>x_values="-80 -40 -20 -10 -5 -2 -1 0 1 2 5 10 20 40 80"
-for x in $x_values; do
-    echo -n "$x ";
-    ./likelihood_server \
-        --config=test.conf  \
-        --image-bounds "0 530 397 0 200 2000"  \
-        --cam-convention "1 0 0"  \
-        --dbg_save_frames  \
-        --dbg_load_message  \
-        --dbg-ppo-x-offset=$x 2&gt; /dev/null | grep ^3 | sed -e 's/3 //' -e 's/,//';
-done
-</code></pre>
+<p>Code:
+    x_values="-80 -40 -20 -10 -5 -2 -1 0 1 2 5 10 20 40 80"
+    for x in $x_values; do
+        echo -n "$x ";
+        ./likelihood_server \
+            --config=test.conf  \
+            --image-bounds "0 530 397 0 200 2000"  \
+            --cam-convention "1 0 0"  \
+            --dbg_save_frames  \
+            --dbg_load_message  \
+            --dbg-ppo-x-offset=$x 2> /dev/null | grep ^3 | sed -e 's/3 //' -e 's/,//';
+    done</p>
 
 <p>Output (delta-x vs log-likelihood):</p>
 
@@ -292,26 +290,24 @@ empty model: 4.01252e+06
 
 <p>Much more sensible.  Missing data looks terrible, noise looks okay but not great,  ground truth looks best.  Lets do an offset plot just to be safe.</p>
 
-<h2>Optimality test (redux<sup>2)</sup></h2>
+<h2>Optimality test (redux<sup>2</sup>)</h2>
 
-<p>Results:</p>
-
-<pre><code>-80 3.1039e+06
--40 3.27557e+06
--20 3.58156e+06
--10 3.77333e+06
--5 3.93159e+06
--2 4.01459e+06
--1 4.02845e+06
-0 4.03273e+06
-1 4.02704e+06
-2 4.01209e+06
-5 3.93021e+06
-10 3.78782e+06
-20 3.60557e+06
-40 3.26585e+06
-80 3.26894e+06
-</code></pre>
+<p>Results:
+    -80 3.1039e+06
+    -40 3.27557e+06
+    -20 3.58156e+06
+    -10 3.77333e+06
+    -5 3.93159e+06
+    -2 4.01459e+06
+    -1 4.02845e+06
+    0 4.03273e+06
+    1 4.02704e+06
+    2 4.01209e+06
+    5 3.93021e+06
+    10 3.78782e+06
+    20 3.60557e+06
+    40 3.26585e+06
+    80 3.26894e+06</p>
 
 <p>Plot</p>
 

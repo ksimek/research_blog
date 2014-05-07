@@ -131,7 +131,7 @@
 
 <p>Found bug in re-ordering -- the gradient and Hessian's transformation Jacobian wasn't updated properly.  After a few false starts, got it right.  Results seem much better.  Still getting signficant positive index offset for three curves, all others start at zero.  Post-procssing to force them to zero seems to fix; more investigation is warranted in the future.</p>
 
-<p>Offset may be due to insufficient perturb variance?  Positive index offset only increases the variance of the first point; the conditional variance of future points is roughly the same for any index offset, due to conditional independence.  Possibly the perturb position variance is too low?  Carefull setting it too high, we'll get drift toward the camera.  Quick test: increase perturb position variance from 5<sup>2</sup> to 20<sup>2.</sup>  The offset phenomenon is exagerated.  When position perturbations are left in, the attached model moves all over the place, over 100 mm at times. Well beyond the perturb variance.</p>
+<p>Offset may be due to insufficient perturb variance?  Positive index offset only increases the variance of the first point; the conditional variance of future points is roughly the same for any index offset, due to conditional independence.  Possibly the perturb position variance is too low?  Carefull setting it too high, we'll get drift toward the camera.  Quick test: increase perturb position variance from 5<sup>2</sup> to 20<sup>2</sup>.  The offset phenomenon is exagerated.  When position perturbations are left in, the attached model moves all over the place, over 100 mm at times. Well beyond the perturb variance.</p>
 
 <p>Remember that increasing the perturb variance increases the marginal within-view variance, too.</p>
 

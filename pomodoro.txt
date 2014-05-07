@@ -144,3 +144,79 @@
 1395601600: fire data validation
 1395616758: TULIPS - debugging training
 1395618861: TULIPS - debugging training
+1397512321: test suite - octave setup
+1397515314: test suite - octave setup
+1397520321: test suite - engine
+1397578477: review immunity plots
+1397580594: review graph-cut slides
+1397582410: TULIPS testing framework: index discontinuity
+1397585615: TULIPS testing framework - evaluations: accuracy, motion
+1397611153: TULIPS testing framework - visualization
+1397613385: TULIPS testing framework - visualization
+1397666781: TULIPS testing framework - calling framework
+1397668937: TULIPS testing framework - calling framework
+1397675800: TULIPS testing framework - testing engine
+1397679018: TULIPS testing framework - testing engine
+1397681615: TULIPS testing framework - testing engine
+1397684205: TULIPS testing framework - finishing engine
+1397686024: TULIPS testing framework - debugging visualization feature
+1397689944: TULIPS testing framework - finishing calling code
+1397694495: TULIPS testing framework - finishing calling code
+1397696310: TULIPS testing framework - tes end-to-end
+1397699270: TULIPS testing framework - test end-to-end
+1397701876: TULIPS testing framework - test end-to-end
+1397711402: TULIPS testing framework - test end-to-end, start HTML
+1397714328: TULIPS testing framework - making new tests
+1397770250: ICI seminar - alpha expansion
+1397772351: ICI seminar - alpha expansion
+1397774155: ICI seminar - alpha expansion
+1397775957: ICI seminar - alpha expansion
+1397779620: ICI seminar - alpha expansion
+1397798282: ICI seminar - alpha expansion - graph construction
+1397800086: ICI seminar - alpha expansion - graph construction
+1397801893: ICI seminar - alpha expansion - results
+1397803696: ICI seminar - alpha expansion - results
+1397805800: ICI seminar - alpha expansion - testing
+1397807602: ICI seminar - alpha expansion - testing
+1398181130: experiment log visualizsation
+1398916438: TIES: piecewise linear model - model.h and inference.h
+1398918541: TIES: piecewise linear model - model.h and inference.h
+1398920353: TIES: piecewise linear model - inference.h
+1398922165: FIRE - model
+1398923971: FIRE - compiling
+1398926090: FIRE - main
+1398953271: FIRE - main
+1398955081: FIRE - est initial model
+1398956890: FIRE - est initial model
+1398958991: FIRE - est initial model
+1398970284: FIRE - est initial model
+1398979745: FIRE - est initial model
+1398986010: FIRE - compiling
+1399007599: Fire - compiling
+1399009406: Fire - tests
+1399302308: Fire - synthetic data
+1399304158: Fire - synthetic data
+1399306270: Fire - debugging inference test
+1399314442: Fire - debugging kjb::Vector::insert
+1399316252: Fire - troubleshooting long run times
+1399323907: Fire - optimizing gradient
+1399326020: Fire - troubleshooting bad results
+1399329405: Fire - troubleshooting bad results
+1399331978: Fire - troubleshooting bad results
+1399333797: FIRE - troubleshooting parallel gradient
+1399335922: FIRE - openmp
+1399344070: FIRE - openmp comparison
+1399345980: FIRE - openmp comparison
+1399347795: FIRE - openmp comparison
+1399386042: FIRE - review results
+1399387888: FIRE - re-run w/ recorder, re-run with everything enabled. investigate tuning
+1399389703: FIRE - visualize run, re-run with everything enabled. investigate tuning
+1399391973: FIRE - improv initial estimate
+1399393778: Fire - improve initial model
+1399395594: Fire - inverstigating possibility of overdefined model
+1399397400: Fire - inverstigating possibility of overdefined model
+1399399515: Fire - debugging initial model estimate
+1399402908: FIRE - initial model estimation experiments
+1399411003: FIRE - brainstorm on data correlation, per-person scaling/offset, etc.
+1399412807: FIRE - brainstorm on data correlation, per-person scaling/offset, etc.
+1399418093: FIRE - held-out error evaluation

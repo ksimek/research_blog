@@ -1,0 +1,477 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Work Log &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+      <li><a  href="/ksimek/research/pomodoro.html"><img src="/ksimek/research/img/pom.png" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Work Log
+    </h1>
+
+  <div class="date emphnext">
+    May 06, 2014
+      
+ 
+  </div>
+    
+
+
+  
+    
+
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/fire.html">FIRE</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Piecewise Linear Clustering (tests)</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;fire/&#8203;trunk/&#8203;src/&#8203;piecewise_linear/&#8203;test</td>
+    </tr>
+
+
+</table>
+
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
+
+
+<p>Ran 10,000 iterations, keeping observation model fixed.</p>
+
+<p><strong>Update</strong>: The three plots below are incorrect.  corrected plot follows.
+Ground truth model:<br/>
+<img src="/ksimek/research/img/2014-05-06-run1_gt_model.png" alt="" /></p>
+
+<p>Initial model:<br/>
+<img src="/ksimek/research/img/2014-05-06-run1_initial_model.png" alt="" /></p>
+
+<p>Final model:<br/>
+<img src="/ksimek/research/img/2014-05-06-run1_final_model.png" alt="" /></p>
+
+<p><strong>Update</strong>: There was a bug in my plotting code for the plots above. Here is the corrected plot, which is more sensible:</p>
+
+<p><img src="/ksimek/research/img/2014-05-06-run1_fixed.png" alt="" /></p>
+
+<p>Observations:</p>
+
+<ol>
+<li>Initial estimate is bad, esp y-offset.  Should review this code.</li>
+<li>Recovered results are noticably better.  Not perfect, but this may be because</li>
+<li>Keeping observation model fixed seems to improve speed by two orders of magnitude (???)</li>
+</ol>
+
+
+<h2>Run 2:  Keep best model</h2>
+
+<p>Added a 'best_sample_recorder' to keep track of the best model we've seen.</p>
+
+<h3>Results</h3>
+
+<p><img src="/ksimek/research/img/2014-05-06-run2.png" alt="" /></p>
+
+<h3>Observations</h3>
+
+<ol>
+<li>Best model is pretty good</li>
+<li>Why is initial model so different from that in the previous run?  same model, same random seed.</li>
+<li>Keep in mind, on average only 1/3 of the [0,1] domain is represented in the dataset, because it's divided into "before", "during" and "after" regions.</li>
+</ol>
+
+
+<h3>Discussion</h3>
+
+<p>Initial model uses a different observation model, so it's hard to say whether it's good or not.  I get the feeling that there's a lot of slack in this model, meaning several different combinations of observed and latent parameters can give nearly equal results.</p>
+
+<p>Also, initial model estimation doesn't correctly handle x-offsets for "during" and "after" regions.  TODO: fix this.</p>
+
+<p>Note that the noise epsilon is very large relative to the model's dynamic range.  It's hard to visualize, since the plots above are sent through an observation model before noise is added. But the observation model's scaling is around 0.5.</p>
+
+<p>Variability in the latent variable is around 0.3.  Observation model scales that to 0.15, then adds noise on the order of 1.0.  So signal-to-noise ratio is around 0.15 -- not great.  Luckilly we have lots of observations (150 people x 9 time points x 7 observed dimensions), but in our non-synthetic model, I hope our noise is smaller.</p>
+
+<h2>Run 3: Improved initial model estimate</h2>
+
+<p><em>SVN REVISION</em>: 16742<br/>
+<em>Description</em>: Fixed initial model estimate by centering each region at x=0.  See <code>model.cpp:partition_observations()</code>.</p>
+
+<p># iterations: 10,000 iterations<br/>
+Running time: 0:18.53<br/>
+Results:<br/>
+<img src="/ksimek/research/img/2014-05-06-run3.png" alt="" /></p>
+
+<p>Summary:<br/>
+Initial model has changed, but initial offset is still way off.  Other models (initia, final and best are the same).</p>
+
+<p>Discussion:<br/>
+Need to dig more into the initial estimation code.  Is boost's RNG seeded with current time?</p>
+
+<h2>Run 4: fixed observation parameters</h2>
+
+<p><em>SVN REVISION</em>: 16743<br/>
+Goal: See if fixing observation parameters (A, B) improve line-fits.  If so, issue is in observation parameters.  If not, issue is with line-fitting.<br/>
+Running time: 0:18.26</p>
+
+<p>Results:<br/>
+<img src="/ksimek/research/img/2014-05-06-run4.png" alt="" /></p>
+
+<h2>Run 5: fixed observation parameters (take 2)</h2>
+
+<p>Descrijption: Found a bug when using fixed offset B -- wasn't subtracting offset before doing PCA to find A.<br/>
+Revision: 16744<br/>
+Results:</p>
+
+<p><img src="/ksimek/research/img/2014-05-06-run5.png" alt="" /></p>
+
+<p>Discussion:
+No change.  In retrospect, this change only applies when not using fixed observation parameters, so no change is to be expected.  But a good bug to fix for later on!</p>
+
+<h2>Run 6:</h2>
+
+<h3>Description:</h3>
+
+<p>Found another bug: when projecting points onto pincipal component, if the direction vector (d) isn't normalized to 1, the projected points are off by a factor of (|d|^2).   The observation equation is given by:</p>
+
+<div>
+\[
+y = Ax + B
+\]
+
+The goal is to solve for \(x\), which means we need the Moore-Penrose pseudoinverse, \(A^+ = (A^\top A)^{-1} A \).  When \(A\) is a column vector, the term in perentheses on the right-hand size is the squared magnitude of \(A\), which was ommitted in the original equation.
+</div>
+
+
+<p><strong>Revision</strong>:  16745<br/>
+<strong>Invocation</strong>:</p>
+
+<pre><code># On bayes01
+cd ~ksimek/src/fire/src/piecewise_linear/test
+./test_inference &gt; /dev/null
+cat results.txt | \
+    awk '{row=NR%7; if(row == 3 || row == 4) print;}' \
+    &gt; ~/tmp/lin.txt
+
+# on local machine
+rsync -avz v01:tmp/lin*.txt ~/tmp/
+
+# in matlab on local machine
+cd ~ksimek/work/src/fire/src/matlab/in_progress
+figure
+lin = load('~/tmp/lin7_1.txt')'
+lin3 = reshape(lin, [3, 2, 4])
+visualize_pl_result(lin3, ...
+    {'ground truth', ...
+    'initial model', ...
+    'final model', ...
+    'best model'})
+</code></pre>
+
+<p><strong>Results</strong>:<br/>
+<img src="/ksimek/research/img/2014-05-06-run6.png" alt="" /></p>
+
+<h3>Discussion:</h3>
+
+<p>Finally getting good initial estimates.  In fact, initial estimate is the <strong>optimal estimate</strong> when A and B are known.  The best model doesn't look perfect, especially in the red curve, but there seems to be significant variance in the red curve estimator, as shorn in "final model".</p>
+
+<h2>Run 7: Initial estimate of A</h2>
+
+<p><strong>Description</strong>: Time to add initial estimation of A.  Sampling will still only estimate latent parameters.    I'm curious how close this will be to optimal.  I'm forcing the ground-truth A to have unit-length so the experimental results are comparable to the ground truth.<br/>
+<strong>Invocation</strong>: see previous<br/>
+<strong>Revision</strong>: 16746</p>
+
+<p><strong>Baseline</strong>:  The results below are estimates of the linear model when A is known.</p>
+
+<p><img src="/ksimek/research/img/2014-05-06-run7_1.png" alt="" /></p>
+
+<p><strong>Results</strong>: Below are results of sampling, using an estimate of A from the noisy data</p>
+
+<p><img src="/ksimek/research/img/2014-05-06-run7_2.png" alt="" /></p>
+
+<p><strong>Discussion:</strong><br/>
+Initial estimate is slightly worse in the green and blue curves, but still in the ballpark, as we would hope.  As observation noise decreases, this estimate should improve.</p>
+
+<p>It's notable that HMC still can't find a better model.  This is good news for the quality of our estimate.</p>
+
+<h2>Run 8: initial estimate of A and B</h2>
+
+<p><strong>Description</strong>:  Adding initial estimation of B to the test.
+<strong>Invocation</strong>: see previous</p>
+
+<p><strong>Results</strong>:</p>
+
+<p><img src="/ksimek/research/img/2014-05-06-run_8.png" alt="" /></p>
+
+<p><strong>Discussion</strong>:<br/>
+Much worse.  This could be caused by overestimating the magitude of (B), while understimating the magnitude of (b) (which can result in identical models due to our model being overdefined).  Since (b) currently adds positive offset to all observations, estimating (B) as the mean over observations could is likely to capture some of (b).</p>
+
+<p>Probably the best way to evaluate is to measure prediction error.</p>
+
+<p><strong>Update</strong> run 9 shows that this model predicts quite well, despite having different model parameters.</p>
+
+<h2>Discussion - Scaling and offset</h2>
+
+<p>I'm starting to think we should consider preprocessing the immunity data bafore passing it through this model, for two reasons</p>
+
+<h3>1. poorly scaled data; correlated noise</h3>
+
+<p>It seems too easy that we can solve for 'A' using simple PCA.  Said differently, dynamics are the interesting part of our model, but A is determined irrespective of dynamics.</p>
+
+<p>The observation transformation A has an intuitive interpretation as the direction of greatest variation in the data, after taking dynamics into account.  The problem with this is that if data is badly scaled, the direction of greatest variation will come from the noise, not the dynamics.   If possible, we’d prefer to separate variation due to noise from variation due to dynamics.  That way, A can capture the dynamic relationships between variables (e.g. IL-6 and IL-5 both start low and end high), not just correlation (IL-6 and IL-5 co-vary, but no temporal information).</p>
+
+<p>For this reason, it might help to "whiten" the data by PCA, so the inferred direction of A is more likely to capture dynamics only.</p>
+
+<h3>2. Variability in immunity measurements</h3>
+
+<p>Second, I’ve been thinking on the fact that individuals’ immunity values differ significantly in scale and offset.  From what I understand, much of this variation occurs within “plate”, i.e. its a byproduct of laboratory conditions, not immunity dynamics.   This could affect our clustering, as the latent slope and y-intercept parameters depend directly on the data’s scale and offset.  As a result, I fear our learned clusters will reflect different groups of “laboratory conditions”, rather than different groups of immunity dynamics.</p>
+
+<p>We could replace readings with z-score within each person, but this has two problems:</p>
+
+<ol>
+<li>readings that are relatively constant but legitimately high would seem more typical than they are.</li>
+<li>extremely steep changes over time would tend to flatten. similarly, relatively low slopes would tend to look higher after transforming.</li>
+</ol>
+
+
+<p>No obvious answer; may need to try several solutions.</p>
+
+<h2>Run 9: Held-out error </h2>
+
+<p><strong>Description</strong>: Since our model is overdefined, comparing model parameters is no longer a good indicator of model quality.  Instead, we should</p>
+
+<p><strong>Method</strong>: hold out 20% of data, measure log-likelihood for (a) ground truth model, (b) initial model estimate.  Two cases: 1. using global mean for B, PCA for A, 2. using ground truth A and B.</p>
+
+<p><strong>Results</strong>:</p>
+
+<pre><code>Training error:
+------------
+
+    Ground truth:              -13301.3
+    Ana. Soln (Known A, B):    -13295.2
+    Ana. Soln (Inferred A, B): -13318.3
+
+Testing error:
+-----------
+
+    Ground Truth:               -1886.17
+    Ana. Soln (Known A, B):     -1887.3
+    Ana. Soln (Inferred A, B):  -1887.06
+</code></pre>
+
+<p><strong>Discussion</strong>:</p>
+
+<p>Training error is <em>better</em> for analytical solution with known A and B, which what we'd expect if the analytical solution was the true optimum.  When A and B are inferred, training error is worse, since PCA doesn't account for dynamics.</p>
+
+<p>Prediction error is worse than ground truth for all models, which is a good sanity check.  But they're all in a very tight ballpark (less than 1.0), which suggests that we aren't overfitting.  A better test would be to compare against one or more simpler models, but these results are good enough to proceed.</p>
+
+<p>One good conclusion is that even though inferring A and B results in vastly different latent models (see run #8), the prediction is just as good.</p>
+
+<h2>Run XXX: Whitening before inference</h2>
+
+<p><strong>Description</strong>: transforming observations so they follow a standard m.v. Gaussian may help in infering.  Test prediction error and compare against run #9 errors (should be nearly identical).</p>
+
+<p><strong>Method</strong>: transform data by PCA.  Using linear regression to infer initial direction (since PCA is out).  Force B to be zero.  Fit model.  Evaluate held-out error after transforming back to data space.</p>
+
+<h2>Mid-term TODO</h2>
+
+<ul>
+<li>Tuning HMC</li>
+<li>refactor model
+
+<ul>
+<li>Start and end times out of model</li>
+<li>epsilon per-dimension</li>
+<li>missing data</li>
+</ul>
+</li>
+<li>Add offset constraints</li>
+<li></li>
+</ul>
+
+
+<h2>Meta-notes on experiments</h2>
+
+<ol>
+<li>always test on synthetic data first</li>
+<li>always test on a simpler model first (fix some parameters)</li>
+<li>always have a visualization in mind when running a test.</li>
+</ol>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  
+    <a href="/ksimek/research/2014/05/05/work-log" class="prev" title="FIRE - piecewise linear inference">&larr; FIRE - piecewise linear inference</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

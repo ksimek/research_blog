@@ -246,7 +246,7 @@ Final ML: -5664.35
 
 <p>The upward ML trend continues, but the noise variance appears to be flattening out.  The perturb_position_variance jumped upward unexpectedly.</p>
 
-<p>This might explain all of the disparity between the 2D and 3D noise variances.  Unfortunately, we can't reduce the sampling period to 0.0004, because the runtime complexity of the matching  is O(N<sup>2),</sup> where N is the number of sampled points.</p>
+<p>This might explain all of the disparity between the 2D and 3D noise variances.  Unfortunately, we can't reduce the sampling period to 0.0004, because the runtime complexity of the matching  is O(N<sup>2</sup>), where N is the number of sampled points.</p>
 
 <p>Better idea: after finding the optimal region in the matching algorithm, improve it by projecting the point onto the line segments neighboring the matched point.  Constant-time, and significantly better!</p>
 

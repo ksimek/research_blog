@@ -198,14 +198,12 @@ smoothing_variance_2d: 0.0157
 
 <p>Interesting that noise_variance_2d is so low.  We expected it to be on the order of 1 pixel.  More discussion on this later.</p>
 
-<p>I retrained the BG model for <em>only</em> the foreground curves, and evaluated the ML under it.</p>
-
-<pre><code>     position_mean_2d: [2x1 double]
- position_variance_2d: 5.8116e+03
-     rate_variance_2d: 0.5000
-    noise_variance_2d: 4.8105e-04
-smoothing_variance_2d: 0.0053
-</code></pre>
+<p>I retrained the BG model for <em>only</em> the foreground curves, and evaluated the ML under it.<br/>
+         position_mean_2d: [2x1 double]
+     position_variance_2d: 5.8116e+03
+         rate_variance_2d: 0.5000
+        noise_variance_2d: 4.8105e-04
+    smoothing_variance_2d: 0.0053</p>
 
 <p>Smaller noise variance, smaller smoothing variance.  This shrinking of variance with smaller training set is typical overfitting behavior.  Not of much concern.</p>
 
@@ -270,12 +268,11 @@ fg model = -8049.097873
 
 <h2>ML Validity Testing</h2>
 
-<p>Running reference ml:</p>
+<p>Running reference ml:
+    data_2 = init_data_curves_ml(data_, bg_train_params_done_force)
+    sum([data_2.curves_ml{:}])</p>
 
-<pre><code>data_2 = init_data_curves_ml(data_, bg_train_params_done_force)
-sum([data_2.curves_ml{:}])
-
-    ans =
+<pre><code>    ans =
       -5.1552e+04
 </code></pre>
 

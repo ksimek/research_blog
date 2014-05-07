@@ -164,7 +164,7 @@
 
 <p>GOT IT!  Recall that the likelihood variance is measured in world units, even though they are really image-based values.  As the curve moves toward the camera, the likelihood variance <em>should</em> ideally reduce, since the same size of world perturbations result in larger image perturbations.  But in our model they don't, and so curves can stray farther from the data in the image, but still look nearby the data according to the Gaussian.</p>
 
-<p>In the extreme case, all the points end up near the camera pinhole, and they will be in the center of the data Gaussian.  In practice, any point within \(\sigma<sup>2\)</sup> of the camera will be well supported, where \(\sigma<sup>2\)</sup> is the average noise variance in 3D.  I'll call this the "Singular Region", where all the of likelihood's Gaussian "cylinders" (degenerate cones) intersect and overlap.</p>
+<p>In the extreme case, all the points end up near the camera pinhole, and they will be in the center of the data Gaussian.  In practice, any point within \(\sigma<sup>2</sup>\) of the camera will be well supported, where \(\sigma<sup>2</sup>\) is the average noise variance in 3D.  I'll call this the "Singular Region", where all the of likelihood's Gaussian "cylinders" (degenerate cones) intersect and overlap.</p>
 
 <p>In terms of the marginal likelihood, this can cause counterintuitive behavior.  For example, large perturb_rate_variance might be good, because it allows the curve to wander into the "singular zone" near the camera.  Thinking of in spherical coordinates, there is a wedge of the sphere that points toward the camera, and as the perturb_rate_variance increases, this wedge remains relatively constant in angular size, but gets longer and longer.  The longer it gets, the more of singular zone it overlaps. Even though greater variance means there are more possible model configurations, there is a period during which the proportion of these configurations that are well-supported by the likelihood doesn't necessarily decrease, so the ML doesn't necessarily decrease, either.</p>
 
@@ -203,31 +203,29 @@
 
 <p>Running training using clamped likelihoods.</p>
 
-<p><em>No Perturb Model</em></p>
+<p><em>No Perturb Model</em>
+    Model:
+            smoothing_variance: 0.0025
+                noise_variance: 0.1231
+             position_variance: 1.6658e+04
+                 rate_variance: 0.2207</p>
 
-<pre><code>Model:
-        smoothing_variance: 0.0025
-            noise_variance: 0.1231
-         position_variance: 1.6658e+04
-             rate_variance: 0.2207
-
-Final ML: 2.371 x 10^4
+<pre><code>Final ML: 2.371 x 10^4
 </code></pre>
 
 <p>Exactly the same result as the non-clamped version.</p>
 
-<p><em>Ind Perturb Model</em></p>
+<p><em>Ind Perturb Model</em>
+    Model:
+            smoothing_variance: 0.0019
+                noise_variance: 0.0719
+             position_variance: 1.6729e+04
+                 rate_variance: 0.2422
+    perturb_smoothing_variance: 3.3860e-41
+         perturb_rate_variance: 1.4918e-06
+     perturb_position_variance: 0.4801</p>
 
-<pre><code>Model:
-        smoothing_variance: 0.0019
-            noise_variance: 0.0719
-         position_variance: 1.6729e+04
-             rate_variance: 0.2422
-perturb_smoothing_variance: 3.3860e-41
-     perturb_rate_variance: 1.4918e-06
- perturb_position_variance: 0.4801
-
-Final ML:  2.512 x 10^4
+<pre><code>Final ML:  2.512 x 10^4
 </code></pre>
 
 <p>Old non-clamped training resulted in perturb_rate_variance exploding.  The new perturb_rate_variance looks very reasonable.</p>

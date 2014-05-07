@@ -241,7 +241,7 @@ c^{(ab)}_{ij} = \begin{cases}
 
 <h1>Likelihood Function</h1>
 
-<p>Our likelihood function assumes observations \(Y\) arise by projecting each curve point into its corresponding image and perturbing by isotropic IID Gaussian noise with variance \(\sigma_n<sup>2\).</sup>  Using \(\pi(x_i\) to denote the projection of \(x_i\) into its corresponding view \(v_i\), the curve likelihood is the product of the individual point likelihoods,</p>
+<p>Our likelihood function assumes observations \(Y\) arise by projecting each curve point into its corresponding image and perturbing by isotropic IID Gaussian noise with variance \(\sigma_n<sup>2</sup>\).  Using \(\pi(x_i\) to denote the projection of \(x_i\) into its corresponding view \(v_i\), the curve likelihood is the product of the individual point likelihoods,</p>
 
 <div>
     p(Y | X) = \prod \mathcal{N}(y_i | \pi(x_i), \sigma^2_n)
@@ -254,7 +254,7 @@ c^{(ab)}_{ij} = \begin{cases}
 
 <p>When considered as a function of \(x_i\),  the point-wise likelihood takes the shape of a cone whose tip is centered at the camera's pinhole, \(p\), and whose axis is aligned with the backprojection line, \(l_{bp}\) (see Figure \ref{likelihood_cone}).  If we knew the optimal depth \(\hat d\) for the imaged point, we could take a Laplace approximation of the likelihood at this point:</p>
 
-<p>TODO: laplace blah blah. p(D|x) = L(x) =  dL/dx<sup>*</sup></p>
+<p>TODO: laplace blah blah. p(D|x) = L(x) =  dL/dx^*</p>
 
 <p>Due to the projection ambiguity, this Gaussian will have infinite covariance in the backprojection direction; the resulting approximation will be cylinder-shaped.</p>
 
