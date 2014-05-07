@@ -306,3 +306,6 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *02:46 PM* &nbsp; "  
 *04:14 PM* &nbsp; FIRE - held-out error evaluation  
 *06:51 PM* &nbsp; "  
+*07:31 PM* &nbsp; FIRE - PCA model  
+*08:01 PM* &nbsp; "  
+*08:43 PM* &nbsp; FIRE - PCA model, initial direction  
