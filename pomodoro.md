@@ -305,3 +305,4 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *02:16 PM* &nbsp; FIRE - brainstorm on data correlation, per-person scaling/offset, etc.  
 *02:46 PM* &nbsp; "  
 *04:14 PM* &nbsp; FIRE - held-out error evaluation  
+*06:51 PM* &nbsp; "  

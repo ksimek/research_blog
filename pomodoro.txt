@@ -220,3 +220,4 @@
 1399411003: FIRE - brainstorm on data correlation, per-person scaling/offset, etc.
 1399412807: FIRE - brainstorm on data correlation, per-person scaling/offset, etc.
 1399418093: FIRE - held-out error evaluation
+1399427467: FIRE - held-out error evaluation
