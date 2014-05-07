@@ -309,3 +309,8 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *07:31 PM* &nbsp; FIRE - PCA model  
 *08:01 PM* &nbsp; "  
 *08:43 PM* &nbsp; FIRE - PCA model, initial direction  
+<a id="2014_05_07"></a>
+##May 07, 2014
+*09:17 AM* &nbsp; "  
+*09:47 AM* &nbsp; FIRE - test regression initial estimate  
+*10:17 AM* &nbsp; "  
