@@ -217,3 +217,6 @@
 1399397400: Fire - inverstigating possibility of overdefined model
 1399399515: Fire - debugging initial model estimate
 1399402908: FIRE - initial model estimation experiments
+1399411003: FIRE - brainstorm on data correlation, per-person scaling/offset, etc.
+1399412807: FIRE - brainstorm on data correlation, per-person scaling/offset, etc.
+1399418093: FIRE - held-out error evaluation

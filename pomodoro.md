@@ -302,3 +302,6 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *10:30 AM* &nbsp; "  
 *11:05 AM* &nbsp; Fire - debugging initial model estimate  
 *12:01 PM* &nbsp; FIRE - initial model estimation experiments  
+*02:16 PM* &nbsp; FIRE - brainstorm on data correlation, per-person scaling/offset, etc.  
+*02:46 PM* &nbsp; "  
+*04:14 PM* &nbsp; FIRE - held-out error evaluation  
