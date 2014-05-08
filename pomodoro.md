@@ -321,3 +321,7 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *03:50 PM* &nbsp; "  
 *04:20 PM* &nbsp; "  
 *04:52 PM* &nbsp; FIRE - cluster model  
+*07:55 PM* &nbsp; FIRE - cluster model - generating synthetic data  
+<a id="2014_05_08"></a>
+##May 08, 2014
+*10:13 AM* &nbsp; "  
