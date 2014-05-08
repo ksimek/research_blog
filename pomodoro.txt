@@ -227,3 +227,10 @@
 1399479431: FIRE - PCA model, initial direction
 1399481246: FIRE - test regression initial estimate
 1399483050: FIRE - test regression initial estimate
+1399494704: FIRE - continuous model
+1399496604: FIRE - debugging new pw linear implementation
+1399498559: FIRE - inferring contiguous models
+1399500397: FIRE - inferring contiguous models
+1399503025: FIRE - inferring contiguous models
+1399504828: FIRE - inferring contiguous models
+1399506775: FIRE - cluster model

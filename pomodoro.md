@@ -314,3 +314,10 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *09:17 AM* &nbsp; "  
 *09:47 AM* &nbsp; FIRE - test regression initial estimate  
 *10:17 AM* &nbsp; "  
+*01:31 PM* &nbsp; FIRE - continuous model  
+*02:03 PM* &nbsp; FIRE - debugging new pw linear implementation  
+*02:35 PM* &nbsp; FIRE - inferring contiguous models  
+*03:06 PM* &nbsp; "  
+*03:50 PM* &nbsp; "  
+*04:20 PM* &nbsp; "  
+*04:52 PM* &nbsp; FIRE - cluster model  
