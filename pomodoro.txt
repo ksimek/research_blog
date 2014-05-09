@@ -236,3 +236,6 @@
 1399506775: FIRE - cluster model
 1399517722: FIRE - cluster model - generating synthetic data
 1399569218: FIRE - cluster model - generating synthetic data
+1399583687: FIRE - cluster model - k-means initialization
+1399585988: FIRE - compiling initial clustering estimate test
+1399591876: FIRE - debugging initial clustering estimates

@@ -325,3 +325,5 @@ The list below only accounts for a fraction of my actual work -- many days I for
 <a id="2014_05_08"></a>
 ##May 08, 2014
 *10:13 AM* &nbsp; "  
+*02:14 PM* &nbsp; FIRE - cluster model - k-means initialization  
+*02:53 PM* &nbsp; FIRE - compiling initial clustering estimate test  
