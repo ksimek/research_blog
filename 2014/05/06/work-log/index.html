@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Work Log &larr; </title>
+   <title>Fire: 10 inference experiments &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -86,7 +86,7 @@
 
 
   <h1 class="title">
-        [Work Log] Work Log
+        [Work Log] Fire: 10 inference experiments
     </h1>
 
   <div class="date emphnext">
@@ -142,8 +142,8 @@ Ground truth model:<br/>
 
 <ol>
 <li>Initial estimate is bad, esp y-offset.  Should review this code.</li>
-<li>Recovered results are noticably better.  Not perfect, but this may be because</li>
-<li>Keeping observation model fixed seems to improve speed by two orders of magnitude (???)</li>
+<li>Recovered results are noticably better.  Not perfect, but this may be because we're seeing the <em>final</em> model, not the best one.</li>
+<li>Keeping observation model fixed seems to improve speed by two orders of magnitude (why???)</li>
 </ol>
 
 
@@ -185,7 +185,7 @@ Results:<br/>
 <img src="/ksimek/research/img/2014-05-06-run3.png" alt="" /></p>
 
 <p>Summary:<br/>
-Initial model has changed, but initial offset is still way off.  Other models (initia, final and best are the same).</p>
+Initial model has changed, but initial offset is still way off.  Other models (final and best) are the same.</p>
 
 <p>Discussion:<br/>
 Need to dig more into the initial estimation code.  Is boost's RNG seeded with current time?</p>
@@ -199,9 +199,12 @@ Running time: 0:18.26</p>
 <p>Results:<br/>
 <img src="/ksimek/research/img/2014-05-06-run4.png" alt="" /></p>
 
+<p>Discussion:<br/>
+Bad results; issue is probably in line-fitting, not estimation of observation model.</p>
+
 <h2>Run 5: fixed observation parameters (take 2)</h2>
 
-<p>Descrijption: Found a bug when using fixed offset B -- wasn't subtracting offset before doing PCA to find A.<br/>
+<p>Description: Found a bug when using fixed offset B -- wasn't subtracting offset before doing PCA to find A.<br/>
 Revision: 16744<br/>
 Results:</p>
 
@@ -212,9 +215,8 @@ No change.  In retrospect, this change only applies when not using fixed observa
 
 <h2>Run 6:</h2>
 
-<h3>Description:</h3>
-
-<p>Found another bug: when projecting points onto pincipal component, if the direction vector (d) isn't normalized to 1, the projected points are off by a factor of (|d|^2).   The observation equation is given by:</p>
+<p><strong>Description</strong>:<br/>
+Found another bug: when projecting points onto pincipal component, if the direction vector \(d\) isn't normalized to 1, the projected points are off by a factor of \(|d|^2\).   The observation equation is given by:</p>
 
 <div>
 \[
@@ -253,14 +255,14 @@ visualize_pl_result(lin3, ...
 <p><strong>Results</strong>:<br/>
 <img src="/ksimek/research/img/2014-05-06-run6.png" alt="" /></p>
 
-<h3>Discussion:</h3>
-
-<p>Finally getting good initial estimates.  In fact, initial estimate is the <strong>optimal estimate</strong> when A and B are known.  The best model doesn't look perfect, especially in the red curve, but there seems to be significant variance in the red curve estimator, as shorn in "final model".</p>
+<p><strong>Discussion:</strong><br/>
+Finally getting good initial estimates.  In fact, initial estimate is the <strong>optimal estimate</strong> when A and B are known.  The best model doesn't look perfect, especially in the red curve, but there seems to be significant variance in the red curve estimator, as shorn in "final model".</p>
 
 <h2>Run 7: Initial estimate of A</h2>
 
-<p><strong>Description</strong>: Time to add initial estimation of A.  Sampling will still only estimate latent parameters.    I'm curious how close this will be to optimal.  I'm forcing the ground-truth A to have unit-length so the experimental results are comparable to the ground truth.<br/>
-<strong>Invocation</strong>: see previous<br/>
+<p><strong>Description</strong>: Time to add initial estimation of A.  Sampling will still only estimate latent parameters.    I'm curious how close this will be to optimal.  I'm forcing the ground-truth A to have unit-length so the experimental results are comparable to the ground truth.</p>
+
+<p><strong>Invocation</strong>: see previous<br/>
 <strong>Revision</strong>: 16746</p>
 
 <p><strong>Baseline</strong>:  The results below are estimates of the linear model when A is known.</p>
@@ -278,7 +280,7 @@ Initial estimate is slightly worse in the green and blue curves, but still in th
 
 <h2>Run 8: initial estimate of A and B</h2>
 
-<p><strong>Description</strong>:  Adding initial estimation of B to the test.
+<p><strong>Description</strong>:  Adding initial estimation of B to the test.<br/>
 <strong>Invocation</strong>: see previous</p>
 
 <p><strong>Results</strong>:</p>
@@ -296,17 +298,15 @@ Much worse.  This could be caused by overestimating the magitude of (B), while u
 
 <p>I'm starting to think we should consider preprocessing the immunity data bafore passing it through this model, for two reasons</p>
 
-<h3>1. poorly scaled data; correlated noise</h3>
-
-<p>It seems too easy that we can solve for 'A' using simple PCA.  Said differently, dynamics are the interesting part of our model, but A is determined irrespective of dynamics.</p>
+<p><strong>1. poorly scaled data; correlated noise</strong><br/>
+It seems too easy that we can solve for 'A' using simple PCA.  Said differently, dynamics are the interesting part of our model, but A is determined irrespective of dynamics.</p>
 
 <p>The observation transformation A has an intuitive interpretation as the direction of greatest variation in the data, after taking dynamics into account.  The problem with this is that if data is badly scaled, the direction of greatest variation will come from the noise, not the dynamics.   If possible, we’d prefer to separate variation due to noise from variation due to dynamics.  That way, A can capture the dynamic relationships between variables (e.g. IL-6 and IL-5 both start low and end high), not just correlation (IL-6 and IL-5 co-vary, but no temporal information).</p>
 
 <p>For this reason, it might help to "whiten" the data by PCA, so the inferred direction of A is more likely to capture dynamics only.</p>
 
-<h3>2. Variability in immunity measurements</h3>
-
-<p>Second, I’ve been thinking on the fact that individuals’ immunity values differ significantly in scale and offset.  From what I understand, much of this variation occurs within “plate”, i.e. its a byproduct of laboratory conditions, not immunity dynamics.   This could affect our clustering, as the latent slope and y-intercept parameters depend directly on the data’s scale and offset.  As a result, I fear our learned clusters will reflect different groups of “laboratory conditions”, rather than different groups of immunity dynamics.</p>
+<p><strong>2. Variability in immunity measurements</strong><br/>
+Second, I’ve been thinking on the fact that individuals’ immunity values differ significantly in scale and offset.  From what I understand, much of this variation occurs within “plate”, i.e. its a byproduct of laboratory conditions, not immunity dynamics.   This could affect our clustering, as the latent slope and y-intercept parameters depend directly on the data’s scale and offset.  As a result, I fear our learned clusters will reflect different groups of “laboratory conditions”, rather than different groups of immunity dynamics.</p>
 
 <p>We could replace readings with z-score within each person, but this has two problems:</p>
 
@@ -320,7 +320,7 @@ Much worse.  This could be caused by overestimating the magitude of (B), while u
 
 <h2>Run 9: Held-out error </h2>
 
-<p><strong>Description</strong>: Since our model is overdefined, comparing model parameters is no longer a good indicator of model quality.  Instead, we should</p>
+<p><strong>Description</strong>: Since our model is overdefined, comparing model parameters is no longer a good indicator of model quality.  Instead, we should held-out data to evaluate the predictive power of the model</p>
 
 <p><strong>Method</strong>: hold out 20% of data, measure log-likelihood for (a) ground truth model, (b) initial model estimate.  Two cases: 1. using global mean for B, PCA for A, 2. using ground truth A and B.</p>
 
@@ -349,11 +349,44 @@ Testing error:
 
 <p>One good conclusion is that even though inferring A and B results in vastly different latent models (see run #8), the prediction is just as good.</p>
 
-<h2>Run XXX: Whitening before inference</h2>
+<h2>Run 10: Whitening before inference</h2>
 
-<p><strong>Description</strong>: transforming observations so they follow a standard m.v. Gaussian may help in infering.  Test prediction error and compare against run #9 errors (should be nearly identical).</p>
+<p><strong>Description</strong>: transforming observations so they follow a standard m.v. Gaussian may help in infering.  Test prediction error and compare against run #9 errors (should be nearly identical).
+<strong>Revision</strong>: 16756</p>
 
 <p><strong>Method</strong>: transform data by PCA.  Using linear regression to infer initial direction (since PCA is out).  Force B to be zero.  Fit model.  Evaluate held-out error after transforming back to data space.</p>
+
+<p><strong>Results</strong>:</p>
+
+<pre><code>("Error" is average negative log likelihood over 150 points)
+
+Ground truth
+------------
+    Training error: 88.6756
+    Prediction error: 90.3623
+
+Estimated Model
+--------------
+    Raw data; A,B from PCA
+    ---------
+    Training error: 88.7887
+    Prediction error: 90.5986
+
+    Raw data; A,B from Regression
+    ------------
+    Training error: 88.6285
+    Prediction error: 90.4405
+
+    Whiteened Data; A,B from Regression
+    --------------
+    Training error: 93.8502
+    Prediction error: 95.7252
+</code></pre>
+
+<p><strong>Discussion</strong>:<br/>
+Training and prediction error is worse for whitened data, which is contrary to my expectation.  In retrospect, we're fitting to different data, so it's not too surprising that it predicts worse.  The story may be different if the data is truely poorly scaled.  Our example data was already well scaled, so its not a great test.</p>
+
+<p>But in the end, its defnitely clear that whitening isn't innocuous, and possibly harmful.</p>
 
 <h2>Mid-term TODO</h2>
 
@@ -367,8 +400,8 @@ Testing error:
 <li>missing data</li>
 </ul>
 </li>
-<li>Add offset constraints</li>
-<li></li>
+<li>Add offset constraints (continuous model)</li>
+<li>clustering</li>
 </ul>
 
 
@@ -389,6 +422,9 @@ Testing error:
 
 
   
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/05/07/work-log" class="next" title="FIRE - continuous model, clustering">FIRE - continuous model, clustering &rarr;</a>
   
   
     <a href="/ksimek/research/2014/05/05/work-log" class="prev" title="FIRE - piecewise linear inference">&larr; FIRE - piecewise linear inference</a>

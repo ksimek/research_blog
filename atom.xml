@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2014-05-06T18:49:18-07:00</updated>
+ <updated>2014-05-09T11:50:04-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -13,7 +13,148 @@
 
  
  <entry>
-   <title>Work Log</title>
+   <title>FIRE = Cluster model</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/05/08/work-log"/>
+   <updated>2014-05-08T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/05/08/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Implemented cluster model in &lt;code&gt;cluster_model.{cpp,h}&lt;/code&gt;.  Implemented synthetic data generation in &lt;code&gt;synthetic.{cpp,h}&lt;/code&gt;.  Working on initial model estimation using k-means.&lt;/p&gt;
+
+&lt;h2&gt;Run #1:  Adding estimation of epsilon.&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: After estimating &#39;A&#39;, also estimate the noise scale, &lt;code&gt;epsilon&lt;/code&gt; (assumed 1.0 until now).&lt;br/&gt;
+&lt;strong&gt;Method&lt;/strong&gt;: Project data onto &#39;A&#39; in data space, take mean projection error (see kjb_c::project_rows_onto_basis).&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Using known epsilon: 0.5
+-------------------
+Training error: -45.3955
+Prediction error: -46.5
+
+Estimating epsilon: 0.46192
+----------------------
+Training error: -45.7958
+Prediction error: -47.1319
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;: in the ballpark!&lt;/p&gt;
+
+&lt;h2&gt;Run #2: initial cluster estimation&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Iteratively estimate three clusters and assign memebership.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Issues&lt;/strong&gt;: third cluster initialization is identical to second.  Guess: it&#39;s picking the same bad point over and over.&lt;/p&gt;
+
+&lt;h2&gt;Run #3: initial cluster estimation, per-cluster obs. model&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Like Run #2, but each cluster has an individual observation model&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>FIRE - continuous model, clustering</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/05/07/work-log"/>
+   <updated>2014-05-07T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/05/07/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Today I finished run #10 from yesterday, in which I tried whitening the data before doing inference.  The results were inconclusive but not encouraging.&lt;/p&gt;
+
+&lt;p&gt;I need to clean up the code which has gained some cruft from yesterday&#39;s tests.  I&#39;m removing the whitening option, since it doesn&#39;t help with synthetic data, but I&#39;ll keep the whtening function for testing on real data later.&lt;/p&gt;
+
+&lt;h2&gt;Run 1: contiguous model&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Introduce piecewise continuity constriants.   Re-run and evaluate prediction error.&lt;br/&gt;
+&lt;strong&gt;Method&lt;/strong&gt;:  add a special case to Piecewise_linear_model.  If b.size() == 1, assume contiguous model and infer the other b&#39;s on the fly.  Initial model estimate uses the same code as the non-continouous model, and simply resizes b.x.b to 1 afterward.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Ground Truth
+--------------
+Training error:   88.6756
+Prediction error: 90.3623
+
+Initial Model
+------------
+Training error:   88.6303
+Prediction error: 90.4582
+
+Best Model
+----------
+Training error:   88.6268
+Prediction error: 90.4576
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;The prediction error of the estimated model is extremely close to that of ground truth.  This is a simpler model, so that probably explains improved prediction accuracy.&lt;/p&gt;
+
+&lt;p&gt;It&#39;s notable that the best model is now different than the initial estimate.  That&#39;s because the continuity constraints make the problem not solvable analytically.&lt;/p&gt;
+
+&lt;p&gt;Also notable is that training error for the estimated models is better than that of the ground truth.&lt;/p&gt;
+
+&lt;hr /&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Fire: 10 inference experiments</title>
    <link href="http://vision.sista.arizona.edu/ksimek/research/2014/05/06/work-log"/>
    <updated>2014-05-06T00:00:00-07:00</updated>
    <id>http://vision.sista.arizona.edu/ksimek/research/2014/05/06/work-log</id>
@@ -61,8 +202,8 @@ Ground truth model:&lt;br/&gt;
 
 &lt;ol&gt;
 &lt;li&gt;Initial estimate is bad, esp y-offset.  Should review this code.&lt;/li&gt;
-&lt;li&gt;Recovered results are noticably better.  Not perfect, but this may be because&lt;/li&gt;
-&lt;li&gt;Keeping observation model fixed seems to improve speed by two orders of magnitude (???)&lt;/li&gt;
+&lt;li&gt;Recovered results are noticably better.  Not perfect, but this may be because we&#39;re seeing the &lt;em&gt;final&lt;/em&gt; model, not the best one.&lt;/li&gt;
+&lt;li&gt;Keeping observation model fixed seems to improve speed by two orders of magnitude (why???)&lt;/li&gt;
 &lt;/ol&gt;
 
 
@@ -104,7 +245,7 @@ Results:&lt;br/&gt;
 &lt;img src=&quot;/ksimek/research/img/2014-05-06-run3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Summary:&lt;br/&gt;
-Initial model has changed, but initial offset is still way off.  Other models (initia, final and best are the same).&lt;/p&gt;
+Initial model has changed, but initial offset is still way off.  Other models (final and best) are the same.&lt;/p&gt;
 
 &lt;p&gt;Discussion:&lt;br/&gt;
 Need to dig more into the initial estimation code.  Is boost&#39;s RNG seeded with current time?&lt;/p&gt;
@@ -118,9 +259,12 @@ Running time: 0:18.26&lt;/p&gt;
 &lt;p&gt;Results:&lt;br/&gt;
 &lt;img src=&quot;/ksimek/research/img/2014-05-06-run4.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
+&lt;p&gt;Discussion:&lt;br/&gt;
+Bad results; issue is probably in line-fitting, not estimation of observation model.&lt;/p&gt;
+
 &lt;h2&gt;Run 5: fixed observation parameters (take 2)&lt;/h2&gt;
 
-&lt;p&gt;Descrijption: Found a bug when using fixed offset B -- wasn&#39;t subtracting offset before doing PCA to find A.&lt;br/&gt;
+&lt;p&gt;Description: Found a bug when using fixed offset B -- wasn&#39;t subtracting offset before doing PCA to find A.&lt;br/&gt;
 Revision: 16744&lt;br/&gt;
 Results:&lt;/p&gt;
 
@@ -131,9 +275,8 @@ No change.  In retrospect, this change only applies when not using fixed observa
 
 &lt;h2&gt;Run 6:&lt;/h2&gt;
 
-&lt;h3&gt;Description:&lt;/h3&gt;
-
-&lt;p&gt;Found another bug: when projecting points onto pincipal component, if the direction vector (d) isn&#39;t normalized to 1, the projected points are off by a factor of (|d|^2).   The observation equation is given by:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;:&lt;br/&gt;
+Found another bug: when projecting points onto pincipal component, if the direction vector \(d\) isn&#39;t normalized to 1, the projected points are off by a factor of \(|d|^2\).   The observation equation is given by:&lt;/p&gt;
 
 &lt;div&gt;
 \[
@@ -172,14 +315,14 @@ visualize_pl_result(lin3, ...
 &lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;br/&gt;
 &lt;img src=&quot;/ksimek/research/img/2014-05-06-run6.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;h3&gt;Discussion:&lt;/h3&gt;
-
-&lt;p&gt;Finally getting good initial estimates.  In fact, initial estimate is the &lt;strong&gt;optimal estimate&lt;/strong&gt; when A and B are known.  The best model doesn&#39;t look perfect, especially in the red curve, but there seems to be significant variance in the red curve estimator, as shorn in &quot;final model&quot;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Discussion:&lt;/strong&gt;&lt;br/&gt;
+Finally getting good initial estimates.  In fact, initial estimate is the &lt;strong&gt;optimal estimate&lt;/strong&gt; when A and B are known.  The best model doesn&#39;t look perfect, especially in the red curve, but there seems to be significant variance in the red curve estimator, as shorn in &quot;final model&quot;.&lt;/p&gt;
 
 &lt;h2&gt;Run 7: Initial estimate of A&lt;/h2&gt;
 
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Time to add initial estimation of A.  Sampling will still only estimate latent parameters.    I&#39;m curious how close this will be to optimal.  I&#39;m forcing the ground-truth A to have unit-length so the experimental results are comparable to the ground truth.&lt;br/&gt;
-&lt;strong&gt;Invocation&lt;/strong&gt;: see previous&lt;br/&gt;
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Time to add initial estimation of A.  Sampling will still only estimate latent parameters.    I&#39;m curious how close this will be to optimal.  I&#39;m forcing the ground-truth A to have unit-length so the experimental results are comparable to the ground truth.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Invocation&lt;/strong&gt;: see previous&lt;br/&gt;
 &lt;strong&gt;Revision&lt;/strong&gt;: 16746&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;Baseline&lt;/strong&gt;:  The results below are estimates of the linear model when A is known.&lt;/p&gt;
@@ -197,7 +340,7 @@ Initial estimate is slightly worse in the green and blue curves, but still in th
 
 &lt;h2&gt;Run 8: initial estimate of A and B&lt;/h2&gt;
 
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;:  Adding initial estimation of B to the test.
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;:  Adding initial estimation of B to the test.&lt;br/&gt;
 &lt;strong&gt;Invocation&lt;/strong&gt;: see previous&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
@@ -215,17 +358,15 @@ Much worse.  This could be caused by overestimating the magitude of (B), while u
 
 &lt;p&gt;I&#39;m starting to think we should consider preprocessing the immunity data bafore passing it through this model, for two reasons&lt;/p&gt;
 
-&lt;h3&gt;1. poorly scaled data; correlated noise&lt;/h3&gt;
-
-&lt;p&gt;It seems too easy that we can solve for &#39;A&#39; using simple PCA.  Said differently, dynamics are the interesting part of our model, but A is determined irrespective of dynamics.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1. poorly scaled data; correlated noise&lt;/strong&gt;&lt;br/&gt;
+It seems too easy that we can solve for &#39;A&#39; using simple PCA.  Said differently, dynamics are the interesting part of our model, but A is determined irrespective of dynamics.&lt;/p&gt;
 
 &lt;p&gt;The observation transformation A has an intuitive interpretation as the direction of greatest variation in the data, after taking dynamics into account.  The problem with this is that if data is badly scaled, the direction of greatest variation will come from the noise, not the dynamics.   If possible, we’d prefer to separate variation due to noise from variation due to dynamics.  That way, A can capture the dynamic relationships between variables (e.g. IL-6 and IL-5 both start low and end high), not just correlation (IL-6 and IL-5 co-vary, but no temporal information).&lt;/p&gt;
 
 &lt;p&gt;For this reason, it might help to &quot;whiten&quot; the data by PCA, so the inferred direction of A is more likely to capture dynamics only.&lt;/p&gt;
 
-&lt;h3&gt;2. Variability in immunity measurements&lt;/h3&gt;
-
-&lt;p&gt;Second, I’ve been thinking on the fact that individuals’ immunity values differ significantly in scale and offset.  From what I understand, much of this variation occurs within “plate”, i.e. its a byproduct of laboratory conditions, not immunity dynamics.   This could affect our clustering, as the latent slope and y-intercept parameters depend directly on the data’s scale and offset.  As a result, I fear our learned clusters will reflect different groups of “laboratory conditions”, rather than different groups of immunity dynamics.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2. Variability in immunity measurements&lt;/strong&gt;&lt;br/&gt;
+Second, I’ve been thinking on the fact that individuals’ immunity values differ significantly in scale and offset.  From what I understand, much of this variation occurs within “plate”, i.e. its a byproduct of laboratory conditions, not immunity dynamics.   This could affect our clustering, as the latent slope and y-intercept parameters depend directly on the data’s scale and offset.  As a result, I fear our learned clusters will reflect different groups of “laboratory conditions”, rather than different groups of immunity dynamics.&lt;/p&gt;
 
 &lt;p&gt;We could replace readings with z-score within each person, but this has two problems:&lt;/p&gt;
 
@@ -239,7 +380,7 @@ Much worse.  This could be caused by overestimating the magitude of (B), while u
 
 &lt;h2&gt;Run 9: Held-out error &lt;/h2&gt;
 
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Since our model is overdefined, comparing model parameters is no longer a good indicator of model quality.  Instead, we should&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Since our model is overdefined, comparing model parameters is no longer a good indicator of model quality.  Instead, we should held-out data to evaluate the predictive power of the model&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;Method&lt;/strong&gt;: hold out 20% of data, measure log-likelihood for (a) ground truth model, (b) initial model estimate.  Two cases: 1. using global mean for B, PCA for A, 2. using ground truth A and B.&lt;/p&gt;
 
@@ -268,11 +409,44 @@ Testing error:
 
 &lt;p&gt;One good conclusion is that even though inferring A and B results in vastly different latent models (see run #8), the prediction is just as good.&lt;/p&gt;
 
-&lt;h2&gt;Run XXX: Whitening before inference&lt;/h2&gt;
+&lt;h2&gt;Run 10: Whitening before inference&lt;/h2&gt;
 
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: transforming observations so they follow a standard m.v. Gaussian may help in infering.  Test prediction error and compare against run #9 errors (should be nearly identical).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: transforming observations so they follow a standard m.v. Gaussian may help in infering.  Test prediction error and compare against run #9 errors (should be nearly identical).
+&lt;strong&gt;Revision&lt;/strong&gt;: 16756&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;Method&lt;/strong&gt;: transform data by PCA.  Using linear regression to infer initial direction (since PCA is out).  Force B to be zero.  Fit model.  Evaluate held-out error after transforming back to data space.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;(&quot;Error&quot; is average negative log likelihood over 150 points)
+
+Ground truth
+------------
+    Training error: 88.6756
+    Prediction error: 90.3623
+
+Estimated Model
+--------------
+    Raw data; A,B from PCA
+    ---------
+    Training error: 88.7887
+    Prediction error: 90.5986
+
+    Raw data; A,B from Regression
+    ------------
+    Training error: 88.6285
+    Prediction error: 90.4405
+
+    Whiteened Data; A,B from Regression
+    --------------
+    Training error: 93.8502
+    Prediction error: 95.7252
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;:&lt;br/&gt;
+Training and prediction error is worse for whitened data, which is contrary to my expectation.  In retrospect, we&#39;re fitting to different data, so it&#39;s not too surprising that it predicts worse.  The story may be different if the data is truely poorly scaled.  Our example data was already well scaled, so its not a great test.&lt;/p&gt;
+
+&lt;p&gt;But in the end, its defnitely clear that whitening isn&#39;t innocuous, and possibly harmful.&lt;/p&gt;
 
 &lt;h2&gt;Mid-term TODO&lt;/h2&gt;
 
@@ -286,8 +460,8 @@ Testing error:
 &lt;li&gt;missing data&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
-&lt;li&gt;Add offset constraints&lt;/li&gt;
-&lt;li&gt;&lt;/li&gt;
+&lt;li&gt;Add offset constraints (continuous model)&lt;/li&gt;
+&lt;li&gt;clustering&lt;/li&gt;
 &lt;/ul&gt;
 
 

@@ -220,3 +220,26 @@
 1399411003: FIRE - brainstorm on data correlation, per-person scaling/offset, etc.
 1399412807: FIRE - brainstorm on data correlation, per-person scaling/offset, etc.
 1399418093: FIRE - held-out error evaluation
+1399427467: FIRE - held-out error evaluation
+1399429882: FIRE - PCA model
+1399431685: FIRE - PCA model
+1399434189: FIRE - PCA model, initial direction
+1399479431: FIRE - PCA model, initial direction
+1399481246: FIRE - test regression initial estimate
+1399483050: FIRE - test regression initial estimate
+1399494704: FIRE - continuous model
+1399496604: FIRE - debugging new pw linear implementation
+1399498559: FIRE - inferring contiguous models
+1399500397: FIRE - inferring contiguous models
+1399503025: FIRE - inferring contiguous models
+1399504828: FIRE - inferring contiguous models
+1399506775: FIRE - cluster model
+1399517722: FIRE - cluster model - generating synthetic data
+1399569218: FIRE - cluster model - generating synthetic data
+1399583687: FIRE - cluster model - k-means initialization
+1399585988: FIRE - compiling initial clustering estimate test
+1399591876: FIRE - debugging initial clustering estimates
+1399610182: FIRE - debugging initial clustering estimates
+1399611994: FIRE: debugging cluster membership bug
+1399613798: FIRE: debugging cluster membership bug
+1399649804: FIRE: debugging cluster membership bug
