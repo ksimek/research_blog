@@ -239,3 +239,7 @@
 1399583687: FIRE - cluster model - k-means initialization
 1399585988: FIRE - compiling initial clustering estimate test
 1399591876: FIRE - debugging initial clustering estimates
+1399610182: FIRE - debugging initial clustering estimates
+1399611994: FIRE: debugging cluster membership bug
+1399613798: FIRE: debugging cluster membership bug
+1399649804: FIRE: debugging cluster membership bug
