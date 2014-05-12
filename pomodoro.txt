@@ -243,3 +243,8 @@
 1399611994: FIRE: debugging cluster membership bug
 1399613798: FIRE: debugging cluster membership bug
 1399649804: FIRE: debugging cluster membership bug
+1399908801: FIRE - initial clustering testing
+1399910602: FIRE - initial clustering testing
+1399916701: FIRE - testing kjb fixes
+1399918811: FIRE - KJB matrix resize refactor
+1399920628: FIRE - test KJB matrix resize refactor
