@@ -258,3 +258,9 @@
 1400000100: FIRE - test missing data
 1400001907: FIRE - empty cluster bug
 1400003712: FIRE - empty cluster bug
+1400016332: FIRE - project_points bug
+1400018134: FIRE - project_points bug
+1400019942: FIRE - epsilon estimation bug
+1400021785: FIRE - epsilon estimation bug
+1400023889: FIRE - epsilon estimation bug
+1400045387: FIRE - testing heavy missing
