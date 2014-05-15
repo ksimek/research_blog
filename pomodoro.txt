@@ -270,3 +270,6 @@
 1400108941: FIRE - parsing radiation supplement table
 1400110743: FIRE - parsing radiation supplement table
 1400114175: FIRE - generating clustering data
+1400132346: FIRE - fire cluster data preparation - debugging
+1400134164: FIRE - troubleshoot chemo and radiation data inconsisstenceis
+1400135966: FIRE - troubleshoot chemo and radiation data inconsisstenceis
