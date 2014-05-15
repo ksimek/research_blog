@@ -264,3 +264,9 @@
 1400021785: FIRE - epsilon estimation bug
 1400023889: FIRE - epsilon estimation bug
 1400045387: FIRE - testing heavy missing
+1400103233: FIRE - parsing radiation supplement table
+1400105036: FIRE - parsing radiation supplement table
+1400107140: FIRE - parsing radiation supplement table
+1400108941: FIRE - parsing radiation supplement table
+1400110743: FIRE - parsing radiation supplement table
+1400114175: FIRE - generating clustering data
