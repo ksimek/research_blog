@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>FIRE = Cluster model &larr; </title>
+   <title>FIRE Debugging cluster model &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -86,11 +86,11 @@
 
 
   <h1 class="title">
-        [Work Log] FIRE = Cluster model
+        [Work Log] FIRE Debugging cluster model
     </h1>
 
   <div class="date emphnext">
-    May 08, 2014
+    May 09, 2014
       
  
   </div>
@@ -127,37 +127,81 @@
 </div>
 
 
-<p>Implemented cluster model in <code>cluster_model.{cpp,h}</code>.  Implemented synthetic data generation in <code>synthetic.{cpp,h}</code>.  Working on initial model estimation using k-means.</p>
+<p>Initial cluster estimation, something like k-means.</p>
 
-<h2>Run #1:  Adding estimation of epsilon.</h2>
+<p>likelihood isn't monotonically increasing over time.</p>
 
-<p><strong>Description</strong>: After estimating 'A', also estimate the noise scale, <code>epsilon</code> (assumed 1.0 until now).<br/>
-<strong>Method</strong>: Project data onto 'A' in data space, take mean projection error (see kjb_c::project_rows_onto_basis).</p>
+<ol>
+<li>we aren't updating cluster weights</li>
+<li>we're doing soft assignment</li>
+</ol>
 
-<p><strong>Results</strong>:</p>
 
-<pre><code>Using known epsilon: 0.5
--------------------
-Training error: -45.3955
-Prediction error: -46.5
+<p>--</p>
 
-Estimating epsilon: 0.46192
-----------------------
-Training error: -45.7958
-Prediction error: -47.1319
+<p>found bug:</p>
+
+<h2>Run #1: initialize by K-means (part 1)</h2>
+
+<p><strong>Description</strong>: do k-means to initialize cluster assignments.</p>
+
+<p><strong>Details</strong>:</p>
+
+<pre><code>Estimate A, B: no
+estimate epsilon: no
+shared observation model: yes
+continuity constraints: yes
+num clusters: 3
+observed dimensions: 7
+num observations: 150
+A estimation method: regression
 </code></pre>
 
-<p><strong>Discussion</strong>: in the ballpark!</p>
+<p><strong>Revision</strong>: 16767</p>
 
-<h2>Run #2: initial cluster estimation</h2>
+<p><strong>Method</strong>: Build first cluster from all data.  Iteratively choose "bad" points under current model as prototypes for new cluster.  Then run k-means.</p>
 
-<p><strong>Description</strong>: Iteratively estimate three clusters and assign memebership.</p>
+<p><strong>Result</strong>:  Converges after 15 iterations.</p>
 
-<p><strong>Issues</strong>: third cluster initialization is identical to second.  Guess: it's picking the same bad point over and over.</p>
+<p>In the 2x150 image below, first row is ground truth clustering, second row is experimental results.  Specific coloring is irrelevant, grouping is.</p>
 
-<h2>Run #3: initial cluster estimation, per-cluster obs. model</h2>
+<p><img src="/ksimek/research/img/2014-05-12-cluster_results_0.png" alt="" /></p>
 
-<p><strong>Description</strong>: Like Run #2, but each cluster has an individual observation model</p>
+<p><strong>Discussion</strong>:</p>
+
+<p>Not great results.  Hopefully noise is just too high to find any useful structure without more observations.</p>
+
+<p>Interesting that the g.t. clustering is so uneven.  May want to increase Dirichlet distribtuion's alpha parameter.</p>
+
+<h2>Run 2:  Rerun with small noise</h2>
+
+<p><strong>Description</strong>:  Re-run with noise lowered to 0.01.
+<strong>Revision</strong>:  16773
+<strong>Results</strong>:  Converges after 3 iterations.</p>
+
+<p><img src="/ksimek/research/img/2014-05-12-cluster_results.png" alt="" /></p>
+
+<p><strong>Discussion</strong>:</p>
+
+<p>Much better!  We don't correctly find the <em>tiny</em> middle cluster, which we can hopefully find during HMC.</p>
+
+<p>TODO: Return to this model when testing HMC</p>
+
+<h2>Aside: speeding up Matrix::resize(); adding Matrix::realloc()</h2>
+
+<p>The documentation for Matrix::resize claims it reuses allocated space, which is actually untrue.  Spent some time playing with reimplementations before realizing any good solution will require reworking the C library, which would require more precision and care than I have the time for at the moment.</p>
+
+<p>Instead, made two halfway measures:</p>
+
+<ol>
+<li>added spacial case; space is reused iff new_cols == num_cols &amp;&amp; new_rows &lt;= num_rows.</li>
+<li>Added new function: Matrix::realloc, which is like resize, but always preserves allocated storage if possible, and doesn't guarantee data is preserved afterward.</li>
+</ol>
+
+
+<h2>Run 3: Rerun with unknown observation model</h2>
+
+<p><strong>Results</strong>: same</p>
 
       <address class="signature">
         Posted by
@@ -169,10 +213,10 @@ Prediction error: -47.1319
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2014/05/09/work-log" class="next" title="FIRE Debugging cluster model">FIRE Debugging cluster model &rarr;</a>
+    <a href="/ksimek/research/2014/05/12/work-log" class="next" title="FIRE - streamlining; missing data">FIRE - streamlining; missing data &rarr;</a>
   
   
-    <a href="/ksimek/research/2014/05/07/work-log" class="prev" title="FIRE - continuous model, clustering">&larr; FIRE - continuous model, clustering</a>
+    <a href="/ksimek/research/2014/05/08/work-log" class="prev" title="FIRE = Cluster model">&larr; FIRE = Cluster model</a>
   
   </div>
   <div class="clearer"> </div>

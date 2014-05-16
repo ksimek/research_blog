@@ -1,0 +1,444 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>FIRE - first clustering test &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+      <li><a  href="/ksimek/research/pomodoro.html"><img src="/ksimek/research/img/pom.png" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] FIRE - first clustering test
+    </h1>
+
+  <div class="date emphnext">
+    May 15, 2014
+      
+ 
+  </div>
+    
+
+
+  
+    
+
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/fire.html">FIRE</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Piecewise Linear Clustering</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;fire/&#8203;trunk/&#8203;src/&#8203;piecewise_linear</td>
+    </tr>
+
+    <tr>
+        <th>SVN Revision</th>
+        <td>16806</td>
+    </tr>
+
+
+</table>
+
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
+
+
+<h2>Run #1:</h2>
+
+<p><strong>Description</strong>: Run initial model estimation on real data for the first time.</p>
+
+<p><strong>Results</strong>:</p>
+
+<p>Single cluster:</p>
+
+<pre><code>0.00000000e+00  0.00000000e+00
+8.73210306e-03  6.75372609e-02  3.38471516e-02
+1.88790755e+00 -1.88387427e+01 -9.88494611e+00
+-8.09450747e-01 -2.56388154e-01 -3.61218358e-01 -4.23137123e-02  1.64628674e-02 -1.02962552e-02 -3.82633520e-01
+-5.26954930e+01 -9.01436620e+00 -2.14090141e+01  1.88492958e+00  6.61450704e+00  8.49971831e+00 -2.38576056e+01
+24.6497 
+</code></pre>
+
+<p>Multiple cluster:</p>
+
+<pre><code>num_clusters:3
+log weights: 0 0 0
+cluster #1
+  0.00000000e+00  0.00000000e+00
+ -2.68876589e-01 -7.04390256e-02  1.45450526e-02
+  6.16258430e+03  6.13067965e+03  6.12930057e+03
+ -1.08771413e-02  5.76005556e-04 -1.04761899e-02 -1.69093096e-03  9.36991863e-04 -3.78348959e-04  1.27422332e-03
+ -4.89152880e+01 -9.21454922e+00 -1.77681544e+01  2.47259001e+00  6.28886806e+00  8.63120843e+00 -2.43004449e+01
+26.2893
+cluster #2
+  0.00000000e+00  0.00000000e+00
+  1.20215477e-01  0.00000000e+00  2.24383835e-01
+  6.11014579e+03  0.00000000e+00  5.96700128e+03
+ -1.08771413e-02  5.76005556e-04 -1.04761899e-02 -1.69093096e-03  9.36991863e-04 -3.78348959e-04  1.27422332e-03
+ -4.89152880e+01 -9.21454922e+00 -1.77681544e+01  2.47259001e+00  6.28886806e+00  8.63120843e+00 -2.43004449e+01
+26.2893
+cluster #3
+  0.00000000e+00  0.00000000e+00
+ -1.52115349e-01  2.77516102e+00  1.82492585e+00
+ -3.84569849e+00 -7.18131761e+02 -1.63056790e+02
+ -1.08771413e-02  5.76005556e-04 -1.04761899e-02 -1.69093096e-03  9.36991863e-04 -3.78348959e-04  1.27422332e-03
+ -4.89152880e+01 -9.21454922e+00 -1.77681544e+01  2.47259001e+00  6.28886806e+00  8.63120843e+00 -2.43004449e+01
+26.2893
+</code></pre>
+
+<p><strong>Discussion</strong></p>
+
+<p>Surprisingly high epsilon (~26).  This is far beyond the dynamic range of the data, suggesting either (a) a bug, (b) a terrible model, or (c) failure of the analytical estimation method to find a good result.  Option (a) seems more likely, since a flat line give a lower error variance than this.  Perhaps our observation basis A was poorly estimated.  Lets re-run with PCA method.</p>
+
+<h2>Run #2: PCA method</h2>
+
+<p><strong>Description</strong>: Re-run but using PCA instead of regression to estimate observation transformation, A.  (i.e. change constant <code>use_regression_method</code> to false).</p>
+
+<p><strong>Results</strong>:</p>
+
+<p>Single cluster:</p>
+
+<pre><code>  0.00000000e+00  0.00000000e+00
+  8.73210306e-03  6.75372609e-02  3.38471516e-02
+  1.88790755e+00 -1.88387427e+01 -9.88494611e+00
+ -8.09450747e-01 -2.56388154e-01 -3.61218358e-01 -4.23137123e-02  1.64628674e-02 -1.02962552e-02 -3.82633520e-01
+ -5.26954930e+01 -9.01436620e+00 -2.14090141e+01  1.88492958e+00  6.61450704e+00  8.49971831e+00 -2.38576056e+01
+24.6497
+</code></pre>
+
+<p>Multiple Cluster</p>
+
+<pre><code>num_clusters:3
+log weights: 0 0 0
+cluster #1
+  0.00000000e+00  0.00000000e+00
+  1.13041314e-02  6.75372609e-02  3.41203573e-02
+  3.56421036e-01 -1.88387427e+01 -1.11922319e+01
+ -8.09450747e-01 -2.56388154e-01 -3.61218358e-01 -4.23137123e-02  1.64628674e-02 -1.02962552e-02 -3.82633520e-01
+ -5.26954930e+01 -9.01436620e+00 -2.14090141e+01  1.88492958e+00  6.61450704e+00  8.49971831e+00 -2.38576056e+01
+24.6497
+cluster #2
+  0.00000000e+00  0.00000000e+00
+  1.05708618e-03  0.00000000e+00  0.00000000e+00
+  5.35534897e+01  0.00000000e+00  0.00000000e+00
+ -8.09450747e-01 -2.56388154e-01 -3.61218358e-01 -4.23137123e-02  1.64628674e-02 -1.02962552e-02 -3.82633520e-01
+ -5.26954930e+01 -9.01436620e+00 -2.14090141e+01  1.88492958e+00  6.61450704e+00  8.49971831e+00 -2.38576056e+01
+24.6497
+cluster #3
+  0.00000000e+00  0.00000000e+00
+  0.00000000e+00  0.00000000e+00  3.06188063e-02
+  1.18920520e+02  0.00000000e+00  7.71079754e+01
+ -8.09450747e-01 -2.56388154e-01 -3.61218358e-01 -4.23137123e-02  1.64628674e-02 -1.02962552e-02 -3.82633520e-01
+ -5.26954930e+01 -9.01436620e+00 -2.14090141e+01  1.88492958e+00  6.61450704e+00  8.49971831e+00 -2.38576056e+01
+24.6497
+</code></pre>
+
+<p><strong>Discussion</strong></p>
+
+<p>No noticable improvement.  During K-means, cluster collapse was frequent, which didn't occur in previous run.</p>
+
+<h2>Immunity data inspection</h2>
+
+<p>Below are histograms of raw immunity readings for each marker. TNF-\(\alpha\), IL-2, and IL-6 have sensible distributions.</p>
+
+<p>IL-1b and IL-10 have weirdly peaked distribution with heavy tails.  Perhaps outliers are isolated to specific plates (investigated next).</p>
+
+<p>IFN and IL-8 are borderline; peaked with heavy tails but not as bad as IL-1b and IL-10.</p>
+
+<script>
+    $(function() {
+        $( "#hist_tabs" ).tabs();
+    });
+</script>
+
+
+
+
+<div id="hist_tabs">
+  <ul>
+    <li><a href="#IFN">IFN-g</a></li>
+    <li><a href="#TNFa">TNF-\(\alpha\)</a></li>
+    <li><a href="#IL1B">IL-1b</a></li>
+    <li><a href="#IL2">IL-2</a></li>
+    <li><a href="#IL6">IL-6</a></li>
+    <li><a href="#IL8">IL-8</a></li>
+    <li><a href="#IL10">IL-10</a></li>
+  </ul>
+    <div id="TNFa">
+        <img src="/ksimek/research/img/2014-05-15-tnfa.png" />
+    </div>
+    <div id="IL2">
+        <img src="/ksimek/research/img/2014-05-15-IL2.png" />
+    </div>
+    <div id="IL8">
+        <img src="/ksimek/research/img/2014-05-15-IL8.png" />
+    </div>
+    <div id="IL6">
+        <img src="/ksimek/research/img/2014-05-15-IL6.png" />
+    </div>
+    <div id="IL1B">
+        <img src="/ksimek/research/img/2014-05-15-IL1B.png" />
+    </div>
+    <div id="IFN">
+        <img src="/ksimek/research/img/2014-05-15-IFN.png" />
+    </div>
+    <div id="IL10">
+        <img src="/ksimek/research/img/2014-05-15-IL10.png" />
+    </div>
+  </div>
+
+
+<p></div></p>
+
+<h2>Per-plate distributions.</h2>
+
+<script>
+    $(function() {
+        $( "#plate_hist_tabs" ).tabs();
+    });
+</script>
+
+
+<div id="plate_hist_tabs">
+    <ul>
+        <li><a href="#ifng_plates">IFN-g</a></li>
+        <li><a href="#tnfa_plates">TNF-\(\alpha\)</a></li>
+        <li><a href="#IL1B_plates">IL-1b</a></li>
+        <li><a href="#il2_plates">IL-2</a></li>
+        <li><a href="#il6_plates">IL-6</a></li>
+        <li><a href="#il8_plates">IL-8</a></li>
+        <li><a href="#il10_plates">IL-10</a></li>
+    </ul>
+    <div id="ifng_plates">
+    <img src="/ksimek/research/img/2014-05-15-ifng_plates.png" />
+    <br />
+    One of the worse plates in terms of missing/unreadable data (331/710).  Irregular between and within plates.
+    </div>
+    <div id="il10_plates">
+    <img src="/ksimek/research/img/2014-05-15-il10_plates.png" /><br />
+    <p>
+        Another reasonably strong variable in terms of missing data (637/710).  Plots seem somewhat irregular, but possibly due to excessible outliers in plates 10, 7, 8, 4.  This could be good support for a clustering model if it would explain the heavy tails in these plates
+    </p>
+
+    </div>
+    <div id="IL1B_plates">
+    <img src="/ksimek/research/img/2014-05-15-IL1B_plates.png" />
+    <p>
+    In terms of missing data, this variable is borderline (550/710).  Plates seem to split between (a) seemingly exponential-distrubted data (2,3,4,7,8, 10), and (b) irregular data (plates 1,5,6,9).  I'm doubtful that this will be useful for inference.
+    </p>
+    <p>
+    Note <em>massive<em> variation in support between plates.  e.g. plate 8 maxes out at 80, while plate 1 stops at 1.3.
+    </p>
+    </div>
+
+    <div id="il6_plates">
+    <img src="/ksimek/research/img/2014-05-15-il6_plates.png" /><br />
+    <p>
+    Very little missing data in this dataset (699/710).  Seems much more consistent than most other datasets. Scale and shape vary a bit, but not glaring inconsistencies, aside from a few outliers (e.g. plate 9).
+    </p>
+    <p>
+    Lots of between-plate variability (plate 7 vs. 10).
+    </p>
+    </div>
+    <div id="il8_plates">
+    <img src="/ksimek/research/img/2014-05-15-il8_plates.png" />
+    </div>
+    <p>
+        Seems to be Gamma-distributed or log-normal distributed but with lots of big outliers.  Plates 5 and 10 have extreme outliers
+    </p>
+    <div id="tnfa_plates">
+    <img src="/ksimek/research/img/2014-05-15-tnfa_plates.png" /><br />
+    <p>
+    The best plate in terms of missing data (710/710), TNF-\(\alpha\) seems very regular within-plates.  Note the strong gaussian shapes here, compared to the full-dataset histogram earlier.  
+    </p>
+    <p>
+    Variation between plates is notable (see plate 5 vs. plate 8).  Supports a regularization approach.
+    </p>
+    </div>
+    <div id="il2_plates">
+    <img src="/ksimek/research/img/2014-05-15-il2-plates.png" />
+    <p>
+    This is one of the stronger plates in terms of missing data (710/710 present).  Several plates have decent gaussian distributions, albeit with heavy tails (1, 7, 9), but several are irregular (4, 5, 8, 9), and others look more exponential (2, 3, 10).
+    </p>
+    </div>
+</div>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  
+    <a href="/ksimek/research/2014/05/15/reference" class="prev" title="FIRE immunity plots">&larr; FIRE immunity plots</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

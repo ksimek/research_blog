@@ -4,13 +4,689 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2014-05-09T11:50:04-07:00</updated>
+ <updated>2014-05-16T00:11:05-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>FIRE - first clustering test</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/05/15/work-log"/>
+   <updated>2014-05-15T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/05/15/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;16806&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Run #1:&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Run initial model estimation on real data for the first time.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;Single cluster:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;0.00000000e+00  0.00000000e+00
+8.73210306e-03  6.75372609e-02  3.38471516e-02
+1.88790755e+00 -1.88387427e+01 -9.88494611e+00
+-8.09450747e-01 -2.56388154e-01 -3.61218358e-01 -4.23137123e-02  1.64628674e-02 -1.02962552e-02 -3.82633520e-01
+-5.26954930e+01 -9.01436620e+00 -2.14090141e+01  1.88492958e+00  6.61450704e+00  8.49971831e+00 -2.38576056e+01
+24.6497 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Multiple cluster:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;num_clusters:3
+log weights: 0 0 0
+cluster #1
+  0.00000000e+00  0.00000000e+00
+ -2.68876589e-01 -7.04390256e-02  1.45450526e-02
+  6.16258430e+03  6.13067965e+03  6.12930057e+03
+ -1.08771413e-02  5.76005556e-04 -1.04761899e-02 -1.69093096e-03  9.36991863e-04 -3.78348959e-04  1.27422332e-03
+ -4.89152880e+01 -9.21454922e+00 -1.77681544e+01  2.47259001e+00  6.28886806e+00  8.63120843e+00 -2.43004449e+01
+26.2893
+cluster #2
+  0.00000000e+00  0.00000000e+00
+  1.20215477e-01  0.00000000e+00  2.24383835e-01
+  6.11014579e+03  0.00000000e+00  5.96700128e+03
+ -1.08771413e-02  5.76005556e-04 -1.04761899e-02 -1.69093096e-03  9.36991863e-04 -3.78348959e-04  1.27422332e-03
+ -4.89152880e+01 -9.21454922e+00 -1.77681544e+01  2.47259001e+00  6.28886806e+00  8.63120843e+00 -2.43004449e+01
+26.2893
+cluster #3
+  0.00000000e+00  0.00000000e+00
+ -1.52115349e-01  2.77516102e+00  1.82492585e+00
+ -3.84569849e+00 -7.18131761e+02 -1.63056790e+02
+ -1.08771413e-02  5.76005556e-04 -1.04761899e-02 -1.69093096e-03  9.36991863e-04 -3.78348959e-04  1.27422332e-03
+ -4.89152880e+01 -9.21454922e+00 -1.77681544e+01  2.47259001e+00  6.28886806e+00  8.63120843e+00 -2.43004449e+01
+26.2893
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Surprisingly high epsilon (~26).  This is far beyond the dynamic range of the data, suggesting either (a) a bug, (b) a terrible model, or (c) failure of the analytical estimation method to find a good result.  Option (a) seems more likely, since a flat line give a lower error variance than this.  Perhaps our observation basis A was poorly estimated.  Lets re-run with PCA method.&lt;/p&gt;
+
+&lt;h2&gt;Run #2: PCA method&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Re-run but using PCA instead of regression to estimate observation transformation, A.  (i.e. change constant &lt;code&gt;use_regression_method&lt;/code&gt; to false).&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;Single cluster:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  0.00000000e+00  0.00000000e+00
+  8.73210306e-03  6.75372609e-02  3.38471516e-02
+  1.88790755e+00 -1.88387427e+01 -9.88494611e+00
+ -8.09450747e-01 -2.56388154e-01 -3.61218358e-01 -4.23137123e-02  1.64628674e-02 -1.02962552e-02 -3.82633520e-01
+ -5.26954930e+01 -9.01436620e+00 -2.14090141e+01  1.88492958e+00  6.61450704e+00  8.49971831e+00 -2.38576056e+01
+24.6497
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Multiple Cluster&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;num_clusters:3
+log weights: 0 0 0
+cluster #1
+  0.00000000e+00  0.00000000e+00
+  1.13041314e-02  6.75372609e-02  3.41203573e-02
+  3.56421036e-01 -1.88387427e+01 -1.11922319e+01
+ -8.09450747e-01 -2.56388154e-01 -3.61218358e-01 -4.23137123e-02  1.64628674e-02 -1.02962552e-02 -3.82633520e-01
+ -5.26954930e+01 -9.01436620e+00 -2.14090141e+01  1.88492958e+00  6.61450704e+00  8.49971831e+00 -2.38576056e+01
+24.6497
+cluster #2
+  0.00000000e+00  0.00000000e+00
+  1.05708618e-03  0.00000000e+00  0.00000000e+00
+  5.35534897e+01  0.00000000e+00  0.00000000e+00
+ -8.09450747e-01 -2.56388154e-01 -3.61218358e-01 -4.23137123e-02  1.64628674e-02 -1.02962552e-02 -3.82633520e-01
+ -5.26954930e+01 -9.01436620e+00 -2.14090141e+01  1.88492958e+00  6.61450704e+00  8.49971831e+00 -2.38576056e+01
+24.6497
+cluster #3
+  0.00000000e+00  0.00000000e+00
+  0.00000000e+00  0.00000000e+00  3.06188063e-02
+  1.18920520e+02  0.00000000e+00  7.71079754e+01
+ -8.09450747e-01 -2.56388154e-01 -3.61218358e-01 -4.23137123e-02  1.64628674e-02 -1.02962552e-02 -3.82633520e-01
+ -5.26954930e+01 -9.01436620e+00 -2.14090141e+01  1.88492958e+00  6.61450704e+00  8.49971831e+00 -2.38576056e+01
+24.6497
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;No noticable improvement.  During K-means, cluster collapse was frequent, which didn&#39;t occur in previous run.&lt;/p&gt;
+
+&lt;h2&gt;Immunity data inspection&lt;/h2&gt;
+
+&lt;p&gt;Below are histograms of raw immunity readings for each marker. TNF-\(\alpha\), IL-2, and IL-6 have sensible distributions.&lt;/p&gt;
+
+&lt;p&gt;IL-1b and IL-10 have weirdly peaked distribution with heavy tails.  Perhaps outliers are isolated to specific plates (investigated next).&lt;/p&gt;
+
+&lt;p&gt;IFN and IL-8 are borderline; peaked with heavy tails but not as bad as IL-1b and IL-10.&lt;/p&gt;
+
+&lt;script&gt;
+    $(function() {
+        $( &quot;#hist_tabs&quot; ).tabs();
+    });
+&lt;/script&gt;
+
+
+
+
+&lt;div id=&quot;hist_tabs&quot;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&quot;#IFN&quot;&gt;IFN-g&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#TNFa&quot;&gt;TNF-\(\alpha\)&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#IL1B&quot;&gt;IL-1b&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#IL2&quot;&gt;IL-2&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#IL6&quot;&gt;IL-6&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#IL8&quot;&gt;IL-8&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#IL10&quot;&gt;IL-10&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+    &lt;div id=&quot;TNFa&quot;&gt;
+        &lt;img src=&quot;/ksimek/research/img/2014-05-15-tnfa.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;IL2&quot;&gt;
+        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL2.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;IL8&quot;&gt;
+        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL8.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;IL6&quot;&gt;
+        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL6.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;IL1B&quot;&gt;
+        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL1B.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;IFN&quot;&gt;
+        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IFN.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;IL10&quot;&gt;
+        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL10.png&quot; /&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+
+&lt;p&gt;&lt;/div&gt;&lt;/p&gt;
+
+&lt;h2&gt;Per-plate distributions.&lt;/h2&gt;
+
+&lt;script&gt;
+    $(function() {
+        $( &quot;#plate_hist_tabs&quot; ).tabs();
+    });
+&lt;/script&gt;
+
+
+&lt;div id=&quot;plate_hist_tabs&quot;&gt;
+    &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&quot;#ifng_plates&quot;&gt;IFN-g&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#tnfa_plates&quot;&gt;TNF-\(\alpha\)&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#IL1B_plates&quot;&gt;IL-1b&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#il2_plates&quot;&gt;IL-2&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#il6_plates&quot;&gt;IL-6&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#il8_plates&quot;&gt;IL-8&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#il10_plates&quot;&gt;IL-10&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;div id=&quot;ifng_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-15-ifng_plates.png&quot; /&gt;
+    &lt;br /&gt;
+    One of the worse plates in terms of missing/unreadable data (331/710).  Irregular between and within plates.
+    &lt;/div&gt;
+    &lt;div id=&quot;il10_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-15-il10_plates.png&quot; /&gt;&lt;br /&gt;
+    &lt;p&gt;
+        Another reasonably strong variable in terms of missing data (637/710).  Plots seem somewhat irregular, but possibly due to excessible outliers in plates 10, 7, 8, 4.  This could be good support for a clustering model if it would explain the heavy tails in these plates
+    &lt;/p&gt;
+
+    &lt;/div&gt;
+    &lt;div id=&quot;IL1B_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL1B_plates.png&quot; /&gt;
+    &lt;p&gt;
+    In terms of missing data, this variable is borderline (550/710).  Plates seem to split between (a) seemingly exponential-distrubted data (2,3,4,7,8, 10), and (b) irregular data (plates 1,5,6,9).  I&#39;m doubtful that this will be useful for inference.
+    &lt;/p&gt;
+    &lt;p&gt;
+    Note &lt;em&gt;massive&lt;em&gt; variation in support between plates.  e.g. plate 8 maxes out at 80, while plate 1 stops at 1.3.
+    &lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;div id=&quot;il6_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-15-il6_plates.png&quot; /&gt;&lt;br /&gt;
+    &lt;p&gt;
+    Very little missing data in this dataset (699/710).  Seems much more consistent than most other datasets. Scale and shape vary a bit, but not glaring inconsistencies, aside from a few outliers (e.g. plate 9).
+    &lt;/p&gt;
+    &lt;p&gt;
+    Lots of between-plate variability (plate 7 vs. 10).
+    &lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;il8_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-15-il8_plates.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;p&gt;
+        Seems to be Gamma-distributed or log-normal distributed but with lots of big outliers.  Plates 5 and 10 have extreme outliers
+    &lt;/p&gt;
+    &lt;div id=&quot;tnfa_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-15-tnfa_plates.png&quot; /&gt;&lt;br /&gt;
+    &lt;p&gt;
+    The best plate in terms of missing data (710/710), TNF-\(\alpha\) seems very regular within-plates.  Note the strong gaussian shapes here, compared to the full-dataset histogram earlier.  
+    &lt;/p&gt;
+    &lt;p&gt;
+    Variation between plates is notable (see plate 5 vs. plate 8).  Supports a regularization approach.
+    &lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;il2_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-15-il2-plates.png&quot; /&gt;
+    &lt;p&gt;
+    This is one of the stronger plates in terms of missing data (710/710 present).  Several plates have decent gaussian distributions, albeit with heavy tails (1, 7, 9), but several are irregular (4, 5, 8, 9), and others look more exponential (2, 3, 10).
+    &lt;/p&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>FIRE immunity plots</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/05/15/reference"/>
+   <updated>2014-05-15T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/05/15/reference</id>
+   <content type="html">&lt;p&gt;Below are histograms of raw immunity readings for each marker.&lt;/p&gt;
+
+&lt;p&gt;Aside from TNF-\(\alpha\), IL-2, and IL-6, distributions are very peaked and heavy-tailed. Specific-plate histograms (shown later) reveal more detail.&lt;/p&gt;
+
+&lt;script&gt;
+    $(function() {
+        $( &quot;#hist_tabs&quot; ).tabs();
+    });
+&lt;/script&gt;
+
+
+
+
+&lt;div id=&quot;hist_tabs&quot;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href=&quot;#IFN&quot;&gt;IFN-g&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#TNFa&quot;&gt;TNF-\(\alpha\)&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#IL1B&quot;&gt;IL-1b&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#IL2&quot;&gt;IL-2&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#IL6&quot;&gt;IL-6&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#IL8&quot;&gt;IL-8&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#IL10&quot;&gt;IL-10&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+    &lt;div id=&quot;TNFa&quot;&gt;
+        &lt;img src=&quot;/ksimek/research/img/2014-05-15-tnfa.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;IL2&quot;&gt;
+        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL2.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;IL8&quot;&gt;
+        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL8.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;IL6&quot;&gt;
+        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL6.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;IL1B&quot;&gt;
+        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL1B.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;IFN&quot;&gt;
+        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IFN.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;IL10&quot;&gt;
+        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL10.png&quot; /&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+
+&lt;p&gt;&lt;/div&gt;&lt;/p&gt;
+
+&lt;h2&gt;Per-plate distributions.&lt;/h2&gt;
+
+&lt;p&gt;Below are per-plate histograms of immunity readings, broken into plates.  Compared to the full-popuation histograms above, signfiicant regularity emerges in these plots, esp. in TNF-\(\alpha\), IL-8, IL-10.&lt;/p&gt;
+
+&lt;script&gt;
+    $(function() {
+        $( &quot;#plate_hist_tabs&quot; ).tabs();
+    });
+&lt;/script&gt;
+
+
+&lt;div id=&quot;plate_hist_tabs&quot;&gt;
+    &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&quot;#ifng_plates&quot;&gt;IFN-g&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#tnfa_plates&quot;&gt;TNF-\(\alpha\)&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#IL1B_plates&quot;&gt;IL-1b&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#il2_plates&quot;&gt;IL-2&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#il6_plates&quot;&gt;IL-6&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#il8_plates&quot;&gt;IL-8&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#il10_plates&quot;&gt;IL-10&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;div id=&quot;ifng_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-15-ifng_plates.png&quot; /&gt;
+    &lt;br /&gt;
+    One of the worse plates in terms of missing/unreadable data (331/710).  Irregular between and within plates.
+    &lt;/div&gt;
+    &lt;div id=&quot;il10_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-15-il10_plates.png&quot; /&gt;&lt;br /&gt;
+    &lt;p&gt;
+        Another reasonably strong variable in terms of missing data (637/710).  Plots seem somewhat irregular, but possibly due to excessible outliers in plates 10, 7, 8, 4.  This could be a good argument for a clustering/mixture model, as it might explain the heavy tails in the aforementioned plates.
+    &lt;/p&gt;
+
+    &lt;/div&gt;
+    &lt;div id=&quot;IL1B_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL1B_plates.png&quot; /&gt;
+    &lt;p&gt;
+    In terms of missing data, this variable is borderline (550/710).  Plates seem to split between (a) seemingly exponential-distrubted data (2,3,4,7,8, 10), and (b) irregular data (plates 1,5,6,9).  This could pose problems for our inference efforts.
+    &lt;/p&gt;
+    &lt;p&gt;
+    Note &lt;em&gt;massive&lt;/em&gt; variation between plates.  e.g. plate 8 has a maximum at 60, while plate 1 stops at 1.3.
+    &lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;div id=&quot;il6_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-15-il6_plates.png&quot; /&gt;&lt;br /&gt;
+    &lt;p&gt;
+    Very little missing data in this variable (699/710 observed).  Seems much more consistent than most other datasets. Scale and shape vary a bit, but no glaring inconsistencies, aside from a few outliers (e.g. plate 9).
+    &lt;/p&gt;
+    &lt;p&gt;
+    Lots of between-plate variability (e.g. plate 7 vs. 10).
+    &lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;il8_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-15-il8_plates.png&quot; /&gt;
+    &lt;p&gt;
+        An excellent variable in terms of missing data (710 of 710 readings within range). The results seem very regular compared to other variables.  Seems to be Gamma-distributed or log-normal distributed but some big outliers.  Plates 5 and 10 have extreme outliers
+    &lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;tnfa_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-15-tnfa_plates.png&quot; /&gt;&lt;br /&gt;
+    &lt;p&gt;
+    The best plate in terms of missing data (710/710), TNF-\(\alpha\) seems very regular within-plates.  Note the strong gaussian shapes here, compared to the full-dataset histogram earlier.  
+    &lt;/p&gt;
+    &lt;p&gt;
+    Variation between plates is notable (see plate 5 vs. plate 8).  Supports a regularization approach.
+    &lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;il2_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-15-il2-plates.png&quot; /&gt;
+    &lt;p&gt;
+    This is one of the strongest plates in terms of missing data (710 of 710 observed).  Several plates have decent gaussian distributions, albeit with heavy tails (1, 7, 9), but several are irregular (4, 5, 8, 9), and others look more exponential (2, 3, 10). 
+    &lt;/p&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>FIRE - cluster w/ missing data</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/05/13/work-log"/>
+   <updated>2014-05-13T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/05/13/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Testing missing data in cluster model&lt;/p&gt;
+
+&lt;h2&gt;Run #1 - enable missing data&lt;/h2&gt;
+
+&lt;p&gt;Segfault resulting from empty cluster.  Writing routine to create a cluster from worst point.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Still getting weird results.  Clusters are collapsing constantly.&lt;/p&gt;
+
+&lt;p&gt;Even a &lt;em&gt;single&lt;/em&gt; missing value screws up results.  There must be a bug in my initial estimate script&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;BUG: true/false swap when determining whether to use missing-data-enabled line fitting&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Several bugs related to computing epsilon.  Fixed after several hours :-/&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;It seems we can continue to increase the missing percentage indefinitely, without the clustering suffering (or at least until an entire observation becomes missing, which isn&#39;t handled).&lt;/p&gt;
+
+&lt;p&gt;Likely the small amount of noise is helping us a lot here.  We&#39;ll see how it works on real data.&lt;/p&gt;
+
+&lt;h2&gt;Real FIRE data&lt;/h2&gt;
+
+&lt;p&gt;High-level Tasks&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;merge radation data from Laura (into demograph dataset?)&lt;/li&gt;
+&lt;li&gt;for each subject,
+ first chemo
+ last chemo
+ first rad
+ last rad&lt;/li&gt;
+&lt;li&gt;write results in FIRE data format&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Reading and merging radiation data:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;construct out_db cols: subject_ID, had_radiation&lt;/li&gt;
+&lt;li&gt;if row has start and end date,
+
+&lt;ul&gt;
+&lt;li&gt;if out_db already has start or end date, record error&lt;/li&gt;
+&lt;li&gt;else record start and end date&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;assert all &quot;radiation=yes&quot; have start and end date
+
+&lt;ul&gt;
+&lt;li&gt;can already see 57533 fails this test&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Do same for chemo dates.&lt;/p&gt;
+
+&lt;p&gt;Merge chemo and rad.&lt;/p&gt;
+
+&lt;p&gt;compute &quot;type&quot;&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;All implemented in &lt;code&gt;in_progress/process_treatment_dates.m&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2&gt;Data consistency issues&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;some subjects surgeries occur after treatment
+
+&lt;ul&gt;
+&lt;li&gt;57527, 57563, 575139, 575145&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Only 97 of 136 subjects have immune data&lt;/li&gt;
+&lt;li&gt;some subjects disagree about treatment type
+
+&lt;ul&gt;
+&lt;li&gt;57517 - no histo dates, but hist = 70&lt;/li&gt;
+&lt;li&gt;575146, 575156 - demo:rad = yes, but no dates in rad_supl&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>FIRE - streamlining; missing data</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/05/12/work-log"/>
+   <updated>2014-05-12T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/05/12/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;16784&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Refactored kjb::Matrix::resize to be re-use allocated space under more circumstances.  This is currently a bottleneck in inference, and signficantly improves runtime.&lt;/p&gt;
+
+&lt;p&gt;Implemented Missing data handling:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Likelihood ignores missing values&lt;/li&gt;
+&lt;li&gt;initial model estimation handles gracefully handles missing data&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;TODO:  Test missing data.  Randomly convert observations to missing, see if cluster parameters and memberships are still correctly estimated.  Is there a &quot;critical point&quot; above which missing data ruins results?&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>FIRE Debugging cluster model</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/05/09/work-log"/>
+   <updated>2014-05-09T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/05/09/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Initial cluster estimation, something like k-means.&lt;/p&gt;
+
+&lt;p&gt;likelihood isn&#39;t monotonically increasing over time.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;we aren&#39;t updating cluster weights&lt;/li&gt;
+&lt;li&gt;we&#39;re doing soft assignment&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;--&lt;/p&gt;
+
+&lt;p&gt;found bug:&lt;/p&gt;
+
+&lt;h2&gt;Run #1: initialize by K-means (part 1)&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: do k-means to initialize cluster assignments.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Details&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Estimate A, B: no
+estimate epsilon: no
+shared observation model: yes
+continuity constraints: yes
+num clusters: 3
+observed dimensions: 7
+num observations: 150
+A estimation method: regression
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Revision&lt;/strong&gt;: 16767&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Method&lt;/strong&gt;: Build first cluster from all data.  Iteratively choose &quot;bad&quot; points under current model as prototypes for new cluster.  Then run k-means.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Result&lt;/strong&gt;:  Converges after 15 iterations.&lt;/p&gt;
+
+&lt;p&gt;In the 2x150 image below, first row is ground truth clustering, second row is experimental results.  Specific coloring is irrelevant, grouping is.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-12-cluster_results_0.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;Not great results.  Hopefully noise is just too high to find any useful structure without more observations.&lt;/p&gt;
+
+&lt;p&gt;Interesting that the g.t. clustering is so uneven.  May want to increase Dirichlet distribtuion&#39;s alpha parameter.&lt;/p&gt;
+
+&lt;h2&gt;Run 2:  Rerun with small noise&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;:  Re-run with noise lowered to 0.01.
+&lt;strong&gt;Revision&lt;/strong&gt;:  16773
+&lt;strong&gt;Results&lt;/strong&gt;:  Converges after 3 iterations.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-12-cluster_results.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;Much better!  We don&#39;t correctly find the &lt;em&gt;tiny&lt;/em&gt; middle cluster, which we can hopefully find during HMC.&lt;/p&gt;
+
+&lt;p&gt;TODO: Return to this model when testing HMC&lt;/p&gt;
+
+&lt;h2&gt;Aside: speeding up Matrix::resize(); adding Matrix::realloc()&lt;/h2&gt;
+
+&lt;p&gt;The documentation for Matrix::resize claims it reuses allocated space, which is actually untrue.  Spent some time playing with reimplementations before realizing any good solution will require reworking the C library, which would require more precision and care than I have the time for at the moment.&lt;/p&gt;
+
+&lt;p&gt;Instead, made two halfway measures:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;added spacial case; space is reused iff new_cols == num_cols &amp;amp;&amp;amp; new_rows &amp;lt;= num_rows.&lt;/li&gt;
+&lt;li&gt;Added new function: Matrix::realloc, which is like resize, but always preserves allocated storage if possible, and doesn&#39;t guarantee data is preserved afterward.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;h2&gt;Run 3: Rerun with unknown observation model&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;: same&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>FIRE = Cluster model</title>

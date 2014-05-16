@@ -243,3 +243,33 @@
 1399611994: FIRE: debugging cluster membership bug
 1399613798: FIRE: debugging cluster membership bug
 1399649804: FIRE: debugging cluster membership bug
+1399908801: FIRE - initial clustering testing
+1399910602: FIRE - initial clustering testing
+1399916701: FIRE - testing kjb fixes
+1399918811: FIRE - KJB matrix resize refactor
+1399920628: FIRE - test KJB matrix resize refactor
+1399922435: FIRE - test matrix resize
+1399924238: FIRE - test matrix resize
+1399950628: FIRE - missing data
+1399952660: FIRE - missing data
+1399954467: FIRE - multiple imputation
+1399956277: FIRE - finish missing data
+1399958377: FIRE - finish missing data
+1400000100: FIRE - test missing data
+1400001907: FIRE - empty cluster bug
+1400003712: FIRE - empty cluster bug
+1400016332: FIRE - project_points bug
+1400018134: FIRE - project_points bug
+1400019942: FIRE - epsilon estimation bug
+1400021785: FIRE - epsilon estimation bug
+1400023889: FIRE - epsilon estimation bug
+1400045387: FIRE - testing heavy missing
+1400103233: FIRE - parsing radiation supplement table
+1400105036: FIRE - parsing radiation supplement table
+1400107140: FIRE - parsing radiation supplement table
+1400108941: FIRE - parsing radiation supplement table
+1400110743: FIRE - parsing radiation supplement table
+1400114175: FIRE - generating clustering data
+1400132346: FIRE - fire cluster data preparation - debugging
+1400134164: FIRE - troubleshoot chemo and radiation data inconsisstenceis
+1400135966: FIRE - troubleshoot chemo and radiation data inconsisstenceis
