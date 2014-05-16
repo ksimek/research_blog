@@ -101,10 +101,10 @@ Per-plate distributions.
     <div id="il6_plates">
     <img src="{{site.baseurl}}/img/2014-05-15-il6_plates.png" /><br />
     <p>
-    Very little missing data in this dataset (699/710).  Seems much more consistent than most other datasets. Scale and shape vary a bit, but not glaring inconsistencies, aside from a few outliers (e.g. plate 9).
+    Very little missing data in this variable (699/710 observed).  Seems much more consistent than most other datasets. Scale and shape vary a bit, but no glaring inconsistencies, aside from a few outliers (e.g. plate 9).
     </p>
     <p>
-    Lots of between-plate variability (plate 7 vs. 10).
+    Lots of between-plate variability (e.g. plate 7 vs. 10).
     </p>
     </div>
     <div id="il8_plates">
@@ -125,7 +125,7 @@ Per-plate distributions.
     <div id="il2_plates">
     <img src="{{site.baseurl}}/img/2014-05-15-il2-plates.png" />
     <p>
-    This is one of the strongest plates in terms of missing data (710 of 710 observed).  Several plates have decent gaussian distributions, albeit with heavy tails (1, 7, 9), but several are irregular (4, 5, 8, 9), and others look more exponential (2, 3, 10).
+    This is one of the strongest plates in terms of missing data (710 of 710 observed).  Several plates have decent gaussian distributions, albeit with heavy tails (1, 7, 9), but several are irregular (4, 5, 8, 9), and others look more exponential (2, 3, 10). 
     </p>
     </div>
 </div>
