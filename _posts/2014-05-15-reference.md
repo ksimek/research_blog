@@ -12,7 +12,7 @@ meta:
 
 Below are histograms of raw immunity readings for each marker.
 
-Aside from TNF-\\(\alpha\\), IL-2, and IL-6, distributions are very peaked and heavy-tailed. Specific-plate histograms (shown next) reveal more detail.
+Aside from TNF-\\(\alpha\\), IL-2, and IL-6, distributions are very peaked and heavy-tailed. Specific-plate histograms (shown later) reveal more detail.
 
 <script>
     $(function() {
@@ -57,7 +57,7 @@ Aside from TNF-\\(\alpha\\), IL-2, and IL-6, distributions are very peaked and h
 Per-plate distributions.
 ----------------------------
 
-Below are per-plate histograms of immunity readings, broken into plates.  Compared to the full-popuation histograms above, signfiicant regularity emerges in these plots compared, esp. in TNF-\\(\alpha\\), IL-8, IL-10. 
+Below are per-plate histograms of immunity readings, broken into plates.  Compared to the full-popuation histograms above, signfiicant regularity emerges in these plots, esp. in TNF-\\(\alpha\\), IL-8, IL-10. 
 
 <script>
     $(function() {
