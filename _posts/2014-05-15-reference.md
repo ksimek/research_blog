@@ -110,7 +110,7 @@ Per-plate distributions.
     <div id="il8_plates">
     <img src="{{site.baseurl}}/img/2014-05-15-il8_plates.png" />
     <p>
-        An excellent variable in terms of missing data (710 of 710 readings within range). The results seem very regular.  Seems to be Gamma-distributed or log-normal distributed but with lots of big outliers.  Plates 5 and 10 have extreme outliers
+        An excellent variable in terms of missing data (710 of 710 readings within range). The results seem very regular compared to other variables.  Seems to be Gamma-distributed or log-normal distributed but some big outliers.  Plates 5 and 10 have extreme outliers
     </p>
     </div>
     <div id="tnfa_plates">
