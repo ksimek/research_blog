@@ -327,3 +327,46 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *10:13 AM* &nbsp; "  
 *02:14 PM* &nbsp; FIRE - cluster model - k-means initialization  
 *02:53 PM* &nbsp; FIRE - compiling initial clustering estimate test  
+*04:31 PM* &nbsp; FIRE - debugging initial clustering estimates  
+*09:36 PM* &nbsp; "  
+*10:06 PM* &nbsp; FIRE: debugging cluster membership bug  
+*10:36 PM* &nbsp; "  
+<a id="2014_05_09"></a>
+##May 09, 2014
+*08:36 AM* &nbsp; "  
+<a id="2014_05_12"></a>
+##May 12, 2014
+*08:33 AM* &nbsp; FIRE - initial clustering testing  
+*09:03 AM* &nbsp; "  
+*10:45 AM* &nbsp; FIRE - testing kjb fixes  
+*11:20 AM* &nbsp; FIRE - KJB matrix resize refactor  
+*11:50 AM* &nbsp; FIRE - test KJB matrix resize refactor  
+*12:20 PM* &nbsp; FIRE - test matrix resize  
+*12:50 PM* &nbsp; "  
+*08:10 PM* &nbsp; FIRE - missing data  
+*08:44 PM* &nbsp; "  
+*09:14 PM* &nbsp; FIRE - multiple imputation  
+*09:44 PM* &nbsp; FIRE - finish missing data  
+*10:19 PM* &nbsp; "  
+<a id="2014_05_13"></a>
+##May 13, 2014
+*09:55 AM* &nbsp; FIRE - test missing data  
+*10:25 AM* &nbsp; FIRE - empty cluster bug  
+*10:55 AM* &nbsp; "  
+*02:25 PM* &nbsp; FIRE - project_points bug  
+*02:55 PM* &nbsp; "  
+*03:25 PM* &nbsp; FIRE - epsilon estimation bug  
+*03:56 PM* &nbsp; "  
+*04:31 PM* &nbsp; "  
+*10:29 PM* &nbsp; FIRE - testing heavy missing  
+<a id="2014_05_14"></a>
+##May 14, 2014
+*02:33 PM* &nbsp; FIRE - parsing radiation supplement table  
+*03:03 PM* &nbsp; "  
+*03:39 PM* &nbsp; "  
+*04:09 PM* &nbsp; "  
+*04:39 PM* &nbsp; "  
+*05:36 PM* &nbsp; FIRE - generating clustering data  
+*10:39 PM* &nbsp; FIRE - fire cluster data preparation - debugging  
+*11:09 PM* &nbsp; FIRE - troubleshoot chemo and radiation data inconsisstenceis  
+*11:39 PM* &nbsp; "  
