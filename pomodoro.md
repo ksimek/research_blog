@@ -370,3 +370,9 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *10:39 PM* &nbsp; FIRE - fire cluster data preparation - debugging  
 *11:09 PM* &nbsp; FIRE - troubleshoot chemo and radiation data inconsisstenceis  
 *11:39 PM* &nbsp; "  
+<a id="2014_05_16"></a>
+##May 16, 2014
+*01:43 PM* &nbsp; FIRE - clean up clustering project for hand-off to Warren  
+*02:25 PM* &nbsp; "  
+*02:55 PM* &nbsp; "  
+*03:26 PM* &nbsp; FIRE - cleanup clustering visualization script  
