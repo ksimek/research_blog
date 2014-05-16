@@ -4,13 +4,73 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2014-05-16T00:16:08-07:00</updated>
+ <updated>2014-05-16T16:20:09-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>FIRE - cleanup</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/05/16/work-log"/>
+   <updated>2014-05-16T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/05/16/work-log</id>
+   <content type="html">&lt;h2&gt;Skype w/ Kobus&lt;/h2&gt;
+
+&lt;p&gt;Reflecting on &lt;a href=&quot;/ksimek/research/2014/05/15/reference&quot;&gt;immunity histograms&lt;/a&gt; I created late last night.  In discussion with Kobus, we&#39;ve decided a few things could help: (a) log-transforming, (b) introducing a scaling factor, and (c) using robust likelihood (e.g. truncated squared error).&lt;/p&gt;
+
+&lt;p&gt;Will Skype with Warren on Monday afternoon to hand off the self-report clustering analysis.  Will spend this afternoon cleaning up the data and code to make it easier for him to pick it up.&lt;/p&gt;
+
+&lt;p&gt;Kobus will likely need my input in the coming weeks to incorporate branching Gaussian processes into an upcoming grant proposal.&lt;/p&gt;
+
+&lt;h2&gt;Self-report clustering cleanup&lt;/h2&gt;
+
+&lt;p&gt;Add documentation and READMES for clustering, experiment directory, output files.&lt;/p&gt;
+
+&lt;p&gt;Add matlab script to visualize clustering results.&lt;/p&gt;
+
+&lt;p&gt;Created &lt;a href=&quot;/ksimek/research/2014/05/16/reference/&quot;&gt;reference page&lt;/a&gt; for clustering results.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>FIRE - Self-report clustering results.</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/05/16/reference"/>
+   <updated>2014-05-16T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/05/16/reference</id>
+   <content type="html">&lt;p&gt;Results of initial clustering of self-report data.  (I showed these a few weeks ago, but never recorded them here).&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Data&lt;/strong&gt;: Five survey values, recorded once per each of nine visits, for a total of 45 dimensions per cluster.  Missed visits are treated as missing data and ignored during inference.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Model, Inference&lt;/strong&gt;: Multivariate gaussians with diagonal covariance were fit to each cluster.  Cluster memberships and cluster parameters were fit with EM, with 100 different initializations to avoid local minima.  Number of clusters was varied between 2 and 50, and the optimal choice of three clusters was determined using BIC.&lt;/p&gt;
+
+&lt;h2&gt;Results&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Means&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-16-cluster_means.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Standard Deviations&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-16-cluster_std_devs.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;Disucssion&lt;/h2&gt;
+
+&lt;p&gt;PSS is in the 0.9-1.0 range for all clusters.&lt;/p&gt;
+
+&lt;p&gt;Note that FACT data has high standard deviation, making its curves harder to interpret.&lt;/p&gt;
+
+&lt;p&gt;Also note that unlike other variables, high FACT scores correspond to &lt;em&gt;negative&lt;/em&gt; outcomes (e.g. high pain, high nausea, etc)&lt;/p&gt;
+
+&lt;p&gt;Third cluster is the &quot;always good&quot; cluster.&lt;/p&gt;
+
+&lt;p&gt;Second cluster is the &quot;high emotional acceptance cluster&quot;.  Notable that DAS and SRI start low, but increase over time.  This suggests a hyptothesis that high emotional acceptance can result in improved outcomes over time.&lt;/p&gt;
+
+&lt;p&gt;First cluster is the &quot;low emotional acceptance cluster&quot;.  SRI and DAS start low and never improve.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>FIRE - first clustering test</title>

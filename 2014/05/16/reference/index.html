@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>KLS Research Blog &larr; Kyle Simek</title>
+   <title>FIRE - Self-report clustering results. &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -78,240 +78,103 @@
 
 
   
-
-<div id="page">
+<div id="page" class="article">
 	
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/05/work-log">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">July 05, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/04/work-log">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">July 04, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/03/work-log">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">July 03, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/02/work-log">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">July 02, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/02/rethinking-covariance-functions">
-      <li class="title">
-            [Work log] Rethinking covariance functions
-        </li>
-      </a>
-      <div class="date emphnext">July 02, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/01/work-log">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">July 01, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/07/01/foreground-curve-models">
-      <li class="title">
-            [Work log] Foreground Curve Models as Gaussian Process Covariance Function
-        </li>
-      </a>
-      <div class="date emphnext">July 01, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/06/28/work-summary">
-      <li class="title">
-            [Work log] Work summary
-        </li>
-      </a>
-      <div class="date emphnext">June 28, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/06/28/work-log">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">June 28, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/06/27/work-log">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">June 27, 2013</div>
-</ul>
-
-
-<!-- Pagination links -->
-<div class="pagination">
-  
-    <a href="/ksimek/research//page16" class="previous">&lt;&lt; Read Newer Posts</a>
   
   
-    |
+    
+
+
+  <h1 class="title">
+        [Reference] FIRE - Self-report clustering results.
+    </h1>
+
+  <div class="date emphnext">
+    May 16, 2014
+      
+ 
+  </div>
+    
+
+
+  
+    <p>Results of initial clustering of self-report data.  (I showed these a few weeks ago, but never recorded them here).</p>
+
+<p><strong>Data</strong>: Five survey values, recorded once per each of nine visits, for a total of 45 dimensions per cluster.  Missed visits are treated as missing data and ignored during inference.</p>
+
+<p><strong>Model, Inference</strong>: Multivariate gaussians with diagonal covariance were fit to each cluster.  Cluster memberships and cluster parameters were fit with EM, with 100 different initializations to avoid local minima.  Number of clusters was varied between 2 and 50, and the optimal choice of three clusters was determined using BIC.</p>
+
+<h2>Results</h2>
+
+<p><strong>Means</strong></p>
+
+<p><img src="/ksimek/research/img/2014-05-16-cluster_means.png" alt="" /></p>
+
+<p><strong>Standard Deviations</strong></p>
+
+<p><img src="/ksimek/research/img/2014-05-16-cluster_std_devs.png" alt="" /></p>
+
+<h2>Disucssion</h2>
+
+<p>PSS is in the 0.9-1.0 range for all clusters.</p>
+
+<p>Note that FACT data has high standard deviation, making its curves harder to interpret.</p>
+
+<p>Also note that unlike other variables, high FACT scores correspond to <em>negative</em> outcomes (e.g. high pain, high nausea, etc)</p>
+
+<p>Third cluster is the "always good" cluster.</p>
+
+<p>Second cluster is the "high emotional acceptance cluster".  Notable that DAS and SRI start low, but increase over time.  This suggests a hyptothesis that high emotional acceptance can result in improved outcomes over time.</p>
+
+<p>First cluster is the "low emotional acceptance cluster".  SRI and DAS start low and never improve.</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
   
   
-    <a href="/ksimek/research//page18" class="next ">Read Older Posts &gt;&gt;</a>
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/05/16/work-log" class="next" title="FIRE - cleanup">FIRE - cleanup &rarr;</a>
   
+  
+    <a href="/ksimek/research/2014/05/15/work-log" class="prev" title="FIRE - first clustering test">&larr; FIRE - first clustering test</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
 </div>
 
 
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
 </div><!-- End Page -->
+
 
 
   

@@ -7,6 +7,66 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>FIRE - cleanup</title>
+				<description>&lt;h2&gt;Skype w/ Kobus&lt;/h2&gt;
+
+&lt;p&gt;Reflecting on &lt;a href=&quot;/ksimek/research/2014/05/15/reference&quot;&gt;immunity histograms&lt;/a&gt; I created late last night.  In discussion with Kobus, we&#39;ve decided a few things could help: (a) log-transforming, (b) introducing a scaling factor, and (c) using robust likelihood (e.g. truncated squared error).&lt;/p&gt;
+
+&lt;p&gt;Will Skype with Warren on Monday afternoon to hand off the self-report clustering analysis.  Will spend this afternoon cleaning up the data and code to make it easier for him to pick it up.&lt;/p&gt;
+
+&lt;p&gt;Kobus will likely need my input in the coming weeks to incorporate branching Gaussian processes into an upcoming grant proposal.&lt;/p&gt;
+
+&lt;h2&gt;Self-report clustering cleanup&lt;/h2&gt;
+
+&lt;p&gt;Add documentation and READMES for clustering, experiment directory, output files.&lt;/p&gt;
+
+&lt;p&gt;Add matlab script to visualize clustering results.&lt;/p&gt;
+
+&lt;p&gt;Created &lt;a href=&quot;/ksimek/research/2014/05/16/reference/&quot;&gt;reference page&lt;/a&gt; for clustering results.&lt;/p&gt;
+</description>
+				<pubDate>Fri, 16 May 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/16/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/16/work-log</guid>
+			</item>
+		
+			<item>
+				<title>FIRE - Self-report clustering results.</title>
+				<description>&lt;p&gt;Results of initial clustering of self-report data.  (I showed these a few weeks ago, but never recorded them here).&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Data&lt;/strong&gt;: Five survey values, recorded once per each of nine visits, for a total of 45 dimensions per cluster.  Missed visits are treated as missing data and ignored during inference.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Model, Inference&lt;/strong&gt;: Multivariate gaussians with diagonal covariance were fit to each cluster.  Cluster memberships and cluster parameters were fit with EM, with 100 different initializations to avoid local minima.  Number of clusters was varied between 2 and 50, and the optimal choice of three clusters was determined using BIC.&lt;/p&gt;
+
+&lt;h2&gt;Results&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Means&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-16-cluster_means.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Standard Deviations&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-16-cluster_std_devs.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;Disucssion&lt;/h2&gt;
+
+&lt;p&gt;PSS is in the 0.9-1.0 range for all clusters.&lt;/p&gt;
+
+&lt;p&gt;Note that FACT data has high standard deviation, making its curves harder to interpret.&lt;/p&gt;
+
+&lt;p&gt;Also note that unlike other variables, high FACT scores correspond to &lt;em&gt;negative&lt;/em&gt; outcomes (e.g. high pain, high nausea, etc)&lt;/p&gt;
+
+&lt;p&gt;Third cluster is the &quot;always good&quot; cluster.&lt;/p&gt;
+
+&lt;p&gt;Second cluster is the &quot;high emotional acceptance cluster&quot;.  Notable that DAS and SRI start low, but increase over time.  This suggests a hyptothesis that high emotional acceptance can result in improved outcomes over time.&lt;/p&gt;
+
+&lt;p&gt;First cluster is the &quot;low emotional acceptance cluster&quot;.  SRI and DAS start low and never improve.&lt;/p&gt;
+</description>
+				<pubDate>Fri, 16 May 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/16/reference</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/16/reference</guid>
+			</item>
+		
+			<item>
 				<title>FIRE - first clustering test</title>
 				<description>
 
@@ -1144,156 +1204,6 @@ Training and prediction error is worse for whitened data, which is contrary to m
 				<pubDate>Tue, 06 May 2014 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/06/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/06/work-log</guid>
-			</item>
-		
-			<item>
-				<title>FIRE - piecewise linear inference</title>
-				<description>&lt;p&gt;Finished compiling inference test with synthetic data.&lt;/p&gt;
-
-&lt;p&gt;Gradient is taking incredibly long, especially for a 7-dimensional model.  PErhaps 100 data points is too large, but I&#39;m guessing the cost of allocating vectors for each function evaluation is the botteneck (GDB seems to agree).&lt;/p&gt;
-
-&lt;p&gt;&lt;div&gt;
-&lt;strong&gt;Time to run 1 iteration&lt;/strong&gt;&lt;br/&gt;
-&lt;em&gt;Single threaded, on bayes01&lt;/em&gt;
-&lt;table border=&quot;1&quot;&gt;
-&lt;tr&gt;
-&lt;td&gt;Baseline &lt;br/&gt;
-(Debugging mode, allocation checking enabled)&lt;/td&gt;
-&lt;td&gt;
-1:28.94
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Heap checking disabled
-&lt;/td&gt;
-&lt;td&gt;
-0:21.06 (-1:07.88, 4.22x)
-&lt;/td&gt;
-&lt;tr&gt;
-&lt;td&gt;Heap &amp;amp; initialization checking disabled
-&lt;/td&gt;
-&lt;td&gt;
-0:11.19 (-9.87 1.88x)
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;PRODUCTION=1 (with -O2)
-&lt;/td&gt;
-&lt;td&gt;
-0:07.24 (-3.95 1.55x)
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;-O3
-&lt;/td&gt;
-&lt;td&gt;
-0:07.86 (+0.62 0.92x)
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/table&gt;&lt;/p&gt;
-
-&lt;p&gt;Used gprof with grpof2dot.py to get the following diagram:
-&lt;a href=&quot;/img/2014-05-05-gprof_1.pdf&quot;&gt;gprof.pdf&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;iso_mvn_lpdf is getting hit hard:&lt;/p&gt;
-
-&lt;p&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;c&quot;&gt;    &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;iso_mvn_lpdf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;accum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;accum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;accum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;M_PI&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/p&gt;
-
-&lt;p&gt;It&#39;s already pretty lean (no alloc, all c-style).  But we can move the divide-by-epsilon out of the loop for an easy 1.8x speedup.&lt;/p&gt;
-
-&lt;p&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;c&quot;&gt;    &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;iso_mvn_lpdf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;accum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;kt&quot;&gt;double&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;accum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;accum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;accum&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;M_PI&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&lt;/em&gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/p&gt;
-
-&lt;p&gt;Now the bottleneck is all the allocation, copying and freeing of kjb::Vector temporaries.&lt;/p&gt;
-
-&lt;p&gt;I tweaked the code for evaluating a piecewise linear function to avoid creating kjb::Vector temporaries, and running time dropped dramatically &lt;strong&gt;from 11.4s to 1.26s.&lt;/strong&gt;  This is in production mode, so its surprising that more temporaries aren&#39;t optimized out.&lt;/p&gt;
-
-&lt;p&gt;GProf after eliminating temporaries: &lt;a href=&quot;/img/2014-05-05-gprof_2.pdf&quot;&gt;gprof.pdf&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Since 1 iterations takes about 1.2s, bumping up to 10 iterations.&lt;/p&gt;
-
-&lt;p&gt;Remaining speed-up opportuntiies:  exploit gradient independence, parallel gradient&lt;/p&gt;
-
-&lt;h2&gt;Parallel gradient&lt;/h2&gt;
-
-&lt;p&gt;Enabled 8-way parallel gradient evaluation, and got &lt;strong&gt;worse&lt;/strong&gt; performance!&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;single threaded:  0:09.63
-multi threaded: 0:15.48
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This despote &lt;code&gt;top&lt;/code&gt; displaying 550% CPU utilization.&lt;/p&gt;
-
-&lt;p&gt;Maybe gnuprof is affecting performance&lt;/p&gt;
-
-&lt;h2&gt;Tuning&lt;/h2&gt;
-
-&lt;p&gt;step size
-gradient size&lt;/p&gt;
-</description>
-				<pubDate>Mon, 05 May 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/05/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/05/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/tulips.html&quot;&gt;Tulips&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Data Association v3&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;tulips/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;matlab/&amp;#8203;data_association_3&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;15864&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-
-</description>
-				<pubDate>Thu, 01 May 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/01/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/01/work-log</guid>
 			</item>
 		
 	</channel>
