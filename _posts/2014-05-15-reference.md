@@ -12,11 +12,7 @@ meta:
 
 Below are histograms of raw immunity readings for each marker.
 
-TNF-\\(\alpha\\), IL-2, and IL-6 have sensible distributions.  
-
-IL-1b and IL-10 have weirdly peaked distribution with heavy tails.  Perhaps outliers are isolated to specific plates (investigated next).
-
-IFN and IL-8 are borderline; peaked with heavy tails but not as bad as IL-1b and IL-10.
+Aside from TNF-\\(\alpha\\), IL-2, and IL-6, distributions are very peaked and heavy-tailed. Specific-plate histograms (shown next) reveal more detail.
 
 <script>
     $(function() {
