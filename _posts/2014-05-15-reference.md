@@ -61,6 +61,8 @@ IFN and IL-8 are borderline; peaked with heavy tails but not as bad as IL-1b and
 Per-plate distributions.
 ----------------------------
 
+Below are per-plate histograms of immunity readings, broken into plates.  Compared to the full-popuation histograms above, signfiicant regularity emerges in these plots compared, esp. in TNF-\\(\alpha\\), IL-8, IL-10. 
+
 <script>
     $(function() {
         $( "#plate_hist_tabs" ).tabs();
