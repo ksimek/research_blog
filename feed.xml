@@ -206,7 +206,7 @@ cluster #3
     &lt;div id=&quot;ifng_plates&quot;&gt;
     &lt;img src=&quot;/ksimek/research/img/2014-05-15-ifng_plates.png&quot; /&gt;
     &lt;br /&gt;
-    One of the worse plates in terms of missing/unreadable data (331/710).  Irregular between and within plates.
+    One of the worse plates in terms of missing/out-of-range data (331/710).  Irregular distributions, and plate 9 has no radings within range.
     &lt;/div&gt;
     &lt;div id=&quot;il10_plates&quot;&gt;
     &lt;img src=&quot;/ksimek/research/img/2014-05-15-il10_plates.png&quot; /&gt;&lt;br /&gt;
