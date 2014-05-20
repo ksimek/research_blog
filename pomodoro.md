@@ -382,3 +382,13 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *05:11 PM* &nbsp; "  
 *06:03 PM* &nbsp; FIRE - rerun clustering w/ centered data  
 *06:34 PM* &nbsp; FIRE - memory leak in kjb_write_image  
+*08:08 PM* &nbsp; FIRE - evaluate clustering rerun, debug issues  
+*09:23 PM* &nbsp; FIRE - investigate large noise variance  
+*10:29 PM* &nbsp; FIRE - troubleshooting data normalization  
+*11:06 PM* &nbsp; FIRE - running model fitting and clustering with fixes in place  
+<a id="2014_05_20"></a>
+##May 20, 2014
+*08:28 AM* &nbsp; FIRE - merge-in rad_supl data  
+*09:08 AM* &nbsp; "  
+*10:20 AM* &nbsp; "  
+*11:16 AM* &nbsp; FIRE - fixing csv writing, enum parsing bugs  
