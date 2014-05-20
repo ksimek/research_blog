@@ -279,3 +279,4 @@
 1400279171: FIRE - cleanup clustering visualization script
 1400542358: FIRE - immunity regularization, reclustering
 1400544691: FIRE - immunity regularization, reclustering
+1400547834: FIRE - rerun clustering w/ centered data
