@@ -92,6 +92,8 @@
   <div class="date emphnext">
     May 20, 2014
       
+          <a  href="/ksimek/research/pomodoro.html#2014_05_20"><img src="/ksimek/research/img/pom.png" /></a>
+      
  
   </div>
     
@@ -127,9 +129,25 @@
 </div>
 
 
+<h2>Appending radiation data to full data table</h2>
+
+<p>Ran into some issues needing refactoring when trying to add radiation date columns to fire_all.csv.  The work was slow-going, because the parsing code is so incredibly slow (2-3 minutes to read and write all the data).   I managed to speed it up slightly by skipping the missing data check when no missing keys are specified.</p>
+
+<p>Some of the bugs fixed:</p>
+
+<ul>
+<li>Enumeration columns weren't catching misparse errors, thus, some misparsed columns weren't being caught.</li>
+<li>Enums fail to write correctly.</li>
+<li>Refactored to allow writing of enumation columns as text.</li>
+<li>Found and fixed bugs in handling missing data and case sensitivity.</li>
+</ul>
+
+
+<p>Finally (!) merged and committed radiation columns into fire_all.csv.  Committed and write a summary for Warren</p>
+
 <h2>Analyzing cluster membership</h2>
 
-<p><strong>Description</strong>: Are the membership values output by our clustering code related to treatment type?
+<p><strong>Description</strong>: Are the membership values output by our clustering code related to treatment type?<br/>
 <strong>Method</strong>: Modify preprocessing code to output a matlab struct instead of a text file.  Modify clustering code to output memberships as a text file instead of a color image.  Visualize both cluster membership and ground truth treatment type and compare.</p>
 
 <p><strong>Results</strong>:</p>

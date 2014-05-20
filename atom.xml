@@ -4,7 +4,7 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2014-05-20T16:17:30-07:00</updated>
+ <updated>2014-05-20T16:30:43-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
@@ -46,9 +46,25 @@
 &lt;/div&gt;
 
 
+&lt;h2&gt;Appending radiation data to full data table&lt;/h2&gt;
+
+&lt;p&gt;Ran into some issues needing refactoring when trying to add radiation date columns to fire_all.csv.  The work was slow-going, because the parsing code is so incredibly slow (2-3 minutes to read and write all the data).   I managed to speed it up slightly by skipping the missing data check when no missing keys are specified.&lt;/p&gt;
+
+&lt;p&gt;Some of the bugs fixed:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Enumeration columns weren&#39;t catching misparse errors, thus, some misparsed columns weren&#39;t being caught.&lt;/li&gt;
+&lt;li&gt;Enums fail to write correctly.&lt;/li&gt;
+&lt;li&gt;Refactored to allow writing of enumation columns as text.&lt;/li&gt;
+&lt;li&gt;Found and fixed bugs in handling missing data and case sensitivity.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Finally (!) merged and committed radiation columns into fire_all.csv.  Committed and write a summary for Warren&lt;/p&gt;
+
 &lt;h2&gt;Analyzing cluster membership&lt;/h2&gt;
 
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Are the membership values output by our clustering code related to treatment type?
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Are the membership values output by our clustering code related to treatment type?&lt;br/&gt;
 &lt;strong&gt;Method&lt;/strong&gt;: Modify preprocessing code to output a matlab struct instead of a text file.  Modify clustering code to output memberships as a text file instead of a color image.  Visualize both cluster membership and ground truth treatment type and compare.&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
