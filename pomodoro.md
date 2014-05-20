@@ -376,3 +376,7 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *02:25 PM* &nbsp; "  
 *02:55 PM* &nbsp; "  
 *03:26 PM* &nbsp; FIRE - cleanup clustering visualization script  
+<a id="2014_05_19"></a>
+##May 19, 2014
+*04:32 PM* &nbsp; FIRE - immunity regularization, reclustering  
+*05:11 PM* &nbsp; "  

@@ -277,3 +277,5 @@
 1400275551: FIRE - clean up clustering project for hand-off to Warren
 1400277354: FIRE - clean up clustering project for hand-off to Warren
 1400279171: FIRE - cleanup clustering visualization script
+1400542358: FIRE - immunity regularization, reclustering
+1400544691: FIRE - immunity regularization, reclustering
