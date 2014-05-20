@@ -280,3 +280,4 @@
 1400542358: FIRE - immunity regularization, reclustering
 1400544691: FIRE - immunity regularization, reclustering
 1400547834: FIRE - rerun clustering w/ centered data
+1400549652: FIRE - memory leak in kjb_write_image

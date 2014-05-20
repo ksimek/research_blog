@@ -381,3 +381,4 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *04:32 PM* &nbsp; FIRE - immunity regularization, reclustering  
 *05:11 PM* &nbsp; "  
 *06:03 PM* &nbsp; FIRE - rerun clustering w/ centered data  
+*06:34 PM* &nbsp; FIRE - memory leak in kjb_write_image  
