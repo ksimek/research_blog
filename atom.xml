@@ -4,13 +4,280 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2014-05-16T16:20:09-07:00</updated>
+ <updated>2014-05-20T16:17:30-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>FIRE - data prep, analyzing clustering</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/05/20/work-log"/>
+   <updated>2014-05-20T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/05/20/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Analyzing cluster membership&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Are the membership values output by our clustering code related to treatment type?
+&lt;strong&gt;Method&lt;/strong&gt;: Modify preprocessing code to output a matlab struct instead of a text file.  Modify clustering code to output memberships as a text file instead of a color image.  Visualize both cluster membership and ground truth treatment type and compare.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;table class=&quot;data&quot;&gt;
+&lt;tr&gt;&lt;th&gt;Treatment&lt;/th&gt;&lt;th&gt;p(cluster == 1 | treatment)&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Overall&lt;/td&gt;&lt;td&gt;74.7%&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;None&lt;/td&gt;&lt;td&gt;95.5%&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Radiation only&lt;/td&gt;&lt;td&gt;44.0%&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Chemotherapy only&lt;/td&gt;&lt;td&gt;73.9%&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Both&lt;/td&gt;&lt;td&gt;85.2%&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;
+
+
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/05/19/work-log"/>
+   <updated>2014-05-19T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/05/19/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Memory leak in kjb_write_image&lt;/h2&gt;
+
+&lt;p&gt;Found a memory leak in kjb_write_image.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;convert_image_file_from_raster
+-&gt; kjb_system
+-&gt; create_system_command_process
+-&gt; kjb_fork&lt;/p&gt;
+
+&lt;h2&gt;Clustering with centered data&lt;/h2&gt;
+
+&lt;p&gt;Modified &lt;code&gt;inprogres/process_treatment_dates.m&lt;/code&gt; to log-transforms and normalize data. Re-ran clustering. Some observations:&lt;/p&gt;
+
+&lt;p&gt;First, noise standard deviation dropped from 25 to 17.  The change is surprisingly subtle, considering we significantly reduced the dynamic range of the data.  I should probably investigate this more...&lt;/p&gt;
+
+&lt;p&gt;Second, observation offset was on the order of 1e5.  Should be near zero.  Definitely investigate this more.&lt;/p&gt;
+
+&lt;p&gt;Centering did seem to fix cluster collapse, and the memberships were a bit more evenly distributed:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-19-clusters_centered.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;Investigating large observation offset.&lt;/h2&gt;
+
+&lt;p&gt;Run 1: force offset to zero.  does noise variance decrease?&lt;br/&gt;
+Result: RMS error increased from ~17 to ~19.&lt;/p&gt;
+
+&lt;p&gt;looks  like a bug in preprocessing&lt;/p&gt;
+
+&lt;p&gt;Found bugs:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;was normalizing on all data, not on rows.&lt;/li&gt;
+&lt;li&gt;was dividing by mean (i.e. 0) not standard deviation.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;preprocessed data looks much better now.&lt;/p&gt;
+
+&lt;p&gt;New bug: not enabling missing data. Fixing and rerunning...&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;RMS error is down to 0.4 for global regression model.  Results for line-fitting in three regions is shown below (blue=before, green=during, red=after)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-19-single_cluster_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This seems in the ballpark.  Full results below&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  0.00000000e+00  0.00000000e+00
+  7.22085911e-01  2.02331116e+00  1.04881185e+00
+  7.22916954e+01 -2.79730868e+02  1.41688548e+02
+ -2.56235739e-04  4.05002380e-04  1.79111799e-03  6.25535845e-04 -6.55416611e-04  8.34133235e-05  1.67634110e-03
+  2.49784115e-01  6.06155787e-01 -1.52977199e+00  1.15511031e+00  6.25982470e-01  4.20970189e-01 -5.78777462e-01
+0.473467
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that observation offset (5th line) is nonzero, even though we centered it.  That&#39;s because this is the offset for the regression model, which is able to reveal more structure by taking time into account.  This explains the lower-than-one standard deviation (6th line).  The observation scaling (4th line) is interesting -- IFN-g and IL-8 are negataed, and TNF-a is tiny.  Largest apparent activity in IL-1B and IL-2.  I&#39;m guessing this could change significantly once we start sampling the observation parameters.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Clustering results&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;K-means converges after 6 iterations.&lt;/p&gt;
+
+&lt;p&gt;Cluster memberships:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-19-clusters_centered_fixed.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Only two strong clusters, despite using a three-cluster model.&lt;/p&gt;
+
+&lt;p&gt;Full results:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Observation (global):
+A: -2.56235739e-04  4.05002380e-04  1.79111799e-03  6.25535845e-04 -6.55416611e-04  8.34133235e-05  1.67634110e-03
+B:   2.49784115e-01  6.06155787e-01 -1.52977199e+00  1.15511031e+00  6.25982470e-01  4.20970189e-01 -5.78777462e-01
+eps: 0.473467
+
+cluster #1
+m:  7.72956909e-01  2.23224762e+00  8.57568833e-01
+b:  4.86565183e+01 -3.35063295e+02  3.15151426e+02
+
+cluster #2
+m:  9.18374118e+00  0.00000000e+00  0.00000000e+00
+b: -5.45940758e+02  0.00000000e+00  0.00000000e+00
+
+cluster #3
+m: -3.69070988e+00 -3.02755277e+00  1.64214653e+00
+b:  2.82195009e+02  3.96896877e+02 -2.56559679e+02
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Cluster 2 (the trivial cluster) seems to only have ata for the first region, which explains why it&#39;s ideosyncratic.&lt;/p&gt;
+
+&lt;p&gt;Clusters 1 and 3  differ dramatically in slope; cluster three drops significantly in the first two regions.&lt;/p&gt;
+
+&lt;p&gt;Do these clusters align closely with treatment type?  (do tomorrow)&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Are cluster memberships linked to treatment type?
+
+&lt;ul&gt;
+&lt;li&gt;&lt;ol&gt;
+&lt;li&gt;matlab preprocess into struct, not file.  then save struct to file&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;ol&gt;
+&lt;li&gt;use struct to visualize treatment type&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;ol&gt;
+&lt;li&gt;save cluster membership to file, visualize in matlab next to (2.)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;repeat k-means multiple times with random initializations.&lt;/li&gt;
+&lt;li&gt;handle different treatment types.&lt;/li&gt;
+&lt;li&gt;do full sampling.&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>FIRE - immunity data transformations</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/05/18/reference"/>
+   <updated>2014-05-18T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/05/18/reference</id>
+   <content type="html">&lt;p&gt;this is a follow-up to [this earlier post], in which immunity data is plotted as histograms for each &quot;plate&quot;.&lt;/p&gt;
+
+&lt;p&gt;After log-transforming the variables the extreme outliers now look more sensible, and the distributions are far more symmetric, with the exception of a few TNF-\(alpha\) plates.&lt;/p&gt;
+
+&lt;script&gt;
+    $(function() {
+        $( &quot;#plate_hist_tabs&quot; ).tabs();
+    });
+&lt;/script&gt;
+
+
+&lt;div id=&quot;plate_hist_tabs&quot;&gt;
+    &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&quot;#ifng_plates&quot;&gt;IFN-g&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#tnfa_plates&quot;&gt;TNF-\(\alpha\)&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#IL1B_plates&quot;&gt;IL-1b&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#il2_plates&quot;&gt;IL-2&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#il6_plates&quot;&gt;IL-6&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#il8_plates&quot;&gt;IL-8&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#il10_plates&quot;&gt;IL-10&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;div id=&quot;ifng_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-18-ifng_plates.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;il10_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-18-il10_plates.png&quot; /&gt;&lt;br /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;IL1B_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-18-il1b_plates.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;il6_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-18-il6_plates.png&quot; /&gt;&lt;br /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;il8_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-18-il8_plates.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;tnfa_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-18-tnfa_plates.png&quot; /&gt;&lt;br /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;il2_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-18-il2_plates.png&quot; /&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>FIRE - cleanup</title>

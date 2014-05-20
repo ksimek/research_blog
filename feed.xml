@@ -7,6 +7,273 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>FIRE - data prep, analyzing clustering</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Analyzing cluster membership&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Are the membership values output by our clustering code related to treatment type?
+&lt;strong&gt;Method&lt;/strong&gt;: Modify preprocessing code to output a matlab struct instead of a text file.  Modify clustering code to output memberships as a text file instead of a color image.  Visualize both cluster membership and ground truth treatment type and compare.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;table class=&quot;data&quot;&gt;
+&lt;tr&gt;&lt;th&gt;Treatment&lt;/th&gt;&lt;th&gt;p(cluster == 1 | treatment)&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Overall&lt;/td&gt;&lt;td&gt;74.7%&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;None&lt;/td&gt;&lt;td&gt;95.5%&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Radiation only&lt;/td&gt;&lt;td&gt;44.0%&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Chemotherapy only&lt;/td&gt;&lt;td&gt;73.9%&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Both&lt;/td&gt;&lt;td&gt;85.2%&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;
+
+
+
+</description>
+				<pubDate>Tue, 20 May 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/20/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/20/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Memory leak in kjb_write_image&lt;/h2&gt;
+
+&lt;p&gt;Found a memory leak in kjb_write_image.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;convert_image_file_from_raster
+-&gt; kjb_system
+-&gt; create_system_command_process
+-&gt; kjb_fork&lt;/p&gt;
+
+&lt;h2&gt;Clustering with centered data&lt;/h2&gt;
+
+&lt;p&gt;Modified &lt;code&gt;inprogres/process_treatment_dates.m&lt;/code&gt; to log-transforms and normalize data. Re-ran clustering. Some observations:&lt;/p&gt;
+
+&lt;p&gt;First, noise standard deviation dropped from 25 to 17.  The change is surprisingly subtle, considering we significantly reduced the dynamic range of the data.  I should probably investigate this more...&lt;/p&gt;
+
+&lt;p&gt;Second, observation offset was on the order of 1e5.  Should be near zero.  Definitely investigate this more.&lt;/p&gt;
+
+&lt;p&gt;Centering did seem to fix cluster collapse, and the memberships were a bit more evenly distributed:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-19-clusters_centered.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;Investigating large observation offset.&lt;/h2&gt;
+
+&lt;p&gt;Run 1: force offset to zero.  does noise variance decrease?&lt;br/&gt;
+Result: RMS error increased from ~17 to ~19.&lt;/p&gt;
+
+&lt;p&gt;looks  like a bug in preprocessing&lt;/p&gt;
+
+&lt;p&gt;Found bugs:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;was normalizing on all data, not on rows.&lt;/li&gt;
+&lt;li&gt;was dividing by mean (i.e. 0) not standard deviation.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;preprocessed data looks much better now.&lt;/p&gt;
+
+&lt;p&gt;New bug: not enabling missing data. Fixing and rerunning...&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;RMS error is down to 0.4 for global regression model.  Results for line-fitting in three regions is shown below (blue=before, green=during, red=after)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-19-single_cluster_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This seems in the ballpark.  Full results below&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  0.00000000e+00  0.00000000e+00
+  7.22085911e-01  2.02331116e+00  1.04881185e+00
+  7.22916954e+01 -2.79730868e+02  1.41688548e+02
+ -2.56235739e-04  4.05002380e-04  1.79111799e-03  6.25535845e-04 -6.55416611e-04  8.34133235e-05  1.67634110e-03
+  2.49784115e-01  6.06155787e-01 -1.52977199e+00  1.15511031e+00  6.25982470e-01  4.20970189e-01 -5.78777462e-01
+0.473467
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that observation offset (5th line) is nonzero, even though we centered it.  That&#39;s because this is the offset for the regression model, which is able to reveal more structure by taking time into account.  This explains the lower-than-one standard deviation (6th line).  The observation scaling (4th line) is interesting -- IFN-g and IL-8 are negataed, and TNF-a is tiny.  Largest apparent activity in IL-1B and IL-2.  I&#39;m guessing this could change significantly once we start sampling the observation parameters.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Clustering results&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;K-means converges after 6 iterations.&lt;/p&gt;
+
+&lt;p&gt;Cluster memberships:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-19-clusters_centered_fixed.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Only two strong clusters, despite using a three-cluster model.&lt;/p&gt;
+
+&lt;p&gt;Full results:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Observation (global):
+A: -2.56235739e-04  4.05002380e-04  1.79111799e-03  6.25535845e-04 -6.55416611e-04  8.34133235e-05  1.67634110e-03
+B:   2.49784115e-01  6.06155787e-01 -1.52977199e+00  1.15511031e+00  6.25982470e-01  4.20970189e-01 -5.78777462e-01
+eps: 0.473467
+
+cluster #1
+m:  7.72956909e-01  2.23224762e+00  8.57568833e-01
+b:  4.86565183e+01 -3.35063295e+02  3.15151426e+02
+
+cluster #2
+m:  9.18374118e+00  0.00000000e+00  0.00000000e+00
+b: -5.45940758e+02  0.00000000e+00  0.00000000e+00
+
+cluster #3
+m: -3.69070988e+00 -3.02755277e+00  1.64214653e+00
+b:  2.82195009e+02  3.96896877e+02 -2.56559679e+02
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Cluster 2 (the trivial cluster) seems to only have ata for the first region, which explains why it&#39;s ideosyncratic.&lt;/p&gt;
+
+&lt;p&gt;Clusters 1 and 3  differ dramatically in slope; cluster three drops significantly in the first two regions.&lt;/p&gt;
+
+&lt;p&gt;Do these clusters align closely with treatment type?  (do tomorrow)&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Are cluster memberships linked to treatment type?
+
+&lt;ul&gt;
+&lt;li&gt;&lt;ol&gt;
+&lt;li&gt;matlab preprocess into struct, not file.  then save struct to file&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;ol&gt;
+&lt;li&gt;use struct to visualize treatment type&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;ol&gt;
+&lt;li&gt;save cluster membership to file, visualize in matlab next to (2.)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;repeat k-means multiple times with random initializations.&lt;/li&gt;
+&lt;li&gt;handle different treatment types.&lt;/li&gt;
+&lt;li&gt;do full sampling.&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Mon, 19 May 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/19/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/19/work-log</guid>
+			</item>
+		
+			<item>
+				<title>FIRE - immunity data transformations</title>
+				<description>&lt;p&gt;this is a follow-up to [this earlier post], in which immunity data is plotted as histograms for each &quot;plate&quot;.&lt;/p&gt;
+
+&lt;p&gt;After log-transforming the variables the extreme outliers now look more sensible, and the distributions are far more symmetric, with the exception of a few TNF-\(alpha\) plates.&lt;/p&gt;
+
+&lt;script&gt;
+    $(function() {
+        $( &quot;#plate_hist_tabs&quot; ).tabs();
+    });
+&lt;/script&gt;
+
+
+&lt;div id=&quot;plate_hist_tabs&quot;&gt;
+    &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&quot;#ifng_plates&quot;&gt;IFN-g&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#tnfa_plates&quot;&gt;TNF-\(\alpha\)&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#IL1B_plates&quot;&gt;IL-1b&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#il2_plates&quot;&gt;IL-2&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#il6_plates&quot;&gt;IL-6&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#il8_plates&quot;&gt;IL-8&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;#il10_plates&quot;&gt;IL-10&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;div id=&quot;ifng_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-18-ifng_plates.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;il10_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-18-il10_plates.png&quot; /&gt;&lt;br /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;IL1B_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-18-il1b_plates.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;il6_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-18-il6_plates.png&quot; /&gt;&lt;br /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;il8_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-18-il8_plates.png&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;tnfa_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-18-tnfa_plates.png&quot; /&gt;&lt;br /&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;il2_plates&quot;&gt;
+    &lt;img src=&quot;/ksimek/research/img/2014-05-18-il2_plates.png&quot; /&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+</description>
+				<pubDate>Sun, 18 May 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/18/reference</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/18/reference</guid>
+			</item>
+		
+			<item>
 				<title>FIRE - cleanup</title>
 				<description>&lt;h2&gt;Skype w/ Kobus&lt;/h2&gt;
 
@@ -740,470 +1007,6 @@ A estimation method: regression
 				<pubDate>Fri, 09 May 2014 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/09/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/09/work-log</guid>
-			</item>
-		
-			<item>
-				<title>FIRE = Cluster model</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;unknown (see text)&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Implemented cluster model in &lt;code&gt;cluster_model.{cpp,h}&lt;/code&gt;.  Implemented synthetic data generation in &lt;code&gt;synthetic.{cpp,h}&lt;/code&gt;.  Working on initial model estimation using k-means.&lt;/p&gt;
-
-&lt;h2&gt;Run #1:  Adding estimation of epsilon.&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: After estimating &#39;A&#39;, also estimate the noise scale, &lt;code&gt;epsilon&lt;/code&gt; (assumed 1.0 until now).&lt;br/&gt;
-&lt;strong&gt;Method&lt;/strong&gt;: Project data onto &#39;A&#39; in data space, take mean projection error (see kjb_c::project_rows_onto_basis).&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Using known epsilon: 0.5
--------------------
-Training error: -45.3955
-Prediction error: -46.5
-
-Estimating epsilon: 0.46192
-----------------------
-Training error: -45.7958
-Prediction error: -47.1319
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;: in the ballpark!&lt;/p&gt;
-
-&lt;h2&gt;Run #2: initial cluster estimation&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Iteratively estimate three clusters and assign memebership.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Issues&lt;/strong&gt;: third cluster initialization is identical to second.  Guess: it&#39;s picking the same bad point over and over.&lt;/p&gt;
-
-&lt;h2&gt;Run #3: initial cluster estimation, per-cluster obs. model&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Like Run #2, but each cluster has an individual observation model&lt;/p&gt;
-</description>
-				<pubDate>Thu, 08 May 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/08/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/08/work-log</guid>
-			</item>
-		
-			<item>
-				<title>FIRE - continuous model, clustering</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;unknown (see text)&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Today I finished run #10 from yesterday, in which I tried whitening the data before doing inference.  The results were inconclusive but not encouraging.&lt;/p&gt;
-
-&lt;p&gt;I need to clean up the code which has gained some cruft from yesterday&#39;s tests.  I&#39;m removing the whitening option, since it doesn&#39;t help with synthetic data, but I&#39;ll keep the whtening function for testing on real data later.&lt;/p&gt;
-
-&lt;h2&gt;Run 1: contiguous model&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Introduce piecewise continuity constriants.   Re-run and evaluate prediction error.&lt;br/&gt;
-&lt;strong&gt;Method&lt;/strong&gt;:  add a special case to Piecewise_linear_model.  If b.size() == 1, assume contiguous model and infer the other b&#39;s on the fly.  Initial model estimate uses the same code as the non-continouous model, and simply resizes b.x.b to 1 afterward.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Ground Truth
---------------
-Training error:   88.6756
-Prediction error: 90.3623
-
-Initial Model
-------------
-Training error:   88.6303
-Prediction error: 90.4582
-
-Best Model
-----------
-Training error:   88.6268
-Prediction error: 90.4576
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;:&lt;/p&gt;
-
-&lt;p&gt;The prediction error of the estimated model is extremely close to that of ground truth.  This is a simpler model, so that probably explains improved prediction accuracy.&lt;/p&gt;
-
-&lt;p&gt;It&#39;s notable that the best model is now different than the initial estimate.  That&#39;s because the continuity constraints make the problem not solvable analytically.&lt;/p&gt;
-
-&lt;p&gt;Also notable is that training error for the estimated models is better than that of the ground truth.&lt;/p&gt;
-
-&lt;hr /&gt;
-</description>
-				<pubDate>Wed, 07 May 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/07/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/07/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Fire: 10 inference experiments</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;Ran 10,000 iterations, keeping observation model fixed.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Update&lt;/strong&gt;: The three plots below are incorrect.  corrected plot follows.
-Ground truth model:&lt;br/&gt;
-&lt;img src=&quot;/ksimek/research/img/2014-05-06-run1_gt_model.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Initial model:&lt;br/&gt;
-&lt;img src=&quot;/ksimek/research/img/2014-05-06-run1_initial_model.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Final model:&lt;br/&gt;
-&lt;img src=&quot;/ksimek/research/img/2014-05-06-run1_final_model.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Update&lt;/strong&gt;: There was a bug in my plotting code for the plots above. Here is the corrected plot, which is more sensible:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-06-run1_fixed.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Observations:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Initial estimate is bad, esp y-offset.  Should review this code.&lt;/li&gt;
-&lt;li&gt;Recovered results are noticably better.  Not perfect, but this may be because we&#39;re seeing the &lt;em&gt;final&lt;/em&gt; model, not the best one.&lt;/li&gt;
-&lt;li&gt;Keeping observation model fixed seems to improve speed by two orders of magnitude (why???)&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;h2&gt;Run 2:  Keep best model&lt;/h2&gt;
-
-&lt;p&gt;Added a &#39;best_sample_recorder&#39; to keep track of the best model we&#39;ve seen.&lt;/p&gt;
-
-&lt;h3&gt;Results&lt;/h3&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-06-run2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h3&gt;Observations&lt;/h3&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Best model is pretty good&lt;/li&gt;
-&lt;li&gt;Why is initial model so different from that in the previous run?  same model, same random seed.&lt;/li&gt;
-&lt;li&gt;Keep in mind, on average only 1/3 of the [0,1] domain is represented in the dataset, because it&#39;s divided into &quot;before&quot;, &quot;during&quot; and &quot;after&quot; regions.&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;h3&gt;Discussion&lt;/h3&gt;
-
-&lt;p&gt;Initial model uses a different observation model, so it&#39;s hard to say whether it&#39;s good or not.  I get the feeling that there&#39;s a lot of slack in this model, meaning several different combinations of observed and latent parameters can give nearly equal results.&lt;/p&gt;
-
-&lt;p&gt;Also, initial model estimation doesn&#39;t correctly handle x-offsets for &quot;during&quot; and &quot;after&quot; regions.  TODO: fix this.&lt;/p&gt;
-
-&lt;p&gt;Note that the noise epsilon is very large relative to the model&#39;s dynamic range.  It&#39;s hard to visualize, since the plots above are sent through an observation model before noise is added. But the observation model&#39;s scaling is around 0.5.&lt;/p&gt;
-
-&lt;p&gt;Variability in the latent variable is around 0.3.  Observation model scales that to 0.15, then adds noise on the order of 1.0.  So signal-to-noise ratio is around 0.15 -- not great.  Luckilly we have lots of observations (150 people x 9 time points x 7 observed dimensions), but in our non-synthetic model, I hope our noise is smaller.&lt;/p&gt;
-
-&lt;h2&gt;Run 3: Improved initial model estimate&lt;/h2&gt;
-
-&lt;p&gt;&lt;em&gt;SVN REVISION&lt;/em&gt;: 16742&lt;br/&gt;
-&lt;em&gt;Description&lt;/em&gt;: Fixed initial model estimate by centering each region at x=0.  See &lt;code&gt;model.cpp:partition_observations()&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;# iterations: 10,000 iterations&lt;br/&gt;
-Running time: 0:18.53&lt;br/&gt;
-Results:&lt;br/&gt;
-&lt;img src=&quot;/ksimek/research/img/2014-05-06-run3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Summary:&lt;br/&gt;
-Initial model has changed, but initial offset is still way off.  Other models (final and best) are the same.&lt;/p&gt;
-
-&lt;p&gt;Discussion:&lt;br/&gt;
-Need to dig more into the initial estimation code.  Is boost&#39;s RNG seeded with current time?&lt;/p&gt;
-
-&lt;h2&gt;Run 4: fixed observation parameters&lt;/h2&gt;
-
-&lt;p&gt;&lt;em&gt;SVN REVISION&lt;/em&gt;: 16743&lt;br/&gt;
-Goal: See if fixing observation parameters (A, B) improve line-fits.  If so, issue is in observation parameters.  If not, issue is with line-fitting.&lt;br/&gt;
-Running time: 0:18.26&lt;/p&gt;
-
-&lt;p&gt;Results:&lt;br/&gt;
-&lt;img src=&quot;/ksimek/research/img/2014-05-06-run4.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Discussion:&lt;br/&gt;
-Bad results; issue is probably in line-fitting, not estimation of observation model.&lt;/p&gt;
-
-&lt;h2&gt;Run 5: fixed observation parameters (take 2)&lt;/h2&gt;
-
-&lt;p&gt;Description: Found a bug when using fixed offset B -- wasn&#39;t subtracting offset before doing PCA to find A.&lt;br/&gt;
-Revision: 16744&lt;br/&gt;
-Results:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-06-run5.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Discussion:
-No change.  In retrospect, this change only applies when not using fixed observation parameters, so no change is to be expected.  But a good bug to fix for later on!&lt;/p&gt;
-
-&lt;h2&gt;Run 6:&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;:&lt;br/&gt;
-Found another bug: when projecting points onto pincipal component, if the direction vector \(d\) isn&#39;t normalized to 1, the projected points are off by a factor of \(|d|^2\).   The observation equation is given by:&lt;/p&gt;
-
-&lt;div&gt;
-\[
-y = Ax + B
-\]
-
-The goal is to solve for \(x\), which means we need the Moore-Penrose pseudoinverse, \(A^+ = (A^\top A)^{-1} A \).  When \(A\) is a column vector, the term in perentheses on the right-hand size is the squared magnitude of \(A\), which was ommitted in the original equation.
-&lt;/div&gt;
-
-
-&lt;p&gt;&lt;strong&gt;Revision&lt;/strong&gt;:  16745&lt;br/&gt;
-&lt;strong&gt;Invocation&lt;/strong&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;# On bayes01
-cd ~ksimek/src/fire/src/piecewise_linear/test
-./test_inference &amp;gt; /dev/null
-cat results.txt | \
-    awk &#39;{row=NR%7; if(row == 3 || row == 4) print;}&#39; \
-    &amp;gt; ~/tmp/lin.txt
-
-# on local machine
-rsync -avz v01:tmp/lin*.txt ~/tmp/
-
-# in matlab on local machine
-cd ~ksimek/work/src/fire/src/matlab/in_progress
-figure
-lin = load(&#39;~/tmp/lin7_1.txt&#39;)&#39;
-lin3 = reshape(lin, [3, 2, 4])
-visualize_pl_result(lin3, ...
-    {&#39;ground truth&#39;, ...
-    &#39;initial model&#39;, ...
-    &#39;final model&#39;, ...
-    &#39;best model&#39;})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;br/&gt;
-&lt;img src=&quot;/ksimek/research/img/2014-05-06-run6.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Discussion:&lt;/strong&gt;&lt;br/&gt;
-Finally getting good initial estimates.  In fact, initial estimate is the &lt;strong&gt;optimal estimate&lt;/strong&gt; when A and B are known.  The best model doesn&#39;t look perfect, especially in the red curve, but there seems to be significant variance in the red curve estimator, as shorn in &quot;final model&quot;.&lt;/p&gt;
-
-&lt;h2&gt;Run 7: Initial estimate of A&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Time to add initial estimation of A.  Sampling will still only estimate latent parameters.    I&#39;m curious how close this will be to optimal.  I&#39;m forcing the ground-truth A to have unit-length so the experimental results are comparable to the ground truth.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Invocation&lt;/strong&gt;: see previous&lt;br/&gt;
-&lt;strong&gt;Revision&lt;/strong&gt;: 16746&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Baseline&lt;/strong&gt;:  The results below are estimates of the linear model when A is known.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-06-run7_1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;: Below are results of sampling, using an estimate of A from the noisy data&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-06-run7_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Discussion:&lt;/strong&gt;&lt;br/&gt;
-Initial estimate is slightly worse in the green and blue curves, but still in the ballpark, as we would hope.  As observation noise decreases, this estimate should improve.&lt;/p&gt;
-
-&lt;p&gt;It&#39;s notable that HMC still can&#39;t find a better model.  This is good news for the quality of our estimate.&lt;/p&gt;
-
-&lt;h2&gt;Run 8: initial estimate of A and B&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;:  Adding initial estimation of B to the test.&lt;br/&gt;
-&lt;strong&gt;Invocation&lt;/strong&gt;: see previous&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-06-run_8.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;:&lt;br/&gt;
-Much worse.  This could be caused by overestimating the magitude of (B), while understimating the magnitude of (b) (which can result in identical models due to our model being overdefined).  Since (b) currently adds positive offset to all observations, estimating (B) as the mean over observations could is likely to capture some of (b).&lt;/p&gt;
-
-&lt;p&gt;Probably the best way to evaluate is to measure prediction error.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Update&lt;/strong&gt; run 9 shows that this model predicts quite well, despite having different model parameters.&lt;/p&gt;
-
-&lt;h2&gt;Discussion - Scaling and offset&lt;/h2&gt;
-
-&lt;p&gt;I&#39;m starting to think we should consider preprocessing the immunity data bafore passing it through this model, for two reasons&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;1. poorly scaled data; correlated noise&lt;/strong&gt;&lt;br/&gt;
-It seems too easy that we can solve for &#39;A&#39; using simple PCA.  Said differently, dynamics are the interesting part of our model, but A is determined irrespective of dynamics.&lt;/p&gt;
-
-&lt;p&gt;The observation transformation A has an intuitive interpretation as the direction of greatest variation in the data, after taking dynamics into account.  The problem with this is that if data is badly scaled, the direction of greatest variation will come from the noise, not the dynamics.   If possible, we’d prefer to separate variation due to noise from variation due to dynamics.  That way, A can capture the dynamic relationships between variables (e.g. IL-6 and IL-5 both start low and end high), not just correlation (IL-6 and IL-5 co-vary, but no temporal information).&lt;/p&gt;
-
-&lt;p&gt;For this reason, it might help to &quot;whiten&quot; the data by PCA, so the inferred direction of A is more likely to capture dynamics only.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;2. Variability in immunity measurements&lt;/strong&gt;&lt;br/&gt;
-Second, I’ve been thinking on the fact that individuals’ immunity values differ significantly in scale and offset.  From what I understand, much of this variation occurs within “plate”, i.e. its a byproduct of laboratory conditions, not immunity dynamics.   This could affect our clustering, as the latent slope and y-intercept parameters depend directly on the data’s scale and offset.  As a result, I fear our learned clusters will reflect different groups of “laboratory conditions”, rather than different groups of immunity dynamics.&lt;/p&gt;
-
-&lt;p&gt;We could replace readings with z-score within each person, but this has two problems:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;readings that are relatively constant but legitimately high would seem more typical than they are.&lt;/li&gt;
-&lt;li&gt;extremely steep changes over time would tend to flatten. similarly, relatively low slopes would tend to look higher after transforming.&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;p&gt;No obvious answer; may need to try several solutions.&lt;/p&gt;
-
-&lt;h2&gt;Run 9: Held-out error &lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Since our model is overdefined, comparing model parameters is no longer a good indicator of model quality.  Instead, we should held-out data to evaluate the predictive power of the model&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Method&lt;/strong&gt;: hold out 20% of data, measure log-likelihood for (a) ground truth model, (b) initial model estimate.  Two cases: 1. using global mean for B, PCA for A, 2. using ground truth A and B.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Training error:
-------------
-
-    Ground truth:              -13301.3
-    Ana. Soln (Known A, B):    -13295.2
-    Ana. Soln (Inferred A, B): -13318.3
-
-Testing error:
------------
-
-    Ground Truth:               -1886.17
-    Ana. Soln (Known A, B):     -1887.3
-    Ana. Soln (Inferred A, B):  -1887.06
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;:&lt;/p&gt;
-
-&lt;p&gt;Training error is &lt;em&gt;better&lt;/em&gt; for analytical solution with known A and B, which what we&#39;d expect if the analytical solution was the true optimum.  When A and B are inferred, training error is worse, since PCA doesn&#39;t account for dynamics.&lt;/p&gt;
-
-&lt;p&gt;Prediction error is worse than ground truth for all models, which is a good sanity check.  But they&#39;re all in a very tight ballpark (less than 1.0), which suggests that we aren&#39;t overfitting.  A better test would be to compare against one or more simpler models, but these results are good enough to proceed.&lt;/p&gt;
-
-&lt;p&gt;One good conclusion is that even though inferring A and B results in vastly different latent models (see run #8), the prediction is just as good.&lt;/p&gt;
-
-&lt;h2&gt;Run 10: Whitening before inference&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: transforming observations so they follow a standard m.v. Gaussian may help in infering.  Test prediction error and compare against run #9 errors (should be nearly identical).
-&lt;strong&gt;Revision&lt;/strong&gt;: 16756&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Method&lt;/strong&gt;: transform data by PCA.  Using linear regression to infer initial direction (since PCA is out).  Force B to be zero.  Fit model.  Evaluate held-out error after transforming back to data space.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;(&quot;Error&quot; is average negative log likelihood over 150 points)
-
-Ground truth
-------------
-    Training error: 88.6756
-    Prediction error: 90.3623
-
-Estimated Model
---------------
-    Raw data; A,B from PCA
-    ---------
-    Training error: 88.7887
-    Prediction error: 90.5986
-
-    Raw data; A,B from Regression
-    ------------
-    Training error: 88.6285
-    Prediction error: 90.4405
-
-    Whiteened Data; A,B from Regression
-    --------------
-    Training error: 93.8502
-    Prediction error: 95.7252
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;:&lt;br/&gt;
-Training and prediction error is worse for whitened data, which is contrary to my expectation.  In retrospect, we&#39;re fitting to different data, so it&#39;s not too surprising that it predicts worse.  The story may be different if the data is truely poorly scaled.  Our example data was already well scaled, so its not a great test.&lt;/p&gt;
-
-&lt;p&gt;But in the end, its defnitely clear that whitening isn&#39;t innocuous, and possibly harmful.&lt;/p&gt;
-
-&lt;h2&gt;Mid-term TODO&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Tuning HMC&lt;/li&gt;
-&lt;li&gt;refactor model
-
-&lt;ul&gt;
-&lt;li&gt;Start and end times out of model&lt;/li&gt;
-&lt;li&gt;epsilon per-dimension&lt;/li&gt;
-&lt;li&gt;missing data&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Add offset constraints (continuous model)&lt;/li&gt;
-&lt;li&gt;clustering&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;h2&gt;Meta-notes on experiments&lt;/h2&gt;
-
-&lt;ol&gt;
-&lt;li&gt;always test on synthetic data first&lt;/li&gt;
-&lt;li&gt;always test on a simpler model first (fix some parameters)&lt;/li&gt;
-&lt;li&gt;always have a visualization in mind when running a test.&lt;/li&gt;
-&lt;/ol&gt;
-
-</description>
-				<pubDate>Tue, 06 May 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/06/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/06/work-log</guid>
 			</item>
 		
 	</channel>

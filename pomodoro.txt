@@ -277,3 +277,16 @@
 1400275551: FIRE - clean up clustering project for hand-off to Warren
 1400277354: FIRE - clean up clustering project for hand-off to Warren
 1400279171: FIRE - cleanup clustering visualization script
+1400542358: FIRE - immunity regularization, reclustering
+1400544691: FIRE - immunity regularization, reclustering
+1400547834: FIRE - rerun clustering w/ centered data
+1400549652: FIRE - memory leak in kjb_write_image
+1400555314: FIRE - evaluate clustering rerun, debug issues
+1400559794: FIRE - investigate large noise variance
+1400563741: FIRE - troubleshooting data normalization
+1400566017: FIRE - running model fitting and clustering with fixes in place
+1400599717: FIRE - merge-in rad_supl data
+1400602086: FIRE - merge-in rad_supl data
+1400606400: FIRE - merge-in rad_supl data
+1400609781: FIRE - fixing csv writing, enum parsing bugs
+1400623225: FIRE - analyze clustering

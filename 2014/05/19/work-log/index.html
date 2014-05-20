@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>FIRE - cleanup &larr; </title>
+   <title>Work Log &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -86,11 +86,11 @@
 
 
   <h1 class="title">
-        [Work Log] FIRE - cleanup
+        [Work Log] Work Log
     </h1>
 
   <div class="date emphnext">
-    May 16, 2014
+    May 19, 2014
       
  
   </div>
@@ -98,21 +98,158 @@
 
 
   
-    <h2>Skype w/ Kobus</h2>
+    
 
-<p>Reflecting on <a href="/ksimek/research/2014/05/15/reference">immunity histograms</a> I created late last night.  In discussion with Kobus, we've decided a few things could help: (a) log-transforming, (b) introducing a scaling factor, and (c) using robust likelihood (e.g. truncated squared error).</p>
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/fire.html">FIRE</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Piecewise Linear Clustering (tests)</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;fire/&#8203;trunk/&#8203;src/&#8203;piecewise_linear/&#8203;test</td>
+    </tr>
 
-<p>Will Skype with Warren on Monday afternoon to hand off the self-report clustering analysis.  Will spend this afternoon cleaning up the data and code to make it easier for him to pick it up.</p>
+    <tr>
+        <th>SVN Revision</th>
+        <td>unknown (see text)</td>
+    </tr>
 
-<p>Kobus will likely need my input in the coming weeks to incorporate branching Gaussian processes into an upcoming grant proposal.</p>
 
-<h2>Self-report clustering cleanup</h2>
+</table>
 
-<p>Add documentation and READMES for clustering, experiment directory, output files.</p>
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
+</div>
 
-<p>Add matlab script to visualize clustering results.</p>
 
-<p>Created <a href="/ksimek/research/2014/05/16/reference/">reference page</a> for clustering results.</p>
+<h2>Memory leak in kjb_write_image</h2>
+
+<p>Found a memory leak in kjb_write_image.</p>
+
+<p>...</p>
+
+<p>convert_image_file_from_raster
+-> kjb_system
+-> create_system_command_process
+-> kjb_fork</p>
+
+<h2>Clustering with centered data</h2>
+
+<p>Modified <code>inprogres/process_treatment_dates.m</code> to log-transforms and normalize data. Re-ran clustering. Some observations:</p>
+
+<p>First, noise standard deviation dropped from 25 to 17.  The change is surprisingly subtle, considering we significantly reduced the dynamic range of the data.  I should probably investigate this more...</p>
+
+<p>Second, observation offset was on the order of 1e5.  Should be near zero.  Definitely investigate this more.</p>
+
+<p>Centering did seem to fix cluster collapse, and the memberships were a bit more evenly distributed:</p>
+
+<p><img src="/ksimek/research/img/2014-05-19-clusters_centered.png" alt="" /></p>
+
+<h2>Investigating large observation offset.</h2>
+
+<p>Run 1: force offset to zero.  does noise variance decrease?<br/>
+Result: RMS error increased from ~17 to ~19.</p>
+
+<p>looks  like a bug in preprocessing</p>
+
+<p>Found bugs:</p>
+
+<ul>
+<li>was normalizing on all data, not on rows.</li>
+<li>was dividing by mean (i.e. 0) not standard deviation.</li>
+</ul>
+
+
+<p>preprocessed data looks much better now.</p>
+
+<p>New bug: not enabling missing data. Fixing and rerunning...</p>
+
+<p>...</p>
+
+<p>RMS error is down to 0.4 for global regression model.  Results for line-fitting in three regions is shown below (blue=before, green=during, red=after)</p>
+
+<p><img src="/ksimek/research/img/2014-05-19-single_cluster_2.png" alt="" /></p>
+
+<p>This seems in the ballpark.  Full results below</p>
+
+<pre><code>  0.00000000e+00  0.00000000e+00
+  7.22085911e-01  2.02331116e+00  1.04881185e+00
+  7.22916954e+01 -2.79730868e+02  1.41688548e+02
+ -2.56235739e-04  4.05002380e-04  1.79111799e-03  6.25535845e-04 -6.55416611e-04  8.34133235e-05  1.67634110e-03
+  2.49784115e-01  6.06155787e-01 -1.52977199e+00  1.15511031e+00  6.25982470e-01  4.20970189e-01 -5.78777462e-01
+0.473467
+</code></pre>
+
+<p>Note that observation offset (5th line) is nonzero, even though we centered it.  That's because this is the offset for the regression model, which is able to reveal more structure by taking time into account.  This explains the lower-than-one standard deviation (6th line).  The observation scaling (4th line) is interesting -- IFN-g and IL-8 are negataed, and TNF-a is tiny.  Largest apparent activity in IL-1B and IL-2.  I'm guessing this could change significantly once we start sampling the observation parameters.</p>
+
+<p><strong>Clustering results</strong></p>
+
+<p>K-means converges after 6 iterations.</p>
+
+<p>Cluster memberships:</p>
+
+<p><img src="/ksimek/research/img/2014-05-19-clusters_centered_fixed.png" alt="" /></p>
+
+<p>Only two strong clusters, despite using a three-cluster model.</p>
+
+<p>Full results:</p>
+
+<pre><code>Observation (global):
+A: -2.56235739e-04  4.05002380e-04  1.79111799e-03  6.25535845e-04 -6.55416611e-04  8.34133235e-05  1.67634110e-03
+B:   2.49784115e-01  6.06155787e-01 -1.52977199e+00  1.15511031e+00  6.25982470e-01  4.20970189e-01 -5.78777462e-01
+eps: 0.473467
+
+cluster #1
+m:  7.72956909e-01  2.23224762e+00  8.57568833e-01
+b:  4.86565183e+01 -3.35063295e+02  3.15151426e+02
+
+cluster #2
+m:  9.18374118e+00  0.00000000e+00  0.00000000e+00
+b: -5.45940758e+02  0.00000000e+00  0.00000000e+00
+
+cluster #3
+m: -3.69070988e+00 -3.02755277e+00  1.64214653e+00
+b:  2.82195009e+02  3.96896877e+02 -2.56559679e+02
+</code></pre>
+
+<p><strong>Discussion</strong></p>
+
+<p>Cluster 2 (the trivial cluster) seems to only have ata for the first region, which explains why it's ideosyncratic.</p>
+
+<p>Clusters 1 and 3  differ dramatically in slope; cluster three drops significantly in the first two regions.</p>
+
+<p>Do these clusters align closely with treatment type?  (do tomorrow)</p>
+
+<h2>TODO</h2>
+
+<ul>
+<li>Are cluster memberships linked to treatment type?
+
+<ul>
+<li><ol>
+<li>matlab preprocess into struct, not file.  then save struct to file</li>
+</ol>
+</li>
+<li><ol>
+<li>use struct to visualize treatment type</li>
+</ol>
+</li>
+<li><ol>
+<li>save cluster membership to file, visualize in matlab next to (2.)</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>repeat k-means multiple times with random initializations.</li>
+<li>handle different treatment types.</li>
+<li>do full sampling.</li>
+</ul>
+
 
       <address class="signature">
         Posted by
@@ -124,10 +261,10 @@
   
   
   <div class="prev-next">
-    <a href="/ksimek/research/2014/05/18/reference" class="next" title="FIRE - immunity data transformations">FIRE - immunity data transformations &rarr;</a>
+    <a href="/ksimek/research/2014/05/20/work-log" class="next" title="FIRE - data prep, analyzing clustering">FIRE - data prep, analyzing clustering &rarr;</a>
   
   
-    <a href="/ksimek/research/2014/05/16/reference" class="prev" title="FIRE - Self-report clustering results.">&larr; FIRE - Self-report clustering results.</a>
+    <a href="/ksimek/research/2014/05/18/reference" class="prev" title="FIRE - immunity data transformations">&larr; FIRE - immunity data transformations</a>
   
   </div>
   <div class="clearer"> </div>
