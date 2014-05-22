@@ -292,3 +292,4 @@
 1400623225: FIRE - analyze clustering
 1400643329: FIRE - analyze clustering
 1400784557: FIRE - evaluate fitting and testing errors
+1400787440: KJB - boost::bind error with clang, C++11 and std::make_pair
