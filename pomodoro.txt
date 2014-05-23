@@ -300,3 +300,4 @@
 1400823499: ERGO - ownership refactor
 1400825610: ERGO - ownership refactor
 1400827422: ERGO - ownership refactor
+1400829239: ERGO - copy/ref semantics trick
