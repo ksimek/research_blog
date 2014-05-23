@@ -295,3 +295,8 @@
 1400787440: KJB - boost::bind error with clang, C++11 and std::make_pair
 1400798543: ERGO - random number generation, which version of boost API to support?
 1400800655: ERGO - random number generation
+1400819652: ERGO - testing random refactor
+1400821686: ERGO - testing random refactor
+1400823499: ERGO - ownership refactor
+1400825610: ERGO - ownership refactor
+1400827422: ERGO - ownership refactor
