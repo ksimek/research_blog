@@ -301,3 +301,4 @@
 1400825610: ERGO - ownership refactor
 1400827422: ERGO - ownership refactor
 1400829239: ERGO - copy/ref semantics trick
+1400871345: FIRE - train and test error, introduce sampling
