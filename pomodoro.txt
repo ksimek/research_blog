@@ -293,3 +293,5 @@
 1400643329: FIRE - analyze clustering
 1400784557: FIRE - evaluate fitting and testing errors
 1400787440: KJB - boost::bind error with clang, C++11 and std::make_pair
+1400798543: ERGO - random number generation, which version of boost API to support?
+1400800655: ERGO - random number generation
