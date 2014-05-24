@@ -303,3 +303,9 @@
 1400829239: ERGO - copy/ref semantics trick
 1400871345: FIRE - train and test error, introduce sampling
 1400873491: FIRE - train and test error, introduce sampling
+1400875295: FIRE - train and test error, introduce sampling
+1400880681: FIRE - implement fitting error, run cross validation
+1400884158: FIRE - implement fitting error, run cross validation
+1400886296: FIRE - run cross validation
+1400888099: FIRE - debug cross validation
+1400891733: FIRE - refactoring kmeans to support random initialization
