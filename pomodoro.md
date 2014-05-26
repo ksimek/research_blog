@@ -421,3 +421,4 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *10:52 AM* &nbsp; "  
 *11:29 AM* &nbsp; FIRE - testing refactored kmeans  
 *11:59 AM* &nbsp; FIRE - troubleshooting refactored kmeans  
+*12:30 PM* &nbsp; "  

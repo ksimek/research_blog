@@ -312,3 +312,4 @@
 1401126755: FIRE - refactoring kmeans to support random initialization
 1401128963: FIRE - testing refactored kmeans
 1401130770: FIRE - troubleshooting refactored kmeans
+1401132629: FIRE - troubleshooting refactored kmeans
