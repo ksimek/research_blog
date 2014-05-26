@@ -394,3 +394,30 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *11:16 AM* &nbsp; FIRE - fixing csv writing, enum parsing bugs  
 *03:00 PM* &nbsp; FIRE - analyze clustering  
 *08:35 PM* &nbsp; "  
+<a id="2014_05_22"></a>
+##May 22, 2014
+*11:49 AM* &nbsp; FIRE - evaluate fitting and testing errors  
+*12:37 PM* &nbsp; KJB - boost::bind error with clang, C++11 and std::make_pair  
+*03:42 PM* &nbsp; ERGO - random number generation, which version of boost API to support?  
+*04:17 PM* &nbsp; ERGO - random number generation  
+*09:34 PM* &nbsp; ERGO - testing random refactor  
+*10:08 PM* &nbsp; "  
+*10:38 PM* &nbsp; ERGO - ownership refactor  
+*11:13 PM* &nbsp; "  
+*11:43 PM* &nbsp; "  
+<a id="2014_05_23"></a>
+##May 23, 2014
+*12:13 AM* &nbsp; ERGO - copy/ref semantics trick  
+*11:55 AM* &nbsp; FIRE - train and test error, introduce sampling  
+*12:31 PM* &nbsp; "  
+*01:01 PM* &nbsp; "  
+*02:31 PM* &nbsp; FIRE - implement fitting error, run cross validation  
+*03:29 PM* &nbsp; "  
+*04:04 PM* &nbsp; FIRE - run cross validation  
+*04:34 PM* &nbsp; FIRE - debug cross validation  
+*05:35 PM* &nbsp; FIRE - refactoring kmeans to support random initialization  
+<a id="2014_05_26"></a>
+##May 26, 2014
+*10:52 AM* &nbsp; "  
+*11:29 AM* &nbsp; FIRE - testing refactored kmeans  
+*11:59 AM* &nbsp; FIRE - troubleshooting refactored kmeans  
