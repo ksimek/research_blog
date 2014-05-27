@@ -318,3 +318,4 @@
 1401141634: FIRE - analyze repeated runs
 1401216658: FIRE - implement continuous sampling
 1401218471: FIRE - HMC for slope, intercept
+1401220582: FIRE - full sampling framework

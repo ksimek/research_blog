@@ -429,3 +429,4 @@ The list below only accounts for a fraction of my actual work -- many days I for
 ##May 27, 2014
 *11:50 AM* &nbsp; FIRE - implement continuous sampling  
 *12:21 PM* &nbsp; FIRE - HMC for slope, intercept  
+*12:56 PM* &nbsp; FIRE - full sampling framework  
