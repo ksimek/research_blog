@@ -313,3 +313,6 @@
 1401128963: FIRE - testing refactored kmeans
 1401130770: FIRE - troubleshooting refactored kmeans
 1401132629: FIRE - troubleshooting refactored kmeans
+1401137625: FIRE - running refactored kmeans
+1401139774: FIRE - debugging collapsed clusters
+1401141634: FIRE - analyze repeated runs

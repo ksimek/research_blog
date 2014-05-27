@@ -422,3 +422,6 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *11:29 AM* &nbsp; FIRE - testing refactored kmeans  
 *11:59 AM* &nbsp; FIRE - troubleshooting refactored kmeans  
 *12:30 PM* &nbsp; "  
+*01:53 PM* &nbsp; FIRE - running refactored kmeans  
+*02:29 PM* &nbsp; FIRE - debugging collapsed clusters  
+*03:00 PM* &nbsp; FIRE - analyze repeated runs  
