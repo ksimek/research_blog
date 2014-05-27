@@ -316,3 +316,4 @@
 1401137625: FIRE - running refactored kmeans
 1401139774: FIRE - debugging collapsed clusters
 1401141634: FIRE - analyze repeated runs
+1401216658: FIRE - implement continuous sampling

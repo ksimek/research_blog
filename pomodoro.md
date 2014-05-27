@@ -425,3 +425,6 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *01:53 PM* &nbsp; FIRE - running refactored kmeans  
 *02:29 PM* &nbsp; FIRE - debugging collapsed clusters  
 *03:00 PM* &nbsp; FIRE - analyze repeated runs  
+<a id="2014_05_27"></a>
+##May 27, 2014
+*11:50 AM* &nbsp; FIRE - implement continuous sampling  
