@@ -428,3 +428,4 @@ The list below only accounts for a fraction of my actual work -- many days I for
 <a id="2014_05_27"></a>
 ##May 27, 2014
 *11:50 AM* &nbsp; FIRE - implement continuous sampling  
+*12:21 PM* &nbsp; FIRE - HMC for slope, intercept  
