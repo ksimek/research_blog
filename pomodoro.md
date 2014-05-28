@@ -430,3 +430,7 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *11:50 AM* &nbsp; FIRE - implement continuous sampling  
 *12:21 PM* &nbsp; FIRE - HMC for slope, intercept  
 *12:56 PM* &nbsp; FIRE - full sampling framework  
+*01:26 PM* &nbsp; FIRE - bayesian multiple regression  
+*01:56 PM* &nbsp; FIRE - writing up bayesian multiple regression derivation  
+*03:04 PM* &nbsp; FIRE - implementing bayesian multiple regression  
+*03:39 PM* &nbsp; "  

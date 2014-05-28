@@ -319,3 +319,7 @@
 1401216658: FIRE - implement continuous sampling
 1401218471: FIRE - HMC for slope, intercept
 1401220582: FIRE - full sampling framework
+1401222389: FIRE - bayesian multiple regression
+1401224199: FIRE - writing up bayesian multiple regression derivation
+1401228242: FIRE - implementing bayesian multiple regression
+1401230346: FIRE - implementing bayesian multiple regression
