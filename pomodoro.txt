@@ -323,3 +323,4 @@
 1401224199: FIRE - writing up bayesian multiple regression derivation
 1401228242: FIRE - implementing bayesian multiple regression
 1401230346: FIRE - implementing bayesian multiple regression
+1407219083: sift calibration
