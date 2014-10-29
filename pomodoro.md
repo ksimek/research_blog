@@ -434,3 +434,19 @@ The list below only accounts for a fraction of my actual work -- many days I for
 *01:56 PM* &nbsp; FIRE - writing up bayesian multiple regression derivation  
 *03:04 PM* &nbsp; FIRE - implementing bayesian multiple regression  
 *03:39 PM* &nbsp; "  
+<a id="2014_08"></a>
+<a id="2014_08_04"></a>
+##August 04, 2014
+*11:11 PM* &nbsp; sift calibration  
+<a id="2014_08_05"></a>
+##August 05, 2014
+*12:02 AM* &nbsp; "  
+*12:32 AM* &nbsp; "  
+*01:02 AM* &nbsp; "  
+<a id="2014_08_08"></a>
+##August 08, 2014
+*12:04 AM* &nbsp; keypoint match collection  
+<a id="2014_08_09"></a>
+##August 09, 2014
+*04:06 PM* &nbsp; intrinsic calibration  
+*04:49 PM* &nbsp; test intrinsic calibration  
