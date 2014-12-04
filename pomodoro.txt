@@ -342,3 +342,6 @@
 1417630062: R study
 1417631878: R study
 1417634365: NeuronMetrics, ImageJ
+1417643433: Studying mixed-effects models in R
+1417649939: ImageJ neuron analysis
+1417651774: setting up NeuronMatrics
