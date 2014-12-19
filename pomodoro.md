@@ -450,3 +450,26 @@ The list below only accounts for a fraction of my actual work -- many days I for
 ##August 09, 2014
 *04:06 PM* &nbsp; intrinsic calibration  
 *04:49 PM* &nbsp; test intrinsic calibration  
+<a id="2014_11"></a>
+<a id="2014_11_12"></a>
+##November 12, 2014
+*10:31 AM* &nbsp; GT ML debugging  
+*10:51 AM* &nbsp; "  
+<a id="2014_12"></a>
+<a id="2014_12_02"></a>
+##December 02, 2014
+*10:05 AM* &nbsp; neuron literature review  
+*10:31 AM* &nbsp; "  
+*10:59 AM* &nbsp; "  
+*11:29 AM* &nbsp; "  
+*11:59 AM* &nbsp; Review: SynD  
+*12:49 PM* &nbsp; Lit review - Overview of recent software  
+<a id="2014_12_03"></a>
+##December 03, 2014
+*10:18 AM* &nbsp; R study  
+*11:07 AM* &nbsp; "  
+*11:37 AM* &nbsp; "  
+*12:19 PM* &nbsp; NeuronMetrics, ImageJ  
+*02:50 PM* &nbsp; Studying mixed-effects models in R  
+*04:38 PM* &nbsp; ImageJ neuron analysis  
+*05:09 PM* &nbsp; setting up NeuronMatrics  
