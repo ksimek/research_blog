@@ -20,15 +20,15 @@ Epipolar constraints
 
 We can use the known relationship between two cameras to constrain we expect points \\(X_A\\) to appear in view B.  The fundamental matrix \\(F\\) between view A and view B is a 3x3 matrix that constrains points in \\(X_A\\) to lie on their epipolar line in view B.  Because we expect both the points and the fundemental matrix to include some error, we relax this constraint and assume each point lies near its epipolar line with variance \\(\sigma\^2_e\\).  
 
-For any point \\(x\\) in A, epipolar line in view B is given by \\(\mathbf{l} = F\^T (\mathbf{x}\^\top 1)\^\top \\).  The normal vector perpendicular to the epipolar line is \\(\hat \mathbf{l_n} = (l_1 l_2)\^\top / \| (l_1 l_2) \|.  The penalized epipolar constraint can be expressed as a Gaussian distribution \\(\mathcal{N}(\mathbf{e}', \Sigma_e)\\), where \\(\mathbf{e'}\\) is the epipole in view B, and \\(\Sigma_e\^{-1} = \sigma_e\^2 (\mathbf{l_n} \mathbf{l_n}\^\top)\\).  Note that the precision matrix \\(\Sigma_e\^{-1}\\) is rank-deficient, indicating infinite variance along the epipolar line. 
+For any point \\(x\\) in A, epipolar line in view B is given by \\(\mathbf{l} = F\^T (\mathbf{x}\^\top 1)\^\top \\).  The normal vector perpendicular to the epipolar line is \\(\mathbf{l_n} = (l_1 l_2)\^\top / \| (l_1 l_2) \|\\).  The penalized epipolar constraint can be expressed as a Gaussian distribution \\(\mathcal{N}(\mathbf{e}', \Sigma_e)\\), where \\(\mathbf{e'}\\) is the epipole in view B, and \\(\Sigma_e\^{-1} = \sigma_e\^2 (\mathbf{l_n} \mathbf{l_n}\^\top)\\).  Note that the precision matrix \\(\Sigma_e\^{-1}\\) is rank-deficient, indicating infinite variance along the epipolar line. 
 
 The joint likelihood of all points \\(X\^A = x\^A_1, ..., x\^A_M\\) with epipolar normals \\(l_{n1}, ..., l_{nM}\\) is
 
 <div>
 \[
 \begin{align}
-\mu_E &= [\mathbf{e}'^\top mathbf{e}'^top ...]^\top \\
-\Sigma^{-1}_E &= S S^\T \text{, where} \\
+\mu_E &= [\mathbf{e}'^\top \mathbf{e}'^top ...]^\top \\
+\Sigma^{-1}_E &= S S^T \text{, where} \\
 S &= \sigma_e \begin{array}{ccc} \left ( 
     \mathbf{l_{n1}} & 0 & \dots & 0 \ 
     0 & \mathbf{l_{n2}} & \dots & 0\
