@@ -30,10 +30,10 @@ The joint likelihood of all points \\(X\^A = \boldsymbol{x}\^A_1, ..., \boldsymb
 \mu_E &= [\boldsymbol{e}'^\top \boldsymbol{e}'^\top ...]^\top \\
 \Sigma^{-1}_E &= S S^\top \text{, where} \\
 S &= \sigma_e \left ( \begin{array}{cccc} 
-    \boldsymbol{l_{n1}} & 0 & \dots & 0 \\
-    0 & \boldsymbol{l_{n2}} & \dots & 0 \\
+    \boldsymbol{l}_{n_1} & 0 & \dots & 0 \\
+    0 & \boldsymbol{l}_{n_2} & \dots & 0 \\
     \vdots & \vdots & & \vdots \\ 
-    0 & 0 & \dots & \boldsymbol{l_{nM}}
+    0 & 0 & \dots & \boldsymbol{l}_{n_M}
     \end{array}
     \right )
 \end{align}
