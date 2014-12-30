@@ -22,7 +22,7 @@ We can use the known relationship between two cameras to constrain we expect poi
 
 For any point \\(x\\) in A, epipolar line in view B is given by \\(\boldsymbol{l} = F\^T [\boldsymbol{x}\^\top 1]\^\top \\).  The normal vector perpendicular to the epipolar line is \\(\hat {\boldsymbol{n}} = [l_1 l_2]\^\top / \\| [l_1 l_2] \\|\\).  The penalized epipolar constraint can be expressed as a Gaussian distribution \\(\mathcal{N}(\boldsymbol{e}', \Sigma_e)\\), where \\(\boldsymbol{e'}\\) is the epipole in view B, and \\(\Sigma_e\^{-1} = \sigma_e\^2 (\boldsymbol{n} \boldsymbol{n}\^\top)\\).  Note that the precision matrix \\(\Sigma_e\^{-1}\\) is rank-deficient, indicating infinite variance along the epipolar line. 
 
-The joint likelihood of all points \\(X\^A = \boldsymbol{x}\^A_1, ..., \boldsymbol{x}\^A_M\\) with epipolar normals \\(\boldsymbol{n}\_1, ..., \boldsymbol{n}\_M\\) is
+The joint likelihood of all points \\(X\^A = \boldsymbol{x}\^A_1, ..., \boldsymbol{x}\^A_M\\) with epipolar normals \\(\boldsymbol{\hat{n}}\_1, ..., \boldsymbol{\hat{n}}\_M\\) is
 
 <div>
 \[
@@ -30,10 +30,10 @@ The joint likelihood of all points \\(X\^A = \boldsymbol{x}\^A_1, ..., \boldsymb
 \mu_E &= [\boldsymbol{e}'^\top \boldsymbol{e}'^\top ...]^\top \\
 \Sigma^{-1}_E &= S S^\top \text{, where} \\
 S &= \sigma_e \left ( \begin{array}{cccc} 
-    \boldsymbol{n}_{1} & 0 & \dots & 0 \\
-    0 & \boldsymbol{n}_{2} & \dots & 0 \\
+    \boldsymbol{\hat{n}}_{1} & 0 & \dots & 0 \\
+    0 & \boldsymbol{\hat{n}}_{2} & \dots & 0 \\
     \vdots & \vdots & & \vdots \\ 
-    0 & 0 & \dots & \boldsymbol{n}_{M}
+    0 & 0 & \dots & \boldsymbol{\hat{n}}_{M}
     \end{array}
     \right )
 \end{align}
