@@ -27,8 +27,8 @@ The joint likelihood of all points \\(X\^A = \mathbf{x}\^A_1, ..., \mathbf{x}\^A
 <div>
 \[
 \begin{align}
-\mu_E &= [\mathbf{e}'^\top \mathbf{e}'^top ...]^\top \\
-\Sigma^{-1}_E &= S S^T \text{, where} \\
+\mu_E &= [\mathbf{e}'^\top \mathbf{e}'^\top ...]^\top \\
+\Sigma^{-1}_E &= S S^\top \text{, where} \\
 S &= \sigma_e \left ( \begin{array}{cccc} 
     \mathbf{l_{n1}} & 0 & \dots & 0 \\
     0 & \mathbf{l_{n2}} & \dots & 0 \\
