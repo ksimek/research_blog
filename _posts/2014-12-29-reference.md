@@ -22,7 +22,7 @@ We can use the known relationship between two cameras to constrain we expect poi
 
 For any point \\(x\\) in A, epipolar line in view B is given by \\(\mathbf{l} = F\^T [\mathbf{x}\^\top 1]\^\top \\).  The normal vector perpendicular to the epipolar line is \\(\hat {\mathbf{l}}_n = [l_1 l_2]\^\top / \\| [l_1 l_2] \\|\\).  The penalized epipolar constraint can be expressed as a Gaussian distribution \\(\mathcal{N}(\mathbf{e}', \Sigma_e)\\), where \\(\mathbf{e'}\\) is the epipole in view B, and \\(\Sigma_e\^{-1} = \sigma_e\^2 (\mathbf{l_n} \mathbf{l_n}\^\top)\\).  Note that the precision matrix \\(\Sigma_e\^{-1}\\) is rank-deficient, indicating infinite variance along the epipolar line. 
 
-The joint likelihood of all points \\(X\^A = \mathbf{x}\^A_1, ..., \mathbf{x}\^A_M\\) with epipolar normals \\(\mathbf{l\_{n1}}\\) \\(\mathbf{l}_{n1}, ..., \mathbf{l}_{nM}\\) is
+The joint likelihood of all points \\(X\^A = \mathbf{x}\^A_1, ..., \mathbf{x}\^A_M\\) with epipolar normals \\(\mathbf{l}\_{n\_1}, ..., \mathbf{l}\_{n\_M}\\) is
 
 <div>
 \[
