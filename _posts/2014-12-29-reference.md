@@ -28,7 +28,7 @@ The joint likelihood of all points \\(X\^A = x\^A_1, ..., x\^A_M\\) with epipola
 \[
 \begin{align}
 \mu_E &= [\mathbf{e}'^\top mathbf{e}'^top ...]^\top \\
-\Sigma^-1_E &= S S^\T \text{, where} \\
+\Sigma^{-1}_E &= S S^\T \text{, where} \\
 S &= \sigma_e \begin{array}{ccc} \left ( 
     \mathbf{l_{n1}} & 0 & \dots & 0 \ 
     0 & \mathbf{l_{n2}} & \dots & 0\
