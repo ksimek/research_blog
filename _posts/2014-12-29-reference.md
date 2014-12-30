@@ -107,4 +107,4 @@ However, because \\(\Sigma_E^{-1} \\) is rank-deficient, we must rewrite \\(C_N^
 
 Note that despite \\(\Sigma_E^{-1}\\) being rank-deficient, the expression above is non-singular.
 
-Using the expression above, we can compute the Z-score of each point in B against each point in A.  Starting with an empty correspondence set, we construct a set of correspondence candidates whose z-score is below a threshold.  We sample a correspondence from that set, weighted by z-score, and update all candidate z-scores conditioning on the new correspondence set.  We repeat until no valid candidates exist.
+Using the expression above, we can compute the Z-score of each point in B against each point in A.  Starting with an empty correspondence set, we construct a set of correspondence candidates whose z-score is below a threshold.  We sample a correspondence from that set, weighted by z-score, and update all candidate z-scores conditioning on the new correspondence set.  We repeat until no valid candidates exist.  To avoid spending time on bad matches, we quit early if the relative geodesic distances between corresponding graphs differ too greatly.
