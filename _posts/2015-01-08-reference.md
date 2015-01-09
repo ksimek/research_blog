@@ -63,3 +63,4 @@ We could try something similar, but use a spherical arc to connect the two branc
 Both of these bridging techniques also violate the elegant property of the tree-based covariance, namely that the L1 distance between points is equal to thier geodesic distance.
 
 A third possibility is to simply use the distance function \\(d(i,x,i',x')\\) we introduced before.  The down side of this is I con't think of a proof for its positive-definiteness.  But if it is PD, it should have the properties we want, and is relatively easy to implement.
+
