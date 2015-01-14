@@ -1,0 +1,338 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Neuron work planning &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+      <li><a  href="/ksimek/research/pomodoro.html"><img src="/ksimek/research/img/pom.png" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [reference] Neuron work planning
+    </h1>
+
+  <div class="date emphnext">
+    December 05, 2014
+      
+ 
+  </div>
+    
+
+
+  
+    <p>Input data: Skeleton graph
+* nodes: junctions (data: none)
+* edges: curves (data: curve points + indices)</p>
+
+<p>Ouptut data: curve graph
+* nodes: curves (data: curve points + indices)
+* edges: branches (data: branch point and index offset)</p>
+
+<p>Converting from skeleton graph to curve graph requires a "resolution" for each junction
+  4 possible resolutions for three-way graph { (ab,c) (a,bc) (ac,b) (a,b,c) }
+  6 possible resolutions for 4-way graph</p>
+
+<p>Special case: loops</p>
+
+<p>  a <-> b <-> c <-> d <-> a
+        ^     ^     ^   <br/>
+        |     |     |
+        V     v     v
+        e     f     g</p>
+
+<p>  above, subgraph {a,b,c,d} constitutes a loop.
+  requires "loop resolution": pick two endpoints and interpolate (estimating the index changebetween them). the remaining junction nodes become lateral branches (which require their offsets).</p>
+
+<pre><code>struct loop_resolution
+{
+  int endpoint_1;
+  int endpoint_2;
+  double index_delta;
+  double lateral_branch_index[n];
+  double lateral_index_deltas[n];
+}
+</code></pre>
+
+<h2>Inference</h2>
+
+<p>preprocess: compute putative junction resolution branch poionts
+preprocess: compute putative loop resolution branch points and index offsets</p>
+
+<ul>
+<li>Ideal method: Gibbs sample over junction/loop resolutions.  Metropolis sample model parameters.</li>
+<li>Metropolis method 1: To avoid computing full BGP marginal likelihood at each sample, compute local improvement at each junction/loop. Occasionally evaluate full BGP and accept/reject based on difference between local improvement and global improvement.</li>
+<li>Metropolis method 2: After each global improvement, extend local curves using junction resolutions.  New junction resolutions can use this information to improve local estimates.</li>
+</ul>
+
+
+<h2>dependency flow:</h2>
+
+<p>skeleton_graph plus junction resolutions implies curve graph
+Curve graph plus BGP parameters implies BGP matrix
+BGP matrix plus BGP mean implies marginal likelihood</p>
+
+<h2>Model:</h2>
+
+<pre><code>Curve covariance: smooth central curve plus mean-reverting random-walk plus small iid noise (for quantization error)
+    smooth central curve: either cubic spline GP or squared-exponential GP w/ initial constraints
+    random walk curve: Ornstein-Uhlenbeck GP
+</code></pre>
+
+<h2>Training:</h2>
+
+<p>manually specify all junction and loop resolutions
+per image:
+    argmax smoothness covariance , random walk covariance,
+        compute BGP covariance matrix
+fix a distribution over smoothness covariance and random walk covariance</p>
+
+<h2>Straw man:</h2>
+
+<ol type="a">
+<li>Resolve using best linear fit and threshold</li>
+<li>resolve using trained SVM</li>
+<li>resolve using sampling with manually-set parameters (aka "first pass" below)</li>
+</ol>
+
+
+<h2>First pass: no training</h2>
+
+<pre><code>don't train.  set covariances somewhat randomly (overestimate; use matlab generate samples and eyeball )
+use full gibbs sampling and run for several days.
+</code></pre>
+
+<h2>Second pass: training, don't sample model parameters.</h2>
+
+<pre><code>gather ground truth on all 8 datasets (imagej? c++?)
+train parameters for all 8 datasets
+fit parameter model to 7 datasets; inference on 8th.
+For each parameter covariance, use largest over all training 7 datasets (no gibbs sampling)
+</code></pre>
+
+<h2>Third pass: full model (training and sampling model parameters</h2>
+
+<pre><code>self explanatory
+</code></pre>
+
+<h2>Fourth pass: full model  w/ metropolis method 1</h2>
+
+<pre><code>(see "metropolis method 1" above, under "inference")
+Use local marginal likelihood during Gibbs sampling; periodically accept/reject new model using metropolis method on full marginal likelihood.
+don't update local curves after accepting 
+</code></pre>
+
+<h2>Fifth pass: full model  w/ metropolis method 2</h2>
+
+<pre><code>(see "metropolis method 2" above, under "inference")
+same as previous, but update local curves after accepting.
+Should result in better acceptance, faster convergence.
+</code></pre>
+
+<h2>Evaluation:</h2>
+
+<pre><code>Percent of correctly classified junction resolutions
+    (Ignore "don't know" junction resolutions in ground truth annotation)
+compare straw man, various "Nth pass" method above.
+Compare energy vs. time on various "Nth pass" method above
+Visual: show smoothed skeleton
+</code></pre>
+
+<h2>Extensions</h2>
+
+<ul>
+<li>allow junction breaking.</li>
+<li>allow creating of junctions by filling gaps.
+
+<ul>
+<li>(requires additional annotation code)</li>
+</ul>
+</li>
+<li>imageJ plugin for ground-truthing</li>
+</ul>
+
+
+<h2>Miscellanous observations</h2>
+
+<p>Loop collapsing shouldn't occur if interpolated curve or lateral curves pass through block region (non-neuron).  Prefer breaking loop in this case.</p>
+
+<p>When breaking loops, prefer curves that grow narrower that farther then get from the tree.  Each edge can be assigned a "direction" posterior probability based on its tendancy to grow thinner.  Could use an OU process; given initial point, compute probability of remaining.  Since OU prefers reverting to the mean (zero in this case), the forward direction should be preferred.</p>
+
+<p>When breaking, prefer keeping thick branch points, rather than thin ones.</p>
+
+<p>When resolving junctions, make sure "parent" curve doesn't wind up in a child configuration.  In other words, in a y junction, one curve will be closer to the tree root than the other two.  The other two cannot end up being connected, because that would imply the parent curve is a lateral branch of the child.</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/12/07/reference" class="next" title="Generalizing the brownian bridge">Generalizing the brownian bridge &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2014/12/03/work-log" class="prev" title="Meeting notes (R code for Mixed Effects models)">&larr; Meeting notes (R code for Mixed Effects models)</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

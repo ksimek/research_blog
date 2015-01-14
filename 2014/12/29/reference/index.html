@@ -1,0 +1,342 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Graph matching with epipolar constraints &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+      <li><a  href="/ksimek/research/pomodoro.html"><img src="/ksimek/research/img/pom.png" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Reference] Graph matching with epipolar constraints
+    </h1>
+
+  <div class="date emphnext">
+    December 29, 2014
+      
+ 
+  </div>
+    
+
+
+  
+    
+
+<div>\[
+  \def\CV#1{\boldsymbol{#1}}
+  \def\cross{\times}
+  \def\ocross{\otimes}
+  \]</div>
+
+
+<p>What follows is a variation on the work of <a href="https://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=1&amp;cad=rja&amp;uact=8&amp;ved=0CCUQFjAA&amp;url=http%3A%2F%2Fcvlab.epfl.ch%2Ffiles%2Fcontent%2Fsites%2Fcvlab2%2Ffiles%2Fpublications%2Fpublications%2F2012%2FSerradellGKMF12.pdf&amp;ei=YDWjVMXYCpWwogSmj4HYDQ&amp;usg=AFQjCNFCQfO_wNWnnFZa_35HQtW9xA3ogA&amp;bvm=bv.82001339,d.cGU">Serradell et al. (CVPR 2012)</a>, which we modify to introduce an epipolar constraint and use a covariance function based on geodesic distance.  The epipolar constraint requires significant rework of the original derivation, which assumes the x and y dimension are independent.  The use of geodesic distance is necessary to handle parallax motion not present in Serradell's data.</p>
+
+<p>See also <a href="http://www.iaeng.org/publication/WCE2007/WCE2007_pp265-268.pdf">(Yu, Tian, Liu, 2007)</a> for an earlier application of GP for point matching, including expressions for marginal likelihood derivatives for training.</p>
+
+<p>Consider a 3D tree structure observed in two views as 2D trees.  We seek a correspondence between points in the 2D trees.  We treat this as a problem of matching graphs embedded in \(\mathbb{R}^2\), which we solve using nonlinear Gaussian process regression, using epipolar constraints to ensure the result is consistent with the known camera configuration.</p>
+
+<p>Consider a embedded graph in two views, A and B, with vertex positions \(X_A = \{x^A_1, \dots, x^A_{M_A}\}\) and \(X_B = \{x^B_1, \dots, x^B_{M_B}\}\).  We model the graph in B as arising from an affine transform of the graph in A plus a nonlinear deformation.  The goal is to find a correspondence between the graph vertices that minimizes the distortion between them.  Because the graph structures may be noisy, we seek an approach that is robust to graphs with minor differences in topology.</p>
+
+<h2>Epipolar constraints</h2>
+
+<p>We can use the known relationship between two cameras to constrain we expect points \(X_A\) to appear in view B.  The fundamental matrix \(F\) between view A and view B is a 3x3 matrix that constrains points in \(X_A\) to lie on their epipolar line in view B.  Because we expect both the points and the fundemental matrix to include some error, we relax this constraint and assume each point lies near its epipolar line with variance \(\sigma^2_e\).</p>
+
+<p>For any point \(\boldsymbol{x}\) in view A, the epipolar line in view B is given by \(\boldsymbol{l} = F^T [\boldsymbol{x}^\top 1]^\top \).  The normal vector perpendicular to the epipolar line is \(\hat {\boldsymbol{n}} = [l_1 l_2]^\top / \| [l_1 l_2] \|\).  The penalized epipolar constraint can be expressed as a Gaussian distribution \(\mathcal{N}(\boldsymbol{e}', \Sigma_e)\), where \(\boldsymbol{e'}\) is the epipole in view B, and \(\Sigma_e^{-1} = (\hat{\boldsymbol{n}} \hat{\boldsymbol{n}}^\top) / \sigma_e^2 \).  Note that the precision matrix \(\Sigma_e^{-1}\) is rank-deficient, representing infinite variance along the epipolar line.</p>
+
+<p>The joint likelihood of all points \(X^A = \{\boldsymbol{x}^A_1, \dots, \boldsymbol{x}^A_M\}\) with epipolar normals \(\{\boldsymbol{\hat{n}}_1, \dots, \boldsymbol{\hat{n}}_M\}\) is \(\mathcal{N}(\mu_E, \Sigma_E)\), where</p>
+
+<div>
+\[
+\begin{align}
+\mu_E &= [\boldsymbol{e}'^\top \boldsymbol{e}'^\top \dots]^\top \\
+\Sigma^{-1}_E &= S S^\top \\
+S &= (1/\sigma_e) \left ( \begin{array}{cccc} 
+    \boldsymbol{\hat{n}}_{1} & 0 & \dots & 0 \\
+    0 & \boldsymbol{\hat{n}}_{2} & \dots & 0 \\
+    \vdots & \vdots & & \vdots \\ 
+    0 & 0 & \dots & \boldsymbol{\hat{n}}_{M}
+    \end{array}
+    \right ).
+\end{align}
+\]
+</div>
+
+
+<h2>Nonrigid deformation prior </h2>
+
+<p>We assume the motion of points from view A to view B arise as an affine transformation plus some nonrigid deformation.  The main cause of nonrigid deformation is parallax motion, but other less predictable factors like camera lens distortion of small scene movements are possible too.</p>
+
+<p>Assuming motion in the x and y direction are independent, single-dimensional prior covariance between the \(i\)th and \(j\)th points is</p>
+
+<div>
+\[
+  k(i,j) = \theta_0 + \theta_1 x_i^T x_j + \theta_2 \exp \left \{ -\frac{\theta_3}{2} \| x_i - x_j  \|^2 \right \} + \theta_4 \exp \left \{ -\frac{\theta_5}{2} d( v_i, v_j) \right \}.  \;\;(1)
+\]
+</div>
+
+
+<p>Here, \(d(v_i, v_j)\) is the geodesic graph distance, i.e. the closest path between vertices \(v_i\) and \(v_j\).  The first three terms are the same as Serradell et al. -- the first two terms define an affine transformation and the third is a nonlinear distortion term that penalizes local geometry in A being distorted in B.   However, we recognize that points with dissimilar 2D position may appear similar in 2D due to projection.  The significant parallax shift between such points violates the locality assumption of the third covariance term.  The fourth term in (1) introduces deformation based on geodesic distance.  We observe that relative geodesic distances are better preserved under projection than relative Euclidean distances.   This term provides a better explanation for parallax shift between points at similar Euclidean positions but dissimilar positions in the graph.</p>
+
+<p>Equation (1) applies to one-dimensional points; we need an expression relating two-dimensional points.  The x and y dimensions are independent under the prior, so the covariance matrix over 2D points is simply a block-diagonal matrix of two covariance matrices over 1D points.  We permute this matrix so dimensions are ordered first by increasing point index, then spatial dimension.  Formally, let \(X_I\) and \(X_J\) be the vertical concatenation of 2D points with indices \(I = \{i_1, \dots, i_m\}\) and \(J = \{j_1, \dots, j_n\}\).  Define \(k(I,J)\) as the gram matrix of covariances \(k(i,j)\) for each pair \((i,j) \in I \cross J\).  We define the prior covariance between point sets \(X_I\) and \(X_J\) as</p>
+
+<div>
+\[
+K(I,J) = k(I,J) \ocross I_2, 
+\]
+</div>
+
+
+<p>where \(\ocross\) denotes Kronecker product and \(I_2\) is a 2x2 identity matrix.  The result is a \(2 \vert I \vert \times 2 \vert J \vert\) covariance matrix over a sequence of stacked 2D variables with independent dimensions.</p>
+
+<h2>Correspondence matching</h2>
+
+<p>To estimate correspondences between \(X^A\) and \(X^B\), we follow the coarse-to-fine matching strategy in Serradell et al. (2012).  We first find a coarse set of correspondences between branch points and tips using the method below.  A fine-grained correspondence is then found between the densely spaced remaining points, conditioned on the coarse correspondences.</p>
+
+<p>Given a (possibly empty) set of \(N\) correspondences, we can derive a posterior distribution over possible locations for points \(X^A\) in view B.  For a given correspondence of size N, let \(X^B_N\) be the points in graph B corresponding to points in A with indices \(J_N = \{j_{1}, \dots, j_{N}\}\).  Let \(J = \{1, \dots, M\}\) be the set of all vertex indices in graph A.  The marginal posterior for point \(x^A_{i_*}\) is</p>
+
+<div>
+\[
+  \begin{align}
+  \mu_N(i_*) &=  K_*^T C^{-1}_N \left ( \begin{array}{c} X_N^B \\ \mu_E \end{array} \right ) \\
+  \sigma^2_N(i_*) &= K(i_*, i_*) + \sigma_n^2 I_2 - K_*^T C_N^{-1} K_*  \text{, where} \\
+  C_N^{-1} &= 
+  \left (
+  \begin{array}{cc} 
+  K(J_N, J_N) + \sigma_n^2 I & K(J, J_N) \\
+  K(J_N, J) & K(J,J) + \Sigma_E
+  \end{array}
+  \right )^{-1}
+  \end{align} \\
+  K_* = K(J_N, i_*)
+\]
+</div>
+
+
+<p>However, because \(\Sigma_E^{-1} \) is rank-deficient, we must rewrite \(C_N^{-1}\)  as</p>
+
+<div>
+\[
+  \begin{align}
+  C_N^{-1} &= 
+  \left (
+  \begin{array}{cc} 
+      I & 0 \\
+      0 & S
+  \end{array}
+  \right ) 
+  
+  \left (
+  \begin{array}{cc} 
+  K(J_N, J_N) + \sigma_n^2 I & S K(J, J_N) \\
+  K(J_N, J) S & S^\top K(J,J) S + I
+  \end{array}
+  \right )^{-1}
+
+  \left (
+  \begin{array}{cc} 
+      I & 0 \\
+      0 & S^\top
+  \end{array}
+  \right ) 
+  \end{align}
+\]
+</div>
+
+
+<p>Note that despite \(\Sigma_E^{-1}\) being rank-deficient, the expression above is non-singular.</p>
+
+<p>Using the expression above, we can compute the z-score of each point in B against the image of each point in A.  Starting with an empty correspondence set, we construct a set of correspondence candidates whose z-score is below a threshold.  We use z-score as weights to sample a correspondence from that set, and use that correspondence to update the z-scores of all remaining candidates by conditioning on the new correspondence set.  We repeat until no valid candidates exist.  Unclaimed vertices are treated as outliers.  We repeat this process several times and keep the best fit.  To avoid spending time on bad matches, we quit early if the relative geodesic distances between corresponding graphs differ too greatly.</p>
+
+<p>Fine-grained correspondences between remaining points can be found using the Hungarian algorithm using pairwise z-score as a cost metric.</p>
+
+<h2>3D reconstruction</h2>
+
+<p>The simplest approach to 3D reconstruction is to triangulate the corresponding points in two views.  Multiple views can be chained together from pairwise correspondence using transitivity.  A better approach would be to use my BGP model to find an optimal registration between sequences of recovered 3D trees.  I don't know if I could fit both the above and that into a single conference paper, because the temporal BGP model is a bit complicated.  I have a simpler model in mind that might work better, and might be easier to squeeze into the end of a paper.</p>
+
+<h2>Results</h2>
+
+<p>None yet, working on it.</p>
+
+<p>Still unclear how best to do evaluation.  The original paper evaluated against synthetic data generated by <a href="http://vascusynth.cs.sfu.ca/Software.html">VacuSynth</a>, which we might be able to use too.  They used mean squared error between estimated and true position, which I'm not thrilled with, because it doesn't explicitly capture whether the topology is matched correctly.</p>
+
+<p>If Dr. Tabb's software works reasonably well, we could measure reconstruction quality and compare our reconstruction against hers.  Ground truth would be the triangulated 2D ground truth, smoothed with hand-tuned BGP.</p>
+
+<p>We could develop</p>
+
+<p>Precision/recall against ground-truth curves.</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/12/31/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2014/12/23/work-log" class="prev" title="GP Graph-matching for 3d reconstruction">&larr; GP Graph-matching for 3d reconstruction</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

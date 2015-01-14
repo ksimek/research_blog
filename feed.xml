@@ -7,74 +7,93 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
-				<title>FIRE - data prep, analyzing clustering</title>
-				<description>
+				<title>Work Log</title>
+				<description>&lt;p&gt;Spent morning considering covariance over loopy graphs.  Implemented and example of &quot;shortest geodesic distance&quot;, modified to be minimum sum of squared distances between junctions over all paths.  This is a generalization of our metric over tree-structured graphs.  As anticipated, with loopy graphs, this results in non-positive-definite covariance matrices.&lt;/p&gt;
 
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Piecewise Linear Clustering&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear&lt;/td&gt;
-    &lt;/tr&gt;
+&lt;p&gt;Consider this example, with two paths between nodes (1) and (4), one twice as long as the other.&lt;/p&gt;
 
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;unknown (see text)&lt;/td&gt;
-    &lt;/tr&gt;
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-13-exmple_graph.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
+&lt;p&gt;The shortest squared-distance matrix is&lt;/p&gt;
 
-&lt;/table&gt;
+&lt;pre&gt;&lt;code&gt; 0     1     4     9     4    13
+ 1     0     1     4     5     8
+ 4     1     0     1     8     5
+ 9     4     1     0    13     4
+ 4     5     8    13     0     4
+13     8     5     4     4     0
+&lt;/code&gt;&lt;/pre&gt;
 
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
+&lt;p&gt;The code for this is:&lt;/p&gt;
 
+&lt;pre&gt;&lt;code&gt;d1 = 0:3; % route 1 distances
+d2 = 0:2:6; % route 2 distances
+D1 = pdist2(d1&#39;, d1&#39;, &#39;euclidean&#39;).^2;
+D2 = pdist2(d2&#39;, d2&#39;, &#39;euclidean&#39;).^2;
+G  = sparse(size(D));
+% top-left block is simply a straight path
+G(1:length(d1),1:length(d1)) = D1;
+% for bottom-left, compute shortest path between nodes through
+% junctions
+for i = 1:(length(d2)-2)
+  i_ = length(d1)+i;
+  for j = 1:length(D)
+    j_ = j;
+    if i_ == j_, G(i_,j_) = 0; G(j_,i_) = 0; continue, end
+    G2 = sparse(4,4);
+    G2(1,2) = D(i_, 1);
+    G2(1,3) = D(i_, length(d1));
+    G2(2,3) = D(1,length(d1));
+    G2(1,4) = D(i_, j_);
+    G2(2,4) = D(1,j_);
+    G2(3,4) = D(length(d1),j_);
+    d = graphshortestpath(G2&#39;, 1,4, &#39;directed&#39;, false);
+    G(i_, j_) = d;
+    G(j_, i_) = d;
+  end
+end
+&lt;/code&gt;&lt;/pre&gt;
 
-&lt;h2&gt;Appending radiation data to full data table&lt;/h2&gt;
+&lt;p&gt;At large enough scales, the squared-exponential covariance matrix has negative eigenvalues:&lt;/p&gt;
 
-&lt;p&gt;Ran into some issues needing refactoring when trying to add radiation date columns to fire_all.csv.  The work was slow-going, because the parsing code is so incredibly slow (2-3 minutes to read and write all the data).   I managed to speed it up slightly by skipping the missing data check when no missing keys are specified.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;scale = 10;
+min(eig(exp(-full(G)/(scale^2*2))))
 
-&lt;p&gt;Some of the bugs fixed:&lt;/p&gt;
+    ans =
 
-&lt;ul&gt;
-&lt;li&gt;Enumeration columns weren&#39;t catching misparse errors, thus, some misparsed columns weren&#39;t being caught.&lt;/li&gt;
-&lt;li&gt;Enums fail to write correctly.&lt;/li&gt;
-&lt;li&gt;Refactored to allow writing of enumation columns as text.&lt;/li&gt;
-&lt;li&gt;Found and fixed bugs in handling missing data and case sensitivity.&lt;/li&gt;
-&lt;/ul&gt;
+       -0.0134
+&lt;/code&gt;&lt;/pre&gt;
 
+&lt;p&gt;Thus, this covariance function is not positive definite.&lt;/p&gt;
 
-&lt;p&gt;Finally (!) merged and committed radiation columns into fire_all.csv.  Committed and write a summary for Warren&lt;/p&gt;
+&lt;h2&gt;A loopy graph strategy&lt;/h2&gt;
 
-&lt;h2&gt;Analyzing cluster membership&lt;/h2&gt;
+&lt;p&gt;We need to be able to embed the graph into a Euclidean space that preserves most of the interesting properties.&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Are the membership values output by our clustering code related to treatment type?&lt;br/&gt;
-&lt;strong&gt;Method&lt;/strong&gt;: Modify preprocessing code to output a matlab struct instead of a text file.  Modify clustering code to output memberships as a text file instead of a color image.  Visualize both cluster membership and ground truth treatment type and compare.&lt;/p&gt;
+&lt;p&gt;Here&#39;s a simple approach: construct a graph with junctions as vertices and geodesic distance as edge weight.  Find the graph&#39;s minimum spanning tree, and transform the tree into curve-tree coordinates.  For unclaimed curve segments, linearly interpolate between the coordinates of the endpoints.&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
+&lt;p&gt;This is nice, but if a
+A loopy graph strategyn unclaimed curve segment&#39;s length is perticularly long, it should act differently than a short (straight) line between the points.  To handle this, we introduce a new dimension for each unclaimed curve segment, and allow the transformed segment to have longer length by dipping into this dimension to some extent (with a limit of none for straight lines).&lt;/p&gt;
 
-&lt;table class=&quot;data&quot;&gt;
-&lt;tr&gt;&lt;th&gt;Treatment&lt;/th&gt;&lt;th&gt;p(cluster == 1 | treatment)&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;Overall&lt;/td&gt;&lt;td&gt;74.7%&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;None&lt;/td&gt;&lt;td&gt;95.5%&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;Radiation only&lt;/td&gt;&lt;td&gt;44.0%&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;Chemotherapy only&lt;/td&gt;&lt;td&gt;73.9%&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;Both&lt;/td&gt;&lt;td&gt;85.2%&lt;/td&gt;&lt;/tr&gt;
-&lt;/table&gt;
+&lt;p&gt;Ideally, all pairs of points on the transformed segment will have the same distance as their geodesic distance in untransformed space.  However, this is not possible, because it would contradict the fact that the endpoint distance is defined by the graph distance in the minimum spanning tree.  At least we can try to preserve local distances, and a parabolic arc is a reasonable choice for this.   How to derive a parabola equation of an appropriate length?&lt;/p&gt;
 
+&lt;p&gt;Given the distance between the end-points and the length of the desired curve, we seek a symmetric parabola with an appropriate arc length.   Given arc length and end-points, we can compute the focus the parabola (f), and from that we can compute the parabolic equation y = x&lt;sup&gt;2&lt;/sup&gt;/(4f).&lt;/p&gt;
 
+&lt;h2&gt;Training foreground likelihood&lt;/h2&gt;
 
+&lt;p&gt;First, reproject curve into second image.&lt;/p&gt;
+
+&lt;p&gt;Draw as medial axis w/ width.&lt;/p&gt;
+
+&lt;p&gt;Compute inverse medial axis.&lt;/p&gt;
+
+&lt;p&gt;Grab all foreground/background pixels in probability map.&lt;/p&gt;
+
+&lt;p&gt;create histogram.  Try smoothing and/or annealing.&lt;/p&gt;
 </description>
-				<pubDate>Tue, 20 May 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/20/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/20/work-log</guid>
+				<pubDate>Tue, 13 Jan 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/13/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/13/work-log</guid>
 			</item>
 		
 			<item>
@@ -108,638 +127,567 @@
 &lt;/div&gt;
 
 
-&lt;h2&gt;Memory leak in kjb_write_image&lt;/h2&gt;
+&lt;p&gt;Training epipolar prior.&lt;/p&gt;
 
-&lt;p&gt;Found a memory leak in kjb_write_image.&lt;/p&gt;
+&lt;p&gt;Fixing local prior using parameters learned yesterday.  The computing the epipolar and full prior is more computationally intensive, since it involves twice as many dimensions.  To mitigate, I eliminated every other point from the data.&lt;/p&gt;
 
-&lt;p&gt;...&lt;/p&gt;
+&lt;p&gt;Without the epipolar prior, the data likelihood is:&lt;/p&gt;
 
-&lt;p&gt;convert_image_file_from_raster
--&gt; kjb_system
--&gt; create_system_command_process
--&gt; kjb_fork&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Log-likelihood (baseline) =  -2471.12 
+&lt;/code&gt;&lt;/pre&gt;
 
-&lt;h2&gt;Clustering with centered data&lt;/h2&gt;
+&lt;p&gt;Fixing euclidean scale and variance to zero, I trained the epipolar variance:&lt;/p&gt;
 
-&lt;p&gt;Modified &lt;code&gt;inprogres/process_treatment_dates.m&lt;/code&gt; to log-transforms and normalize data. Re-ran clustering. Some observations:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Log-likelihood =  -2395.05
+training_result = 
 
-&lt;p&gt;First, noise standard deviation dropped from 25 to 17.  The change is surprisingly subtle, considering we significantly reduced the dynamic range of the data.  I should probably investigate this more...&lt;/p&gt;
+    epipolar_variance: 4.39
+&lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Second, observation offset was on the order of 1e5.  Should be near zero.  Definitely investigate this more.&lt;/p&gt;
+&lt;p&gt;By allowing some euclidean-correlated variance, the iid variance should be able to drop a bit.  Fixing euclidean scale to 1/100&lt;sup&gt;2&lt;/sup&gt;, I trained epipolar_variance and euclidean_variance jointly:&lt;/p&gt;
 
-&lt;p&gt;Centering did seem to fix cluster collapse, and the memberships were a bit more evenly distributed:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Log-likelihood = -2394.88
+training_result =
 
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-19-clusters_centered.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+    epipolar_variance: 4.3214
+      euclidean_scale: 1.0000e-04
+   euclidean_variance: 0.0335
+&lt;/code&gt;&lt;/pre&gt;
 
-&lt;h2&gt;Investigating large observation offset.&lt;/h2&gt;
+&lt;p&gt;Now training all three:&lt;/p&gt;
 
-&lt;p&gt;Run 1: force offset to zero.  does noise variance decrease?&lt;br/&gt;
-Result: RMS error increased from ~17 to ~19.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Log-likelihood = -2394.57
+training_result = 
 
-&lt;p&gt;looks  like a bug in preprocessing&lt;/p&gt;
+     epipolar_variance: 4.2877
+    euclidean_variance: 0.0458
+       euclidean_scale: 2.1581e-06
+&lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Found bugs:&lt;/p&gt;
+&lt;p&gt;Now training all 10 parameters together:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Log-likelihood = -1294.59
+training_result = 
+
+     epipolar_variance: 4.2877
+    euclidean_variance: 0.0458
+       euclidean_scale: 2.1581e-06
+        noise_variance: 0.0821
+     geodesic_variance: 193.9141
+        geodesic_scale: 0.0031
+branch_linear_variance: 0.0800
+ branch_const_variance: 6.1725
+       linear_variance: 0.1561
+        const_variance: 685.7670
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;...but we actually want noise_variance to be fixed to 1.  Repeating previous run with noise_variance=1 results in:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Log-likelihood = -2381.29
+training_result = 
+
+     epipolar_variance: 4.2877
+    euclidean_variance: 0.0458
+       euclidean_scale: 2.1581e-06
+        noise_variance: 1
+     geodesic_variance: 33.6972
+        geodesic_scale: 0.0011
+branch_linear_variance: 0.1028
+ branch_const_variance: 6.9943
+       linear_variance: 0.0737
+        const_variance: 1.8641e+03
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;running for 30 more iterations:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ll = 2376.76
+     epipolar_variance: 4.2877
+    euclidean_variance: 0.0458
+       euclidean_scale: 2.1581e-06
+        noise_variance: 1
+     geodesic_variance: 160.7604
+        geodesic_scale: 5.3712e-04
+branch_linear_variance: 0.1028
+ branch_const_variance: 6.9943
+       linear_variance: 0.0835
+        const_variance: 2.1123e+03
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;The fullly trained model is then:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;     epipolar_variance: 4.2877
+    euclidean_variance: 0.0458
+       euclidean_scale: 2.1581e-06
+        noise_variance: 1
+     geodesic_variance: 15.9174
+        geodesic_scale: 0.0019
+branch_linear_variance: 0.0485
+ branch_const_variance: 3.7438
+       linear_variance: 0.0348
+        const_variance: 685.7670
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The samples from this prior look very nice:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-12-full_prior_samples.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Motion is restricted to be near the epipolar lines, and the resulting curves remain smooth.&lt;/p&gt;
+
+&lt;p&gt;Matlab says only 314 out of 3766 are nonnegligible.&lt;/p&gt;
+</description>
+				<pubDate>Mon, 12 Jan 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/12/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/12/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>&lt;p&gt;Finished training.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;training_result = 
+
+         final_const_variance: 1.1669e-04
+  final_branch_const_variance: 1.7636e+03
+        final_linear_variance: 1.4425e+03
+      final_geodesic_variance: 195.4912
+         final_geodesic_scale: 0.0065
+                  final_noise: 0.0776
+
+training_result.initial
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;  ans =&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;         const_variance: 831.7886
+  branch_const_variance: 0.8552
+        linear_variance: 0.1183
+     euclidean_variance: 1.7367
+        euclidean_scale: 1.0000
+      geodesic_variance: 225.8247
+         geodesic_scale: 1.0000
+      epipolar_variance: 1.7367
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;These just don&#39;t make sense.  It allows for almost zero total translation, but lots of pert-curve translation (const_variance vs. branch_const_variance).  Linear variance allows for way too much scaling.  Geodesic variance seems sensible, but the (inverse-squared) geodesic scale is way too low... Basically this becomes a stand-in for const_variance.  Perhaps this is just a local minimum, we could try fixing const_variance to some large number and forcing geodesic variance to serve its intended purpose.&lt;/p&gt;
+
+&lt;p&gt;But the strangest thing is that&lt;/p&gt;
+
+&lt;p&gt;I sampled some curves from this prior, and they are about what I&#39;d expect: rotated and scaled with very little nonrigid deformation.   Below is a sample, along with the mean tree barely visible in the center:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-tree_sample.png&quot; alt=&quot;tree sample&quot; /&gt;&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;was normalizing on all data, not on rows.&lt;/li&gt;
-&lt;li&gt;was dividing by mean (i.e. 0) not standard deviation.&lt;/li&gt;
+&lt;li&gt;Branches remain connected to tree, despite large per-curve offset variance.&lt;/li&gt;
+&lt;li&gt;covariance matrix is singular&lt;/li&gt;
 &lt;/ul&gt;
 
 
-&lt;p&gt;preprocessed data looks much better now.&lt;/p&gt;
-
-&lt;p&gt;New bug: not enabling missing data. Fixing and rerunning...&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;RMS error is down to 0.4 for global regression model.  Results for line-fitting in three regions is shown below (blue=before, green=during, red=after)&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-19-single_cluster_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;This seems in the ballpark.  Full results below&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;  0.00000000e+00  0.00000000e+00
-  7.22085911e-01  2.02331116e+00  1.04881185e+00
-  7.22916954e+01 -2.79730868e+02  1.41688548e+02
- -2.56235739e-04  4.05002380e-04  1.79111799e-03  6.25535845e-04 -6.55416611e-04  8.34133235e-05  1.67634110e-03
-  2.49784115e-01  6.06155787e-01 -1.52977199e+00  1.15511031e+00  6.25982470e-01  4.20970189e-01 -5.78777462e-01
-0.473467
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Note that observation offset (5th line) is nonzero, even though we centered it.  That&#39;s because this is the offset for the regression model, which is able to reveal more structure by taking time into account.  This explains the lower-than-one standard deviation (6th line).  The observation scaling (4th line) is interesting -- IFN-g and IL-8 are negataed, and TNF-a is tiny.  Largest apparent activity in IL-1B and IL-2.  I&#39;m guessing this could change significantly once we start sampling the observation parameters.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Clustering results&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;K-means converges after 6 iterations.&lt;/p&gt;
-
-&lt;p&gt;Cluster memberships:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-19-clusters_centered_fixed.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Only two strong clusters, despite using a three-cluster model.&lt;/p&gt;
-
-&lt;p&gt;Full results:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Observation (global):
-A: -2.56235739e-04  4.05002380e-04  1.79111799e-03  6.25535845e-04 -6.55416611e-04  8.34133235e-05  1.67634110e-03
-B:   2.49784115e-01  6.06155787e-01 -1.52977199e+00  1.15511031e+00  6.25982470e-01  4.20970189e-01 -5.78777462e-01
-eps: 0.473467
-
-cluster #1
-m:  7.72956909e-01  2.23224762e+00  8.57568833e-01
-b:  4.86565183e+01 -3.35063295e+02  3.15151426e+02
-
-cluster #2
-m:  9.18374118e+00  0.00000000e+00  0.00000000e+00
-b: -5.45940758e+02  0.00000000e+00  0.00000000e+00
-
-cluster #3
-m: -3.69070988e+00 -3.02755277e+00  1.64214653e+00
-b:  2.82195009e+02  3.96896877e+02 -2.56559679e+02
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Cluster 2 (the trivial cluster) seems to only have ata for the first region, which explains why it&#39;s ideosyncratic.&lt;/p&gt;
-
-&lt;p&gt;Clusters 1 and 3  differ dramatically in slope; cluster three drops significantly in the first two regions.&lt;/p&gt;
-
-&lt;p&gt;Do these clusters align closely with treatment type?  (do tomorrow)&lt;/p&gt;
-
-&lt;h2&gt;TODO&lt;/h2&gt;
+&lt;p&gt;Ruled-out causes of error:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Are cluster memberships linked to treatment type?
+&lt;li&gt;badly implemented logmvnpdf.  Tested against reference implementation.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Training observations&lt;/h2&gt;
+
+&lt;p&gt;The simulated annealing algorithm is very sensitive to our local minima.  It can sometimes find a good result in less than 500 iterations, but other times it gets stuck after less than 100 and never improves.  I can probably tweak the annealing schedule to increase temperature earlier(is &quot;reannealing&quot; the right value to tweak?&quot;).&lt;/p&gt;
+
+&lt;p&gt;The patternsearch algorithm beats simulated annealing after only 16 iterations (vs. 5k or more).   Annealing really struggles to get out of that minimum.&lt;/p&gt;
+
+&lt;p&gt;Surprisingly, after adding a seventh parameter (for branch-specific affine deformation), patternsearch totally fails to find a good minimum starting from default parameters.  Initializing it with the result of the six-parameter model gives much better results.  This suggests a coarse-to-fine strategy for training might work well in general.  However, this is a very specific case:  the six-parameter model was flexible enough to explain the data quite well, but was overly permissive -- it allowed too many nonsensical solutions.  Adding the seventh parameter introduced an alternative explanation of the data, one requiring less nonrigid deformation.&lt;/p&gt;
+
+&lt;p&gt;To try: genetic algorithm;  particle swarm; simplex method; start pattern search from SA result; globalsearch; grid search with multistart&lt;/p&gt;
+
+&lt;p&gt;Globalsearch &amp;amp; multistart w/
+  simplex
+  fminunc&lt;/p&gt;
+
+&lt;h2&gt;Misc results&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-tree_sample2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likleihood = -3.1787e+03
+training_result = 
+
+         final_const_variance: 6.0197e+06
+  final_branch_const_variance: 1.5774e-09
+        final_linear_variance: 1.6250
+      final_geodesic_variance: 238.6891
+         final_geodesic_scale: 0.0039
+         final_noise_variance: 0.1487
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Not bad.  Lots of geodesic variance to account for distortion.  Why is const variance so high?  Linear variance seems a bit high, but reasonable.&lt;/p&gt;
+
+&lt;p&gt;It might be a good idea to allow each branch to have a linear distortion relative to its initial point.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood = -2.5318e+03
+training_result = 
+
+       final_const_variance: 2.3156e+09
+final_branch_const_variance: 2.4988
+      final_linear_variance: 33.8221
+    final_geodesic_variance: 1.7165e+03
+       final_geodesic_scale: 0.0029
+       final_noise_variance: 0.0880
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Much smaller noise variance, much higher for all other variances.  const variance is astronomical... is the optimizer exploiting numerical error arising from a poorly-conditioned matrix?&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-tree_sample6.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood = -2.4848e+03
+training_result =
+
+       final_const_variance: 0.1383
+final_branch_const_variance: 1.7466
+      final_linear_variance: 5.4218e-04
+    final_geodesic_variance: 378.6715
+       final_geodesic_scale: 0.0048
+       final_noise_variance: 0.0832
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is close to what I would hope for -- small constant and linear variance, most variance coming from deformation.  Still, the scale is fairly short (~14 pixels), allowing for quite a bit of deformation.&lt;/p&gt;
+
+&lt;p&gt;Ran for several thousand more iterations.  Seem to be converging.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood = -2.4799e+03
+training_result =
+
+       const_variance: 0.0717
+branch_const_variance: 3.2826
+      linear_variance: 0.0028
+    geodesic_variance: 401.4291
+       geodesic_scale: 0.0047
+       noise_variance: 0.0831
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Running from scratch with the &quot;pattern_search&quot; algorithm, I got excellent results very quickly:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood = -2.4256e+03
+training_result =
+
+         const_variance: 261.7339
+branch_const_variance: 3.0796
+      linear_variance: 0.0035
+    geodesic_variance: 165.2169
+       geodesic_scale: 0.0063
+       noise_variance: 0.0821
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;These are the most sensible results yet!  Moderately large constant variance , small but nonnegligible branch constant variance.  A touch of linear variance to rotations.  Smaller deformation variance in response to larger const variance.  Yes!&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Adding a new parameter assigning independent affine deformation variance to each branch.  This should allow less variance to be allotted to geodesic_variance, which should improve marginal-likelihood.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-sampled_tree9.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Initial training pass failed to find the old local minimum.  Restarting it using the previous optimum resulted in very nice parameters:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood = -2.3107e+03
+training_result = 
+
+        const_variance: 291.9853
+ branch_const_variance: 2.0196
+       linear_variance: 0.0366
+branch_linear_variance: 0.0516
+     geodesic_variance: 12.7402
+        geodesic_scale: 0.0136
+        noise_variance: 0.0796
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note the dramatic drop in geodesic variance and increase in marginal likelihood.  On the other hand, the (corrected) geodesic scale dropped from(~12 to ~8), meaning slightly higher effective dimension.  The resulting tree looks much closer to the original shape than previous models.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Previous model had a problem: allowing each curve to affine-transform independently results in parents drifting away from children, which in reality isn&#39;t possible.  We need each child to inherit the covariance of the parent, which we accomplish by simply taking the dot-product of the &quot;geodesic&quot; index.&lt;/p&gt;
+
+&lt;p&gt;The pattern_search algorithm is having a hard time finding a better set of&lt;/p&gt;
+
+&lt;p&gt;Starting from the same position as previous starting point, results in a worse log-likelihood:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood = -2.3131e+03
+training_result = 
+
+        const_variance: 3.1017e-25
+ branch_const_variance: 2.9157
+       linear_variance: 0.0326
+branch_linear_variance: 0.0575
+     geodesic_variance: 12.5426
+        geodesic_scale: 0.0137
+        noise_variance: 0.0796
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Zero const variance is troubling.  Other parameters are mostly unchanged, except slightly higher branch_const_variance.  It seems the translation component was mostly used to align curves affected by parallax.&lt;/p&gt;
+
+&lt;p&gt;Actually, zero const variance isn&#39;t so surprising, because our now model alls branches to pivot around their starting point, and the root of the tree hardly moves between views.  What movement there is could be solved by pivoting the whole tree around it&#39;s center, using the global affine transformation.&lt;/p&gt;
+
+&lt;p&gt;It seems we have a redundant representation here.  The branch affine transformations subsume the global affine transformation, unless there&#39;s evidence that a multi-level type of model is reasonable (which it might be).&lt;/p&gt;
+
+&lt;p&gt;Starting from the result of the previous run gives slightly better results, but still not better than the &quot;bad&quot; model used previously.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood = -2.3122e+03
+training_result = 
+
+        const_variance: 498.3842
+ branch_const_variance: 2.9623
+       linear_variance: 0.0400
+branch_linear_variance: 0.0523
+     geodesic_variance: 12.0562
+        geodesic_scale: 0.0138
+        noise_variance: 0.0799
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Now optimization approach, adding one dimension at a time and reoptimizing. Results are almost identical to second-to-last run:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood:  -2.3131e+03
+training_result = 
+
+        noise_variance: 0.0800
+     geodesic_variance: 12.3965
+        geodesic_scale: 0.0136
+branch_linear_variance: 0.0576
+ branch_const_variance: 2.9157
+       linear_variance: 0.0327
+        const_variance: 8.3205e-09
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Again, low const_variance, but we manually can do 1D optimization to improve it:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-ml_vs_const_variance.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;training_result = 
+
+        noise_variance: 0.0800
+     geodesic_variance: 12.3965
+        geodesic_scale: 0.0136
+branch_linear_variance: 0.0576
+ branch_const_variance: 2.9157
+       linear_variance: 0.0327
+        const_variance: 435.8995
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Some plots showed that at low const_variance, the terrain become rocky, making search difficult.&lt;/h2&gt;
+
+&lt;p&gt;Forcing noise variance to be 1.0 results in much smoother priors:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-smooth_sampled_tree.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;training_result = 
+
+        noise_variance: 1
+     geodesic_variance: 15.9174
+        geodesic_scale: 0.0019
+branch_linear_variance: 0.0485
+ branch_const_variance: 3.7438
+       linear_variance: 0.0348
+        const_variance: 685.7670
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This kind of makes sense, since our point-correspondence algorithm has mean error of 0.5, even if correspondences are perfect.  In many cases, correspondences aren&#39;t perfect, because the triangulation metric used to find correspondences isn&#39;t sufficiently informative to infer the true correspondence.  So forcing i.i.d. noise variance to some minimum value prevents the prior from taking up that noise.&lt;/p&gt;
+
+&lt;h2&gt;misc notes&lt;/h2&gt;
+
+&lt;p&gt;Try different deformation model - cubic spline?&lt;/p&gt;
+
+&lt;p&gt;euclidean affine transform&lt;/p&gt;
+
+&lt;p&gt;next:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;ol&gt;
-&lt;li&gt;matlab preprocess into struct, not file.  then save struct to file&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;ol&gt;
-&lt;li&gt;use struct to visualize treatment type&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;ol&gt;
-&lt;li&gt;save cluster membership to file, visualize in matlab next to (2.)&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
+&lt;li&gt;train epipolar likelihood&lt;/li&gt;
+&lt;li&gt;MCMC
+
+&lt;ul&gt;
+&lt;li&gt;from sample to raster&lt;/li&gt;
+&lt;li&gt;train bernoulli likelihood&lt;/li&gt;
+&lt;li&gt;adaptive MH (or test with just simulated annealing)&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
-&lt;li&gt;repeat k-means multiple times with random initializations.&lt;/li&gt;
-&lt;li&gt;handle different treatment types.&lt;/li&gt;
-&lt;li&gt;do full sampling.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Dangling tasks:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;train on multiple different view-pairs&lt;/li&gt;
+&lt;li&gt;ground-truth and train on neighboring views (rather than four-separated)&lt;/li&gt;
 &lt;/ul&gt;
 
 </description>
-				<pubDate>Mon, 19 May 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/19/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/19/work-log</guid>
+				<pubDate>Sun, 11 Jan 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/11/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/11/work-log</guid>
 			</item>
 		
 			<item>
-				<title>FIRE - immunity data transformations</title>
-				<description>&lt;p&gt;this is a follow-up to [this earlier post], in which immunity data is plotted as histograms for each &quot;plate&quot;.&lt;/p&gt;
+				<title>Trained prior parameters</title>
+				<description>&lt;p&gt;Training only local prior w/ noise_variance fixed at 1.0:&lt;/p&gt;
 
-&lt;p&gt;After log-transforming the variables the extreme outliers now look more sensible, and the distributions are far more symmetric, with the exception of a few TNF-\(alpha\) plates.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;        noise_variance: 1
+     geodesic_variance: 15.9174
+        geodesic_scale: 0.0019
+branch_linear_variance: 0.0485
+ branch_const_variance: 3.7438
+       linear_variance: 0.0348
+        const_variance: 685.7670
+&lt;/code&gt;&lt;/pre&gt;
 
-&lt;script&gt;
-    $(function() {
-        $( &quot;#plate_hist_tabs&quot; ).tabs();
-    });
-&lt;/script&gt;
+&lt;p&gt;Training full model (local prior and epipolar prior) w/ noise variance fixed at 1.0&lt;/p&gt;
 
+&lt;pre&gt;&lt;code&gt;log-likelihood = -2368.62
 
-&lt;div id=&quot;plate_hist_tabs&quot;&gt;
-    &lt;ul&gt;
-        &lt;li&gt;&lt;a href=&quot;#ifng_plates&quot;&gt;IFN-g&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#tnfa_plates&quot;&gt;TNF-\(\alpha\)&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#IL1B_plates&quot;&gt;IL-1b&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#il2_plates&quot;&gt;IL-2&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#il6_plates&quot;&gt;IL-6&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#il8_plates&quot;&gt;IL-8&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#il10_plates&quot;&gt;IL-10&lt;/a&gt;&lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;div id=&quot;ifng_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-18-ifng_plates.png&quot; /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;il10_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-18-il10_plates.png&quot; /&gt;&lt;br /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;IL1B_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-18-il1b_plates.png&quot; /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;il6_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-18-il6_plates.png&quot; /&gt;&lt;br /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;il8_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-18-il8_plates.png&quot; /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;tnfa_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-18-tnfa_plates.png&quot; /&gt;&lt;br /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;il2_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-18-il2_plates.png&quot; /&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
+     epipolar_variance: 4.5465
+    euclidean_variance: 0.0422
+       euclidean_scale: 4.2001e-07
+        noise_variance: 1
+     geodesic_variance: 233.9050
+        geodesic_scale: 4.3327e-04
+branch_linear_variance: 0.1079
+ branch_const_variance: 7.0217
+       linear_variance: 0.1016
+        const_variance: 2.4123e+03
+&lt;/code&gt;&lt;/pre&gt;
 
+&lt;p&gt;  Notice significantly larger geodesic variance, and much longer scale length (48 vs 22 pixels).  All other variances increased too.  This is probably because we&#39;ve treated the two priors as independent, but they aren&#39;t, so multiplying them results in too little overall variance.&lt;/p&gt;
+
+&lt;p&gt;By comparison, below is a nearby local minimum, obtained by training all 9 parameters from scratch.&lt;/p&gt;
+
+&lt;p&gt;  log-likelihood:  -2370.05&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;       epipolar_variance: 4.6435
+      euclidean_variance: 3.1113e-35
+         euclidean_scale: 7.4415e+152
+          noise_variance: 1
+       geodesic_variance: 283.5387
+          geodesic_scale: 3.9692e-04
+  branch_linear_variance: 0.1236
+   branch_const_variance: 6.5436
+         linear_variance: 0.0746
+          const_variance: 5.4990e-109
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This model moves all epipolar prior variance into the iid epipolar_variance variables. Also the local prior&#39;s offset variance has been moved into the deformation variance, geodesic_variance, while shortening the scale.&lt;/p&gt;
 </description>
-				<pubDate>Sun, 18 May 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/18/reference</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/18/reference</guid>
+				<pubDate>Sun, 11 Jan 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/11/reference</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/11/reference</guid>
 			</item>
 		
 			<item>
-				<title>FIRE - cleanup</title>
-				<description>&lt;h2&gt;Skype w/ Kobus&lt;/h2&gt;
+				<title>Projection of point onto line using distance from two reference points</title>
+				<description>&lt;p&gt;Consider two known points A, and B, an unknown point C. If we know the distances between C and the other two points, we can recover \(\pi_{AB}(C)\), the projection of C onto the line AB.&lt;/p&gt;
 
-&lt;p&gt;Reflecting on &lt;a href=&quot;/ksimek/research/2014/05/15/reference&quot;&gt;immunity histograms&lt;/a&gt; I created late last night.  In discussion with Kobus, we&#39;ve decided a few things could help: (a) log-transforming, (b) introducing a scaling factor, and (c) using robust likelihood (e.g. truncated squared error).&lt;/p&gt;
+&lt;p&gt;The distance between \(\pi_{AB}(C)\) and A is&lt;/p&gt;
 
-&lt;p&gt;Will Skype with Warren on Monday afternoon to hand off the self-report clustering analysis.  Will spend this afternoon cleaning up the data and code to make it easier for him to pick it up.&lt;/p&gt;
-
-&lt;p&gt;Kobus will likely need my input in the coming weeks to incorporate branching Gaussian processes into an upcoming grant proposal.&lt;/p&gt;
-
-&lt;h2&gt;Self-report clustering cleanup&lt;/h2&gt;
-
-&lt;p&gt;Add documentation and READMES for clustering, experiment directory, output files.&lt;/p&gt;
-
-&lt;p&gt;Add matlab script to visualize clustering results.&lt;/p&gt;
-
-&lt;p&gt;Created &lt;a href=&quot;/ksimek/research/2014/05/16/reference/&quot;&gt;reference page&lt;/a&gt; for clustering results.&lt;/p&gt;
-</description>
-				<pubDate>Fri, 16 May 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/16/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/16/work-log</guid>
-			</item>
-		
-			<item>
-				<title>FIRE - Self-report clustering results.</title>
-				<description>&lt;p&gt;Results of initial clustering of self-report data.  (I showed these a few weeks ago, but never recorded them here).&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Data&lt;/strong&gt;: Five survey values, recorded once per each of nine visits, for a total of 45 dimensions per cluster.  Missed visits are treated as missing data and ignored during inference.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Model, Inference&lt;/strong&gt;: Multivariate gaussians with diagonal covariance were fit to each cluster.  Cluster memberships and cluster parameters were fit with EM, with 100 different initializations to avoid local minima.  Number of clusters was varied between 2 and 50, and the optimal choice of three clusters was determined using BIC.&lt;/p&gt;
-
-&lt;h2&gt;Results&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;Means&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-16-cluster_means.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Standard Deviations&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-16-cluster_std_devs.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2&gt;Disucssion&lt;/h2&gt;
-
-&lt;p&gt;PSS is in the 0.9-1.0 range for all clusters.&lt;/p&gt;
-
-&lt;p&gt;Note that FACT data has high standard deviation, making its curves harder to interpret.&lt;/p&gt;
-
-&lt;p&gt;Also note that unlike other variables, high FACT scores correspond to &lt;em&gt;negative&lt;/em&gt; outcomes (e.g. high pain, high nausea, etc)&lt;/p&gt;
-
-&lt;p&gt;Third cluster is the &quot;always good&quot; cluster.&lt;/p&gt;
-
-&lt;p&gt;Second cluster is the &quot;high emotional acceptance cluster&quot;.  Notable that DAS and SRI start low, but increase over time.  This suggests a hyptothesis that high emotional acceptance can result in improved outcomes over time.&lt;/p&gt;
-
-&lt;p&gt;First cluster is the &quot;low emotional acceptance cluster&quot;.  SRI and DAS start low and never improve.&lt;/p&gt;
-</description>
-				<pubDate>Fri, 16 May 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/16/reference</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/16/reference</guid>
-			</item>
-		
-			<item>
-				<title>FIRE - first clustering test</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Piecewise Linear Clustering&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;16806&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;div&gt;
+\[
+\begin{align}
+d(A, \pi_{AB}(C)) = d(A,B) (1+g) / 2 \text{, where} \\
+g &amp;= \left ( d(A,C)^2 - d(B,C)^2 \right ) / d(A,B)^2
+\end{align}
+\]
 &lt;/div&gt;
 
 
-&lt;h2&gt;Run #1:&lt;/h2&gt;
+&lt;p&gt;This can be derived using the pythagorean theorem and fact triangles AC\pi(C) and BC\pi(C) share a side.&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Run initial model estimation on real data for the first time.&lt;/p&gt;
+&lt;p&gt;This can be used to derive an expression for \(\pi_{AB}(C)\) using a weighted sum of A and B:&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
-
-&lt;p&gt;Single cluster:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;0.00000000e+00  0.00000000e+00
-8.73210306e-03  6.75372609e-02  3.38471516e-02
-1.88790755e+00 -1.88387427e+01 -9.88494611e+00
--8.09450747e-01 -2.56388154e-01 -3.61218358e-01 -4.23137123e-02  1.64628674e-02 -1.02962552e-02 -3.82633520e-01
--5.26954930e+01 -9.01436620e+00 -2.14090141e+01  1.88492958e+00  6.61450704e+00  8.49971831e+00 -2.38576056e+01
-24.6497 
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Multiple cluster:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;num_clusters:3
-log weights: 0 0 0
-cluster #1
-  0.00000000e+00  0.00000000e+00
- -2.68876589e-01 -7.04390256e-02  1.45450526e-02
-  6.16258430e+03  6.13067965e+03  6.12930057e+03
- -1.08771413e-02  5.76005556e-04 -1.04761899e-02 -1.69093096e-03  9.36991863e-04 -3.78348959e-04  1.27422332e-03
- -4.89152880e+01 -9.21454922e+00 -1.77681544e+01  2.47259001e+00  6.28886806e+00  8.63120843e+00 -2.43004449e+01
-26.2893
-cluster #2
-  0.00000000e+00  0.00000000e+00
-  1.20215477e-01  0.00000000e+00  2.24383835e-01
-  6.11014579e+03  0.00000000e+00  5.96700128e+03
- -1.08771413e-02  5.76005556e-04 -1.04761899e-02 -1.69093096e-03  9.36991863e-04 -3.78348959e-04  1.27422332e-03
- -4.89152880e+01 -9.21454922e+00 -1.77681544e+01  2.47259001e+00  6.28886806e+00  8.63120843e+00 -2.43004449e+01
-26.2893
-cluster #3
-  0.00000000e+00  0.00000000e+00
- -1.52115349e-01  2.77516102e+00  1.82492585e+00
- -3.84569849e+00 -7.18131761e+02 -1.63056790e+02
- -1.08771413e-02  5.76005556e-04 -1.04761899e-02 -1.69093096e-03  9.36991863e-04 -3.78348959e-04  1.27422332e-03
- -4.89152880e+01 -9.21454922e+00 -1.77681544e+01  2.47259001e+00  6.28886806e+00  8.63120843e+00 -2.43004449e+01
-26.2893
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Surprisingly high epsilon (~26).  This is far beyond the dynamic range of the data, suggesting either (a) a bug, (b) a terrible model, or (c) failure of the analytical estimation method to find a good result.  Option (a) seems more likely, since a flat line give a lower error variance than this.  Perhaps our observation basis A was poorly estimated.  Lets re-run with PCA method.&lt;/p&gt;
-
-&lt;h2&gt;Run #2: PCA method&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Re-run but using PCA instead of regression to estimate observation transformation, A.  (i.e. change constant &lt;code&gt;use_regression_method&lt;/code&gt; to false).&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
-
-&lt;p&gt;Single cluster:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;  0.00000000e+00  0.00000000e+00
-  8.73210306e-03  6.75372609e-02  3.38471516e-02
-  1.88790755e+00 -1.88387427e+01 -9.88494611e+00
- -8.09450747e-01 -2.56388154e-01 -3.61218358e-01 -4.23137123e-02  1.64628674e-02 -1.02962552e-02 -3.82633520e-01
- -5.26954930e+01 -9.01436620e+00 -2.14090141e+01  1.88492958e+00  6.61450704e+00  8.49971831e+00 -2.38576056e+01
-24.6497
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Multiple Cluster&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;num_clusters:3
-log weights: 0 0 0
-cluster #1
-  0.00000000e+00  0.00000000e+00
-  1.13041314e-02  6.75372609e-02  3.41203573e-02
-  3.56421036e-01 -1.88387427e+01 -1.11922319e+01
- -8.09450747e-01 -2.56388154e-01 -3.61218358e-01 -4.23137123e-02  1.64628674e-02 -1.02962552e-02 -3.82633520e-01
- -5.26954930e+01 -9.01436620e+00 -2.14090141e+01  1.88492958e+00  6.61450704e+00  8.49971831e+00 -2.38576056e+01
-24.6497
-cluster #2
-  0.00000000e+00  0.00000000e+00
-  1.05708618e-03  0.00000000e+00  0.00000000e+00
-  5.35534897e+01  0.00000000e+00  0.00000000e+00
- -8.09450747e-01 -2.56388154e-01 -3.61218358e-01 -4.23137123e-02  1.64628674e-02 -1.02962552e-02 -3.82633520e-01
- -5.26954930e+01 -9.01436620e+00 -2.14090141e+01  1.88492958e+00  6.61450704e+00  8.49971831e+00 -2.38576056e+01
-24.6497
-cluster #3
-  0.00000000e+00  0.00000000e+00
-  0.00000000e+00  0.00000000e+00  3.06188063e-02
-  1.18920520e+02  0.00000000e+00  7.71079754e+01
- -8.09450747e-01 -2.56388154e-01 -3.61218358e-01 -4.23137123e-02  1.64628674e-02 -1.02962552e-02 -3.82633520e-01
- -5.26954930e+01 -9.01436620e+00 -2.14090141e+01  1.88492958e+00  6.61450704e+00  8.49971831e+00 -2.38576056e+01
-24.6497
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;No noticable improvement.  During K-means, cluster collapse was frequent, which didn&#39;t occur in previous run.&lt;/p&gt;
-
-&lt;h2&gt;Immunity data inspection&lt;/h2&gt;
-
-&lt;p&gt;Below are histograms of raw immunity readings for each marker. TNF-\(\alpha\), IL-2, and IL-6 have sensible distributions.&lt;/p&gt;
-
-&lt;p&gt;IL-1b and IL-10 have weirdly peaked distribution with heavy tails.  Perhaps outliers are isolated to specific plates (investigated next).&lt;/p&gt;
-
-&lt;p&gt;IFN and IL-8 are borderline; peaked with heavy tails but not as bad as IL-1b and IL-10.&lt;/p&gt;
-
-&lt;script&gt;
-    $(function() {
-        $( &quot;#hist_tabs&quot; ).tabs();
-    });
-&lt;/script&gt;
-
-
-
-
-&lt;div id=&quot;hist_tabs&quot;&gt;
-  &lt;ul&gt;
-    &lt;li&gt;&lt;a href=&quot;#IFN&quot;&gt;IFN-g&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;#TNFa&quot;&gt;TNF-\(\alpha\)&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;#IL1B&quot;&gt;IL-1b&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;#IL2&quot;&gt;IL-2&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;#IL6&quot;&gt;IL-6&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;#IL8&quot;&gt;IL-8&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;#IL10&quot;&gt;IL-10&lt;/a&gt;&lt;/li&gt;
-  &lt;/ul&gt;
-    &lt;div id=&quot;TNFa&quot;&gt;
-        &lt;img src=&quot;/ksimek/research/img/2014-05-15-tnfa.png&quot; /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;IL2&quot;&gt;
-        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL2.png&quot; /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;IL8&quot;&gt;
-        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL8.png&quot; /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;IL6&quot;&gt;
-        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL6.png&quot; /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;IL1B&quot;&gt;
-        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL1B.png&quot; /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;IFN&quot;&gt;
-        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IFN.png&quot; /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;IL10&quot;&gt;
-        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL10.png&quot; /&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-
-
-&lt;p&gt;&lt;/div&gt;&lt;/p&gt;
-
-&lt;h2&gt;Per-plate distributions.&lt;/h2&gt;
-
-&lt;script&gt;
-    $(function() {
-        $( &quot;#plate_hist_tabs&quot; ).tabs();
-    });
-&lt;/script&gt;
-
-
-&lt;div id=&quot;plate_hist_tabs&quot;&gt;
-    &lt;ul&gt;
-        &lt;li&gt;&lt;a href=&quot;#ifng_plates&quot;&gt;IFN-g&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#tnfa_plates&quot;&gt;TNF-\(\alpha\)&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#IL1B_plates&quot;&gt;IL-1b&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#il2_plates&quot;&gt;IL-2&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#il6_plates&quot;&gt;IL-6&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#il8_plates&quot;&gt;IL-8&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#il10_plates&quot;&gt;IL-10&lt;/a&gt;&lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;div id=&quot;ifng_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-15-ifng_plates.png&quot; /&gt;
-    &lt;br /&gt;
-    One of the worse plates in terms of missing/out-of-range data (331/710).  Irregular distributions, and plate 9 has no radings within range.
-    &lt;/div&gt;
-    &lt;div id=&quot;il10_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-15-il10_plates.png&quot; /&gt;&lt;br /&gt;
-    &lt;p&gt;
-        Another reasonably strong variable in terms of missing data (637/710).  Plots seem somewhat irregular, but possibly due to excessible outliers in plates 10, 7, 8, 4.  This could be good support for a clustering model if it would explain the heavy tails in these plates
-    &lt;/p&gt;
-
-    &lt;/div&gt;
-    &lt;div id=&quot;IL1B_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL1B_plates.png&quot; /&gt;
-    &lt;p&gt;
-    In terms of missing data, this variable is borderline (550/710).  Plates seem to split between (a) seemingly exponential-distrubted data (2,3,4,7,8, 10), and (b) irregular data (plates 1,5,6,9).  I&#39;m doubtful that this will be useful for inference.
-    &lt;/p&gt;
-    &lt;p&gt;
-    Note &lt;em&gt;massive&lt;em&gt; variation in support between plates.  e.g. plate 8 maxes out at 80, while plate 1 stops at 1.3.
-    &lt;/p&gt;
-    &lt;/div&gt;
-
-    &lt;div id=&quot;il6_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-15-il6_plates.png&quot; /&gt;&lt;br /&gt;
-    &lt;p&gt;
-    Very little missing data in this dataset (699/710).  Seems much more consistent than most other datasets. Scale and shape vary a bit, but not glaring inconsistencies, aside from a few outliers (e.g. plate 9).
-    &lt;/p&gt;
-    &lt;p&gt;
-    Lots of between-plate variability (plate 7 vs. 10).
-    &lt;/p&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;il8_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-15-il8_plates.png&quot; /&gt;
-    &lt;/div&gt;
-    &lt;p&gt;
-        Seems to be Gamma-distributed or log-normal distributed but with lots of big outliers.  Plates 5 and 10 have extreme outliers
-    &lt;/p&gt;
-    &lt;div id=&quot;tnfa_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-15-tnfa_plates.png&quot; /&gt;&lt;br /&gt;
-    &lt;p&gt;
-    The best plate in terms of missing data (710/710), TNF-\(\alpha\) seems very regular within-plates.  Note the strong gaussian shapes here, compared to the full-dataset histogram earlier.  
-    &lt;/p&gt;
-    &lt;p&gt;
-    Variation between plates is notable (see plate 5 vs. plate 8).  Supports a regularization approach.
-    &lt;/p&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;il2_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-15-il2-plates.png&quot; /&gt;
-    &lt;p&gt;
-    This is one of the stronger plates in terms of missing data (710/710 present).  Several plates have decent gaussian distributions, albeit with heavy tails (1, 7, 9), but several are irregular (4, 5, 8, 9), and others look more exponential (2, 3, 10).
-    &lt;/p&gt;
-    &lt;/div&gt;
+&lt;div&gt;
+\[
+\begin{align}
+\pi_{AB}(C) &amp;= (A(1-g) + B(1+g) ) / 2
+\end{align}
+\]
 &lt;/div&gt;
 
+
+
 </description>
-				<pubDate>Thu, 15 May 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/15/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/15/work-log</guid>
+				<pubDate>Fri, 09 Jan 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/09/reference</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/09/reference</guid>
 			</item>
 		
 			<item>
-				<title>FIRE immunity plots</title>
-				<description>&lt;p&gt;Below are histograms of raw immunity readings for each marker.&lt;/p&gt;
+				<title>Geodesic distance kernel and BGP kernel -- simplified representation</title>
+				<description>&lt;p&gt;With a nod to Mercer&#39;s theorem, we can represent gaussian processes over graph-structured points in a very simple way.  We may transform our input space over graph nodes into a new eucliean space.&lt;/p&gt;
 
-&lt;p&gt;Aside from TNF-\(\alpha\), IL-2, and IL-6, distributions are very peaked and heavy-tailed. Specific-plate histograms (shown later) reveal more detail.&lt;/p&gt;
+&lt;p&gt;For trees with N branches, we denote a point a distance x along the i-th branch by the ordered pair \(i, x\).  For each branch i, its parent is denoted by p(i), and its branch point is denoted by b(i).  If branch i has not parent, we define p(i) = b(i) = 0.  We can define a transformation \(\phi : \mathbb{N}\times\mathbb{R} \rightarrow \mathbb{R}^N\), whose k-th dimension is:&lt;/p&gt;
 
-&lt;script&gt;
-    $(function() {
-        $( &quot;#hist_tabs&quot; ).tabs();
-    });
-&lt;/script&gt;
+&lt;p&gt;  &lt;div&gt;
+  [
+    \phi_k(i,x) = \begin{cases}
+        x &amp;amp; \text{ if } i == k \
+        0 &amp;amp; \text{ if } i == 0 \
+        \phi_k(p(i), b(i)) &amp;amp; \text{ otherwise.}
+        \end{cases}
+  ]
+  &lt;/div&gt;.&lt;/p&gt;
 
+&lt;p&gt;If branch k is the root of a subtree containing (i,x), \(\phi_k\) is the branch position of sub-subtree containing (i,x).&lt;/p&gt;
 
+&lt;p&gt;This formulation makes it easier to define covariance functions over tree structures.  O&lt;/p&gt;
 
+&lt;p&gt;It is often useful to model each tree branch as a squared-exponential curve.  This is sometimes falsely implemented as squared exponential covariance function over geodesic distance instead of Euclidean distance.  However, this covariance function isn&#39;t positive definite (need illustration).  Instead, if we define a distance function \(d(i,x,i&#39;,x&#39;)\) as the sum of squared geodesic distances between adjacent junctions along the path between (i,x) and (i&#39;,x&#39;).  Using this distance metric with a squared-exponential covariance function results in exactly the model we seek.&lt;/p&gt;
 
-&lt;div id=&quot;hist_tabs&quot;&gt;
-  &lt;ul&gt;
-    &lt;li&gt;&lt;a href=&quot;#IFN&quot;&gt;IFN-g&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;#TNFa&quot;&gt;TNF-\(\alpha\)&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;#IL1B&quot;&gt;IL-1b&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;#IL2&quot;&gt;IL-2&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;#IL6&quot;&gt;IL-6&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;#IL8&quot;&gt;IL-8&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;#IL10&quot;&gt;IL-10&lt;/a&gt;&lt;/li&gt;
-  &lt;/ul&gt;
-    &lt;div id=&quot;TNFa&quot;&gt;
-        &lt;img src=&quot;/ksimek/research/img/2014-05-15-tnfa.png&quot; /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;IL2&quot;&gt;
-        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL2.png&quot; /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;IL8&quot;&gt;
-        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL8.png&quot; /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;IL6&quot;&gt;
-        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL6.png&quot; /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;IL1B&quot;&gt;
-        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL1B.png&quot; /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;IFN&quot;&gt;
-        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IFN.png&quot; /&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;IL10&quot;&gt;
-        &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL10.png&quot; /&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-
-
-&lt;p&gt;&lt;/div&gt;&lt;/p&gt;
-
-&lt;h2&gt;Per-plate distributions.&lt;/h2&gt;
-
-&lt;p&gt;Below are per-plate histograms of immunity readings, broken into plates.  Compared to the full-popuation histograms above, signfiicant regularity emerges in these plots, esp. in TNF-\(\alpha\), IL-8, IL-10.&lt;/p&gt;
-
-&lt;script&gt;
-    $(function() {
-        $( &quot;#plate_hist_tabs&quot; ).tabs();
-    });
-&lt;/script&gt;
-
-
-&lt;div id=&quot;plate_hist_tabs&quot;&gt;
-    &lt;ul&gt;
-        &lt;li&gt;&lt;a href=&quot;#ifng_plates&quot;&gt;IFN-g&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#tnfa_plates&quot;&gt;TNF-\(\alpha\)&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#IL1B_plates&quot;&gt;IL-1b&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#il2_plates&quot;&gt;IL-2&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#il6_plates&quot;&gt;IL-6&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#il8_plates&quot;&gt;IL-8&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href=&quot;#il10_plates&quot;&gt;IL-10&lt;/a&gt;&lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;div id=&quot;ifng_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-15-ifng_plates.png&quot; /&gt;
-    &lt;br /&gt;
-    One of the worse plates in terms of missing/unreadable data (331/710).  Irregular between and within plates.
-    &lt;/div&gt;
-    &lt;div id=&quot;il10_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-15-il10_plates.png&quot; /&gt;&lt;br /&gt;
-    &lt;p&gt;
-        Another reasonably strong variable in terms of missing data (637/710).  Plots seem somewhat irregular, but possibly due to excessible outliers in plates 10, 7, 8, 4.  This could be a good argument for a clustering/mixture model, as it might explain the heavy tails in the aforementioned plates.
-    &lt;/p&gt;
-
-    &lt;/div&gt;
-    &lt;div id=&quot;IL1B_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-15-IL1B_plates.png&quot; /&gt;
-    &lt;p&gt;
-    In terms of missing data, this variable is borderline (550/710).  Plates seem to split between (a) seemingly exponential-distrubted data (2,3,4,7,8, 10), and (b) irregular data (plates 1,5,6,9).  This could pose problems for our inference efforts.
-    &lt;/p&gt;
-    &lt;p&gt;
-    Note &lt;em&gt;massive&lt;/em&gt; variation between plates.  e.g. plate 8 has a maximum at 60, while plate 1 stops at 1.3.
-    &lt;/p&gt;
-    &lt;/div&gt;
-
-    &lt;div id=&quot;il6_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-15-il6_plates.png&quot; /&gt;&lt;br /&gt;
-    &lt;p&gt;
-    Very little missing data in this variable (699/710 observed).  Seems much more consistent than most other datasets. Scale and shape vary a bit, but no glaring inconsistencies, aside from a few outliers (e.g. plate 9).
-    &lt;/p&gt;
-    &lt;p&gt;
-    Lots of between-plate variability (e.g. plate 7 vs. 10).
-    &lt;/p&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;il8_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-15-il8_plates.png&quot; /&gt;
-    &lt;p&gt;
-        An excellent variable in terms of missing data (710 of 710 readings within range). The results seem very regular compared to other variables.  Seems to be Gamma-distributed or log-normal distributed but some big outliers.  Plates 5 and 10 have extreme outliers
-    &lt;/p&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;tnfa_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-15-tnfa_plates.png&quot; /&gt;&lt;br /&gt;
-    &lt;p&gt;
-    The best plate in terms of missing data (710/710), TNF-\(\alpha\) seems very regular within-plates.  Note the strong gaussian shapes here, compared to the full-dataset histogram earlier.  
-    &lt;/p&gt;
-    &lt;p&gt;
-    Variation between plates is notable (see plate 5 vs. plate 8).  Supports a regularization approach.
-    &lt;/p&gt;
-    &lt;/div&gt;
-    &lt;div id=&quot;il2_plates&quot;&gt;
-    &lt;img src=&quot;/ksimek/research/img/2014-05-15-il2-plates.png&quot; /&gt;
-    &lt;p&gt;
-    This is one of the strongest plates in terms of missing data (710 of 710 observed).  Several plates have decent gaussian distributions, albeit with heavy tails (1, 7, 9), but several are irregular (4, 5, 8, 9), and others look more exponential (2, 3, 10). 
-    &lt;/p&gt;
-    &lt;/div&gt;
+&lt;div&gt;
+  k(i,x,i&#39;,x&#39;) = \exp\{-d(i,x,i&#39;,x&#39;)\}
 &lt;/div&gt;
 
+
+&lt;p&gt;We can use our transformation above to represent this more succinctly:&lt;/p&gt;
+
+&lt;div&gt;
+  k(\phi, \phi&#39;) = \exp\{- \| \phi - \phi&#39; \|^2\}
+&lt;/div&gt;
+
+
+&lt;p&gt;Since each dimension in phi corresponds to exactly one branch, \( \phi - \phi \) is a vector of distances between branch points on the each curve corresponding to (i,x) and (i&#39;,x&#39;).  The squared l2 norm of this expression is equivalent to d(i,x,i&#39;,x&#39;).  Note that the fact that we can represent this covariance function using a standard covariance function with transformed inputs shows that it is positive definite.&lt;/p&gt;
+
+&lt;p&gt;A second useful tree model is the one I introduced in my dissertation proposal -- the branching cubic spline model.  The covariance function for this model involved a recursive function that was complicated and wasn&#39;t previously proven to be positive definite.  Using our input transformation, this simplifies to:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+  k(\phi, \phi) = \sum_i k_c(\phi_i, \phi&#39;_i)
+  \]
+&lt;/div&gt;
+
+
+&lt;p&gt;where k_c() is the cubic spline covariance function.  The recursive nature of the definition of \(\phi\) ensures that each curve inherits the covariance of its parent curve.  And because \(k_c(0,x) == 0\), points on different subtrees only receive covariance from their shared ancestors.  Again, this formulation suffices to show that our original covariance function is positive definite.&lt;/p&gt;
+
+&lt;h2&gt;Loopy graphs&lt;/h2&gt;
+
+&lt;p&gt;Non-tree structured graphs are more difficult, but I have a few possible approaches.&lt;/p&gt;
+
+&lt;p&gt;One way of interpreting a loop is as two separate branches (one at each junction) that gradually blend into one another.  Implementing a transformation \(\phi\) is easy under this interpretation -- just linearly interpolate between the two independent lines in \(\phi\).  Unfortunately, the resulting embedding doesn&#39;t preserve distances between nearby points. I tried a similar approach with cubic Hermite splines instead of linear interpolation, but again, distances aren&#39;t preserved.  This could be solved if we could (a) guarantee that the bridging curve has exactly the right length and (b) the mapping between graph points and the bridging curve in \(\phi\) preserves distance.  Both of these result in equations that can&#39;t be solved analytically, but numerical techniques could work if we cared enough.&lt;/p&gt;
+
+&lt;p&gt;We could try something similar, but use a spherical arc to connect the two branch points in \(\phi\).  This would preserve total length and adjacent distances, but it violates the property that the curve&#39;s endpoint is orthogonal to its parent.&lt;/p&gt;
+
+&lt;p&gt;Both of these bridging techniques also violate the elegant property of the tree-based covariance, namely that the L1 distance between points is equal to thier geodesic distance.&lt;/p&gt;
+
+&lt;p&gt;A third possibility is to simply use the distance function \(d(i,x,i&#39;,x&#39;)\) we introduced before.  The down side of this is I con&#39;t think of a proof for its positive-definiteness.  But if it is PD, it should have the properties we want, and is relatively easy to implement.&lt;/p&gt;
 </description>
-				<pubDate>Thu, 15 May 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/15/reference</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/15/reference</guid>
+				<pubDate>Thu, 08 Jan 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/08/reference</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/08/reference</guid>
 			</item>
 		
 			<item>
-				<title>FIRE - cluster w/ missing data</title>
+				<title>Work Log</title>
 				<description>
 
 &lt;div class=&quot;meta-info&quot;&gt;
@@ -769,152 +717,51 @@ cluster #3
 &lt;/div&gt;
 
 
-&lt;p&gt;Testing missing data in cluster model&lt;/p&gt;
-
-&lt;h2&gt;Run #1 - enable missing data&lt;/h2&gt;
-
-&lt;p&gt;Segfault resulting from empty cluster.  Writing routine to create a cluster from worst point.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Still getting weird results.  Clusters are collapsing constantly.&lt;/p&gt;
-
-&lt;p&gt;Even a &lt;em&gt;single&lt;/em&gt; missing value screws up results.  There must be a bug in my initial estimate script&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;BUG: true/false swap when determining whether to use missing-data-enabled line fitting&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;Several bugs related to computing epsilon.  Fixed after several hours :-/&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;It seems we can continue to increase the missing percentage indefinitely, without the clustering suffering (or at least until an entire observation becomes missing, which isn&#39;t handled).&lt;/p&gt;
-
-&lt;p&gt;Likely the small amount of noise is helping us a lot here.  We&#39;ll see how it works on real data.&lt;/p&gt;
-
-&lt;h2&gt;Real FIRE data&lt;/h2&gt;
-
-&lt;p&gt;High-level Tasks&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;merge radation data from Laura (into demograph dataset?)&lt;/li&gt;
-&lt;li&gt;for each subject,
- first chemo
- last chemo
- first rad
- last rad&lt;/li&gt;
-&lt;li&gt;write results in FIRE data format&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;p&gt;Reading and merging radiation data:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;construct out_db cols: subject_ID, had_radiation&lt;/li&gt;
-&lt;li&gt;if row has start and end date,
-
-&lt;ul&gt;
-&lt;li&gt;if out_db already has start or end date, record error&lt;/li&gt;
-&lt;li&gt;else record start and end date&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;assert all &quot;radiation=yes&quot; have start and end date
-
-&lt;ul&gt;
-&lt;li&gt;can already see 57533 fails this test&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Do same for chemo dates.&lt;/p&gt;
-
-&lt;p&gt;Merge chemo and rad.&lt;/p&gt;
-
-&lt;p&gt;compute &quot;type&quot;&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;All implemented in &lt;code&gt;in_progress/process_treatment_dates.m&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h2&gt;Data consistency issues&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;some subjects surgeries occur after treatment
-
-&lt;ul&gt;
-&lt;li&gt;57527, 57563, 575139, 575145&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Only 97 of 136 subjects have immune data&lt;/li&gt;
-&lt;li&gt;some subjects disagree about treatment type
-
-&lt;ul&gt;
-&lt;li&gt;57517 - no histo dates, but hist = 70&lt;/li&gt;
-&lt;li&gt;575146, 575156 - demo:rad = yes, but no dates in rad_supl&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
 
 </description>
-				<pubDate>Tue, 13 May 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/13/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/13/work-log</guid>
+				<pubDate>Sun, 04 Jan 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/04/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/04/work-log</guid>
 			</item>
 		
 			<item>
-				<title>FIRE - streamlining; missing data</title>
-				<description>
+				<title>Skeleton deformation fitting</title>
+				<description>&lt;p&gt;Since the skeletons are very different between views, the old graph-matching approach probably won&#39;t work.  I believe the graph deformation idea is still a good one, but the likelihood involving correspondences won&#39;t work because it doesn&#39;t handle false positive or false negative parts of the graph.&lt;/p&gt;
 
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
-    &lt;/tr&gt;
+&lt;p&gt;A better idea is to go back to our old approach: use a pixel-based likelihood to evaluate deformed graphs.  Use MCMC to explore the space and use the GP prior covariance for proposals or search directions.  After computing the cholesky decomposition, this should proceed relatively quickly, even for large point sets.&lt;/p&gt;
 
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;16784&lt;/td&gt;
-    &lt;/tr&gt;
+&lt;p&gt;The model is the medial axis transform of the original image, plus GP-distributed deformation, which includes an epipolar constraint.  To render into the second image, we perform an inverse medial axis transform.&lt;/p&gt;
 
+&lt;p&gt;Because of the epipolar constraint, the number of effective dimensions is nearly halved.  The correlation between nearby points should reduce dimension by an even more significant factor.&lt;/p&gt;
 
-&lt;/table&gt;
+&lt;h2&gt;Initial tasks&lt;/h2&gt;
 
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
+&lt;p&gt;Train GP on ground truth data.
+  (try adding runners between almost-bridged points)
+Train Bernoulli distribution over foreground, background&lt;/p&gt;
 
+&lt;p&gt;Algorithms
+    binary image to graph
+    All pairs shortest path.
+    polyline w/ interpolated intensity
+  x medial axis transform
+  x Inverse medial axis transform
+    specialized mcmc
+        adaptive metropolis hastings
+        hit and run sampling?&lt;/p&gt;
 
-&lt;p&gt;Refactored kjb::Matrix::resize to be re-use allocated space under more circumstances.  This is currently a bottleneck in inference, and signficantly improves runtime.&lt;/p&gt;
+&lt;h2&gt;Possible extensions:&lt;/h2&gt;
 
-&lt;p&gt;Implemented Missing data handling:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Likelihood ignores missing values&lt;/li&gt;
-&lt;li&gt;initial model estimation handles gracefully handles missing data&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;p&gt;TODO:  Test missing data.  Randomly convert observations to missing, see if cluster parameters and memberships are still correctly estimated.  Is there a &quot;critical point&quot; above which missing data ruins results?&lt;/p&gt;
+&lt;p&gt;  use a weaker distance function for geodesic distance (huber function?)
+  make geodesic distance greater at junctions&lt;/p&gt;
 </description>
-				<pubDate>Mon, 12 May 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/12/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/12/work-log</guid>
+				<pubDate>Fri, 02 Jan 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/02/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/02/work-log</guid>
 			</item>
 		
 			<item>
-				<title>FIRE Debugging cluster model</title>
+				<title>Work Log</title>
 				<description>
 
 &lt;div class=&quot;meta-info&quot;&gt;
@@ -944,85 +791,52 @@ cluster #3
 &lt;/div&gt;
 
 
-&lt;p&gt;Initial cluster estimation, something like k-means.&lt;/p&gt;
+&lt;p&gt;  Some improvements to the approach outlined at the end of previous post...&lt;/p&gt;
 
-&lt;p&gt;likelihood isn&#39;t monotonically increasing over time.&lt;/p&gt;
+&lt;p&gt;  Tweak epipolar likelihood to add a small affine and nonlinear distortion component
+  (e.g. due to lens distortion).  this allows epipolar variance to be smaller;
+  forces deviations to be spatially correlated.&lt;/p&gt;
 
-&lt;ol&gt;
-&lt;li&gt;we aren&#39;t updating cluster weights&lt;/li&gt;
-&lt;li&gt;we&#39;re doing soft assignment&lt;/li&gt;
-&lt;/ol&gt;
+&lt;p&gt;  Find some good correspondences; fix camera distortion
+      approach 1: distort image using GP and known correspondences.
+      approach 2: optimize camera distortion parameters under GP and known correspondences&lt;/p&gt;
 
+&lt;p&gt;  Use unambiguous correspondences first.&lt;/p&gt;
 
-&lt;p&gt;--&lt;/p&gt;
+&lt;p&gt;  I fear that graph topology may be too noisy and fluxuating to be a reliable source
+  of information.  Is keypoint matching with epipolar constraint enough to solve this?
+  Maybe with added spatial distortion?&lt;/p&gt;
 
-&lt;p&gt;found bug:&lt;/p&gt;
+&lt;p&gt;  How can adding correspondences reduce uncertainty in remaining points?  The approach
+  above can reduce uncertainty to almost lying on the epipolar line.   If we can recover
+  small subgraphs, those can help too.  But will false joints break things? (this would
+  be a good experiment)  Maybe just linear sections with interior keypoint nodes.
+  This should at least improve fine-scale matching later.&lt;/p&gt;
 
-&lt;h2&gt;Run #1: initialize by K-means (part 1)&lt;/h2&gt;
+&lt;p&gt;  2D gives us lateral branch candidates, but are ambiguous.  Can resolve them in 3D?&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: do k-means to initialize cluster assignments.&lt;/p&gt;
+&lt;p&gt;  Idea: branch points have higher geodesic distance?&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Details&lt;/strong&gt;:&lt;/p&gt;
+&lt;p&gt;  Simpler problem: Camera repair for volumetric reconstruction.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;Estimate A, B: no
-estimate epsilon: no
-shared observation model: yes
-continuity constraints: yes
-num clusters: 3
-observed dimensions: 7
-num observations: 150
-A estimation method: regression
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;Revision&lt;/strong&gt;: 16767&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Method&lt;/strong&gt;: Build first cluster from all data.  Iteratively choose &quot;bad&quot; points under current model as prototypes for new cluster.  Then run k-means.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Result&lt;/strong&gt;:  Converges after 15 iterations.&lt;/p&gt;
-
-&lt;p&gt;In the 2x150 image below, first row is ground truth clustering, second row is experimental results.  Specific coloring is irrelevant, grouping is.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-12-cluster_results_0.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;:&lt;/p&gt;
-
-&lt;p&gt;Not great results.  Hopefully noise is just too high to find any useful structure without more observations.&lt;/p&gt;
-
-&lt;p&gt;Interesting that the g.t. clustering is so uneven.  May want to increase Dirichlet distribtuion&#39;s alpha parameter.&lt;/p&gt;
-
-&lt;h2&gt;Run 2:  Rerun with small noise&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;:  Re-run with noise lowered to 0.01.
-&lt;strong&gt;Revision&lt;/strong&gt;:  16773
-&lt;strong&gt;Results&lt;/strong&gt;:  Converges after 3 iterations.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2014-05-12-cluster_results.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;:&lt;/p&gt;
-
-&lt;p&gt;Much better!  We don&#39;t correctly find the &lt;em&gt;tiny&lt;/em&gt; middle cluster, which we can hopefully find during HMC.&lt;/p&gt;
-
-&lt;p&gt;TODO: Return to this model when testing HMC&lt;/p&gt;
-
-&lt;h2&gt;Aside: speeding up Matrix::resize(); adding Matrix::realloc()&lt;/h2&gt;
-
-&lt;p&gt;The documentation for Matrix::resize claims it reuses allocated space, which is actually untrue.  Spent some time playing with reimplementations before realizing any good solution will require reworking the C library, which would require more precision and care than I have the time for at the moment.&lt;/p&gt;
-
-&lt;p&gt;Instead, made two halfway measures:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;added spacial case; space is reused iff new_cols == num_cols &amp;amp;&amp;amp; new_rows &amp;lt;= num_rows.&lt;/li&gt;
-&lt;li&gt;Added new function: Matrix::realloc, which is like resize, but always preserves allocated storage if possible, and doesn&#39;t guarantee data is preserved afterward.&lt;/li&gt;
-&lt;/ol&gt;
-
-
-&lt;h2&gt;Run 3: Rerun with unknown observation model&lt;/h2&gt;
-
-&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;: same&lt;/p&gt;
+&lt;p&gt;  Sift keypoint matching
+    nonlinear distortion fix
+    ransac matching keypoints + distortion correction&lt;/p&gt;
 </description>
-				<pubDate>Fri, 09 May 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/05/09/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/05/09/work-log</guid>
+				<pubDate>Thu, 01 Jan 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/01/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/01/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>&lt;p&gt;Working with KernelBoost code from &lt;a href=&quot;http://cvlab.epfl.ch/page-108936-en.html&quot;&gt;http://cvlab.epfl.ch/page-108936-en.html&lt;/a&gt;.  Running training example, should take about 9 hours.  Working on preparing our data to train with.&lt;/p&gt;
+
+&lt;p&gt;Prepared files for Structure from Silhouette Probability Maps and sent to Dr. Tabb to try reconstruction.&lt;/p&gt;
+</description>
+				<pubDate>Wed, 31 Dec 2014 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2014/12/31/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/12/31/work-log</guid>
 			</item>
 		
 	</channel>

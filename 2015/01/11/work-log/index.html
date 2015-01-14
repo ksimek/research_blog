@@ -1,0 +1,480 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Work Log &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+      <li><a  href="/ksimek/research/pomodoro.html"><img src="/ksimek/research/img/pom.png" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Work Log
+    </h1>
+
+  <div class="date emphnext">
+    January 11, 2015
+      
+ 
+  </div>
+    
+
+
+  
+    <p>Finished training.</p>
+
+<pre><code>training_result = 
+
+         final_const_variance: 1.1669e-04
+  final_branch_const_variance: 1.7636e+03
+        final_linear_variance: 1.4425e+03
+      final_geodesic_variance: 195.4912
+         final_geodesic_scale: 0.0065
+                  final_noise: 0.0776
+
+training_result.initial
+</code></pre>
+
+<p>  ans =</p>
+
+<pre><code>         const_variance: 831.7886
+  branch_const_variance: 0.8552
+        linear_variance: 0.1183
+     euclidean_variance: 1.7367
+        euclidean_scale: 1.0000
+      geodesic_variance: 225.8247
+         geodesic_scale: 1.0000
+      epipolar_variance: 1.7367
+</code></pre>
+
+<p>These just don't make sense.  It allows for almost zero total translation, but lots of pert-curve translation (const_variance vs. branch_const_variance).  Linear variance allows for way too much scaling.  Geodesic variance seems sensible, but the (inverse-squared) geodesic scale is way too low... Basically this becomes a stand-in for const_variance.  Perhaps this is just a local minimum, we could try fixing const_variance to some large number and forcing geodesic variance to serve its intended purpose.</p>
+
+<p>But the strangest thing is that</p>
+
+<p>I sampled some curves from this prior, and they are about what I'd expect: rotated and scaled with very little nonrigid deformation.   Below is a sample, along with the mean tree barely visible in the center:</p>
+
+<p><img src="/ksimek/research/img/2015-01-11-tree_sample.png" alt="tree sample" /></p>
+
+<ul>
+<li>Branches remain connected to tree, despite large per-curve offset variance.</li>
+<li>covariance matrix is singular</li>
+</ul>
+
+
+<p>Ruled-out causes of error:</p>
+
+<ul>
+<li>badly implemented logmvnpdf.  Tested against reference implementation.</li>
+</ul>
+
+
+<h2>Training observations</h2>
+
+<p>The simulated annealing algorithm is very sensitive to our local minima.  It can sometimes find a good result in less than 500 iterations, but other times it gets stuck after less than 100 and never improves.  I can probably tweak the annealing schedule to increase temperature earlier(is "reannealing" the right value to tweak?").</p>
+
+<p>The patternsearch algorithm beats simulated annealing after only 16 iterations (vs. 5k or more).   Annealing really struggles to get out of that minimum.</p>
+
+<p>Surprisingly, after adding a seventh parameter (for branch-specific affine deformation), patternsearch totally fails to find a good minimum starting from default parameters.  Initializing it with the result of the six-parameter model gives much better results.  This suggests a coarse-to-fine strategy for training might work well in general.  However, this is a very specific case:  the six-parameter model was flexible enough to explain the data quite well, but was overly permissive -- it allowed too many nonsensical solutions.  Adding the seventh parameter introduced an alternative explanation of the data, one requiring less nonrigid deformation.</p>
+
+<p>To try: genetic algorithm;  particle swarm; simplex method; start pattern search from SA result; globalsearch; grid search with multistart</p>
+
+<p>Globalsearch &amp; multistart w/
+  simplex
+  fminunc</p>
+
+<h2>Misc results</h2>
+
+<p><img src="/ksimek/research/img/2015-01-11-tree_sample2.png" alt="" /></p>
+
+<pre><code>log-likleihood = -3.1787e+03
+training_result = 
+
+         final_const_variance: 6.0197e+06
+  final_branch_const_variance: 1.5774e-09
+        final_linear_variance: 1.6250
+      final_geodesic_variance: 238.6891
+         final_geodesic_scale: 0.0039
+         final_noise_variance: 0.1487
+</code></pre>
+
+<p>Not bad.  Lots of geodesic variance to account for distortion.  Why is const variance so high?  Linear variance seems a bit high, but reasonable.</p>
+
+<p>It might be a good idea to allow each branch to have a linear distortion relative to its initial point.</p>
+
+<hr />
+
+<pre><code>log-likelihood = -2.5318e+03
+training_result = 
+
+       final_const_variance: 2.3156e+09
+final_branch_const_variance: 2.4988
+      final_linear_variance: 33.8221
+    final_geodesic_variance: 1.7165e+03
+       final_geodesic_scale: 0.0029
+       final_noise_variance: 0.0880
+</code></pre>
+
+<p>Much smaller noise variance, much higher for all other variances.  const variance is astronomical... is the optimizer exploiting numerical error arising from a poorly-conditioned matrix?</p>
+
+<hr />
+
+<p><img src="/ksimek/research/img/2015-01-11-tree_sample6.png" alt="" /></p>
+
+<pre><code>log-likelihood = -2.4848e+03
+training_result =
+
+       final_const_variance: 0.1383
+final_branch_const_variance: 1.7466
+      final_linear_variance: 5.4218e-04
+    final_geodesic_variance: 378.6715
+       final_geodesic_scale: 0.0048
+       final_noise_variance: 0.0832
+</code></pre>
+
+<p>This is close to what I would hope for -- small constant and linear variance, most variance coming from deformation.  Still, the scale is fairly short (~14 pixels), allowing for quite a bit of deformation.</p>
+
+<p>Ran for several thousand more iterations.  Seem to be converging.</p>
+
+<pre><code>log-likelihood = -2.4799e+03
+training_result =
+
+       const_variance: 0.0717
+branch_const_variance: 3.2826
+      linear_variance: 0.0028
+    geodesic_variance: 401.4291
+       geodesic_scale: 0.0047
+       noise_variance: 0.0831
+</code></pre>
+
+<hr />
+
+<p>Running from scratch with the "pattern_search" algorithm, I got excellent results very quickly:</p>
+
+<pre><code>log-likelihood = -2.4256e+03
+training_result =
+
+         const_variance: 261.7339
+branch_const_variance: 3.0796
+      linear_variance: 0.0035
+    geodesic_variance: 165.2169
+       geodesic_scale: 0.0063
+       noise_variance: 0.0821
+</code></pre>
+
+<p>These are the most sensible results yet!  Moderately large constant variance , small but nonnegligible branch constant variance.  A touch of linear variance to rotations.  Smaller deformation variance in response to larger const variance.  Yes!</p>
+
+<hr />
+
+<p>Adding a new parameter assigning independent affine deformation variance to each branch.  This should allow less variance to be allotted to geodesic_variance, which should improve marginal-likelihood.</p>
+
+<p><img src="/ksimek/research/img/2015-01-11-sampled_tree9.png" alt="" /></p>
+
+<p>Initial training pass failed to find the old local minimum.  Restarting it using the previous optimum resulted in very nice parameters:</p>
+
+<pre><code>log-likelihood = -2.3107e+03
+training_result = 
+
+        const_variance: 291.9853
+ branch_const_variance: 2.0196
+       linear_variance: 0.0366
+branch_linear_variance: 0.0516
+     geodesic_variance: 12.7402
+        geodesic_scale: 0.0136
+        noise_variance: 0.0796
+</code></pre>
+
+<p>Note the dramatic drop in geodesic variance and increase in marginal likelihood.  On the other hand, the (corrected) geodesic scale dropped from(~12 to ~8), meaning slightly higher effective dimension.  The resulting tree looks much closer to the original shape than previous models.</p>
+
+<hr />
+
+<p>Previous model had a problem: allowing each curve to affine-transform independently results in parents drifting away from children, which in reality isn't possible.  We need each child to inherit the covariance of the parent, which we accomplish by simply taking the dot-product of the "geodesic" index.</p>
+
+<p>The pattern_search algorithm is having a hard time finding a better set of</p>
+
+<p>Starting from the same position as previous starting point, results in a worse log-likelihood:</p>
+
+<pre><code>log-likelihood = -2.3131e+03
+training_result = 
+
+        const_variance: 3.1017e-25
+ branch_const_variance: 2.9157
+       linear_variance: 0.0326
+branch_linear_variance: 0.0575
+     geodesic_variance: 12.5426
+        geodesic_scale: 0.0137
+        noise_variance: 0.0796
+</code></pre>
+
+<p>Zero const variance is troubling.  Other parameters are mostly unchanged, except slightly higher branch_const_variance.  It seems the translation component was mostly used to align curves affected by parallax.</p>
+
+<p>Actually, zero const variance isn't so surprising, because our now model alls branches to pivot around their starting point, and the root of the tree hardly moves between views.  What movement there is could be solved by pivoting the whole tree around it's center, using the global affine transformation.</p>
+
+<p>It seems we have a redundant representation here.  The branch affine transformations subsume the global affine transformation, unless there's evidence that a multi-level type of model is reasonable (which it might be).</p>
+
+<p>Starting from the result of the previous run gives slightly better results, but still not better than the "bad" model used previously.</p>
+
+<pre><code>log-likelihood = -2.3122e+03
+training_result = 
+
+        const_variance: 498.3842
+ branch_const_variance: 2.9623
+       linear_variance: 0.0400
+branch_linear_variance: 0.0523
+     geodesic_variance: 12.0562
+        geodesic_scale: 0.0138
+        noise_variance: 0.0799
+</code></pre>
+
+<hr />
+
+<p>Now optimization approach, adding one dimension at a time and reoptimizing. Results are almost identical to second-to-last run:</p>
+
+<pre><code>log-likelihood:  -2.3131e+03
+training_result = 
+
+        noise_variance: 0.0800
+     geodesic_variance: 12.3965
+        geodesic_scale: 0.0136
+branch_linear_variance: 0.0576
+ branch_const_variance: 2.9157
+       linear_variance: 0.0327
+        const_variance: 8.3205e-09
+</code></pre>
+
+<p>Again, low const_variance, but we manually can do 1D optimization to improve it:</p>
+
+<p><img src="/ksimek/research/img/2015-01-11-ml_vs_const_variance.png" alt="" /></p>
+
+<pre><code>training_result = 
+
+        noise_variance: 0.0800
+     geodesic_variance: 12.3965
+        geodesic_scale: 0.0136
+branch_linear_variance: 0.0576
+ branch_const_variance: 2.9157
+       linear_variance: 0.0327
+        const_variance: 435.8995
+</code></pre>
+
+<h2>Some plots showed that at low const_variance, the terrain become rocky, making search difficult.</h2>
+
+<p>Forcing noise variance to be 1.0 results in much smoother priors:</p>
+
+<p><img src="/ksimek/research/img/2015-01-11-smooth_sampled_tree.png" alt="" /></p>
+
+<pre><code>training_result = 
+
+        noise_variance: 1
+     geodesic_variance: 15.9174
+        geodesic_scale: 0.0019
+branch_linear_variance: 0.0485
+ branch_const_variance: 3.7438
+       linear_variance: 0.0348
+        const_variance: 685.7670
+</code></pre>
+
+<p>This kind of makes sense, since our point-correspondence algorithm has mean error of 0.5, even if correspondences are perfect.  In many cases, correspondences aren't perfect, because the triangulation metric used to find correspondences isn't sufficiently informative to infer the true correspondence.  So forcing i.i.d. noise variance to some minimum value prevents the prior from taking up that noise.</p>
+
+<h2>misc notes</h2>
+
+<p>Try different deformation model - cubic spline?</p>
+
+<p>euclidean affine transform</p>
+
+<p>next:</p>
+
+<ul>
+<li>train epipolar likelihood</li>
+<li>MCMC
+
+<ul>
+<li>from sample to raster</li>
+<li>train bernoulli likelihood</li>
+<li>adaptive MH (or test with just simulated annealing)</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Dangling tasks:</p>
+
+<ul>
+<li>train on multiple different view-pairs</li>
+<li>ground-truth and train on neighboring views (rather than four-separated)</li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2015/01/12/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2015/01/11/reference" class="prev" title="Trained prior parameters">&larr; Trained prior parameters</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

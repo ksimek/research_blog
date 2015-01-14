@@ -290,3 +290,58 @@
 1400606400: FIRE - merge-in rad_supl data
 1400609781: FIRE - fixing csv writing, enum parsing bugs
 1400623225: FIRE - analyze clustering
+1400643329: FIRE - analyze clustering
+1400784557: FIRE - evaluate fitting and testing errors
+1400787440: KJB - boost::bind error with clang, C++11 and std::make_pair
+1400798543: ERGO - random number generation, which version of boost API to support?
+1400800655: ERGO - random number generation
+1400819652: ERGO - testing random refactor
+1400821686: ERGO - testing random refactor
+1400823499: ERGO - ownership refactor
+1400825610: ERGO - ownership refactor
+1400827422: ERGO - ownership refactor
+1400829239: ERGO - copy/ref semantics trick
+1400871345: FIRE - train and test error, introduce sampling
+1400873491: FIRE - train and test error, introduce sampling
+1400875295: FIRE - train and test error, introduce sampling
+1400880681: FIRE - implement fitting error, run cross validation
+1400884158: FIRE - implement fitting error, run cross validation
+1400886296: FIRE - run cross validation
+1400888099: FIRE - debug cross validation
+1400891733: FIRE - refactoring kmeans to support random initialization
+1401126755: FIRE - refactoring kmeans to support random initialization
+1401128963: FIRE - testing refactored kmeans
+1401130770: FIRE - troubleshooting refactored kmeans
+1401132629: FIRE - troubleshooting refactored kmeans
+1401137625: FIRE - running refactored kmeans
+1401139774: FIRE - debugging collapsed clusters
+1401141634: FIRE - analyze repeated runs
+1401216658: FIRE - implement continuous sampling
+1401218471: FIRE - HMC for slope, intercept
+1401220582: FIRE - full sampling framework
+1401222389: FIRE - bayesian multiple regression
+1401224199: FIRE - writing up bayesian multiple regression derivation
+1401228242: FIRE - implementing bayesian multiple regression
+1401230346: FIRE - implementing bayesian multiple regression
+1407219083: sift calibration
+1407222122: sift calibration
+1407223924: sift calibration
+1407225727: sift calibration
+1407481442: keypoint match collection
+1407625581: intrinsic calibration
+1407628154: test intrinsic calibration
+1415813474: GT ML debugging
+1415814675: GT ML debugging
+1417539957: neuron literature review
+1417541481: neuron literature review
+1417543153: neuron literature review
+1417544971: neuron literature review
+1417546753: Review: SynD
+1417549754: Lit review - Overview of recent software
+1417627128: R study
+1417630062: R study
+1417631878: R study
+1417634365: NeuronMetrics, ImageJ
+1417643433: Studying mixed-effects models in R
+1417649939: ImageJ neuron analysis
+1417651774: setting up NeuronMatrics

@@ -4,13 +4,2556 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2014-05-20T16:30:43-07:00</updated>
+ <updated>2015-01-14T14:24:31-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/13/work-log"/>
+   <updated>2015-01-13T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/13/work-log</id>
+   <content type="html">&lt;p&gt;Spent morning considering covariance over loopy graphs.  Implemented and example of &quot;shortest geodesic distance&quot;, modified to be minimum sum of squared distances between junctions over all paths.  This is a generalization of our metric over tree-structured graphs.  As anticipated, with loopy graphs, this results in non-positive-definite covariance matrices.&lt;/p&gt;
+
+&lt;p&gt;Consider this example, with two paths between nodes (1) and (4), one twice as long as the other.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-13-exmple_graph.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The shortest squared-distance matrix is&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt; 0     1     4     9     4    13
+ 1     0     1     4     5     8
+ 4     1     0     1     8     5
+ 9     4     1     0    13     4
+ 4     5     8    13     0     4
+13     8     5     4     4     0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The code for this is:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;d1 = 0:3; % route 1 distances
+d2 = 0:2:6; % route 2 distances
+D1 = pdist2(d1&#39;, d1&#39;, &#39;euclidean&#39;).^2;
+D2 = pdist2(d2&#39;, d2&#39;, &#39;euclidean&#39;).^2;
+G  = sparse(size(D));
+% top-left block is simply a straight path
+G(1:length(d1),1:length(d1)) = D1;
+% for bottom-left, compute shortest path between nodes through
+% junctions
+for i = 1:(length(d2)-2)
+  i_ = length(d1)+i;
+  for j = 1:length(D)
+    j_ = j;
+    if i_ == j_, G(i_,j_) = 0; G(j_,i_) = 0; continue, end
+    G2 = sparse(4,4);
+    G2(1,2) = D(i_, 1);
+    G2(1,3) = D(i_, length(d1));
+    G2(2,3) = D(1,length(d1));
+    G2(1,4) = D(i_, j_);
+    G2(2,4) = D(1,j_);
+    G2(3,4) = D(length(d1),j_);
+    d = graphshortestpath(G2&#39;, 1,4, &#39;directed&#39;, false);
+    G(i_, j_) = d;
+    G(j_, i_) = d;
+  end
+end
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;At large enough scales, the squared-exponential covariance matrix has negative eigenvalues:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;scale = 10;
+min(eig(exp(-full(G)/(scale^2*2))))
+
+    ans =
+
+       -0.0134
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Thus, this covariance function is not positive definite.&lt;/p&gt;
+
+&lt;h2&gt;A loopy graph strategy&lt;/h2&gt;
+
+&lt;p&gt;We need to be able to embed the graph into a Euclidean space that preserves most of the interesting properties.&lt;/p&gt;
+
+&lt;p&gt;Here&#39;s a simple approach: construct a graph with junctions as vertices and geodesic distance as edge weight.  Find the graph&#39;s minimum spanning tree, and transform the tree into curve-tree coordinates.  For unclaimed curve segments, linearly interpolate between the coordinates of the endpoints.&lt;/p&gt;
+
+&lt;p&gt;This is nice, but if a
+A loopy graph strategyn unclaimed curve segment&#39;s length is perticularly long, it should act differently than a short (straight) line between the points.  To handle this, we introduce a new dimension for each unclaimed curve segment, and allow the transformed segment to have longer length by dipping into this dimension to some extent (with a limit of none for straight lines).&lt;/p&gt;
+
+&lt;p&gt;Ideally, all pairs of points on the transformed segment will have the same distance as their geodesic distance in untransformed space.  However, this is not possible, because it would contradict the fact that the endpoint distance is defined by the graph distance in the minimum spanning tree.  At least we can try to preserve local distances, and a parabolic arc is a reasonable choice for this.   How to derive a parabola equation of an appropriate length?&lt;/p&gt;
+
+&lt;p&gt;Given the distance between the end-points and the length of the desired curve, we seek a symmetric parabola with an appropriate arc length.   Given arc length and end-points, we can compute the focus the parabola (f), and from that we can compute the parabolic equation y = x&lt;sup&gt;2&lt;/sup&gt;/(4f).&lt;/p&gt;
+
+&lt;h2&gt;Training foreground likelihood&lt;/h2&gt;
+
+&lt;p&gt;First, reproject curve into second image.&lt;/p&gt;
+
+&lt;p&gt;Draw as medial axis w/ width.&lt;/p&gt;
+
+&lt;p&gt;Compute inverse medial axis.&lt;/p&gt;
+
+&lt;p&gt;Grab all foreground/background pixels in probability map.&lt;/p&gt;
+
+&lt;p&gt;create histogram.  Try smoothing and/or annealing.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/12/work-log"/>
+   <updated>2015-01-12T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/12/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Training epipolar prior.&lt;/p&gt;
+
+&lt;p&gt;Fixing local prior using parameters learned yesterday.  The computing the epipolar and full prior is more computationally intensive, since it involves twice as many dimensions.  To mitigate, I eliminated every other point from the data.&lt;/p&gt;
+
+&lt;p&gt;Without the epipolar prior, the data likelihood is:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Log-likelihood (baseline) =  -2471.12 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Fixing euclidean scale and variance to zero, I trained the epipolar variance:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Log-likelihood =  -2395.05
+training_result = 
+
+    epipolar_variance: 4.39
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;By allowing some euclidean-correlated variance, the iid variance should be able to drop a bit.  Fixing euclidean scale to 1/100&lt;sup&gt;2&lt;/sup&gt;, I trained epipolar_variance and euclidean_variance jointly:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Log-likelihood = -2394.88
+training_result =
+
+    epipolar_variance: 4.3214
+      euclidean_scale: 1.0000e-04
+   euclidean_variance: 0.0335
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now training all three:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Log-likelihood = -2394.57
+training_result = 
+
+     epipolar_variance: 4.2877
+    euclidean_variance: 0.0458
+       euclidean_scale: 2.1581e-06
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now training all 10 parameters together:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Log-likelihood = -1294.59
+training_result = 
+
+     epipolar_variance: 4.2877
+    euclidean_variance: 0.0458
+       euclidean_scale: 2.1581e-06
+        noise_variance: 0.0821
+     geodesic_variance: 193.9141
+        geodesic_scale: 0.0031
+branch_linear_variance: 0.0800
+ branch_const_variance: 6.1725
+       linear_variance: 0.1561
+        const_variance: 685.7670
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;...but we actually want noise_variance to be fixed to 1.  Repeating previous run with noise_variance=1 results in:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Log-likelihood = -2381.29
+training_result = 
+
+     epipolar_variance: 4.2877
+    euclidean_variance: 0.0458
+       euclidean_scale: 2.1581e-06
+        noise_variance: 1
+     geodesic_variance: 33.6972
+        geodesic_scale: 0.0011
+branch_linear_variance: 0.1028
+ branch_const_variance: 6.9943
+       linear_variance: 0.0737
+        const_variance: 1.8641e+03
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;running for 30 more iterations:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ll = 2376.76
+     epipolar_variance: 4.2877
+    euclidean_variance: 0.0458
+       euclidean_scale: 2.1581e-06
+        noise_variance: 1
+     geodesic_variance: 160.7604
+        geodesic_scale: 5.3712e-04
+branch_linear_variance: 0.1028
+ branch_const_variance: 6.9943
+       linear_variance: 0.0835
+        const_variance: 2.1123e+03
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;The fullly trained model is then:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;     epipolar_variance: 4.2877
+    euclidean_variance: 0.0458
+       euclidean_scale: 2.1581e-06
+        noise_variance: 1
+     geodesic_variance: 15.9174
+        geodesic_scale: 0.0019
+branch_linear_variance: 0.0485
+ branch_const_variance: 3.7438
+       linear_variance: 0.0348
+        const_variance: 685.7670
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The samples from this prior look very nice:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-12-full_prior_samples.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Motion is restricted to be near the epipolar lines, and the resulting curves remain smooth.&lt;/p&gt;
+
+&lt;p&gt;Matlab says only 314 out of 3766 are nonnegligible.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/11/work-log"/>
+   <updated>2015-01-11T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/11/work-log</id>
+   <content type="html">&lt;p&gt;Finished training.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;training_result = 
+
+         final_const_variance: 1.1669e-04
+  final_branch_const_variance: 1.7636e+03
+        final_linear_variance: 1.4425e+03
+      final_geodesic_variance: 195.4912
+         final_geodesic_scale: 0.0065
+                  final_noise: 0.0776
+
+training_result.initial
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;  ans =&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;         const_variance: 831.7886
+  branch_const_variance: 0.8552
+        linear_variance: 0.1183
+     euclidean_variance: 1.7367
+        euclidean_scale: 1.0000
+      geodesic_variance: 225.8247
+         geodesic_scale: 1.0000
+      epipolar_variance: 1.7367
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;These just don&#39;t make sense.  It allows for almost zero total translation, but lots of pert-curve translation (const_variance vs. branch_const_variance).  Linear variance allows for way too much scaling.  Geodesic variance seems sensible, but the (inverse-squared) geodesic scale is way too low... Basically this becomes a stand-in for const_variance.  Perhaps this is just a local minimum, we could try fixing const_variance to some large number and forcing geodesic variance to serve its intended purpose.&lt;/p&gt;
+
+&lt;p&gt;But the strangest thing is that&lt;/p&gt;
+
+&lt;p&gt;I sampled some curves from this prior, and they are about what I&#39;d expect: rotated and scaled with very little nonrigid deformation.   Below is a sample, along with the mean tree barely visible in the center:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-tree_sample.png&quot; alt=&quot;tree sample&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Branches remain connected to tree, despite large per-curve offset variance.&lt;/li&gt;
+&lt;li&gt;covariance matrix is singular&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Ruled-out causes of error:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;badly implemented logmvnpdf.  Tested against reference implementation.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Training observations&lt;/h2&gt;
+
+&lt;p&gt;The simulated annealing algorithm is very sensitive to our local minima.  It can sometimes find a good result in less than 500 iterations, but other times it gets stuck after less than 100 and never improves.  I can probably tweak the annealing schedule to increase temperature earlier(is &quot;reannealing&quot; the right value to tweak?&quot;).&lt;/p&gt;
+
+&lt;p&gt;The patternsearch algorithm beats simulated annealing after only 16 iterations (vs. 5k or more).   Annealing really struggles to get out of that minimum.&lt;/p&gt;
+
+&lt;p&gt;Surprisingly, after adding a seventh parameter (for branch-specific affine deformation), patternsearch totally fails to find a good minimum starting from default parameters.  Initializing it with the result of the six-parameter model gives much better results.  This suggests a coarse-to-fine strategy for training might work well in general.  However, this is a very specific case:  the six-parameter model was flexible enough to explain the data quite well, but was overly permissive -- it allowed too many nonsensical solutions.  Adding the seventh parameter introduced an alternative explanation of the data, one requiring less nonrigid deformation.&lt;/p&gt;
+
+&lt;p&gt;To try: genetic algorithm;  particle swarm; simplex method; start pattern search from SA result; globalsearch; grid search with multistart&lt;/p&gt;
+
+&lt;p&gt;Globalsearch &amp;amp; multistart w/
+  simplex
+  fminunc&lt;/p&gt;
+
+&lt;h2&gt;Misc results&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-tree_sample2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likleihood = -3.1787e+03
+training_result = 
+
+         final_const_variance: 6.0197e+06
+  final_branch_const_variance: 1.5774e-09
+        final_linear_variance: 1.6250
+      final_geodesic_variance: 238.6891
+         final_geodesic_scale: 0.0039
+         final_noise_variance: 0.1487
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Not bad.  Lots of geodesic variance to account for distortion.  Why is const variance so high?  Linear variance seems a bit high, but reasonable.&lt;/p&gt;
+
+&lt;p&gt;It might be a good idea to allow each branch to have a linear distortion relative to its initial point.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood = -2.5318e+03
+training_result = 
+
+       final_const_variance: 2.3156e+09
+final_branch_const_variance: 2.4988
+      final_linear_variance: 33.8221
+    final_geodesic_variance: 1.7165e+03
+       final_geodesic_scale: 0.0029
+       final_noise_variance: 0.0880
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Much smaller noise variance, much higher for all other variances.  const variance is astronomical... is the optimizer exploiting numerical error arising from a poorly-conditioned matrix?&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-tree_sample6.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood = -2.4848e+03
+training_result =
+
+       final_const_variance: 0.1383
+final_branch_const_variance: 1.7466
+      final_linear_variance: 5.4218e-04
+    final_geodesic_variance: 378.6715
+       final_geodesic_scale: 0.0048
+       final_noise_variance: 0.0832
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is close to what I would hope for -- small constant and linear variance, most variance coming from deformation.  Still, the scale is fairly short (~14 pixels), allowing for quite a bit of deformation.&lt;/p&gt;
+
+&lt;p&gt;Ran for several thousand more iterations.  Seem to be converging.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood = -2.4799e+03
+training_result =
+
+       const_variance: 0.0717
+branch_const_variance: 3.2826
+      linear_variance: 0.0028
+    geodesic_variance: 401.4291
+       geodesic_scale: 0.0047
+       noise_variance: 0.0831
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Running from scratch with the &quot;pattern_search&quot; algorithm, I got excellent results very quickly:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood = -2.4256e+03
+training_result =
+
+         const_variance: 261.7339
+branch_const_variance: 3.0796
+      linear_variance: 0.0035
+    geodesic_variance: 165.2169
+       geodesic_scale: 0.0063
+       noise_variance: 0.0821
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;These are the most sensible results yet!  Moderately large constant variance , small but nonnegligible branch constant variance.  A touch of linear variance to rotations.  Smaller deformation variance in response to larger const variance.  Yes!&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Adding a new parameter assigning independent affine deformation variance to each branch.  This should allow less variance to be allotted to geodesic_variance, which should improve marginal-likelihood.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-sampled_tree9.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Initial training pass failed to find the old local minimum.  Restarting it using the previous optimum resulted in very nice parameters:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood = -2.3107e+03
+training_result = 
+
+        const_variance: 291.9853
+ branch_const_variance: 2.0196
+       linear_variance: 0.0366
+branch_linear_variance: 0.0516
+     geodesic_variance: 12.7402
+        geodesic_scale: 0.0136
+        noise_variance: 0.0796
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note the dramatic drop in geodesic variance and increase in marginal likelihood.  On the other hand, the (corrected) geodesic scale dropped from(~12 to ~8), meaning slightly higher effective dimension.  The resulting tree looks much closer to the original shape than previous models.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Previous model had a problem: allowing each curve to affine-transform independently results in parents drifting away from children, which in reality isn&#39;t possible.  We need each child to inherit the covariance of the parent, which we accomplish by simply taking the dot-product of the &quot;geodesic&quot; index.&lt;/p&gt;
+
+&lt;p&gt;The pattern_search algorithm is having a hard time finding a better set of&lt;/p&gt;
+
+&lt;p&gt;Starting from the same position as previous starting point, results in a worse log-likelihood:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood = -2.3131e+03
+training_result = 
+
+        const_variance: 3.1017e-25
+ branch_const_variance: 2.9157
+       linear_variance: 0.0326
+branch_linear_variance: 0.0575
+     geodesic_variance: 12.5426
+        geodesic_scale: 0.0137
+        noise_variance: 0.0796
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Zero const variance is troubling.  Other parameters are mostly unchanged, except slightly higher branch_const_variance.  It seems the translation component was mostly used to align curves affected by parallax.&lt;/p&gt;
+
+&lt;p&gt;Actually, zero const variance isn&#39;t so surprising, because our now model alls branches to pivot around their starting point, and the root of the tree hardly moves between views.  What movement there is could be solved by pivoting the whole tree around it&#39;s center, using the global affine transformation.&lt;/p&gt;
+
+&lt;p&gt;It seems we have a redundant representation here.  The branch affine transformations subsume the global affine transformation, unless there&#39;s evidence that a multi-level type of model is reasonable (which it might be).&lt;/p&gt;
+
+&lt;p&gt;Starting from the result of the previous run gives slightly better results, but still not better than the &quot;bad&quot; model used previously.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood = -2.3122e+03
+training_result = 
+
+        const_variance: 498.3842
+ branch_const_variance: 2.9623
+       linear_variance: 0.0400
+branch_linear_variance: 0.0523
+     geodesic_variance: 12.0562
+        geodesic_scale: 0.0138
+        noise_variance: 0.0799
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Now optimization approach, adding one dimension at a time and reoptimizing. Results are almost identical to second-to-last run:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood:  -2.3131e+03
+training_result = 
+
+        noise_variance: 0.0800
+     geodesic_variance: 12.3965
+        geodesic_scale: 0.0136
+branch_linear_variance: 0.0576
+ branch_const_variance: 2.9157
+       linear_variance: 0.0327
+        const_variance: 8.3205e-09
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Again, low const_variance, but we manually can do 1D optimization to improve it:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-ml_vs_const_variance.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;training_result = 
+
+        noise_variance: 0.0800
+     geodesic_variance: 12.3965
+        geodesic_scale: 0.0136
+branch_linear_variance: 0.0576
+ branch_const_variance: 2.9157
+       linear_variance: 0.0327
+        const_variance: 435.8995
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Some plots showed that at low const_variance, the terrain become rocky, making search difficult.&lt;/h2&gt;
+
+&lt;p&gt;Forcing noise variance to be 1.0 results in much smoother priors:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-smooth_sampled_tree.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;training_result = 
+
+        noise_variance: 1
+     geodesic_variance: 15.9174
+        geodesic_scale: 0.0019
+branch_linear_variance: 0.0485
+ branch_const_variance: 3.7438
+       linear_variance: 0.0348
+        const_variance: 685.7670
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This kind of makes sense, since our point-correspondence algorithm has mean error of 0.5, even if correspondences are perfect.  In many cases, correspondences aren&#39;t perfect, because the triangulation metric used to find correspondences isn&#39;t sufficiently informative to infer the true correspondence.  So forcing i.i.d. noise variance to some minimum value prevents the prior from taking up that noise.&lt;/p&gt;
+
+&lt;h2&gt;misc notes&lt;/h2&gt;
+
+&lt;p&gt;Try different deformation model - cubic spline?&lt;/p&gt;
+
+&lt;p&gt;euclidean affine transform&lt;/p&gt;
+
+&lt;p&gt;next:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;train epipolar likelihood&lt;/li&gt;
+&lt;li&gt;MCMC
+
+&lt;ul&gt;
+&lt;li&gt;from sample to raster&lt;/li&gt;
+&lt;li&gt;train bernoulli likelihood&lt;/li&gt;
+&lt;li&gt;adaptive MH (or test with just simulated annealing)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Dangling tasks:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;train on multiple different view-pairs&lt;/li&gt;
+&lt;li&gt;ground-truth and train on neighboring views (rather than four-separated)&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Trained prior parameters</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/11/reference"/>
+   <updated>2015-01-11T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/11/reference</id>
+   <content type="html">&lt;p&gt;Training only local prior w/ noise_variance fixed at 1.0:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;        noise_variance: 1
+     geodesic_variance: 15.9174
+        geodesic_scale: 0.0019
+branch_linear_variance: 0.0485
+ branch_const_variance: 3.7438
+       linear_variance: 0.0348
+        const_variance: 685.7670
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Training full model (local prior and epipolar prior) w/ noise variance fixed at 1.0&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;log-likelihood = -2368.62
+
+     epipolar_variance: 4.5465
+    euclidean_variance: 0.0422
+       euclidean_scale: 4.2001e-07
+        noise_variance: 1
+     geodesic_variance: 233.9050
+        geodesic_scale: 4.3327e-04
+branch_linear_variance: 0.1079
+ branch_const_variance: 7.0217
+       linear_variance: 0.1016
+        const_variance: 2.4123e+03
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;  Notice significantly larger geodesic variance, and much longer scale length (48 vs 22 pixels).  All other variances increased too.  This is probably because we&#39;ve treated the two priors as independent, but they aren&#39;t, so multiplying them results in too little overall variance.&lt;/p&gt;
+
+&lt;p&gt;By comparison, below is a nearby local minimum, obtained by training all 9 parameters from scratch.&lt;/p&gt;
+
+&lt;p&gt;  log-likelihood:  -2370.05&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;       epipolar_variance: 4.6435
+      euclidean_variance: 3.1113e-35
+         euclidean_scale: 7.4415e+152
+          noise_variance: 1
+       geodesic_variance: 283.5387
+          geodesic_scale: 3.9692e-04
+  branch_linear_variance: 0.1236
+   branch_const_variance: 6.5436
+         linear_variance: 0.0746
+          const_variance: 5.4990e-109
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This model moves all epipolar prior variance into the iid epipolar_variance variables. Also the local prior&#39;s offset variance has been moved into the deformation variance, geodesic_variance, while shortening the scale.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Projection of point onto line using distance from two reference points</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/09/reference"/>
+   <updated>2015-01-09T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/09/reference</id>
+   <content type="html">&lt;p&gt;Consider two known points A, and B, an unknown point C. If we know the distances between C and the other two points, we can recover \(\pi_{AB}(C)\), the projection of C onto the line AB.&lt;/p&gt;
+
+&lt;p&gt;The distance between \(\pi_{AB}(C)\) and A is&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+d(A, \pi_{AB}(C)) = d(A,B) (1+g) / 2 \text{, where} \\
+g &amp;= \left ( d(A,C)^2 - d(B,C)^2 \right ) / d(A,B)^2
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;This can be derived using the pythagorean theorem and fact triangles AC\pi(C) and BC\pi(C) share a side.&lt;/p&gt;
+
+&lt;p&gt;This can be used to derive an expression for \(\pi_{AB}(C)\) using a weighted sum of A and B:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+\pi_{AB}(C) &amp;= (A(1-g) + B(1+g) ) / 2
+\end{align}
+\]
+&lt;/div&gt;
+
+
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Geodesic distance kernel and BGP kernel -- simplified representation</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/08/reference"/>
+   <updated>2015-01-08T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/08/reference</id>
+   <content type="html">&lt;p&gt;With a nod to Mercer&#39;s theorem, we can represent gaussian processes over graph-structured points in a very simple way.  We may transform our input space over graph nodes into a new eucliean space.&lt;/p&gt;
+
+&lt;p&gt;For trees with N branches, we denote a point a distance x along the i-th branch by the ordered pair \(i, x\).  For each branch i, its parent is denoted by p(i), and its branch point is denoted by b(i).  If branch i has not parent, we define p(i) = b(i) = 0.  We can define a transformation \(\phi : \mathbb{N}\times\mathbb{R} \rightarrow \mathbb{R}^N\), whose k-th dimension is:&lt;/p&gt;
+
+&lt;p&gt;  &lt;div&gt;
+  [
+    \phi_k(i,x) = \begin{cases}
+        x &amp;amp; \text{ if } i == k \
+        0 &amp;amp; \text{ if } i == 0 \
+        \phi_k(p(i), b(i)) &amp;amp; \text{ otherwise.}
+        \end{cases}
+  ]
+  &lt;/div&gt;.&lt;/p&gt;
+
+&lt;p&gt;If branch k is the root of a subtree containing (i,x), \(\phi_k\) is the branch position of sub-subtree containing (i,x).&lt;/p&gt;
+
+&lt;p&gt;This formulation makes it easier to define covariance functions over tree structures.  O&lt;/p&gt;
+
+&lt;p&gt;It is often useful to model each tree branch as a squared-exponential curve.  This is sometimes falsely implemented as squared exponential covariance function over geodesic distance instead of Euclidean distance.  However, this covariance function isn&#39;t positive definite (need illustration).  Instead, if we define a distance function \(d(i,x,i&#39;,x&#39;)\) as the sum of squared geodesic distances between adjacent junctions along the path between (i,x) and (i&#39;,x&#39;).  Using this distance metric with a squared-exponential covariance function results in exactly the model we seek.&lt;/p&gt;
+
+&lt;div&gt;
+  k(i,x,i&#39;,x&#39;) = \exp\{-d(i,x,i&#39;,x&#39;)\}
+&lt;/div&gt;
+
+
+&lt;p&gt;We can use our transformation above to represent this more succinctly:&lt;/p&gt;
+
+&lt;div&gt;
+  k(\phi, \phi&#39;) = \exp\{- \| \phi - \phi&#39; \|^2\}
+&lt;/div&gt;
+
+
+&lt;p&gt;Since each dimension in phi corresponds to exactly one branch, \( \phi - \phi \) is a vector of distances between branch points on the each curve corresponding to (i,x) and (i&#39;,x&#39;).  The squared l2 norm of this expression is equivalent to d(i,x,i&#39;,x&#39;).  Note that the fact that we can represent this covariance function using a standard covariance function with transformed inputs shows that it is positive definite.&lt;/p&gt;
+
+&lt;p&gt;A second useful tree model is the one I introduced in my dissertation proposal -- the branching cubic spline model.  The covariance function for this model involved a recursive function that was complicated and wasn&#39;t previously proven to be positive definite.  Using our input transformation, this simplifies to:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+  k(\phi, \phi) = \sum_i k_c(\phi_i, \phi&#39;_i)
+  \]
+&lt;/div&gt;
+
+
+&lt;p&gt;where k_c() is the cubic spline covariance function.  The recursive nature of the definition of \(\phi\) ensures that each curve inherits the covariance of its parent curve.  And because \(k_c(0,x) == 0\), points on different subtrees only receive covariance from their shared ancestors.  Again, this formulation suffices to show that our original covariance function is positive definite.&lt;/p&gt;
+
+&lt;h2&gt;Loopy graphs&lt;/h2&gt;
+
+&lt;p&gt;Non-tree structured graphs are more difficult, but I have a few possible approaches.&lt;/p&gt;
+
+&lt;p&gt;One way of interpreting a loop is as two separate branches (one at each junction) that gradually blend into one another.  Implementing a transformation \(\phi\) is easy under this interpretation -- just linearly interpolate between the two independent lines in \(\phi\).  Unfortunately, the resulting embedding doesn&#39;t preserve distances between nearby points. I tried a similar approach with cubic Hermite splines instead of linear interpolation, but again, distances aren&#39;t preserved.  This could be solved if we could (a) guarantee that the bridging curve has exactly the right length and (b) the mapping between graph points and the bridging curve in \(\phi\) preserves distance.  Both of these result in equations that can&#39;t be solved analytically, but numerical techniques could work if we cared enough.&lt;/p&gt;
+
+&lt;p&gt;We could try something similar, but use a spherical arc to connect the two branch points in \(\phi\).  This would preserve total length and adjacent distances, but it violates the property that the curve&#39;s endpoint is orthogonal to its parent.&lt;/p&gt;
+
+&lt;p&gt;Both of these bridging techniques also violate the elegant property of the tree-based covariance, namely that the L1 distance between points is equal to thier geodesic distance.&lt;/p&gt;
+
+&lt;p&gt;A third possibility is to simply use the distance function \(d(i,x,i&#39;,x&#39;)\) we introduced before.  The down side of this is I con&#39;t think of a proof for its positive-definiteness.  But if it is PD, it should have the properties we want, and is relatively easy to implement.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/04/work-log"/>
+   <updated>2015-01-04T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/04/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Skeleton deformation fitting</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/02/work-log"/>
+   <updated>2015-01-02T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/02/work-log</id>
+   <content type="html">&lt;p&gt;Since the skeletons are very different between views, the old graph-matching approach probably won&#39;t work.  I believe the graph deformation idea is still a good one, but the likelihood involving correspondences won&#39;t work because it doesn&#39;t handle false positive or false negative parts of the graph.&lt;/p&gt;
+
+&lt;p&gt;A better idea is to go back to our old approach: use a pixel-based likelihood to evaluate deformed graphs.  Use MCMC to explore the space and use the GP prior covariance for proposals or search directions.  After computing the cholesky decomposition, this should proceed relatively quickly, even for large point sets.&lt;/p&gt;
+
+&lt;p&gt;The model is the medial axis transform of the original image, plus GP-distributed deformation, which includes an epipolar constraint.  To render into the second image, we perform an inverse medial axis transform.&lt;/p&gt;
+
+&lt;p&gt;Because of the epipolar constraint, the number of effective dimensions is nearly halved.  The correlation between nearby points should reduce dimension by an even more significant factor.&lt;/p&gt;
+
+&lt;h2&gt;Initial tasks&lt;/h2&gt;
+
+&lt;p&gt;Train GP on ground truth data.
+  (try adding runners between almost-bridged points)
+Train Bernoulli distribution over foreground, background&lt;/p&gt;
+
+&lt;p&gt;Algorithms
+    binary image to graph
+    All pairs shortest path.
+    polyline w/ interpolated intensity
+  x medial axis transform
+  x Inverse medial axis transform
+    specialized mcmc
+        adaptive metropolis hastings
+        hit and run sampling?&lt;/p&gt;
+
+&lt;h2&gt;Possible extensions:&lt;/h2&gt;
+
+&lt;p&gt;  use a weaker distance function for geodesic distance (huber function?)
+  make geodesic distance greater at junctions&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/01/work-log"/>
+   <updated>2015-01-01T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/01/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;  Some improvements to the approach outlined at the end of previous post...&lt;/p&gt;
+
+&lt;p&gt;  Tweak epipolar likelihood to add a small affine and nonlinear distortion component
+  (e.g. due to lens distortion).  this allows epipolar variance to be smaller;
+  forces deviations to be spatially correlated.&lt;/p&gt;
+
+&lt;p&gt;  Find some good correspondences; fix camera distortion
+      approach 1: distort image using GP and known correspondences.
+      approach 2: optimize camera distortion parameters under GP and known correspondences&lt;/p&gt;
+
+&lt;p&gt;  Use unambiguous correspondences first.&lt;/p&gt;
+
+&lt;p&gt;  I fear that graph topology may be too noisy and fluxuating to be a reliable source
+  of information.  Is keypoint matching with epipolar constraint enough to solve this?
+  Maybe with added spatial distortion?&lt;/p&gt;
+
+&lt;p&gt;  How can adding correspondences reduce uncertainty in remaining points?  The approach
+  above can reduce uncertainty to almost lying on the epipolar line.   If we can recover
+  small subgraphs, those can help too.  But will false joints break things? (this would
+  be a good experiment)  Maybe just linear sections with interior keypoint nodes.
+  This should at least improve fine-scale matching later.&lt;/p&gt;
+
+&lt;p&gt;  2D gives us lateral branch candidates, but are ambiguous.  Can resolve them in 3D?&lt;/p&gt;
+
+&lt;p&gt;  Idea: branch points have higher geodesic distance?&lt;/p&gt;
+
+&lt;p&gt;  Simpler problem: Camera repair for volumetric reconstruction.&lt;/p&gt;
+
+&lt;p&gt;  Sift keypoint matching
+    nonlinear distortion fix
+    ransac matching keypoints + distortion correction&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/12/31/work-log"/>
+   <updated>2014-12-31T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/12/31/work-log</id>
+   <content type="html">&lt;p&gt;Working with KernelBoost code from &lt;a href=&quot;http://cvlab.epfl.ch/page-108936-en.html&quot;&gt;http://cvlab.epfl.ch/page-108936-en.html&lt;/a&gt;.  Running training example, should take about 9 hours.  Working on preparing our data to train with.&lt;/p&gt;
+
+&lt;p&gt;Prepared files for Structure from Silhouette Probability Maps and sent to Dr. Tabb to try reconstruction.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Graph matching with epipolar constraints</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/12/29/reference"/>
+   <updated>2014-12-29T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/12/29/reference</id>
+   <content type="html">
+
+&lt;div&gt;\[
+  \def\CV#1{\boldsymbol{#1}}
+  \def\cross{\times}
+  \def\ocross{\otimes}
+  \]&lt;/div&gt;
+
+
+&lt;p&gt;What follows is a variation on the work of &lt;a href=&quot;https://www.google.com/url?sa=t&amp;amp;rct=j&amp;amp;q=&amp;amp;esrc=s&amp;amp;source=web&amp;amp;cd=1&amp;amp;cad=rja&amp;amp;uact=8&amp;amp;ved=0CCUQFjAA&amp;amp;url=http%3A%2F%2Fcvlab.epfl.ch%2Ffiles%2Fcontent%2Fsites%2Fcvlab2%2Ffiles%2Fpublications%2Fpublications%2F2012%2FSerradellGKMF12.pdf&amp;amp;ei=YDWjVMXYCpWwogSmj4HYDQ&amp;amp;usg=AFQjCNFCQfO_wNWnnFZa_35HQtW9xA3ogA&amp;amp;bvm=bv.82001339,d.cGU&quot;&gt;Serradell et al. (CVPR 2012)&lt;/a&gt;, which we modify to introduce an epipolar constraint and use a covariance function based on geodesic distance.  The epipolar constraint requires significant rework of the original derivation, which assumes the x and y dimension are independent.  The use of geodesic distance is necessary to handle parallax motion not present in Serradell&#39;s data.&lt;/p&gt;
+
+&lt;p&gt;See also &lt;a href=&quot;http://www.iaeng.org/publication/WCE2007/WCE2007_pp265-268.pdf&quot;&gt;(Yu, Tian, Liu, 2007)&lt;/a&gt; for an earlier application of GP for point matching, including expressions for marginal likelihood derivatives for training.&lt;/p&gt;
+
+&lt;p&gt;Consider a 3D tree structure observed in two views as 2D trees.  We seek a correspondence between points in the 2D trees.  We treat this as a problem of matching graphs embedded in \(\mathbb{R}^2\), which we solve using nonlinear Gaussian process regression, using epipolar constraints to ensure the result is consistent with the known camera configuration.&lt;/p&gt;
+
+&lt;p&gt;Consider a embedded graph in two views, A and B, with vertex positions \(X_A = \{x^A_1, \dots, x^A_{M_A}\}\) and \(X_B = \{x^B_1, \dots, x^B_{M_B}\}\).  We model the graph in B as arising from an affine transform of the graph in A plus a nonlinear deformation.  The goal is to find a correspondence between the graph vertices that minimizes the distortion between them.  Because the graph structures may be noisy, we seek an approach that is robust to graphs with minor differences in topology.&lt;/p&gt;
+
+&lt;h2&gt;Epipolar constraints&lt;/h2&gt;
+
+&lt;p&gt;We can use the known relationship between two cameras to constrain we expect points \(X_A\) to appear in view B.  The fundamental matrix \(F\) between view A and view B is a 3x3 matrix that constrains points in \(X_A\) to lie on their epipolar line in view B.  Because we expect both the points and the fundemental matrix to include some error, we relax this constraint and assume each point lies near its epipolar line with variance \(\sigma^2_e\).&lt;/p&gt;
+
+&lt;p&gt;For any point \(\boldsymbol{x}\) in view A, the epipolar line in view B is given by \(\boldsymbol{l} = F^T [\boldsymbol{x}^\top 1]^\top \).  The normal vector perpendicular to the epipolar line is \(\hat {\boldsymbol{n}} = [l_1 l_2]^\top / \| [l_1 l_2] \|\).  The penalized epipolar constraint can be expressed as a Gaussian distribution \(\mathcal{N}(\boldsymbol{e}&#39;, \Sigma_e)\), where \(\boldsymbol{e&#39;}\) is the epipole in view B, and \(\Sigma_e^{-1} = (\hat{\boldsymbol{n}} \hat{\boldsymbol{n}}^\top) / \sigma_e^2 \).  Note that the precision matrix \(\Sigma_e^{-1}\) is rank-deficient, representing infinite variance along the epipolar line.&lt;/p&gt;
+
+&lt;p&gt;The joint likelihood of all points \(X^A = \{\boldsymbol{x}^A_1, \dots, \boldsymbol{x}^A_M\}\) with epipolar normals \(\{\boldsymbol{\hat{n}}_1, \dots, \boldsymbol{\hat{n}}_M\}\) is \(\mathcal{N}(\mu_E, \Sigma_E)\), where&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+\mu_E &amp;= [\boldsymbol{e}&#39;^\top \boldsymbol{e}&#39;^\top \dots]^\top \\
+\Sigma^{-1}_E &amp;= S S^\top \\
+S &amp;= (1/\sigma_e) \left ( \begin{array}{cccc} 
+    \boldsymbol{\hat{n}}_{1} &amp; 0 &amp; \dots &amp; 0 \\
+    0 &amp; \boldsymbol{\hat{n}}_{2} &amp; \dots &amp; 0 \\
+    \vdots &amp; \vdots &amp; &amp; \vdots \\ 
+    0 &amp; 0 &amp; \dots &amp; \boldsymbol{\hat{n}}_{M}
+    \end{array}
+    \right ).
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;h2&gt;Nonrigid deformation prior &lt;/h2&gt;
+
+&lt;p&gt;We assume the motion of points from view A to view B arise as an affine transformation plus some nonrigid deformation.  The main cause of nonrigid deformation is parallax motion, but other less predictable factors like camera lens distortion of small scene movements are possible too.&lt;/p&gt;
+
+&lt;p&gt;Assuming motion in the x and y direction are independent, single-dimensional prior covariance between the \(i\)th and \(j\)th points is&lt;/p&gt;
+
+&lt;div&gt;
+\[
+  k(i,j) = \theta_0 + \theta_1 x_i^T x_j + \theta_2 \exp \left \{ -\frac{\theta_3}{2} \| x_i - x_j  \|^2 \right \} + \theta_4 \exp \left \{ -\frac{\theta_5}{2} d( v_i, v_j) \right \}.  \;\;(1)
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Here, \(d(v_i, v_j)\) is the geodesic graph distance, i.e. the closest path between vertices \(v_i\) and \(v_j\).  The first three terms are the same as Serradell et al. -- the first two terms define an affine transformation and the third is a nonlinear distortion term that penalizes local geometry in A being distorted in B.   However, we recognize that points with dissimilar 2D position may appear similar in 2D due to projection.  The significant parallax shift between such points violates the locality assumption of the third covariance term.  The fourth term in (1) introduces deformation based on geodesic distance.  We observe that relative geodesic distances are better preserved under projection than relative Euclidean distances.   This term provides a better explanation for parallax shift between points at similar Euclidean positions but dissimilar positions in the graph.&lt;/p&gt;
+
+&lt;p&gt;Equation (1) applies to one-dimensional points; we need an expression relating two-dimensional points.  The x and y dimensions are independent under the prior, so the covariance matrix over 2D points is simply a block-diagonal matrix of two covariance matrices over 1D points.  We permute this matrix so dimensions are ordered first by increasing point index, then spatial dimension.  Formally, let \(X_I\) and \(X_J\) be the vertical concatenation of 2D points with indices \(I = \{i_1, \dots, i_m\}\) and \(J = \{j_1, \dots, j_n\}\).  Define \(k(I,J)\) as the gram matrix of covariances \(k(i,j)\) for each pair \((i,j) \in I \cross J\).  We define the prior covariance between point sets \(X_I\) and \(X_J\) as&lt;/p&gt;
+
+&lt;div&gt;
+\[
+K(I,J) = k(I,J) \ocross I_2, 
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;where \(\ocross\) denotes Kronecker product and \(I_2\) is a 2x2 identity matrix.  The result is a \(2 \vert I \vert \times 2 \vert J \vert\) covariance matrix over a sequence of stacked 2D variables with independent dimensions.&lt;/p&gt;
+
+&lt;h2&gt;Correspondence matching&lt;/h2&gt;
+
+&lt;p&gt;To estimate correspondences between \(X^A\) and \(X^B\), we follow the coarse-to-fine matching strategy in Serradell et al. (2012).  We first find a coarse set of correspondences between branch points and tips using the method below.  A fine-grained correspondence is then found between the densely spaced remaining points, conditioned on the coarse correspondences.&lt;/p&gt;
+
+&lt;p&gt;Given a (possibly empty) set of \(N\) correspondences, we can derive a posterior distribution over possible locations for points \(X^A\) in view B.  For a given correspondence of size N, let \(X^B_N\) be the points in graph B corresponding to points in A with indices \(J_N = \{j_{1}, \dots, j_{N}\}\).  Let \(J = \{1, \dots, M\}\) be the set of all vertex indices in graph A.  The marginal posterior for point \(x^A_{i_*}\) is&lt;/p&gt;
+
+&lt;div&gt;
+\[
+  \begin{align}
+  \mu_N(i_*) &amp;=  K_*^T C^{-1}_N \left ( \begin{array}{c} X_N^B \\ \mu_E \end{array} \right ) \\
+  \sigma^2_N(i_*) &amp;= K(i_*, i_*) + \sigma_n^2 I_2 - K_*^T C_N^{-1} K_*  \text{, where} \\
+  C_N^{-1} &amp;= 
+  \left (
+  \begin{array}{cc} 
+  K(J_N, J_N) + \sigma_n^2 I &amp; K(J, J_N) \\
+  K(J_N, J) &amp; K(J,J) + \Sigma_E
+  \end{array}
+  \right )^{-1}
+  \end{align} \\
+  K_* = K(J_N, i_*)
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;However, because \(\Sigma_E^{-1} \) is rank-deficient, we must rewrite \(C_N^{-1}\)  as&lt;/p&gt;
+
+&lt;div&gt;
+\[
+  \begin{align}
+  C_N^{-1} &amp;= 
+  \left (
+  \begin{array}{cc} 
+      I &amp; 0 \\
+      0 &amp; S
+  \end{array}
+  \right ) 
+  
+  \left (
+  \begin{array}{cc} 
+  K(J_N, J_N) + \sigma_n^2 I &amp; S K(J, J_N) \\
+  K(J_N, J) S &amp; S^\top K(J,J) S + I
+  \end{array}
+  \right )^{-1}
+
+  \left (
+  \begin{array}{cc} 
+      I &amp; 0 \\
+      0 &amp; S^\top
+  \end{array}
+  \right ) 
+  \end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Note that despite \(\Sigma_E^{-1}\) being rank-deficient, the expression above is non-singular.&lt;/p&gt;
+
+&lt;p&gt;Using the expression above, we can compute the z-score of each point in B against the image of each point in A.  Starting with an empty correspondence set, we construct a set of correspondence candidates whose z-score is below a threshold.  We use z-score as weights to sample a correspondence from that set, and use that correspondence to update the z-scores of all remaining candidates by conditioning on the new correspondence set.  We repeat until no valid candidates exist.  Unclaimed vertices are treated as outliers.  We repeat this process several times and keep the best fit.  To avoid spending time on bad matches, we quit early if the relative geodesic distances between corresponding graphs differ too greatly.&lt;/p&gt;
+
+&lt;p&gt;Fine-grained correspondences between remaining points can be found using the Hungarian algorithm using pairwise z-score as a cost metric.&lt;/p&gt;
+
+&lt;h2&gt;3D reconstruction&lt;/h2&gt;
+
+&lt;p&gt;The simplest approach to 3D reconstruction is to triangulate the corresponding points in two views.  Multiple views can be chained together from pairwise correspondence using transitivity.  A better approach would be to use my BGP model to find an optimal registration between sequences of recovered 3D trees.  I don&#39;t know if I could fit both the above and that into a single conference paper, because the temporal BGP model is a bit complicated.  I have a simpler model in mind that might work better, and might be easier to squeeze into the end of a paper.&lt;/p&gt;
+
+&lt;h2&gt;Results&lt;/h2&gt;
+
+&lt;p&gt;None yet, working on it.&lt;/p&gt;
+
+&lt;p&gt;Still unclear how best to do evaluation.  The original paper evaluated against synthetic data generated by &lt;a href=&quot;http://vascusynth.cs.sfu.ca/Software.html&quot;&gt;VacuSynth&lt;/a&gt;, which we might be able to use too.  They used mean squared error between estimated and true position, which I&#39;m not thrilled with, because it doesn&#39;t explicitly capture whether the topology is matched correctly.&lt;/p&gt;
+
+&lt;p&gt;If Dr. Tabb&#39;s software works reasonably well, we could measure reconstruction quality and compare our reconstruction against hers.  Ground truth would be the triangulated 2D ground truth, smoothed with hand-tuned BGP.&lt;/p&gt;
+
+&lt;p&gt;We could develop&lt;/p&gt;
+
+&lt;p&gt;Precision/recall against ground-truth curves.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>GP Graph-matching for 3d reconstruction</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/12/23/work-log"/>
+   <updated>2014-12-23T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/12/23/work-log</id>
+   <content type="html">&lt;p&gt;Based on &lt;a href=&quot;http://cvlab.epfl.ch/files/content/sites/cvlab2/files/publications/publications/2012/SerradellGKMF12.pdf&quot;&gt;this paper&lt;/a&gt; on graph matching for registration of biomed data.  We can adapt the approach to our multi-view data using knowledge of (a) the cameras and (b) small motion between views.  Our graphs will deform differently than theirs, because parallax doesn&#39;t maintain relative euclidean distances.  However, geodesic distances should be roughly maintained, so we can use geodesic distance in our nonlinear deformation GP.   The coarse-to-fine strategy should make inference more tractible than our previous appraoches; fitting branch points first, interior points later.  This approach will require better foreground-background segmentation than we&#39;ve used in the past, which we can achieve by training a pixel classifier with the Weka segmenter in Fiji.&lt;/p&gt;
+
+&lt;p&gt;This appraoch answers the question of how to project an embedded graph from one view to another using a small number of known correspondences.   In the original paper, the GP evidence consisted of the graph vertex positions in the original view, which are allowed to deform in the second view using a squared-expoential covariance function.  In our approach, we will also use the original vertex positions in order to encourage minimal motion, under the assumption of minimal camera motion.  However, we will also introduce evidence from the epipolar lines, using known cameras.  To accomplish this, we will backproject the points to a default depth, and reproject them into the second image.  The likelihood covariance will have infinite variance in the direction of the epipolar line.  For any particular point, the product of (a) the &quot;zero motion&quot; likelihood function and (b) the &quot;epipolar constraint&quot; likelihood function should be their product -- an enlongated eliptical gaussian with mean lying on (or very near) the eipolar line nearest to the original point location.&lt;/p&gt;
+
+&lt;p&gt;The prior covariance between graph points will be given by a covariance function similar to that in the original paper, but using geodesic distance between points instead of euclidean distance.  This should allow greater movement in the tips of plant.&lt;/p&gt;
+
+&lt;p&gt;We can train this model on ground truth curve skeletons.&lt;/p&gt;
+
+&lt;p&gt;The coarse graph matching proceeds by proposing correspondence between two pairs of points, using point covariance to choose good candidates.  We then update to covariance of remaining points and propose a new correspondence from the pair with fewest matches.  We resume until a threshold of matches is met, and we evaluate the result.  We then back up the decision tree and try the other correspondence candidate (i.e. depth first search over all candidates).  Note that at each level of the decision tree, the number of candidates decreases, due to less uncertainty in point positions, which mitigates the combinitoric explosion in correspondences.  We terminate early if the relative geodesic distance between pairs of corresponding nodes differs significantly.  We may also use triangulation error as a stoping criterion, but this is probably already handled by the epipolar constraint likelihood.&lt;/p&gt;
+
+&lt;p&gt;In some cases, the graph changes topology between views, due to overlapping stems.  Our approach should be robust somewhat to different topologies, but it is unclear how much.  We may need to convert our graphs to trees somehow, maybe by sampling.  Other possible heuristics:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;use X-junctions as candidates for overlapping edges&lt;/li&gt;
+&lt;li&gt;assume bottom of image is graph root; prefer nodes closer to the root according to breadth-first-search depth when breaking loops.&lt;/li&gt;
+&lt;li&gt;eliminate short segments, merging their nodes&lt;/li&gt;
+&lt;li&gt;prune short edges, or edges with fast-varying width. (e.g. at flower tips.)&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Mean / Covariance&lt;/h2&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+  \mu_N(\mathbf{x}^A) &amp;= \mathbf(k)^T \mathbf{C}_N^{-1} \mathbf{Y}_N^B \\
+  \sigma^2_N(\mathbf{x}^A) &amp;= k(\mathbf{x}^A, \mathbf{x}^A) + \beta^{-1} - \mathbf{k}^T \mathbf{C}_N^{-1}\mathbf{k}
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;where&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+  \mathbf{C}_N = diag(K,3) + K_y
+  K_y = (\sigma_o^{-1} I + \Sigma_e^{-1})^{-1}
+  Y^B_N = K_y (\sigma_o^{-1} I X^B_N + \Sigma_e^{-1} e
+  e is the epipole
+  \pi^K(X) is the epipiolar projection of the points in X into view K (see explanation)
+  \Sigma^A_e = diag([\Sigma^A_{e,1}, ..., \Sigma^A_{e,N}])
+  \Sigma^{-A}_{e,i} = 1/\sigma_e^2 R(\Theta(x_i)) [1 0; 0 0] R^T(\Theta(x_i))
+  \Theta(x_i) = atan2(-F_1 x_i, F_2 x_i)
+  K_ij = k(x_i^A, k_j^A)
+\end{align}
+\]
+&lt;/div&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/12/21/work-log"/>
+   <updated>2014-12-21T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/12/21/work-log</id>
+   <content type="html">&lt;p&gt;Generate synthetic vascular data with &quot;Vacusynth&quot;, like in &lt;a href=&quot;http://cvlab.epfl.ch/files/content/sites/cvlab2/files/publications/publications/2012/SerradellGKMF12.pdf&quot;&gt;this paper&lt;/a&gt; on graph matching.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>GP with two constraints</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/12/18/reference"/>
+   <updated>2014-12-18T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/12/18/reference</id>
+   <content type="html">&lt;p&gt;Consider a GP \(f(x)\) with covariance \k(x,y)\).  We can construct a new GP \f&#39;(x)\) by constraining two points in \(f(x)\), which we&#39;ll call &quot;endpoints&quot;.  Without loss of generality, assume the constraints occur at \(x = 0 \) and \(x = 1\).&lt;/p&gt;
+
+&lt;p&gt;We can derive the expression for covariance of the doubly-constrained function, \(k&#39;&#39;(x,y)\).  Let \(k_{a,b})\) denote \(k(a,b)\).  Recall our &lt;a href=&quot;/ksimek/research/2014/12/07/reference/&quot;&gt;earlier result&lt;/a&gt; for the singly-constrained GP at \(x = 0\):&lt;/p&gt;
+
+&lt;div&gt;
+\[
+  k&#39;(x,y) = k_{xy} - k_{x0} k_{y0} / k_{00}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;We can apply this tranformation twice to obtain \(k&#39;&#39;(x,y)\):&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+  k&#39;&#39;(x,y) &amp;= k&#39;_{xy} - k&#39;_{x0} k&#39;_{y0} / k&#39;_{00} \\
+           &amp;= 
+           (k_{xy} - k_{x0} k_{y0} / k_{00}) - 
+              (k_{x1} - k_{x0} k_{10} / k_{00}) 
+              (k_{1y} - k_{10} k_{y0} / k_{00})
+              (k_{11} - k_{10} k_{10} / k_{00})^{-1}
+           &amp;= 
+          \frac{1}{(k_{11} - k_{10} k_{10} / k_{00})^{-1}}
+          \left [
+            (k_{xy} - k_{x0} k_{y0} / k_{00})
+            (k_{11} - k_{10} k_{10} / k_{00}) - 
+            (k_{x1} - k_{x0} k_{10} / k_{00}) 
+            (k_{1y} - k_{10} k_{y0} / k_{00})
+          \right ] \\
+          &amp;= 
+          \frac{1}{(k_{11} - k_{10} k_{10} / k_{00})}
+          \left [
+            (k_{xy} - k_{x0} k_{y0} / k_{00})
+            (k_{11} - k_{10} k_{10} / k_{00})  - 
+            (k_{x1} - k_{x0} k_{10} / k_{00}) 
+            (k_{1y} - k_{10} k_{y0} / k_{00})
+          \right ] \\
+          &amp;= 
+          \frac{k_{00}}{k_{11}k_{00} - k_{10}^2}
+          \left [
+             k_{00} k_{11} k_{xy} 
+            -k_{00} k_{11} k_{x0} k_{y0} /k_{00} 
+            -k_{00} k_{xy} k_{10}^2/k_{00} 
+            +k_{00} k_{x0} k_{y0} k_{10}^2/k_{00}^2
+            -k_{00} k_{x1} k_{y1} 
+            +k_{00} k_{x1} k_{y0} k_{10} /k_{00} 
+            -k_{00} k_{x0} k_{y0} k_{10}^2/k_{00}^2
+            +k_{00} k_{x0} k_{y1} k_{10} /k_{00} 
+          \right ] \\
+          &amp;= 
+          \frac{1}{k_{11}k_{00} - k_{10}^2}
+          \left [
+            k_{00} k_{11} k_{xy} 
+           -k_{xy} k_{10} ^2
+           +k_{x0} k_{y1} k_{10} 
+           +k_{x1} k_{y0} k_{10} 
+           -k_{x0} k_{y0} k_{11} 
+           -k_{x1} k_{y1} k_{00} 
+          \right ]
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;It&#39;s important to note that this expression is symmetric w.r.t {0,1}. Also note that no pair of values appear more than once, making further simplification difficult.&lt;/p&gt;
+
+&lt;p&gt;We&#39;ll denote the covariance for a constrained GP by k(x,y ; a, b), where a,b are the constraint  indices.&lt;/p&gt;
+
+&lt;h2&gt;Curve trees with runners&lt;/h2&gt;
+
+&lt;p&gt;We can modify the curve tree model to introduce &quot;runners&quot; -- special curves that are connected on both ends to curve tree curves.  The introduction of runner curves transforms a curve tree into a curve DAG.  In general, it isn&#39;t possible to unambiguously identify runners by inspecting a DAG, because there are always at least two ways to break a loop.  Thus, we need to augment our directed graph with labels to indicate runners explicitly.&lt;/p&gt;
+
+&lt;p&gt;A runner differs from a normal curve in two ways.  First, that it always has two parents, which define its endpoints.  Second, its gaussian process differs from a standard curve, due to it being constrained on both ends.  The runner curve process is a linear process connecting its two endpoints, plus a smooth curve process that allows deviations from the linear curve.  The latter process must be constrained on both ends to pass through the endpoints, using the derivation above.&lt;/p&gt;
+
+&lt;h3&gt;Deriving the runner covariance&lt;/h3&gt;
+
+&lt;p&gt;Let \(A\) and \(B\) be random variables representing endpoints of a runner curve, lying somewhere on its parent curves.  A straight line between those curves is given by&lt;/p&gt;
+
+&lt;div&gt;
+\[
+  f(t) = t A + (1-t) B
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Let us derive the covariance of two points \(X = f(s) \) and \(Y = f(t)\) on the line.&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+  cov (X,Y) &amp;= E[XY] - E[X]E[Y] \\
+           &amp;= E[XY] - 0 \text{(assiming zero mean curves)} \\
+           &amp;= E[ \right ( tA + (1-s) B \left) \right ( tA + (1-t) B \left) ] \\
+           &amp;= E[ ts A^2] + E[t(1-s)BA] + E[s(1-t)BA] + E[(1-t)(1-s)B^2 ]
+           &amp;= ts var(A) + cov(B,A) [t (1-s) + s (1-t)] + (1-t)(1-s)var(B)
+\begin{end}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;The GP above assumes endpoints occur at 0 and 1. We can relax this to end at \(T_\mathrm{max}\), giving us the &quot;linear interpolation gaussian process:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+  k_l(s,t; T_\mathrm{max}) &amp;= 1/T_\mathrm{max}^2 \right ( ts var(A) + cov(B,A) [t (T_\mathrm{max}-s) + s (T_\mathrm{max}-t)] + (T_\mathrm{max}-t)(T_\mathrm{max} - s)var(B) \left )
+\begin{end}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;This gaussian process will form the backbone of the runner curv.   To allow deviations from the linear path, we add a smooth curve GP with covariance \(k_c\).  This GP must be constrained to pass through zero at \(0\) and \(T_\mathrm{max}\) using the derivation above.  For any two points on the runner, the covariance is given by:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+  k(x,y) &amp;=  \right( k_l(x,y ; T_\mathrm{max}) + k_c(x,y ; 0,T_\mathrm{max})  \left ) + 
+\begin{end}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;If \(x\) lies on the runner and \(y\) lies elsewhere on the curve DAG, the covariance is:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+  cov(X,Y) &amp;= E[XY] \\
+           &amp;= E[(sA + (1-s)B) Y] \\
+           &amp;= E[sAY] + E[(1-s)BY ] \\
+           &amp;= s \mathrm{cov}(AY) + (1-s)\mathrm{cov}(BY) \\
+\begin{end}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;i.e. the linear intpolation of its endpoint covariances.&lt;/p&gt;
+
+&lt;p&gt;One notable property of the runner curve is that it introduces no additional attachment between its parent curves.  For this reason, we can first construct the curve tree covariance matrix without runners, and then add runner blocks in a second pass.  This is nice, because the runner equation doesn&#39;t fit nicely into the recursive equation for BGP covariance.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/12/11/work-log"/>
+   <updated>2014-12-11T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/12/11/work-log</id>
+   <content type="html">&lt;p&gt;Reached out to Amy Tabb with the possibility of using her voxel reconstruction method to bootstrap the branching gaussian process.  She&#39;s offered to try it on our data, and if it works, perhaps there&#39;s a collaboration possible.&lt;/p&gt;
+
+&lt;p&gt;Continuing to work on managing the Diadem dataset.  It is still downloading; meanwhile, I&#39;m unraring the parts I have and resizing the ones I&#39;ve unrared for easy viewing.  Some datasets need levels adjusted to see anything; imagemagick&#39;s -auto-level flag does a good enough job to get the gist of the dataset.&lt;/p&gt;
+
+&lt;p&gt;Working on incorporating new FIRE immunity data.  Some inconsistencies between the old and new data.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Some dates are inconsistent (e.g. mistaking July for June or vice-versa).&lt;/li&gt;
+&lt;li&gt;I noticed that my old spreadsheet lost some decimal places, due to a combination of Excel formatting and unjudicious copy/pasting.  Needs fixing.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;NEXT: R coding / mixed effects model&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Diadem dataset investigation</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/12/10/work-log"/>
+   <updated>2014-12-10T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/12/10/work-log</id>
+   <content type="html">&lt;h1&gt;Software&lt;/h1&gt;
+
+&lt;h2&gt;ImageJ &lt;/h2&gt;
+
+&lt;p&gt;ImageJ has great image stack tools (slicing, manipulation, analysis).  Has the &quot;tubeness&quot; measure from the diadem challenge.&lt;/p&gt;
+
+&lt;h2&gt;ImageJ Cookbook&lt;/h2&gt;
+
+&lt;p&gt;The &quot;&lt;a href=&quot;http://fiji.sc/Cookbook&quot;&gt;cookbook&lt;/a&gt;&quot; plugin for microscopy seems to be very useful in particular.&lt;/p&gt;
+
+&lt;h2&gt;MBF Plugin Collection&lt;/h2&gt;
+
+&lt;p&gt;The original software associated with the &quot;ImageJ for Microscopy&quot; reference (see below).  It seems defunct now, and is supplanted by the ImageJ Cookbook plugin suite.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://fiji.sc/MBF_Plugin_Collection&quot;&gt;link&lt;/a&gt;;&lt;/p&gt;
+
+&lt;h2&gt;Neuromantic&lt;/h2&gt;
+
+&lt;p&gt;Need to look into this tool.  Was mentioned in Diadem data documentation.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.reading.ac.uk/neuromantic/&quot;&gt;link&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://journal.frontiersin.org/Journal/10.3389/fninf.2012.00004/abstract&quot;&gt;pdf&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;count: 3&lt;/p&gt;
+
+&lt;h2&gt;Xvoxtrace&lt;/h2&gt;
+
+&lt;p&gt;Manual segmentation tool&lt;/p&gt;
+
+&lt;h2&gt;Synu&lt;/h2&gt;
+
+&lt;p&gt;Surface reconstruct tool (used with Xvoxtrace?)&lt;/p&gt;
+
+&lt;h2&gt;Neurolucida&lt;/h2&gt;
+
+&lt;p&gt;Segmentation tool.  Provides nice single-line segmentations, rather than the volumetric ones from other tools.&lt;/p&gt;
+
+&lt;p&gt;Extension: *.asc (ascii)&lt;/p&gt;
+
+&lt;p&gt;Count: 5&lt;/p&gt;
+
+&lt;h2&gt;Analyze (7.5)&lt;/h2&gt;
+
+&lt;p&gt;Image stack tool?  Compressed image stacks&lt;/p&gt;
+
+&lt;p&gt;extension: &lt;em&gt;.img, &lt;/em&gt;.hdr&lt;/p&gt;
+
+&lt;h2&gt;Amira&lt;/h2&gt;
+
+&lt;p&gt;Semi-automatic segmentation&lt;/p&gt;
+
+&lt;h2&gt;BioRadPIC&lt;/h2&gt;
+
+&lt;p&gt;microscopy image data format&lt;/p&gt;
+
+&lt;p&gt;extension: *.PIC&lt;/p&gt;
+
+&lt;h2&gt;flNeuronTool&lt;/h2&gt;
+
+&lt;p&gt;Neuron Tracing tool (C++)&lt;/p&gt;
+
+&lt;h2&gt;cvapp - Duke / Southampton Morphology editor&lt;/h2&gt;
+
+&lt;p&gt;Neuron tracing, labelling.  Can read neurolucida files.&lt;/p&gt;
+
+&lt;h2&gt;Vaa3D &lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://vaa3d.org&quot;&gt;link&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2&gt;NeuronStudio&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://research.mssm.edu/cnic/tools-ns.html&quot;&gt;link&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2&gt;Rayburst&lt;/h2&gt;
+
+&lt;p&gt;Algorithm used in at least one tracing algorithm.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://research.mssm.edu/cnic/tools-rayburst.html&quot;&gt;link&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2&gt;Neurozoom&lt;/h2&gt;
+
+&lt;p&gt;TBD&lt;/p&gt;
+
+&lt;h2&gt;NeuronML&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.neuroml.org/tool_support&quot;&gt;link&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;open format for representing neurons, neuron networks, and others.&lt;/p&gt;
+
+&lt;h2&gt;NeuronLand &lt;/h2&gt;
+
+&lt;p&gt;convert between over 20 difference neuron morphology formats&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://neuronland.org/&quot;&gt;link&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2&gt;Other&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;autoneuron&lt;/li&gt;
+&lt;li&gt;neuronj&lt;/li&gt;
+&lt;li&gt;neuronmetrics&lt;/li&gt;
+&lt;li&gt;Raveler&lt;/li&gt;
+&lt;li&gt;tablet&lt;/li&gt;
+&lt;li&gt;TRAKA&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h1&gt;References&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://medicine.osu.edu/neuroscience/Documents/Biotechniques%20ImageJ%20overview%202013.pdf&quot;&gt;ImageJ for Microscopy&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Sezgin &amp;amp; Sankur. 2004. Survey over image thresholding techniques and quantitative performance evaluation. Journal of Electronic Imaging, 2004&lt;/li&gt;
+&lt;li&gt;For reconstruction and analysis of dendritic spines: Rodriguez A., Ehlenberger D.B., Dickstein D.L., Hof P.R., Wearne S.L. Automated Three-Dimensional Detection and Shape Classification of Dendritic Spines from Fluorescence Microscopy Images. PLoS ONE 3(4): e1997&lt;/li&gt;
+&lt;li&gt;For reconstruction and analysis of dendritic arbors: Wearne, S.L., Rodriguez, A., Ehlenberger, D.B., Rocher, A.B., Hendersion, S.C., and Hof, P.R. New Techniques for imaging, digitization and analysis of three-dimensional neural morphology on multiple scales.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h1&gt;Neuron Datasets&lt;/h1&gt;
+
+&lt;h2&gt;NeuroMorpho&lt;/h2&gt;
+
+&lt;p&gt;Seems to be an open neuron reconstruction dataset.  They don&#39;t appear to have the original images, unfortunatley.  I could try to contact the labs&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://neuromorpho.org/neuroMorpho/index.jsp&quot;&gt;link&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2&gt;Duke Southampton Archive of Neuronal Morphology&lt;/h2&gt;
+
+&lt;h2&gt;Cell-centered database&lt;/h2&gt;
+
+&lt;p&gt;General database of cell images.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://ccdb.ucsd.edu/CCDBWebSite/index.html&quot;&gt;link&lt;/a&gt;&lt;/p&gt;
+
+&lt;h4&gt;Useful search terms:&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Neuron (obviously)&lt;/li&gt;
+&lt;li&gt;Dendritic tree&lt;/li&gt;
+&lt;li&gt;Spiny Dendrite&lt;/li&gt;
+&lt;li&gt;Purkinje&lt;/li&gt;
+&lt;li&gt;neurolucida (ground truth tool)&lt;/li&gt;
+&lt;li&gt;vascular?&lt;/li&gt;
+&lt;li&gt;protoplasmic astrocyte&lt;/li&gt;
+&lt;li&gt;cerebellar basket cell&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h4&gt;Examined datasets&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://ccdb.ucsd.edu/sand/main?mpid=1&amp;amp;event=displaySum&quot;&gt;dendritic tree&lt;/a&gt; - could be good for &quot;tracking&quot; through slices.  Ground truth segmentation isn&#39;t clear&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://ccdb.ucsd.edu/sand/main?mpid=12&amp;amp;event=displaySum&quot;&gt;spiny dendrite&lt;/a&gt; -&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://ccdb.ucsd.edu/sand/main?mpid=2&amp;amp;event=displaySum&quot;&gt;Purkinje neuron (dendritic tree)&lt;/a&gt; - very complex branching structure, with ground truth&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://ccdb.ucsd.edu/sand/main?mpid=3494&amp;amp;event=displayRecon&quot;&gt;Purkinje neuron (spiny dendrite)&lt;/a&gt; - nice electron microscopy image&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://ccdb.ucsd.edu/sand/main?mpid=3687&amp;amp;event=displaySum&quot;&gt;Purkinje neuron (multiphoton)&lt;/a&gt;  Nice but no ground truth&lt;/li&gt;
+&lt;li&gt;(http://ccdb.ucsd.edu/sand/main?mpid=3380&amp;amp;event=displaySeg) - confocal data seems in the seetspot between clean and noisy.  Nice 3d ground truth&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://ccdb.ucsd.edu/sand/main?mpid=3693&amp;amp;event=displaySeg&quot;&gt;medium spiny neuron (transmitted light&lt;/a&gt; - has a nice looking ground-truth&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://ccdb.ucsd.edu/sand/main?mpid=8244&amp;amp;event=displayRecon&quot;&gt;neocortex pyramidal neuron&lt;/a&gt; - different-looking neuron, different lab, could be an easier dataset&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h4&gt;Datasets to look into&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Maryann Martone - at least 4 very complex dendritic tree stacks w/ ground truth.&lt;/li&gt;
+&lt;li&gt;Mark Ellisman, Stephen Larson - at least 1 full neuron w/ semi-auto segmentation&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h4&gt;Data types&lt;/h4&gt;
+
+&lt;ul&gt;
+&lt;li&gt;confocal&lt;/li&gt;
+&lt;li&gt;IVEM / UHVEM - {intermediate, ultra high} voltage electron microscopy)&lt;/li&gt;
+&lt;li&gt;transmitted light&lt;/li&gt;
+&lt;li&gt;multiphoton - very clean images&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h1&gt;Miscellaneous&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Lucifer yellow - cell stain&lt;/li&gt;
+&lt;li&gt;Golgi - staining method&lt;/li&gt;
+&lt;li&gt;genesis modelling package?&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h1&gt;To Try&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Decovolution with synthetic and emperical point spread functions.&lt;/li&gt;
+&lt;li&gt;using duke/southampton format - swc&lt;/li&gt;
+&lt;li&gt;use neuromorpho for training
+** experimental condition: &quot;Control&quot;&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/12/08/work-log"/>
+   <updated>2014-12-08T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/12/08/work-log</id>
+   <content type="html">&lt;p&gt;Finished implementing and debugging neuron skeleton-image-to-graph code.  It was deceptively difficult; there are lots of corner cases when tracing pixels that lead to unexpected behavior.  I had to totally redesign how junctions were calculated three times.  I also twice refactored how previously-visited pixels were recorded, and how chains are split at junctions.&lt;/p&gt;
+
+&lt;p&gt;We define the &quot;neighbor set&quot; of a pixel as the set of all nonzero 8-connected neighbors with the caveat that diagonal neighbors are not &quot;blocked&quot; by a horizontal neighbor.  The idea here is that we want all paths through the graph to be unique, and &quot;blocked&quot; diagonal neighbors have two paths: one in which the diagonal neighbor is adjacent to the current pixel, and one in which it is adjacent to the blocking pixel.  Omitting it from the neighbor set solves the problem by eliminating the extra path, while guaranteeing a path still exists that passes through the offending neighbor pixel.  In practice, this prevents chains from sneaking around previously visited pixels by visiting diagonal neighbors.  It also is central to the definition of a &quot;junction&quot; below.&lt;/p&gt;
+
+&lt;p&gt;We use a modified floodfill algorithm to explore the entire graph.  First, we add one or more seed pixels to the queue.  While the queue is not empty, we dequeue a pixel, add it to the current pixel chain, and enqueue its neighbors.  We also check if it is a junction pixel; if so, we add the current pixel-chain to the chain set, and begin a new empty chain.  We define a junction as any pixel with a neighbor set of size three or more.  If during any iteration, no pixels are added to the queue, the chain has reeached its end; we add it to the chain set and begin a new empty chain.&lt;/p&gt;
+
+&lt;p&gt;Several additional details are important.&lt;/p&gt;
+
+&lt;p&gt;Because we allow several seed pixels, our depth-first search may encounter the seed pixels while they still exist deeper in the queue.  The side effect is that the seed pixels may be added to two different chains.  We resolve this by marking pixels when they are added to a chain, and if a pixel is dequeued that is already added to a chain, we discard it.&lt;/p&gt;
+
+&lt;p&gt;After finding all chains, at most one endpoint is associated with a junction.  We require that the junction point appear in every pixel-chain that enters the junction, so some chains need their second junction point added.  Recall that a chain only terminates at junctions or if it has no unclaimed neighbors.  For any non-junction endpoints, any neighbors (not counting the chain&#39;s antecedent pixel) must be junctions.  To prove there is at most one junction neighbor, assume it had two junction endpoints.  Then the pixel would have three neighbors: two endpoints and its antecedent pixel. This implies the pixel is a junction itself -- a contradition.  Thus, adding a junction to a dangling endpoint amounts to finding an unclaimed neighbor.&lt;/p&gt;
+
+&lt;p&gt;Two adjacent junction pixels must be handled separately.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Generalizing the brownian bridge</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/12/07/reference"/>
+   <updated>2014-12-07T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/12/07/reference</id>
+   <content type="html">&lt;p&gt;the Brownian bridge is a modified Weiner process a constrained that f(0)=0 and f(1)=0.  According to the &lt;a href=&quot;http://en.wikipedia.org/wiki/Brownian_bridge&quot;&gt;Wikipedia page&lt;/a&gt;, its covariance is \(k(x,y) = min(x,y) (1-max(x,y))\).&lt;/p&gt;
+
+&lt;p&gt;What if we want something like a Brownian bridge, but with a different base distribution?  Or a more general question: how can we derive a covariance function for a Gaussian process with a constained point?  Consider a general covariance function, \(k_0(x,y)\), and a constraint, \(f(x_c) = z\).  After conditioning on \(f(x_c)\), the new covariance function is \(k = k_0(x,y) - k(x, x_c) k(x_c, y) / k(x_c, x_c)\).  Notice that applying this to thw Weiner process covariance, \(k_0(x,y) = min(x,y)\) results in the Brownian bridge covariance: \(k(x,y) = min(x,y) - min(x,1) min(1,y) / min(1,1) = min(x,y) - x y = min(x,y) (1 - max(x,y))\. QED.  Deriving the mean curve in closed form is more difficult, and is likely impossible if the GP has infinite basis.  In the special case where the original mean function is zero and the constraint value is zero, the conditoinal mean is also zero.&lt;/p&gt;
+
+&lt;p&gt;If we want to condition both ends of the distribution to pass through constraints, we can apply the above formula twice.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Neuron work planning</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/12/05/reference-neurons"/>
+   <updated>2014-12-05T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/12/05/reference-neurons</id>
+   <content type="html">&lt;p&gt;Input data: Skeleton graph
+* nodes: junctions (data: none)
+* edges: curves (data: curve points + indices)&lt;/p&gt;
+
+&lt;p&gt;Ouptut data: curve graph
+* nodes: curves (data: curve points + indices)
+* edges: branches (data: branch point and index offset)&lt;/p&gt;
+
+&lt;p&gt;Converting from skeleton graph to curve graph requires a &quot;resolution&quot; for each junction
+  4 possible resolutions for three-way graph { (ab,c) (a,bc) (ac,b) (a,b,c) }
+  6 possible resolutions for 4-way graph&lt;/p&gt;
+
+&lt;p&gt;Special case: loops&lt;/p&gt;
+
+&lt;p&gt;  a &lt;-&gt; b &lt;-&gt; c &lt;-&gt; d &lt;-&gt; a
+        ^     ^     ^   &lt;br/&gt;
+        |     |     |
+        V     v     v
+        e     f     g&lt;/p&gt;
+
+&lt;p&gt;  above, subgraph {a,b,c,d} constitutes a loop.
+  requires &quot;loop resolution&quot;: pick two endpoints and interpolate (estimating the index changebetween them). the remaining junction nodes become lateral branches (which require their offsets).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;struct loop_resolution
+{
+  int endpoint_1;
+  int endpoint_2;
+  double index_delta;
+  double lateral_branch_index[n];
+  double lateral_index_deltas[n];
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Inference&lt;/h2&gt;
+
+&lt;p&gt;preprocess: compute putative junction resolution branch poionts
+preprocess: compute putative loop resolution branch points and index offsets&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Ideal method: Gibbs sample over junction/loop resolutions.  Metropolis sample model parameters.&lt;/li&gt;
+&lt;li&gt;Metropolis method 1: To avoid computing full BGP marginal likelihood at each sample, compute local improvement at each junction/loop. Occasionally evaluate full BGP and accept/reject based on difference between local improvement and global improvement.&lt;/li&gt;
+&lt;li&gt;Metropolis method 2: After each global improvement, extend local curves using junction resolutions.  New junction resolutions can use this information to improve local estimates.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;dependency flow:&lt;/h2&gt;
+
+&lt;p&gt;skeleton_graph plus junction resolutions implies curve graph
+Curve graph plus BGP parameters implies BGP matrix
+BGP matrix plus BGP mean implies marginal likelihood&lt;/p&gt;
+
+&lt;h2&gt;Model:&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;Curve covariance: smooth central curve plus mean-reverting random-walk plus small iid noise (for quantization error)
+    smooth central curve: either cubic spline GP or squared-exponential GP w/ initial constraints
+    random walk curve: Ornstein-Uhlenbeck GP
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Training:&lt;/h2&gt;
+
+&lt;p&gt;manually specify all junction and loop resolutions
+per image:
+    argmax smoothness covariance , random walk covariance,
+        compute BGP covariance matrix
+fix a distribution over smoothness covariance and random walk covariance&lt;/p&gt;
+
+&lt;h2&gt;Straw man:&lt;/h2&gt;
+
+&lt;ol type=&quot;a&quot;&gt;
+&lt;li&gt;Resolve using best linear fit and threshold&lt;/li&gt;
+&lt;li&gt;resolve using trained SVM&lt;/li&gt;
+&lt;li&gt;resolve using sampling with manually-set parameters (aka &quot;first pass&quot; below)&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;h2&gt;First pass: no training&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;don&#39;t train.  set covariances somewhat randomly (overestimate; use matlab generate samples and eyeball )
+use full gibbs sampling and run for several days.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Second pass: training, don&#39;t sample model parameters.&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;gather ground truth on all 8 datasets (imagej? c++?)
+train parameters for all 8 datasets
+fit parameter model to 7 datasets; inference on 8th.
+For each parameter covariance, use largest over all training 7 datasets (no gibbs sampling)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Third pass: full model (training and sampling model parameters&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;self explanatory
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Fourth pass: full model  w/ metropolis method 1&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;(see &quot;metropolis method 1&quot; above, under &quot;inference&quot;)
+Use local marginal likelihood during Gibbs sampling; periodically accept/reject new model using metropolis method on full marginal likelihood.
+don&#39;t update local curves after accepting 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Fifth pass: full model  w/ metropolis method 2&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;(see &quot;metropolis method 2&quot; above, under &quot;inference&quot;)
+same as previous, but update local curves after accepting.
+Should result in better acceptance, faster convergence.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Evaluation:&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;Percent of correctly classified junction resolutions
+    (Ignore &quot;don&#39;t know&quot; junction resolutions in ground truth annotation)
+compare straw man, various &quot;Nth pass&quot; method above.
+Compare energy vs. time on various &quot;Nth pass&quot; method above
+Visual: show smoothed skeleton
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Extensions&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;allow junction breaking.&lt;/li&gt;
+&lt;li&gt;allow creating of junctions by filling gaps.
+
+&lt;ul&gt;
+&lt;li&gt;(requires additional annotation code)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;imageJ plugin for ground-truthing&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Miscellanous observations&lt;/h2&gt;
+
+&lt;p&gt;Loop collapsing shouldn&#39;t occur if interpolated curve or lateral curves pass through block region (non-neuron).  Prefer breaking loop in this case.&lt;/p&gt;
+
+&lt;p&gt;When breaking loops, prefer curves that grow narrower that farther then get from the tree.  Each edge can be assigned a &quot;direction&quot; posterior probability based on its tendancy to grow thinner.  Could use an OU process; given initial point, compute probability of remaining.  Since OU prefers reverting to the mean (zero in this case), the forward direction should be preferred.&lt;/p&gt;
+
+&lt;p&gt;When breaking, prefer keeping thick branch points, rather than thin ones.&lt;/p&gt;
+
+&lt;p&gt;When resolving junctions, make sure &quot;parent&quot; curve doesn&#39;t wind up in a child configuration.  In other words, in a y junction, one curve will be closer to the tree root than the other two.  The other two cannot end up being connected, because that would imply the parent curve is a lateral branch of the child.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Meeting notes (R code for Mixed Effects models)</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/12/03/work-log"/>
+   <updated>2014-12-03T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/12/03/work-log</id>
+   <content type="html">&lt;p&gt;Notes from today&#39;s meeting with Emily&lt;/p&gt;
+
+&lt;p&gt;  Modelling repeated measure data for diads (e.g coupled osc)&lt;/p&gt;
+
+&lt;p&gt;  standard: multi-level model
+      papers that introduced it?&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  most doable in sass and R, 
+      one piece in sass but not R
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;  Weighted sum of predictors
+  multi-level - fixed effects model
+      global average plus individual average&lt;/p&gt;
+
+&lt;p&gt;  What happens to residuals around lines.&lt;/p&gt;
+
+&lt;p&gt;  eg. my result is grand slope plus my difference, plus residual&lt;/p&gt;
+
+&lt;p&gt;  &quot;what happens to residuals?&quot;  what does that mean
+      model residuals
+      auto-correlation or partner covariation
+      want both
+      hack in R:  put them in as fixed effects.  lag-1 &lt;-  don&#39;t totally understand this
+      R package - NLME  nonlinear mixed effects models
+          -&gt; lme() function is most used
+              -&gt; correlation structure
+              -&gt; Type A: &quot;variance functions&quot;
+                  -&gt; NLME defines a default set of variance functions
+              -&gt; Type B: &quot;correlation structures&quot;
+                  -&gt; NLME defines a default set of CorrStruct classes
+                     We may need to define our own
+  SASS version
+      - Emily will send the url
+      - a &quot;repeated statemnt&quot;
+          sets up structure on residuals (the &quot;R matrix&quot;)
+      - &quot;type equals&quot;
+          the type we want in SASS-speak  un@ar1  &quot;direct product AR 1&quot;&lt;/p&gt;
+
+&lt;p&gt;  S or S+ are &quot;paid versions&quot; of R.&lt;/p&gt;
+
+&lt;h2&gt;  Questions&lt;/h2&gt;
+
+&lt;p&gt;  Where can I get sass?
+      runs in VMWare
+      runs through the internet through UA
+      Emily has it running&lt;/p&gt;
+
+&lt;h2&gt;  Need:&lt;/h2&gt;
+
+&lt;p&gt;  example data
+  example results in SASS&lt;/p&gt;
+
+&lt;p&gt;  book: mixed effects models in S or S+ .  pinhiero bates
+  niell: longitudinal data in R&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Brainstorm: Neuron-tracing</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/12/01/work-log"/>
+   <updated>2014-12-01T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/12/01/work-log</id>
+   <content type="html">&lt;p&gt;  threshold
+  distance transform
+  skeleton
+  identify chains, endpoints, and intersections
+  identify endpoint merge candidates
+  identify t-junction merge candidates&lt;/p&gt;
+
+&lt;p&gt;  identify ambiguous cases
+    ambiguous intersection (which one is the lateral?)
+    ambiguous merge (endpoint vs t-junction?&lt;/p&gt;
+
+&lt;p&gt;  for each skeleton point,
+    find direction and distance to two matching points
+    get width&lt;/p&gt;
+
+&lt;p&gt;  identify soma as point with largest distance&lt;/p&gt;
+
+&lt;p&gt;  filter bad skeleton points
+    average touch-point velocity is much less than skeleton point velocity.
+    with changes almost as fast as skeleton point moves&lt;/p&gt;
+
+&lt;p&gt;  ———————————
+  GROUND TRUTH
+  ————————————&lt;/p&gt;
+
+&lt;p&gt;  w/ known skeleton
+  ———————————
+  identify skeleton points that are good/bad
+  manually resolve junctions
+  manually perform merges&lt;/p&gt;
+
+&lt;p&gt;  general
+  ————
+  Trace out general topology w/ bezier curves.&lt;/p&gt;
+
+&lt;p&gt;  ————————
+  LEARNING
+  ————————&lt;/p&gt;
+
+&lt;p&gt;  quantities of interest:&lt;/p&gt;
+
+&lt;p&gt;  GP parameters
+    position changes
+    width changes&lt;/p&gt;
+
+&lt;p&gt;  soma shape/size?&lt;/p&gt;
+
+&lt;p&gt;  GP MODELS&lt;/p&gt;
+
+&lt;p&gt;  smooth curve plus mean-reverting random walk?
+    smooth curve resolves ambiguous branch using curvature&lt;/p&gt;
+
+&lt;p&gt;  ————————
+  LIKELIHOOD
+  —————&lt;/p&gt;
+
+&lt;p&gt;  Allow greater uncertainty along cross-section, because width doesn’t change symmetrically.&lt;/p&gt;
+
+&lt;p&gt;  Evidence is weaker where skeleton points are weak (i.e. width changes quickly)&lt;/p&gt;
+
+&lt;p&gt;  ———————
+  INFERENCE
+  —————&lt;/p&gt;
+
+&lt;p&gt;  Questions to answer:&lt;/p&gt;
+
+&lt;p&gt;  which skeleton sections are for actual dendrites?&lt;/p&gt;
+
+&lt;p&gt;  —————
+  STRAW MEN
+  ——————&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt; Use all curves; no merging, use heuristics to resolve junctions&lt;/li&gt;
+&lt;li&gt; same as 1. but use “weak curve” heuristic to trim bad cases
+train an svm to decide which curves are good?&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;  ———————
+  Evaluation
+  ———————&lt;/p&gt;
+
+&lt;p&gt;  general, weak
+  ——————————
+  number of curves
+  number of lateral branches
+  histogram of curve lengths&lt;/p&gt;
+
+&lt;p&gt;  general, strong
+  ———————————
+  topology evaluation / mot metrics - match to ground truth and count identity swaps, etc&lt;/p&gt;
+
+&lt;p&gt;  w/ GT against known skeleton
+  ———————————————
+  misclassified junctions
+  false positive/false negative merges&lt;/p&gt;
+
+&lt;p&gt;  ——————
+  misc
+  ——————
+  Is there any benefit to reconstructing the “smoothed” neuron?  probably not. but the latent model is still useful for classifying junctions.&lt;/p&gt;
+
+&lt;p&gt;  How do deal with un-ground-truthable junctions?&lt;/p&gt;
+
+&lt;p&gt;  how to deal with regions poorly modelled by a skeleton?&lt;/p&gt;
+
+&lt;p&gt;  I should look into neuron-tracing prior art.&lt;/p&gt;
+
+&lt;p&gt;  threshold issue:
+    try multiple thresholds and somehow merge skeletons?&lt;/p&gt;
+
+&lt;h2&gt;matlab code&lt;/h2&gt;
+
+&lt;p&gt;  cd /Volumes/offload/Downloads/JT106_Ex33_Original
+  img = imread(&#39;JT106_Ex33_61.tif&#39;);
+  level = graythresh(img)
+  I = img &gt; (level * max(img(:)));
+  D = bwdist(~I);
+  skel = bwmorph(D,&#39;skel&#39;,Inf);
+  imagesc(skel)
+  skel2 = bwmorph(D,&#39;skel&#39;,5);&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/11/05/work-log"/>
+   <updated>2014-11-05T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/11/05/work-log</id>
+   <content type="html">&lt;p&gt;Met with Kobus and Andrew regarding the seed counting task.  Andrew summarized the current state of the project.  We have foreground-background segmentation in octave, and it seems to work well in the easy cases.  If I understand correctly he has some code to match possible exemplars with an example exemplar, using an affine transform to try to align them.  Given this set of aligned exemplars, a shape model could be learned for more sophisticated analysis.&lt;/p&gt;
+
+&lt;p&gt;Kobus outline a strategy for generating a &quot;heatmap&quot; for data-driven proposals:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;find edgelets&lt;/li&gt;
+&lt;li&gt;for each edgelet, try matching to the contour of an exemplar.  If it matches well, add a &quot;vote&quot; to the pixel where that exemplar wouid appear (or rather it&#39;s centroid).  Could give partial votes for partial matches.  Could give weaker votes to shorter edges.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Possible things to show for 10m talk:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;pipeline: thresholding, interactive edge extraction tool.&lt;/li&gt;
+&lt;li&gt;a sketch of the algorithm&lt;/li&gt;
+&lt;li&gt;preliminary results&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Talk outline:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;outlining the problem, show example image&lt;/li&gt;
+&lt;li&gt;its difficulties, show example image,&lt;/li&gt;
+&lt;li&gt;what has been done, show thresholding,&lt;/li&gt;
+&lt;li&gt;motivate planned work: exemplar model implies a large search space&lt;/li&gt;
+&lt;li&gt;what is planned to be done, and motivation for that plan.&lt;/li&gt;
+&lt;li&gt;current progress&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Summarizing the &quot;motivation&quot; step: searching the entire image over the entire space shape (including the number of shapes) is an exponentially growing problem.  Need a set of good candidates.  Our &quot;exemplar map&quot; could be a good way to reduce the search space by only considering locations where the seed is likely to appear.&lt;/p&gt;
+
+&lt;p&gt;Andrew provided some resources that could help&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;slides from earlier presentation are in: /space/predoehl/iplant-demo-2012oct17.tar.bz2&lt;/li&gt;
+&lt;li&gt;octave code for thresholding is in /data/predoehl/seed-counting/.../...&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;To do before CVPR is over:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;run edgelet extraction on all images&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;After CVPR:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;implement voting scheme, run on example image`&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Other thoughts&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Could my edge-based likelihood be useful here?
+:w&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/10/28/work-log"/>
+   <updated>2014-10-28T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/10/28/work-log</id>
+   <content type="html">&lt;p&gt;Trying to address cholesky issues arising new dynamic covariance.  Eschewing clique tree implementation in favor of direct method for obtaining MAP curves.&lt;/p&gt;
+
+&lt;p&gt;gdb on OSX is losing stack frame at exception.  Running in vagrant...&lt;/p&gt;
+
+&lt;p&gt;g++ is segfaulting on my vagrant ubuntu&lt;/p&gt;
+
+&lt;p&gt;gdb on v11 is crashing due to missing libpython (probaby lost during upgrade to ubuntu 14.04).&lt;/p&gt;
+
+&lt;p&gt;trying my ubuntu 12.04 desktop server.  Taking a realllly long time to check out (15 minutes and counting)&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;OK, finally rolling on Vll.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;Getting singular posterior covariance matrix.  why?  ... Singular prior matrix.  why? ...  New dynamics covariance is singular.  But this shouldn&#39;t affect joint covariance, right?&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;bug: sqexp parameters not being set when computing prior
+bug: sqexp scale parameter not set when reading params
+bug: conditional sqexp math error&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;AHA!  Reviewing Rasmussen and Williams, I see now that Koller and Friedman&#39;s &quot;Canonical form&quot; is exactly wrong for the types of tasks we want to perform.  When the prior is close to singular (or is singular), we can still do inference, we just have to be careful not to invert the prior covariance matrix.  W&amp;amp;R show how to do this in the simple case.  It remains to extend it to inference in varable blocks organized in markov chains.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>New dynamic models</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/10/27/work-log"/>
+   <updated>2014-10-27T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/10/27/work-log</id>
+   <content type="html">&lt;p&gt;The current mode for dynamics is a cubic spline spatial process modulated by a Weiner temporal process.  This is allowing excessive drift toward the cameras when curves are long.  A stationary covariance function should avoid this, but out model requires zero covariance at the start of a curve.&lt;/p&gt;
+
+&lt;p&gt;To resolve this, we can condition the process to start at the origin.&lt;/p&gt;
+
+&lt;p&gt;K - K:0 1/K0 K:0&#39;&lt;/p&gt;
+
+&lt;p&gt;The equivalent covariance function is:&lt;/p&gt;
+
+&lt;p&gt;k_{x|x_0}(x,x&#39;) = k(x,x&#39;) - k(x, 0) 1/k(0,0) K(0,x&#39;)&lt;/p&gt;
+
+&lt;p&gt;When k(x,x&#39;) is a squared exponential, the conditional covariance function becomes&lt;/p&gt;
+
+&lt;p&gt;k_{x|x_0}(x,x&#39;) = k(x,x&#39;) \left (1 - exp{(-x_i x_j)/s}\right)&lt;/p&gt;
+
+&lt;p&gt;This causes the covariance to start at zero, and smoothly transition to the standard kernel, over a time scale (s).&lt;/p&gt;
+
+&lt;p&gt;Adding this as an option to the covariance function...&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Now getting cholesky failures during reconstruction.&lt;/p&gt;
+
+&lt;h2&gt;OSX building issues&lt;/h2&gt;
+
+&lt;p&gt;Still struggling with building and debugging on OSX.  Got c++11 with init_Compile working on OSX.  Can&#39;t run dbg without it segfaulting.  I&#39;m trying &lt;code&gt;brew update&lt;/code&gt; to rebuild it and all its dependencies.  Meanwhile, i&#39;m setting up and ubuntu virtual machine through Vagrant to help with debugging if I can&#39;t get gdb going.&lt;/p&gt;
+
+&lt;p&gt;The fortran spline library I imported is segfaulting in OSX.  Can&#39;t debug it, because GDB is segfaulting.  HOW DOES NAYONE DEVELOP ON THIS SYSTEM???   I&#39;ll dig into it with LLDB while my virtual machine is setting up. Also running valgrind to find out where the illegal access is happening.&lt;/p&gt;
+
+&lt;h2&gt;Misc notes&lt;/h2&gt;
+
+&lt;p&gt;When computing ML, must try curves both forward and backward, since the covariance for dynamics is assymetrical.  Root motion is much more penalized than tip motion.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Reconstruction problems</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/10/26/work-log"/>
+   <updated>2014-10-26T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/10/26/work-log</id>
+   <content type="html">&lt;p&gt;Visualizing 3d reconstruction of match candidates, and the results are problematic:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;No obvious good matches.&lt;/li&gt;
+&lt;li&gt;Significant drift toward the camera.&lt;/li&gt;
+&lt;li&gt;Marginal likelihood is promoting the worst reconstructions.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Issue 3 is possibly because there is a preference for placing structure near the camera center.  If perturbation model is loose enough, each view can pull curves twoard its camera, and the likelihood reward is high.&lt;/p&gt;
+
+&lt;p&gt;How does it compare to simple triangulation?&lt;/p&gt;
+
+&lt;p&gt;Very poorly!  The good triangulation candidates fit basically perfectly -- no perturbation necessary.  We should reduce the perturbation variances, but this is causing the clique tree algorithm to become numerically unstable.  Is there a better solution for piecewise reconstruction, that avoids taking inverse/cholesky of near-singular matrices?&lt;/p&gt;
+
+&lt;p&gt;Open questions&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Is the current GP implementation working?&lt;/li&gt;
+&lt;li&gt;can adjusting GP parameters give reasonabley flexible dynamics without significiatn drift toward camera?&lt;/li&gt;
+&lt;li&gt;Do we need to linearize the camera model?&lt;/li&gt;
+&lt;li&gt;Is ML promoting the best matches?  Should be roughly in-line with triangulation error&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Actually, we have no real evidence that GP smoothing is even working.  Need some unit tests:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Test GP smoothing on single curve.  is it smoother?  is RMS error only minimally affected?&lt;/li&gt;
+&lt;li&gt;TEST GP on two views of a curve.  Can we recover the original curves?  Does ML match Matlab implementation?&lt;/li&gt;
+&lt;li&gt;Test piecewise marginal likelihood -- does it match full-matrix marginal likelihood?&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/10/21/work-log"/>
+   <updated>2014-10-21T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/10/21/work-log</id>
+   <content type="html">&lt;p&gt;Current task: implementing clique tree algorithm when noise distribution is improper.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Why do we need this now?  Didn&#39;t this work in the Matlab version of the code?&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;No, in matlab, we did reconstruction by inverting a matrix containing all points in all views.  This worked when correspondences are known, and reconstruction was the only goal, but it&#39;s hugely inefficient when sampling over correspondences.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Why do we need a reconstruction at each MCM iteration?&lt;/em&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;we need to estimate indices after each merge, which requires projecting the current estimate&lt;/li&gt;
+&lt;li&gt;projecting is a primary method of finding good candidates.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;&lt;em&gt;What&#39;s the current difficulty?&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;The main difficulty is arising when constructing the conditional posterior distribution $p(x_2 | x_1, y_2)$, wher $x_i$ and $y_i$ are the curve in view $i$ and its observations.  In implementation, the covariance of the matrix is not positive definite, suggesting there is a bug somewhere, or we&#39;re suffering from numerical instability.  In either case, the issue need to be addressed or the inference will fail.&lt;/p&gt;
+
+&lt;p&gt;I wrote up a unit test for this, and the issue isn&#39;t arising in the test.  But in practice, some match proposals encounter this problem (currently the 5th such match out of ~300 is suffering this issue, so it seems prevalent).&lt;/p&gt;
+
+&lt;p&gt;I also coded up two different implementations to construct the conditional posterior, one that performs the matrix operations directly, and another less efficient version that uses the functionality from the Canonical_gaussian class.  The latter is much less likely to contain math errors, as it&#39;s well tested.   Both implementations exhibit this problem, suggesting the issue is with the matrices themselves.  I&#39;ve exported all of the matrices involved and imported them into matlab.  The same issue is arising there.&lt;/p&gt;
+
+&lt;p&gt;Should I test the prior matrices to make sure they are PD?  Maybe they are almost singular because indices are nearly overlapping?  I think I have an old blog where I derive an alternative implementation for this situation...&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/09/26/work-log"/>
+   <updated>2014-09-26T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/09/26/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;TODO: troubleshoot triangulation width penalty in DTW matching&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Camera caliberation, revisited</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/08/01/work-log"/>
+   <updated>2014-08-01T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/08/01/work-log</id>
+   <content type="html">&lt;p&gt;Revisiting camera calibration -- can it be done automatically with opencv?&lt;/p&gt;
+
+&lt;p&gt;Can get a ballpark camera from a single pass of OpenCV: (1) extract chessboards, (2) calibrate.&lt;/p&gt;
+
+&lt;p&gt;pass 2: mask out previous chessboard and re-run
+pass n: repeat until no new chessboards&lt;/p&gt;
+
+&lt;p&gt;Stage 2: find circular path&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;For each estimated pose,
+    1. get camera center and add to list
+    1. get camera rotation and add to list
+    2. Assume pattern is rotated 180-degrees, find camera center, add to list
+    3. Repeat 1 and 2 five more times, once for each face of cube.
+
+Find a strong plane in cameras list (ransac)
+Find a circle in planar points (ransac)
+    (there will be four points per camera on this circle, due to cube
+     ambiguity.  use known rotation angle to prune extra points)
+    For each camera pose, bring to canonical reference frame (pointing toward circle center).  Find average deviation (geodesic mean of quaternions).
+
+Estimate missing cameras by interpolation.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Stage 3: Dense point collection&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;re-run opencv, this time masking each face using roughly known face position
+    (avoids interference from mutliple faces)
+    (use white mask to simulate white margin that opencv hope for)
+    (Hopefully we get points on each face now)
+    (points now correspond to same faces, so better calibration)
+    (! possibly rectify top chessboard, to improve capture rate)
+    (! conservatively mask to remove other faces, then mask everything but good face, leaving a large margin to allow for imperfactions)
+Re-run pairwise calibration in opencv
+Undistort images
+Run bundle adjustment in ceres solver
+
+This calibration occurs without assumptions about cube, which makes it robust to imperfect construction.
+
+POSSIBLE EXTENSIONS
+    add some ceres solver constraints to ensure reconstruction is cube-like
+        face points are equally spaced
+        face points are in orthogonal grid
+        faces are orthogonal
+&lt;/code&gt;&lt;/pre&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Thoughts on a New approach</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/07/23/work-log"/>
+   <updated>2014-07-23T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/07/23/work-log</id>
+   <content type="html">&lt;ol&gt;
+&lt;li&gt;Improve calibration: distortion, bundle adjustment&lt;/li&gt;
+&lt;li&gt;MRF-based per-view depth estimates&lt;/li&gt;
+&lt;li&gt;merging or killing structure by Maximum marginal likelihood&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;h2&gt;0. feature extraction hacks&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Use ELSD for segments&lt;/li&gt;
+&lt;li&gt;use background subtraction to ignore spurious curves&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;1. Improve calibration&lt;/h2&gt;
+
+&lt;p&gt;There&#39;s no reason not to model lens distortion and run bundle adjustment.  This will allow some form of multi-view stereo to become feasible.&lt;/p&gt;
+
+&lt;p&gt;bundle adjustment will let us correct for errors in calibration target (finally!)&lt;/p&gt;
+
+&lt;h2&gt;2. Initial dept estimate for all curve points&lt;/h2&gt;
+
+&lt;p&gt;It should be relatively easy to create a simple MRF for depth estimation. Likelihood: nearest reprojected distance.  prior: first or second order markove in 1-dimension.  Look into MRF solvers (is kolmogorov&#39;s code available? TRW?).&lt;/p&gt;
+
+&lt;p&gt;alternative: keypoint matching and gap-filling.  think pmvs, but with 2 dof instead of 3&lt;/p&gt;
+
+&lt;p&gt;alternative:&lt;/p&gt;
+
+&lt;h2&gt;3. merging, branching, and pruning using maximum marginal likleihood&lt;/h2&gt;
+
+&lt;p&gt;greedily pick pairs to merge, using DTW to match points and branching gaussian process to perform marginal likleihood.    compare against mcmc&lt;/p&gt;
+
+&lt;p&gt;future papers could add branching and background rejection.&lt;/p&gt;
+
+&lt;h2&gt;4. reconstruct&lt;/h2&gt;
+
+&lt;p&gt;maximum posterior&lt;/p&gt;
+
+&lt;h2&gt;5. evaluate&lt;/h2&gt;
+
+&lt;p&gt;compare against hand-picked correspondences&lt;/p&gt;
+
+&lt;p&gt;compare against bundler + pmvs.&lt;/p&gt;
+
+&lt;h2&gt;other ideas&lt;/h2&gt;
+
+&lt;p&gt;**Alternarive initial depth estimate: sift keypoint matching for seeding multi-view stereo.   use background model to mask-out background keypoints.&lt;/p&gt;
+
+&lt;p&gt;ceres-solver for nonlinear least squares task.&lt;/p&gt;
+
+&lt;p&gt;evaluate sensitivity to poor calibration.  which methods deteriorate fastest?&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>FIRE - Sampling strategy</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/05/27/work-log"/>
+   <updated>2014-05-27T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/05/27/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Tuning&lt;/h2&gt;
+
+&lt;p&gt;On the issue of HMC step size, I wondered if anyone had published on the relationship between ideal step size and the log-posterior&#39;s second derivative.  I found an answer in section 4.2 of &lt;a href=&quot;http://arxiv.org/pdf/1206.1901.pdf&quot;&gt;Neal 2011&lt;/a&gt;[pdf], which poses the question in the context of a Gaussian-shaped posterior.  Using eigenvalue analysis, he shows that a step size larger than 2 standard deviations results in unstable dynamcis, and the state will diverge to infinity.  From Neal (2011):&lt;/p&gt;
+
+&lt;blockquote&gt;&lt;p&gt;For low-dimensional problems, using a value for ε that is just a bit below the stability limit
+is suﬃcient to produce a good acceptance rate. For high-dimensional problems, however,
+the stepsize may need to be reduced further than this to keep the error in H to a level that
+produces a good acceptance probability.&lt;/p&gt;&lt;/blockquote&gt;
+
+&lt;p&gt;If we can estimate the Hessian of the log-posterior (perhaps diagonally), we can use this to choose the step-size as some fraction of that (user settable).  Thus, our tuning run will perform Laplace approxization:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;perform local minimizations of negative log posterior.&lt;/li&gt;
+&lt;li&gt;estimate diagonal Hessian at miminimum.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;h2&gt;Sampling the clustering model&lt;/h2&gt;
+
+&lt;p&gt;I&#39;ve devised the strategy below for sampling the clustering model.  I have determined that all variables can be Gibbs sampled except the latent piecewise linear model.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Gibbs sample new membership values&lt;/li&gt;
+&lt;li&gt;update each cluster&#39;s piecewise linear model using HMC&lt;/li&gt;
+&lt;li&gt;Gibbs sample observation model using known latent values&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Step 3 needs some explanation.&lt;/p&gt;
+
+&lt;h2&gt;Bayesian multiple linear regression&lt;/h2&gt;
+
+&lt;p&gt;Let \(x\) be the column vector of latent immune activity values at each time, (t).  These are provided by the (fixed) piecewise linear model.  Recall that the observation model is:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    y = A x + B + \epsilon
+\]
+
+&lt;br /&gt;
+
+where \(\epsilon\) is a normally distributed random variable with variance \(\sigma^2\).
+&lt;/div&gt;
+
+
+&lt;p&gt;Thus, the error is given by&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    e = \left ( (A B)\begin{array}{c} x^\top \\ 1 \end{array} - y^\top \right ) / \sigma
+\]
+
+&lt;br /&gt;
+
+Let \(\beta = (vec(A)^\top vec(B)^\top)^\top \) be the concatenated vectorization of A and B,  and \(X = (x 1)^\top\).  Following the [derivation provided by wikipedia](http://en.wikipedia.org/wiki/Bayesian_multivariate_linear_regression), the resulting log-likelihood can be written as a guassian w.r.t. \(\beta\):
+
+\[
+    -(\beta - \hat \beta)^\top (\Sigma_\epsilon^{-1} \ocross X X^\top) (\beta - \hat \beta)
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;where \(\ocross\) is the kronecker product in our case, the observation noise variance \(\Sigma_\epsilon\) is simply \(I \sigma&lt;sup&gt;2&lt;/sup&gt; \).&lt;/p&gt;
+
+&lt;p&gt;If we assume a uniform prior over \(A\) and \(B\), then this Gaussian becomes our conditional posterior distribution, which we can easilly sample from with Gibbs.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>FIRE - improving fitting</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/05/26/work-log"/>
+   <updated>2014-05-26T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/05/26/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;h2&gt;Run: Refactoring kmeans, fixed bug&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Refactored k-means to make replicates easier to run.  Also fixed a bug in how collapsed clusters are handled.
+&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;BEFORE REPOPULATION FIX
+
+    10 itns
+    ----------
+    training error: 3.61348
+    test error: 4.60147
+
+    15 itns
+    --------
+    training error: 3.60094
+    test error: 4.58815
+
+    20 itns
+    ----------
+    training error: 3.60094
+    test error: 4.58815
+
+AFTER REPOPULATION FIX
+
+    10 itns
+    ---------
+    training error: 3.5833
+    test error: 4.57327
+
+    15 itns
+    ---------
+    training error: 3.58389
+    test error: 4.57315
+
+    20 itns
+    ---------
+    training error: 3.58411
+    test error: 4.57321
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;Neither of these results match what I was getting on Friday.  Testing error in particular is worse.  Did I break something?&lt;/p&gt;
+
+&lt;p&gt;Found it:  error in evaluation code arising from bad copy/paste.&lt;/p&gt;
+
+&lt;p&gt;Another issue:  should be using centered_data.txt, not data.txt.&lt;/p&gt;
+
+&lt;h2&gt;Run: multiple repetitions&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Run kmeans with 10 repetitions.&lt;br/&gt;
+&lt;strong&gt;Issues&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Found assert failure - fixing empty clusters sometimes fails.&lt;/li&gt;
+&lt;li&gt;only fixed empty clusters after first iteration.  fixed&lt;/li&gt;
+&lt;li&gt;fails when same cluster is picked twice.  fixed&lt;/li&gt;
+&lt;li&gt;cluster weights was computed wrongly.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;trivial model error: 3.55057
+
+10 itns
+-------
+training error: 3.54682
+test error: 4.51326
+
+20 itns
+------------
+training error: 3.53998
+test error: 4.52958
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Training and teesting error improve over the single-initialization version.  Test error is slightly worse for 20-iteration run; possibly due to overfitting.&lt;/p&gt;
+
+&lt;h2&gt;Run: New baseline - use centered data&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Perform 10 replicates of k-means using centered log-transformed data.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Trivial model error: 1.40502
+
+10 itns
+-----------
+training error: 1.10196
+test error: 1.11679
+
+15 itns
+----------
+training error: 1.09979
+test error: 1.09903
+
+20 itns
+--------------
+training error: 1.09756
+test error: 1.09137
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Run: compare against null model&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Do we do better or worse with a constant model? (slope zero, intercept zero)
+&lt;strong&gt;Results&lt;/strong&gt;: see previous runs; &quot;trivial model&quot; results have been added.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;:&lt;br/&gt;
+It is interesting that the trivial model performs better on raw data than the cluster model.  With rescaled data, the cluster model performs better.&lt;/p&gt;
+
+&lt;h2&gt;Run: continuous model (aborted)&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Re-run using the continuous model.
+&lt;strong&gt;Details&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Found bug in line-fitting corner case.  Fails if all observations occur at same time.&lt;/li&gt;
+&lt;li&gt;found huge bug in preprocessing -- all values are identical!  Was an indexing error introduced when we added per-plate centering.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Will need to re-run all experiments.&lt;/p&gt;
+
+&lt;h2&gt;Run: baseline (rerun)&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Re-run baseline fitting of centered data using discontinuous model.  10 Repetitions&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Trivial model error: 1.58913
+Single cluster error: 1.58365
+training error: 1.61625
+test error: 1.64005
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;: trivial model outperforms clustered model.  This shouldn&#39;t be happening, need to investigate.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>FIRE - Refactoring, k-folds cross validation, baseline evaluation</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2014/05/23/work-log"/>
+   <updated>2014-05-23T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2014/05/23/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Refactored code base to better support model evaluation and k-folds cross validation.&lt;/p&gt;
+
+&lt;h2&gt;Run: Cross validation (baseline)&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;: Run 10-folds cross validation on the non-sampling (analytical) model.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Error values are mean per-dimension negative log-likelihood.
+
+3 kmeans iterations:
+------------
+training error: 3.94522
+test error: 4.9166
+
+5 kmeans iterations:
+---------------
+training error: 3.97775
+test error: 4.9501
+
+10 kmeans iterations:
+------------------
+training error: 4.01519
+test error: 5.0074
+
+20 kmeans iterations:
+-----------
+training error: 4.01538
+test error: 5.0068
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;:&lt;br/&gt;
+Increasing iterations also increases training error, which seems counterintuitive, especially because the algorithm debugging messages show the total log likelihood increasing.&lt;/p&gt;
+
+&lt;p&gt;But the log likelihood uses known membership, so values will naturally be higher.  Model evaluation marginalizes over clusters, and since we have fixed the cluster weights to be equal, the dominating cluster is under-promoted.  I would guess setting cluster weights from training membership proportions will reverse this trend, so more iterations will improve training error.&lt;/p&gt;
+
+&lt;h2&gt;Run: Re-run with uneven cluster wieghts&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Description&lt;/strong&gt;:  Set cluster weights proportional to the training membership values.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;5 itns
+--------
+training error: 3.62931
+test error: 4.61624
+
+10 itns
+---------
+training error: 3.61348
+test error: 4.60147
+
+15 itns
+-------
+training error: 3.60094
+test error: 4.58815
+
+20 itns
+--------
+training error: 3.60094
+test error: 4.58815
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Discussion&lt;/strong&gt;: Success! Error dropped as kmeans converged further&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>FIRE - data prep, analyzing clustering</title>
@@ -60,7 +2603,7 @@
 &lt;/ul&gt;
 
 
-&lt;p&gt;Finally (!) merged and committed radiation columns into fire_all.csv.  Committed and write a summary for Warren&lt;/p&gt;
+&lt;p&gt;Finally (!) merged and committed radiation columns into fire_all.csv.  Committed and wrote a summary for Warren.&lt;/p&gt;
 
 &lt;h2&gt;Analyzing cluster membership&lt;/h2&gt;
 
@@ -79,6 +2622,22 @@
 &lt;/table&gt;
 
 
+&lt;p&gt;So, cluster 3 strongly corresponds to &quot;some treatment&quot; and most likely implies radiation only.&lt;/p&gt;
+
+&lt;h2&gt;Next steps&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Improve clustering and modeling results.
+
+&lt;ul&gt;
+&lt;li&gt;Compute fitting and testing error.&lt;/li&gt;
+&lt;li&gt;Repeated runs of kmeans (trivial to try)&lt;/li&gt;
+&lt;li&gt;Sampling observation parameters&lt;/li&gt;
+&lt;li&gt;Sampling of membership (should be easy)&lt;/li&gt;
+&lt;li&gt;Sampling of linear model parameters&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
 
 </content>
  </entry>

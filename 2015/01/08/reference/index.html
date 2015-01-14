@@ -1,0 +1,254 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Geodesic distance kernel and BGP kernel -- simplified representation &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+      <li><a  href="/ksimek/research/pomodoro.html"><img src="/ksimek/research/img/pom.png" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Reference] Geodesic distance kernel and BGP kernel -- simplified representation
+    </h1>
+
+  <div class="date emphnext">
+    January 08, 2015
+      
+ 
+  </div>
+    
+
+
+  
+    <p>With a nod to Mercer's theorem, we can represent gaussian processes over graph-structured points in a very simple way.  We may transform our input space over graph nodes into a new eucliean space.</p>
+
+<p>For trees with N branches, we denote a point a distance x along the i-th branch by the ordered pair \(i, x\).  For each branch i, its parent is denoted by p(i), and its branch point is denoted by b(i).  If branch i has not parent, we define p(i) = b(i) = 0.  We can define a transformation \(\phi : \mathbb{N}\times\mathbb{R} \rightarrow \mathbb{R}^N\), whose k-th dimension is:</p>
+
+<p>  <div>
+  [
+    \phi_k(i,x) = \begin{cases}
+        x &amp; \text{ if } i == k \
+        0 &amp; \text{ if } i == 0 \
+        \phi_k(p(i), b(i)) &amp; \text{ otherwise.}
+        \end{cases}
+  ]
+  </div>.</p>
+
+<p>If branch k is the root of a subtree containing (i,x), \(\phi_k\) is the branch position of sub-subtree containing (i,x).</p>
+
+<p>This formulation makes it easier to define covariance functions over tree structures.  O</p>
+
+<p>It is often useful to model each tree branch as a squared-exponential curve.  This is sometimes falsely implemented as squared exponential covariance function over geodesic distance instead of Euclidean distance.  However, this covariance function isn't positive definite (need illustration).  Instead, if we define a distance function \(d(i,x,i',x')\) as the sum of squared geodesic distances between adjacent junctions along the path between (i,x) and (i',x').  Using this distance metric with a squared-exponential covariance function results in exactly the model we seek.</p>
+
+<div>
+  k(i,x,i',x') = \exp\{-d(i,x,i',x')\}
+</div>
+
+
+<p>We can use our transformation above to represent this more succinctly:</p>
+
+<div>
+  k(\phi, \phi') = \exp\{- \| \phi - \phi' \|^2\}
+</div>
+
+
+<p>Since each dimension in phi corresponds to exactly one branch, \( \phi - \phi \) is a vector of distances between branch points on the each curve corresponding to (i,x) and (i',x').  The squared l2 norm of this expression is equivalent to d(i,x,i',x').  Note that the fact that we can represent this covariance function using a standard covariance function with transformed inputs shows that it is positive definite.</p>
+
+<p>A second useful tree model is the one I introduced in my dissertation proposal -- the branching cubic spline model.  The covariance function for this model involved a recursive function that was complicated and wasn't previously proven to be positive definite.  Using our input transformation, this simplifies to:</p>
+
+<div>
+\[
+  k(\phi, \phi) = \sum_i k_c(\phi_i, \phi'_i)
+  \]
+</div>
+
+
+<p>where k_c() is the cubic spline covariance function.  The recursive nature of the definition of \(\phi\) ensures that each curve inherits the covariance of its parent curve.  And because \(k_c(0,x) == 0\), points on different subtrees only receive covariance from their shared ancestors.  Again, this formulation suffices to show that our original covariance function is positive definite.</p>
+
+<h2>Loopy graphs</h2>
+
+<p>Non-tree structured graphs are more difficult, but I have a few possible approaches.</p>
+
+<p>One way of interpreting a loop is as two separate branches (one at each junction) that gradually blend into one another.  Implementing a transformation \(\phi\) is easy under this interpretation -- just linearly interpolate between the two independent lines in \(\phi\).  Unfortunately, the resulting embedding doesn't preserve distances between nearby points. I tried a similar approach with cubic Hermite splines instead of linear interpolation, but again, distances aren't preserved.  This could be solved if we could (a) guarantee that the bridging curve has exactly the right length and (b) the mapping between graph points and the bridging curve in \(\phi\) preserves distance.  Both of these result in equations that can't be solved analytically, but numerical techniques could work if we cared enough.</p>
+
+<p>We could try something similar, but use a spherical arc to connect the two branch points in \(\phi\).  This would preserve total length and adjacent distances, but it violates the property that the curve's endpoint is orthogonal to its parent.</p>
+
+<p>Both of these bridging techniques also violate the elegant property of the tree-based covariance, namely that the L1 distance between points is equal to thier geodesic distance.</p>
+
+<p>A third possibility is to simply use the distance function \(d(i,x,i',x')\) we introduced before.  The down side of this is I con't think of a proof for its positive-definiteness.  But if it is PD, it should have the properties we want, and is relatively easy to implement.</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2015/01/09/reference" class="next" title="Projection of point onto line using distance from two reference points">Projection of point onto line using distance from two reference points &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2015/01/04/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

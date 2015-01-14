@@ -1,0 +1,396 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Diadem dataset investigation &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+      <li><a  href="/ksimek/research/pomodoro.html"><img src="/ksimek/research/img/pom.png" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Work Log] Diadem dataset investigation
+    </h1>
+
+  <div class="date emphnext">
+    December 10, 2014
+      
+ 
+  </div>
+    
+
+
+  
+    <h1>Software</h1>
+
+<h2>ImageJ </h2>
+
+<p>ImageJ has great image stack tools (slicing, manipulation, analysis).  Has the "tubeness" measure from the diadem challenge.</p>
+
+<h2>ImageJ Cookbook</h2>
+
+<p>The "<a href="http://fiji.sc/Cookbook">cookbook</a>" plugin for microscopy seems to be very useful in particular.</p>
+
+<h2>MBF Plugin Collection</h2>
+
+<p>The original software associated with the "ImageJ for Microscopy" reference (see below).  It seems defunct now, and is supplanted by the ImageJ Cookbook plugin suite.</p>
+
+<p><a href="http://fiji.sc/MBF_Plugin_Collection">link</a>;</p>
+
+<h2>Neuromantic</h2>
+
+<p>Need to look into this tool.  Was mentioned in Diadem data documentation.</p>
+
+<p><a href="http://www.reading.ac.uk/neuromantic/">link</a></p>
+
+<p><a href="http://journal.frontiersin.org/Journal/10.3389/fninf.2012.00004/abstract">pdf</a></p>
+
+<p>count: 3</p>
+
+<h2>Xvoxtrace</h2>
+
+<p>Manual segmentation tool</p>
+
+<h2>Synu</h2>
+
+<p>Surface reconstruct tool (used with Xvoxtrace?)</p>
+
+<h2>Neurolucida</h2>
+
+<p>Segmentation tool.  Provides nice single-line segmentations, rather than the volumetric ones from other tools.</p>
+
+<p>Extension: *.asc (ascii)</p>
+
+<p>Count: 5</p>
+
+<h2>Analyze (7.5)</h2>
+
+<p>Image stack tool?  Compressed image stacks</p>
+
+<p>extension: <em>.img, </em>.hdr</p>
+
+<h2>Amira</h2>
+
+<p>Semi-automatic segmentation</p>
+
+<h2>BioRadPIC</h2>
+
+<p>microscopy image data format</p>
+
+<p>extension: *.PIC</p>
+
+<h2>flNeuronTool</h2>
+
+<p>Neuron Tracing tool (C++)</p>
+
+<h2>cvapp - Duke / Southampton Morphology editor</h2>
+
+<p>Neuron tracing, labelling.  Can read neurolucida files.</p>
+
+<h2>Vaa3D </h2>
+
+<p><a href="http://vaa3d.org">link</a></p>
+
+<h2>NeuronStudio</h2>
+
+<p><a href="http://research.mssm.edu/cnic/tools-ns.html">link</a></p>
+
+<h2>Rayburst</h2>
+
+<p>Algorithm used in at least one tracing algorithm.</p>
+
+<p><a href="http://research.mssm.edu/cnic/tools-rayburst.html">link</a></p>
+
+<h2>Neurozoom</h2>
+
+<p>TBD</p>
+
+<h2>NeuronML</h2>
+
+<p><a href="http://www.neuroml.org/tool_support">link</a></p>
+
+<p>open format for representing neurons, neuron networks, and others.</p>
+
+<h2>NeuronLand </h2>
+
+<p>convert between over 20 difference neuron morphology formats</p>
+
+<p><a href="http://neuronland.org/">link</a></p>
+
+<h2>Other</h2>
+
+<ul>
+<li>autoneuron</li>
+<li>neuronj</li>
+<li>neuronmetrics</li>
+<li>Raveler</li>
+<li>tablet</li>
+<li>TRAKA</li>
+</ul>
+
+
+<h1>References</h1>
+
+<ul>
+<li><a href="http://medicine.osu.edu/neuroscience/Documents/Biotechniques%20ImageJ%20overview%202013.pdf">ImageJ for Microscopy</a></li>
+<li>Sezgin &amp; Sankur. 2004. Survey over image thresholding techniques and quantitative performance evaluation. Journal of Electronic Imaging, 2004</li>
+<li>For reconstruction and analysis of dendritic spines: Rodriguez A., Ehlenberger D.B., Dickstein D.L., Hof P.R., Wearne S.L. Automated Three-Dimensional Detection and Shape Classification of Dendritic Spines from Fluorescence Microscopy Images. PLoS ONE 3(4): e1997</li>
+<li>For reconstruction and analysis of dendritic arbors: Wearne, S.L., Rodriguez, A., Ehlenberger, D.B., Rocher, A.B., Hendersion, S.C., and Hof, P.R. New Techniques for imaging, digitization and analysis of three-dimensional neural morphology on multiple scales.</li>
+</ul>
+
+
+<h1>Neuron Datasets</h1>
+
+<h2>NeuroMorpho</h2>
+
+<p>Seems to be an open neuron reconstruction dataset.  They don't appear to have the original images, unfortunatley.  I could try to contact the labs</p>
+
+<p><a href="http://neuromorpho.org/neuroMorpho/index.jsp">link</a></p>
+
+<h2>Duke Southampton Archive of Neuronal Morphology</h2>
+
+<h2>Cell-centered database</h2>
+
+<p>General database of cell images.</p>
+
+<p><a href="http://ccdb.ucsd.edu/CCDBWebSite/index.html">link</a></p>
+
+<h4>Useful search terms:</h4>
+
+<ul>
+<li>Neuron (obviously)</li>
+<li>Dendritic tree</li>
+<li>Spiny Dendrite</li>
+<li>Purkinje</li>
+<li>neurolucida (ground truth tool)</li>
+<li>vascular?</li>
+<li>protoplasmic astrocyte</li>
+<li>cerebellar basket cell</li>
+</ul>
+
+
+<h4>Examined datasets</h4>
+
+<ul>
+<li><a href="http://ccdb.ucsd.edu/sand/main?mpid=1&amp;event=displaySum">dendritic tree</a> - could be good for "tracking" through slices.  Ground truth segmentation isn't clear</li>
+<li><a href="http://ccdb.ucsd.edu/sand/main?mpid=12&amp;event=displaySum">spiny dendrite</a> -</li>
+<li><a href="http://ccdb.ucsd.edu/sand/main?mpid=2&amp;event=displaySum">Purkinje neuron (dendritic tree)</a> - very complex branching structure, with ground truth</li>
+<li><a href="http://ccdb.ucsd.edu/sand/main?mpid=3494&amp;event=displayRecon">Purkinje neuron (spiny dendrite)</a> - nice electron microscopy image</li>
+<li><a href="http://ccdb.ucsd.edu/sand/main?mpid=3687&amp;event=displaySum">Purkinje neuron (multiphoton)</a>  Nice but no ground truth</li>
+<li>(http://ccdb.ucsd.edu/sand/main?mpid=3380&amp;event=displaySeg) - confocal data seems in the seetspot between clean and noisy.  Nice 3d ground truth</li>
+<li><a href="http://ccdb.ucsd.edu/sand/main?mpid=3693&amp;event=displaySeg">medium spiny neuron (transmitted light</a> - has a nice looking ground-truth</li>
+<li><a href="http://ccdb.ucsd.edu/sand/main?mpid=8244&amp;event=displayRecon">neocortex pyramidal neuron</a> - different-looking neuron, different lab, could be an easier dataset</li>
+</ul>
+
+
+<h4>Datasets to look into</h4>
+
+<ul>
+<li>Maryann Martone - at least 4 very complex dendritic tree stacks w/ ground truth.</li>
+<li>Mark Ellisman, Stephen Larson - at least 1 full neuron w/ semi-auto segmentation</li>
+</ul>
+
+
+<h4>Data types</h4>
+
+<ul>
+<li>confocal</li>
+<li>IVEM / UHVEM - {intermediate, ultra high} voltage electron microscopy)</li>
+<li>transmitted light</li>
+<li>multiphoton - very clean images</li>
+</ul>
+
+
+<h1>Miscellaneous</h1>
+
+<ul>
+<li>Lucifer yellow - cell stain</li>
+<li>Golgi - staining method</li>
+<li>genesis modelling package?</li>
+</ul>
+
+
+<h1>To Try</h1>
+
+<ul>
+<li>Decovolution with synthetic and emperical point spread functions.</li>
+<li>using duke/southampton format - swc</li>
+<li>use neuromorpho for training
+** experimental condition: "Control"</li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2014/12/11/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2014/12/08/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+
