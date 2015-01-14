@@ -6,6 +6,7 @@ Thumbs.db
 .DS_Store
 
 !.gitkeep
-
+**.swp
+**.swo
 .rbenv-version
 .rvmrc
