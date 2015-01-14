@@ -7,6 +7,45 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Prior, visualized</title>
+				<description>&lt;p&gt;Input tree.  (Mean of the local prior)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-input_tree.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Training tree.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-training_tree.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Sample from the locality prior only:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-local_prior_sample.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-local_sample_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-smooth_sampled_tree.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Samples from full prior (including epipolar constraints)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-12-full_prior_samples.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-full_prior_samples.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Notice how all corresponding points lie on the same epipolar line.&lt;/p&gt;
+
+&lt;p&gt;The plot of eigenvalues of the prior covariance matrix suggest a very low-dimensional embedding:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-full_prior_eigs.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Plotting log-sqrt eigenvalues compresses the dynamic range, making it easier to read:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-log_sqrt_prior_eigs.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+</description>
+				<pubDate>Wed, 14 Jan 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/14/reference</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/14/reference</guid>
+			</item>
+		
+			<item>
 				<title>Work Log</title>
 				<description>&lt;p&gt;Spent morning considering covariance over loopy graphs.  Implemented and example of &quot;shortest geodesic distance&quot;, modified to be minimum sum of squared distances between junctions over all paths.  This is a generalization of our metric over tree-structured graphs.  As anticipated, with loopy graphs, this results in non-positive-definite covariance matrices.&lt;/p&gt;
 
@@ -90,6 +129,16 @@ A loopy graph strategyn unclaimed curve segment&#39;s length is perticularly lon
 &lt;p&gt;Grab all foreground/background pixels in probability map.&lt;/p&gt;
 
 &lt;p&gt;create histogram.  Try smoothing and/or annealing.&lt;/p&gt;
+
+&lt;p&gt;Done.&lt;/p&gt;
+
+&lt;p&gt;Foreground model:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-lik_fg.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Background model:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-lik_bg.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 </description>
 				<pubDate>Tue, 13 Jan 2015 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/13/work-log</link>
@@ -826,17 +875,6 @@ Train Bernoulli distribution over foreground, background&lt;/p&gt;
 				<pubDate>Thu, 01 Jan 2015 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/01/work-log</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/01/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>&lt;p&gt;Working with KernelBoost code from &lt;a href=&quot;http://cvlab.epfl.ch/page-108936-en.html&quot;&gt;http://cvlab.epfl.ch/page-108936-en.html&lt;/a&gt;.  Running training example, should take about 9 hours.  Working on preparing our data to train with.&lt;/p&gt;
-
-&lt;p&gt;Prepared files for Structure from Silhouette Probability Maps and sent to Dr. Tabb to try reconstruction.&lt;/p&gt;
-</description>
-				<pubDate>Wed, 31 Dec 2014 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2014/12/31/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2014/12/31/work-log</guid>
 			</item>
 		
 	</channel>

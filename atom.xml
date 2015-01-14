@@ -4,13 +4,52 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2015-01-14T14:25:23-07:00</updated>
+ <updated>2015-01-14T15:06:09-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Prior, visualized</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/14/reference"/>
+   <updated>2015-01-14T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/14/reference</id>
+   <content type="html">&lt;p&gt;Input tree.  (Mean of the local prior)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-input_tree.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Training tree.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-training_tree.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Sample from the locality prior only:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-local_prior_sample.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-local_sample_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-smooth_sampled_tree.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Samples from full prior (including epipolar constraints)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-12-full_prior_samples.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-full_prior_samples.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Notice how all corresponding points lie on the same epipolar line.&lt;/p&gt;
+
+&lt;p&gt;The plot of eigenvalues of the prior covariance matrix suggest a very low-dimensional embedding:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-full_prior_eigs.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Plotting log-sqrt eigenvalues compresses the dynamic range, making it easier to read:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-log_sqrt_prior_eigs.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Work Log</title>
@@ -99,6 +138,16 @@ A loopy graph strategyn unclaimed curve segment&#39;s length is perticularly lon
 &lt;p&gt;Grab all foreground/background pixels in probability map.&lt;/p&gt;
 
 &lt;p&gt;create histogram.  Try smoothing and/or annealing.&lt;/p&gt;
+
+&lt;p&gt;Done.&lt;/p&gt;
+
+&lt;p&gt;Foreground model:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-lik_fg.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Background model:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-lik_bg.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 </content>
  </entry>
  
