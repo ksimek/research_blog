@@ -8,5 +8,6 @@ Thumbs.db
 
 .rbenv-version
 .rvmrc
+**/*.swp
 *.swp
 log
