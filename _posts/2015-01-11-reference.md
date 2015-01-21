@@ -9,6 +9,10 @@ meta:
 ---
 {% include JB/setup %}
 
+40-degree model
+----------
+Below are results for training a deformation model for a 40 degree rotation.
+
 Training only local prior w/ noise_variance fixed at 1.0:
   
             noise_variance: 1
@@ -52,3 +56,20 @@ By comparison, below is a nearby local minimum, obtained by training all 9 param
               const_variance: 5.4990e-109
 
 This model moves all epipolar prior variance into the iid epipolar_variance variables. Also the local prior's offset variance has been moved into the deformation variance, geodesic_variance, while shortening the scale.
+
+10-degree model
+----------
+Below are results for training a deformation model for a 10 degree rotation.
+
+         epipolar_variance: 4.5465
+        euclidean_variance: 0.0422
+           euclidean_scale: 4.2001e-07
+            noise_variance: 1
+         geodesic_variance: 2.0824
+            geodesic_scale: 5.9410e-04
+    branch_linear_variance: 0.0064
+     branch_const_variance: 0.6186
+           linear_variance: 0
+            const_variance: 1.1533e-21
+
+I suspect overfitting here.  Fitting works best when scaling prior variance by 36.
