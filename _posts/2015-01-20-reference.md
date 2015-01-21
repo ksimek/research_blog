@@ -15,16 +15,16 @@ Another example is the skeletonization of a binary image, in which each skeleton
   
 ![]({{site.baseurl}}/img/2015-01-20-neuron_skeleton.png)
 
-We want to generalize the Branching gaussian process to handle graphs with loops.  The basic idea is to model linear chains using the traditional 1D covariance based on curve-distance, and model loops using a 2D covariance based on euclidean position (e.g. 2D squared exponential covariance).  The result is an articulated set of plate-like subgraphs connected by  chain-like subgraphs.  We could call this an "articulated Gaussian process" as a generalization to "branching Gaussian processes".
+We want to generalize the Branching gaussian process to handle graphs with loops.  The basic idea is to model linear chains using the traditional 1D covariance based on curve-distance, and model loops using a 2D covariance based on euclidean position (e.g. 2D squared exponential covariance).  The result is an articulated set of plate-like subgraphs connected by  chain-like subgraphs.  We could call this an "articulated Gaussian process" as a generalization to "branching Gaussian processes."
 
-First, we'll show how to separate the graph into chain-like and plate-like regions.  Then we'll show how to embed the graph in a high-dimensional Euclidean space wuch that traditional covariance functions over this space have nice properties, like conditional independence and piecewise smooth regions.
+First, we'll show how to separate the graph into chain-like and plate-like regions.  Then we'll show how to embed the graph in a high-dimensional Euclidean space such that traditional covariance functions over this space have nice properties, like conditional independence and piecewise smooth regions.
 
 Partitioning into "Plates" and "Chains"
 -------------------------------------
 
 We first partition the graph into subgraphs we call "chains" and "plates."  First, find [biconnected components](http://en.wikipedia.org/wiki/Biconnected_component) in the graph using Tarjan's algorithm.  Biconnected components of size greater than 2 become "plates."  Biconnected components of size two are chain-links; maximal subgraphs of connected chain links are "chains."  Any vertex shared by two subgraphs is an "articulation point."  Let \\(G\^c = \\{G\^c\_i\\}\\) be the set of chain subgraphs, \\(G\^p = \\{G\^p\_j\\}\\) be the set of plate subgraphs.
 
-Below is such a partition, with chains and plates identified:
+Below is such a partition, with two trivial chains and two plates identified:
 
 ![]({{site.baseurl}}/img/2015-01-20-biconnected_components_reprise.png)
 
