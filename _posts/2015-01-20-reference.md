@@ -44,3 +44,20 @@ where \\(d : V\^2 \rightarrow \mathbb{R}\^{|G\^c| + 2\,|G\^p|}\\) is the concate
 
 Under this transformation, index displacement between two vertices is equal to the sum of pairwise displacements along the depth-first search path connecting them.  For vertices with a subgraph, this summation takes a very simple form.  The biconnected property implies that for any two vertices within a subgraph, the search path connecting them lies entirely within the subgraph.  Thus, for any two vertices \\((v,v')\\) in subgraph \(G_i\), their indices \\((x,x'\\)) differ only by \\(d_i(v,v')\\).   As a result, each subgraph lies on an axis-aligned hyperplane (2D for plates, 1D for chains) corresponding to its individual displacement function.  Furthermore, all such hyperplanes are mutually orthogonal and touch only at articulation points.  Also, within subgraphs, this index space preserves relative (Euclidean or geodesic) position from the original 2D embedding.
 
+
+Covariance functions
+-------------------
+
+When using a cubic-spline covariance function, the only dimensions that are nonzero are those corresponding to shared ancestors.  The position along the curve only matters when comparing points on the same subgraph.  For trees, this exactly corresponds to the BGP covariance I derived in my dissertation proposal.  Plate regions act like thin-plate splines.
+
+When using a radial-basis covariance function like squared exponential, the squared L2 distance has a nice interpretation.  Take the path between two nodes, and split it into subpaths at articulation points.  The squared L2 distance is the sum of the distances between articulation points, plus the squared distance between the endpoints and their nearest articulation points.  This is similar to the squared geodesic distance between the points, but modified to restart the distance measurement from zero at each articulation point.
+
+Generalizations
+------------------
+
+It may be interesting to model plates as being superimposed on an underlying chain, for example, in the circled plate below:
+
+![]({{site.baseurl}}/img/2015-01-20-plate_in_chain_2.png)
+
+
+In this case, 1,2,3,4 is probably well modelled as a smooth curve (i.e. a chain), but 2,3,5 is also clearly a plate.   We might want to let point 5's position influence points 2 and 3, without violating smoothness of 1,2,3,4.  To handle this, we relax the requirement that the plate and chain must lie in orthogonal hyperplanes.  Instead of taking the index of its predecessor (e.g. vertex 3), the first term in the index equation for vertex 5 can be the linear interpolation between indexes 3 and 4.  This lets subgraph 2,3,5 act a little bit like a chain and a little bit like a plate.  How to implement this linear interpolation is up for debate, but two possibilities are: (a) relative euclidean distance, or (b) relative geodesic distance.  
