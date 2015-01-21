@@ -1,0 +1,264 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Articulated Gaussian Processes &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+      <li><a  href="/ksimek/research/pomodoro.html"><img src="/ksimek/research/img/pom.png" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Reference] Articulated Gaussian Processes
+    </h1>
+
+  <div class="date emphnext">
+    January 20, 2015
+      
+ 
+  </div>
+    
+
+
+  
+    <p>Consider an arbitrary undirected graph embedded in \(\mathbb{R}^2\), for example:</p>
+
+<p><img src="/ksimek/research/img/2015-01-20-articulated_graph_1.png" alt="" /></p>
+
+<p>Another example is the skeletonization of a binary image, in which each skeleton pixel is a vertex, and adjacent skeleton pixels have an edge between them.  Below is an example of a skeletonized neuron image:</p>
+
+<p><img src="/ksimek/research/img/2015-01-20-neuron_skeleton.png" alt="" /></p>
+
+<p>We want to generalize the Branching gaussian process to handle graphs with loops.  The basic idea is to model linear chains using the traditional 1D covariance based on curve-distance, and model loops using a 2D covariance based on euclidean position (e.g. 2D squared exponential covariance).  The result is an articulated set of plate-like subgraphs connected by  chain-like subgraphs.  We could call this an "articulated Gaussian process" as a generalization to "branching Gaussian processes".</p>
+
+<p>First, we'll show how to separate the graph into chain-like and plate-like regions.  Then we'll show how to embed the graph in a high-dimensional Euclidean space wuch that traditional covariance functions over this space have nice properties, like conditional independence and piecewise smooth regions.</p>
+
+<h2>Partitioning into "Plates" and "Chains"</h2>
+
+<p>We first partition the graph into subgraphs we call "chains" and "plates."  First, find <a href="http://en.wikipedia.org/wiki/Biconnected_component">biconnected components</a> in the graph using Tarjan's algorithm.  Biconnected components of size greater than 2 become "plates."  Biconnected components of size two are chain-links; maximal subgraphs of connected chain links are "chains."  Any vertex shared by two subgraphs is an "articulation point."  Let \(G^c = \{G^c_i\}\) be the set of chain subgraphs, \(G^p = \{G^p_j\}\) be the set of plate subgraphs.</p>
+
+<p>Below is such a partition, with chains and plates identified:</p>
+
+<p><img src="/ksimek/research/img/2015-01-20-biconnected_components_reprise.png" alt="" /></p>
+
+<h2>Constructing a Gaussian process</h2>
+
+<p>Let \(Z = \{z_i\}\) be the 2D position of vertices \(V = \{v_i\}\) embedded in the Euclidean plane. We seek a Gaussian process over \(Z\) that satisfies three properties:  (a) the covariance between points on a chain must be a function of their geodesic position (i.e. distance along the chain), (b) the covariance between points on a plate must be a function of their Euclidean positions, and (c) points in different subgraphs must be independent conditioned on any articulation point on the path connecting them.  Naturally, we require that the covariance function be positive definite.</p>
+
+<p>To guarantee positive definiteness, we will embed the graph in a high-dimensional Hilbert space and then use a standard covariance function on this space.  This allows our model to be agnostic to choice of covariance function.  In what follows, we descibe how to construct such a space, which we call the graph's <em>index space</em>.  Briefly, we satisfy constraints (a) and (b) by embedding vertices such that relative positions within subgraphs are preserved.  To satisfy (c), subgraphs will be embedded in mutually orthogonal hyperplanes, connected only at articulation points.</p>
+
+<h1>Constructing the index-space</h1>
+
+<p>For each plate-type subgraph \(G^p_i \in G^p \), we define a local displacement function \(d^p_i : V^2 \rightarrow \mathbb{R}^2 \):</p>
+
+<div>\[
+d^p_i(v,v') = \begin{cases}
+    z - z' & \text{ if } v,v' \in G^p_i \\
+      0 & \text{ otherwise,}
+      \end{cases}
+\]
+</div>
+
+
+<p>where \((z,z')\) are the 2D Euclidean position of vertices \((v,v')\). Similarly, for each chain-type subgraph \(G^c_i \in G^c\), we define a local displacement \(d^c_i : V^2 \rightarrow \mathbb{R} \).  For any two vertices \(v,v'\) connected by path \(\mathcal{P}\), we define the local displacement by the geodesic distance between the points:</p>
+
+<div>\[
+  d^c_i(v,v') = \begin{cases}
+    \sum_{(j,k) \in \mathcal{P}} ||z_j - z_k|| & \text{ if } v,v' \in G^c_i \\
+      0 & \text{ otherwise}
+      \end{cases}
+  \]
+  </div>
+
+
+<p>Note that for chains, exactly one such path exists, making the above expression well-defined.</p>
+
+<p>We define the full displacement \(d : V^2 \rightarrow \mathbb{R}^{|G^c| + 2|G^p|}\) as the concatenated outputs of all local displacements, i.e. \(d(v,v') = (d^c_1(v,v'), d^c_2(v,v'), \dots, d^p_1(v,v'), d^p_2(v,v'), \dots)\).  The full displacement will be central to defining the index-space.</p>
+
+<p>We arbitrarilly pick a vertex \(v_0\) to be the graph's root and use depth-first search to impose a tree topology over the other vertices.  Because the subgraphs are biconnected, this also defines a tree-topology over subgraphs.  We define the "local origin" of a subgraph as the vertex first encountered in a depth-first search.    For all non-root vertices \(v_i\), we introduce the concept of a "predecessor" vertex \(v_{\pi(i)}\).  The predecessor of a local origin is the the parent subgraph's local origin; the predecessor of all other vertices is the local origin of the subgraph that contains it.</p>
+
+<p>For each vertex \(v_i \in V\), we assign an index \(x_i \in \mathbb{R}^{|G^c| + 2\,|G^p|} \).  Let the root vertex \(v_0\) have index \(x_0 = \mathbf{0}\).  For all other vertices, we define the index recursively:</p>
+
+<div>
+\[
+  x_i = x_{\pi(i)} + d(v_i, v_{\pi(i)})
+\]
+</div>
+
+
+<p>Because vertices within a subgraph differ only by their local displacement, each subgraph lies on an axis-aligned hyperplane (2D for plates, 1D for chains).  All such hyperplanes are mutually orthogonal and touch only at articulation points.  Also, within hyperplanes corresponding to plates (resp. chains), relative Euclidean (geodesic) position is preserved from the original 2D embedding.</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2015/01/20/reference2" class="next" title="Articulated gaussian processes (part 2)">Articulated gaussian processes (part 2) &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2015/01/18/work-log" class="prev" title="Work Log - fitting progress">&larr; Work Log - fitting progress</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

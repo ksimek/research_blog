@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>Prior, visualized &larr; </title>
+   <title>Articulated gaussian processes (part 2) &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -86,11 +86,11 @@
 
 
   <h1 class="title">
-        [Reference] Prior, visualized
+        [Reference] Articulated gaussian processes (part 2)
     </h1>
 
   <div class="date emphnext">
-    January 14, 2015
+    January 20, 2015
       
  
   </div>
@@ -98,37 +98,54 @@
 
 
   
-    <p>Input tree.  (Mean of the local prior)</p>
+    <p>Continued from <a href="/ksimek/research/2015/01/20/reference/">part 1</a>.</p>
 
-<p><img src="/ksimek/research/img/2015-01-14-input_tree.png" alt="" /></p>
+<h2>Covariance functions</h2>
 
-<p>Training tree.</p>
+<p>Recall the 1D cubic-spline covariance:</p>
 
-<p><img src="/ksimek/research/img/2015-01-14-training_tree.png" alt="" /></p>
+<div>
+\[
+k(x,x') = |x-x'| \min(x,x')^2 / 2 + \min(x,x')^3/3.
+\]
+</div>
 
-<p>Sample from the locality prior only:</p>
 
-<p><img src="/ksimek/research/img/2015-01-14-local_prior_sample.png" alt="" /></p>
+<p>We can generalize this to ND indices as</p>
 
-<p><img src="/ksimek/research/img/2015-01-14-local_sample_2.png" alt="" /></p>
+<div>
+\[
+k(\boldsymbol(x),\boldsymbol(x)') = \sum_i |x_i-x_i'| min(x_i,x_i')^2 / 2 + min(x_i,x_i')^3/3.
+\]
+</div>
 
-<p><img src="/ksimek/research/img/2015-01-11-smooth_sampled_tree.png" alt="" /></p>
 
-<p>Samples from full prior (including epipolar constraints)</p>
+<p>When using a cubic-spline covariance function, the only dimensions that are nonzero are those corresponding to shared ancestors.  The position along the curve only matters when comparing points on the same subgraph.  For trees, this exactly corresponds to the branching Gaussian process covariance I derived in my dissertation proposal.  Plate regions act like thin-plate splines.</p>
 
-<p><img src="/ksimek/research/img/2015-01-12-full_prior_samples.png" alt="" /></p>
+<p>When using a radial-basis covariance function like squared exponential, the squared L2 distance has a nice interpretation.  Take any path between two nodes, and split it at articulation points into a sequence of subpaths.  The squared L2 distance is the sum of the squared local distances between articulation points, plus the squared distance between the endpoints and their nearest articulation points.  This is similar to the squared geodesic distance between the points, but modified to restart the distance measurement from zero at each articulation point.</p>
 
-<p><img src="/ksimek/research/img/2015-01-14-full_prior_samples.png" alt="" /></p>
+<h2>Generalizations</h2>
 
-<p>Notice how all corresponding points lie on the same epipolar line.</p>
+<p><img src="/ksimek/research/img/2015-01-20-plate_in_chain_2.png" alt="" /></p>
 
-<p>The plot of eigenvalues of the prior covariance matrix suggest a very low-dimensional embedding:</p>
+<p>It may be interesting to model plates as being superimposed on an underlying chain. For example, in the image above,  1,2,3,4 is probably well modelled by a smooth curve (i.e. a single chain), but 2,3,5 is also clearly a plate.   We might want to let point 5's position influence points 2 and 3, without violating smoothness of 1,2,3,4.  To handle this, we relax the requirement that the plate and chain must lie in orthogonal hyperplanes.  We modify equation (1) so instead of vertex 5 inheriting the index of its predecessor (e.g. vertex 3), we replace the first term with the linear interpolation between indexes 3 and 4.  This lets subgraph 2,3,5 act a little bit like a chain and a little bit like a plate.  How to implement this linear interpolation is up for debate, but two possibilities are: (a) relative euclidean distance, or (b) relative geodesic distance.</p>
 
-<p><img src="/ksimek/research/img/2015-01-14-full_prior_eigs.png" alt="" /></p>
+<h2>Altnerative definition</h2>
 
-<p>Plotting log-sqrt eigenvalues compresses the dynamic range, making it easier to read:</p>
+<p>The definition of the index-space below is equivalent to the one above, but requires some extra proofs to explain (like proving all DFS paths between vertices within a subgraph are fully contained within the subgraph).  It was just too cumbersome, rhetorically, but quite convenient to implmement. I'm including it here so I remember it during implementation.</p>
 
-<p><img src="/ksimek/research/img/2015-01-14-log_sqrt_prior_eigs.png" alt="" /></p>
+<p>...</p>
+
+<p>For each vertex \(v_i \in V\), we assign an index \(x_i \in \mathbb{R}^{|G^c| + 2\,|G^p|} \). We arbitrarilly pick a vertex \(v_0\) to be the graph's root, and set its index to \(x_0 = \mathbf{0}\).  For each vertex \(v_i \in V \setminus v_0\), let \(p(i)\) be the index of its predecessor in a depth-first search.  We then define the index of \(v_i\) to be</p>
+
+<div>
+\[
+x_i = x_{p(i)} + d(v_i, v_{p(i)})  \text{  (1)}
+\]
+</div>
+
+
+<p>where \(d : V^2 \rightarrow \mathbb{R}^{|G^c| + 2\,|G^p|}\) is the concatenation of displacement functions, i.e. \(d(v,v') = \left( d^c_1(v,v'), d^c_2(v,v'), \dots, d^p_1(v,v'), d^p_2(v,v'), \dots \right) \).</p>
 
       <address class="signature">
         Posted by
@@ -139,11 +156,8 @@
 
   
   
-  <div class="prev-next">
-    <a href="/ksimek/research/2015/01/18/work-log" class="next" title="Work Log - fitting progress">Work Log - fitting progress &rarr;</a>
   
-  
-    <a href="/ksimek/research/2015/01/13/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+    <a href="/ksimek/research/2015/01/20/reference" class="prev" title="Articulated Gaussian Processes">&larr; Articulated Gaussian Processes</a>
   
   </div>
   <div class="clearer"> </div>

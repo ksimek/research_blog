@@ -7,6 +7,215 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Articulated gaussian processes (part 2)</title>
+				<description>&lt;p&gt;Continued from &lt;a href=&quot;/ksimek/research/2015/01/20/reference/&quot;&gt;part 1&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2&gt;Covariance functions&lt;/h2&gt;
+
+&lt;p&gt;Recall the 1D cubic-spline covariance:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+k(x,x&#39;) = |x-x&#39;| \min(x,x&#39;)^2 / 2 + \min(x,x&#39;)^3/3.
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;We can generalize this to ND indices as&lt;/p&gt;
+
+&lt;div&gt;
+\[
+k(\boldsymbol(x),\boldsymbol(x)&#39;) = \sum_i |x_i-x_i&#39;| min(x_i,x_i&#39;)^2 / 2 + min(x_i,x_i&#39;)^3/3.
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;When using a cubic-spline covariance function, the only dimensions that are nonzero are those corresponding to shared ancestors.  The position along the curve only matters when comparing points on the same subgraph.  For trees, this exactly corresponds to the branching Gaussian process covariance I derived in my dissertation proposal.  Plate regions act like thin-plate splines.&lt;/p&gt;
+
+&lt;p&gt;When using a radial-basis covariance function like squared exponential, the squared L2 distance has a nice interpretation.  Take any path between two nodes, and split it at articulation points into a sequence of subpaths.  The squared L2 distance is the sum of the squared local distances between articulation points, plus the squared distance between the endpoints and their nearest articulation points.  This is similar to the squared geodesic distance between the points, but modified to restart the distance measurement from zero at each articulation point.&lt;/p&gt;
+
+&lt;h2&gt;Generalizations&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-20-plate_in_chain_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;It may be interesting to model plates as being superimposed on an underlying chain. For example, in the image above,  1,2,3,4 is probably well modelled by a smooth curve (i.e. a single chain), but 2,3,5 is also clearly a plate.   We might want to let point 5&#39;s position influence points 2 and 3, without violating smoothness of 1,2,3,4.  To handle this, we relax the requirement that the plate and chain must lie in orthogonal hyperplanes.  We modify equation (1) so instead of vertex 5 inheriting the index of its predecessor (e.g. vertex 3), we replace the first term with the linear interpolation between indexes 3 and 4.  This lets subgraph 2,3,5 act a little bit like a chain and a little bit like a plate.  How to implement this linear interpolation is up for debate, but two possibilities are: (a) relative euclidean distance, or (b) relative geodesic distance.&lt;/p&gt;
+
+&lt;h2&gt;Altnerative definition&lt;/h2&gt;
+
+&lt;p&gt;The definition of the index-space below is equivalent to the one above, but requires some extra proofs to explain (like proving all DFS paths between vertices within a subgraph are fully contained within the subgraph).  It was just too cumbersome, rhetorically, but quite convenient to implmement. I&#39;m including it here so I remember it during implementation.&lt;/p&gt;
+
+&lt;p&gt;...&lt;/p&gt;
+
+&lt;p&gt;For each vertex \(v_i \in V\), we assign an index \(x_i \in \mathbb{R}^{|G^c| + 2\,|G^p|} \). We arbitrarilly pick a vertex \(v_0\) to be the graph&#39;s root, and set its index to \(x_0 = \mathbf{0}\).  For each vertex \(v_i \in V \setminus v_0\), let \(p(i)\) be the index of its predecessor in a depth-first search.  We then define the index of \(v_i\) to be&lt;/p&gt;
+
+&lt;div&gt;
+\[
+x_i = x_{p(i)} + d(v_i, v_{p(i)})  \text{  (1)}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;where \(d : V^2 \rightarrow \mathbb{R}^{|G^c| + 2\,|G^p|}\) is the concatenation of displacement functions, i.e. \(d(v,v&#39;) = \left( d^c_1(v,v&#39;), d^c_2(v,v&#39;), \dots, d^p_1(v,v&#39;), d^p_2(v,v&#39;), \dots \right) \).&lt;/p&gt;
+</description>
+				<pubDate>Tue, 20 Jan 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/20/reference2</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/20/reference2</guid>
+			</item>
+		
+			<item>
+				<title>Articulated Gaussian Processes</title>
+				<description>&lt;p&gt;Consider an arbitrary undirected graph embedded in \(\mathbb{R}^2\), for example:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-20-articulated_graph_1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Another example is the skeletonization of a binary image, in which each skeleton pixel is a vertex, and adjacent skeleton pixels have an edge between them.  Below is an example of a skeletonized neuron image:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-20-neuron_skeleton.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We want to generalize the Branching gaussian process to handle graphs with loops.  The basic idea is to model linear chains using the traditional 1D covariance based on curve-distance, and model loops using a 2D covariance based on euclidean position (e.g. 2D squared exponential covariance).  The result is an articulated set of plate-like subgraphs connected by  chain-like subgraphs.  We could call this an &quot;articulated Gaussian process&quot; as a generalization to &quot;branching Gaussian processes&quot;.&lt;/p&gt;
+
+&lt;p&gt;First, we&#39;ll show how to separate the graph into chain-like and plate-like regions.  Then we&#39;ll show how to embed the graph in a high-dimensional Euclidean space wuch that traditional covariance functions over this space have nice properties, like conditional independence and piecewise smooth regions.&lt;/p&gt;
+
+&lt;h2&gt;Partitioning into &quot;Plates&quot; and &quot;Chains&quot;&lt;/h2&gt;
+
+&lt;p&gt;We first partition the graph into subgraphs we call &quot;chains&quot; and &quot;plates.&quot;  First, find &lt;a href=&quot;http://en.wikipedia.org/wiki/Biconnected_component&quot;&gt;biconnected components&lt;/a&gt; in the graph using Tarjan&#39;s algorithm.  Biconnected components of size greater than 2 become &quot;plates.&quot;  Biconnected components of size two are chain-links; maximal subgraphs of connected chain links are &quot;chains.&quot;  Any vertex shared by two subgraphs is an &quot;articulation point.&quot;  Let \(G^c = \{G^c_i\}\) be the set of chain subgraphs, \(G^p = \{G^p_j\}\) be the set of plate subgraphs.&lt;/p&gt;
+
+&lt;p&gt;Below is such a partition, with chains and plates identified:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-20-biconnected_components_reprise.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2&gt;Constructing a Gaussian process&lt;/h2&gt;
+
+&lt;p&gt;Let \(Z = \{z_i\}\) be the 2D position of vertices \(V = \{v_i\}\) embedded in the Euclidean plane. We seek a Gaussian process over \(Z\) that satisfies three properties:  (a) the covariance between points on a chain must be a function of their geodesic position (i.e. distance along the chain), (b) the covariance between points on a plate must be a function of their Euclidean positions, and (c) points in different subgraphs must be independent conditioned on any articulation point on the path connecting them.  Naturally, we require that the covariance function be positive definite.&lt;/p&gt;
+
+&lt;p&gt;To guarantee positive definiteness, we will embed the graph in a high-dimensional Hilbert space and then use a standard covariance function on this space.  This allows our model to be agnostic to choice of covariance function.  In what follows, we descibe how to construct such a space, which we call the graph&#39;s &lt;em&gt;index space&lt;/em&gt;.  Briefly, we satisfy constraints (a) and (b) by embedding vertices such that relative positions within subgraphs are preserved.  To satisfy (c), subgraphs will be embedded in mutually orthogonal hyperplanes, connected only at articulation points.&lt;/p&gt;
+
+&lt;h1&gt;Constructing the index-space&lt;/h1&gt;
+
+&lt;p&gt;For each plate-type subgraph \(G^p_i \in G^p \), we define a local displacement function \(d^p_i : V^2 \rightarrow \mathbb{R}^2 \):&lt;/p&gt;
+
+&lt;div&gt;\[
+d^p_i(v,v&#39;) = \begin{cases}
+    z - z&#39; &amp; \text{ if } v,v&#39; \in G^p_i \\
+      0 &amp; \text{ otherwise,}
+      \end{cases}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;where \((z,z&#39;)\) are the 2D Euclidean position of vertices \((v,v&#39;)\). Similarly, for each chain-type subgraph \(G^c_i \in G^c\), we define a local displacement \(d^c_i : V^2 \rightarrow \mathbb{R} \).  For any two vertices \(v,v&#39;\) connected by path \(\mathcal{P}\), we define the local displacement by the geodesic distance between the points:&lt;/p&gt;
+
+&lt;div&gt;\[
+  d^c_i(v,v&#39;) = \begin{cases}
+    \sum_{(j,k) \in \mathcal{P}} ||z_j - z_k|| &amp; \text{ if } v,v&#39; \in G^c_i \\
+      0 &amp; \text{ otherwise}
+      \end{cases}
+  \]
+  &lt;/div&gt;
+
+
+&lt;p&gt;Note that for chains, exactly one such path exists, making the above expression well-defined.&lt;/p&gt;
+
+&lt;p&gt;We define the full displacement \(d : V^2 \rightarrow \mathbb{R}^{|G^c| + 2|G^p|}\) as the concatenated outputs of all local displacements, i.e. \(d(v,v&#39;) = (d^c_1(v,v&#39;), d^c_2(v,v&#39;), \dots, d^p_1(v,v&#39;), d^p_2(v,v&#39;), \dots)\).  The full displacement will be central to defining the index-space.&lt;/p&gt;
+
+&lt;p&gt;We arbitrarilly pick a vertex \(v_0\) to be the graph&#39;s root and use depth-first search to impose a tree topology over the other vertices.  Because the subgraphs are biconnected, this also defines a tree-topology over subgraphs.  We define the &quot;local origin&quot; of a subgraph as the vertex first encountered in a depth-first search.    For all non-root vertices \(v_i\), we introduce the concept of a &quot;predecessor&quot; vertex \(v_{\pi(i)}\).  The predecessor of a local origin is the the parent subgraph&#39;s local origin; the predecessor of all other vertices is the local origin of the subgraph that contains it.&lt;/p&gt;
+
+&lt;p&gt;For each vertex \(v_i \in V\), we assign an index \(x_i \in \mathbb{R}^{|G^c| + 2\,|G^p|} \).  Let the root vertex \(v_0\) have index \(x_0 = \mathbf{0}\).  For all other vertices, we define the index recursively:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+  x_i = x_{\pi(i)} + d(v_i, v_{\pi(i)})
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Because vertices within a subgraph differ only by their local displacement, each subgraph lies on an axis-aligned hyperplane (2D for plates, 1D for chains).  All such hyperplanes are mutually orthogonal and touch only at articulation points.  Also, within hyperplanes corresponding to plates (resp. chains), relative Euclidean (geodesic) position is preserved from the original 2D embedding.&lt;/p&gt;
+</description>
+				<pubDate>Tue, 20 Jan 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/20/reference</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/20/reference</guid>
+			</item>
+		
+			<item>
+				<title>Work Log - fitting progress</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Implemented a image-pyramid-based likelihood and results are much better!  Also relaxed the prior, which appears to be overfit.&lt;/p&gt;
+
+&lt;h2&gt;Run 1:&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;parameterization&lt;/em&gt;: eigenspace, scaled by sqrt of eigenvalues&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Eigenvectors:&lt;/em&gt; 30&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Prior scaling:&lt;/em&gt; 36&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;Algorithm&lt;/em&gt;: pattern-search in two passes
+&lt;strong&gt; &lt;em&gt;termination criteria&lt;/em&gt;: mesh size &amp;lt; 0.5 (roughly 1/2 pixel change)
+&lt;/strong&gt; &lt;em&gt;First pass&lt;/em&gt;: Ran until convergence at pyramid level 3 (i.e. 1/4th original size)
+&lt;em&gt;&lt;em&gt; &lt;/em&gt;Second pass&lt;/em&gt;: Ran until convergence at pyramid level 1&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;After first pass, the global maximum seemed to have been found.  The second pass quickly refined it.&lt;/p&gt;
+
+&lt;p&gt;This wasn&#39;t happening with the prior I trained, which suggests overfitting.&lt;/p&gt;
+
+&lt;h2&gt;Possible changes to consider&lt;/h2&gt;
+
+&lt;p&gt;Try using fewer eigenvectors.&lt;/p&gt;
+
+&lt;p&gt;Use likelihood mixture rather than product.  Should be smoother and allow more non-optimal results.&lt;/p&gt;
+
+&lt;p&gt;Consider scaling by inverse of eigenvector dynamic range, so moving by 1 guarantees at least one pixel changing.&lt;/p&gt;
+
+&lt;p&gt;Consider using hyperpriors during training.&lt;/p&gt;
+
+&lt;p&gt;Train cubic spline covariance model.&lt;/p&gt;
+
+&lt;h2&gt;Next steps&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Extend the track
+&lt;strong&gt; Pass 1: reproject to initialize sampler, run
+&lt;/strong&gt; Pass 2: Use reprojected model as prior&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Get full dataset results
+** run all pairwise on all datasets&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Run on detected data&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Sun, 18 Jan 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/18/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/18/work-log</guid>
+			</item>
+		
+			<item>
 				<title>Prior, visualized</title>
 				<description>&lt;p&gt;Input tree.  (Mean of the local prior)&lt;/p&gt;
 
@@ -111,8 +320,7 @@ min(eig(exp(-full(G)/(scale^2*2))))
 
 &lt;p&gt;Here&#39;s a simple approach: construct a graph with junctions as vertices and geodesic distance as edge weight.  Find the graph&#39;s minimum spanning tree, and transform the tree into curve-tree coordinates.  For unclaimed curve segments, linearly interpolate between the coordinates of the endpoints.&lt;/p&gt;
 
-&lt;p&gt;This is nice, but if a
-A loopy graph strategyn unclaimed curve segment&#39;s length is perticularly long, it should act differently than a short (straight) line between the points.  To handle this, we introduce a new dimension for each unclaimed curve segment, and allow the transformed segment to have longer length by dipping into this dimension to some extent (with a limit of none for straight lines).&lt;/p&gt;
+&lt;p&gt;This is nice, but if an unclaimed curve segment&#39;s length is perticularly long, it should act differently than a short (straight) line between the points.  To handle this, we introduce a new dimension for each unclaimed curve segment, and allow the transformed segment to have longer length by dipping into this dimension to some extent (with a limit of none for straight lines).&lt;/p&gt;
 
 &lt;p&gt;Ideally, all pairs of points on the transformed segment will have the same distance as their geodesic distance in untransformed space.  However, this is not possible, because it would contradict the fact that the endpoint distance is defined by the graph distance in the minimum spanning tree.  At least we can try to preserve local distances, and a parabolic arc is a reasonable choice for this.   How to derive a parabola equation of an appropriate length?&lt;/p&gt;
 
@@ -733,148 +941,6 @@ g &amp;= \left ( d(A,C)^2 - d(B,C)^2 \right ) / d(A,B)^2
 				<pubDate>Thu, 08 Jan 2015 00:00:00 -0700</pubDate>
 				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/08/reference</link>
 				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/08/reference</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;unknown (see text)&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-
-</description>
-				<pubDate>Sun, 04 Jan 2015 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/04/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/04/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Skeleton deformation fitting</title>
-				<description>&lt;p&gt;Since the skeletons are very different between views, the old graph-matching approach probably won&#39;t work.  I believe the graph deformation idea is still a good one, but the likelihood involving correspondences won&#39;t work because it doesn&#39;t handle false positive or false negative parts of the graph.&lt;/p&gt;
-
-&lt;p&gt;A better idea is to go back to our old approach: use a pixel-based likelihood to evaluate deformed graphs.  Use MCMC to explore the space and use the GP prior covariance for proposals or search directions.  After computing the cholesky decomposition, this should proceed relatively quickly, even for large point sets.&lt;/p&gt;
-
-&lt;p&gt;The model is the medial axis transform of the original image, plus GP-distributed deformation, which includes an epipolar constraint.  To render into the second image, we perform an inverse medial axis transform.&lt;/p&gt;
-
-&lt;p&gt;Because of the epipolar constraint, the number of effective dimensions is nearly halved.  The correlation between nearby points should reduce dimension by an even more significant factor.&lt;/p&gt;
-
-&lt;h2&gt;Initial tasks&lt;/h2&gt;
-
-&lt;p&gt;Train GP on ground truth data.
-  (try adding runners between almost-bridged points)
-Train Bernoulli distribution over foreground, background&lt;/p&gt;
-
-&lt;p&gt;Algorithms
-    binary image to graph
-    All pairs shortest path.
-    polyline w/ interpolated intensity
-  x medial axis transform
-  x Inverse medial axis transform
-    specialized mcmc
-        adaptive metropolis hastings
-        hit and run sampling?&lt;/p&gt;
-
-&lt;h2&gt;Possible extensions:&lt;/h2&gt;
-
-&lt;p&gt;  use a weaker distance function for geodesic distance (huber function?)
-  make geodesic distance greater at junctions&lt;/p&gt;
-</description>
-				<pubDate>Fri, 02 Jan 2015 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/02/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/02/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>
-
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;unknown (see text)&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
-&lt;/div&gt;
-
-
-&lt;p&gt;  Some improvements to the approach outlined at the end of previous post...&lt;/p&gt;
-
-&lt;p&gt;  Tweak epipolar likelihood to add a small affine and nonlinear distortion component
-  (e.g. due to lens distortion).  this allows epipolar variance to be smaller;
-  forces deviations to be spatially correlated.&lt;/p&gt;
-
-&lt;p&gt;  Find some good correspondences; fix camera distortion
-      approach 1: distort image using GP and known correspondences.
-      approach 2: optimize camera distortion parameters under GP and known correspondences&lt;/p&gt;
-
-&lt;p&gt;  Use unambiguous correspondences first.&lt;/p&gt;
-
-&lt;p&gt;  I fear that graph topology may be too noisy and fluxuating to be a reliable source
-  of information.  Is keypoint matching with epipolar constraint enough to solve this?
-  Maybe with added spatial distortion?&lt;/p&gt;
-
-&lt;p&gt;  How can adding correspondences reduce uncertainty in remaining points?  The approach
-  above can reduce uncertainty to almost lying on the epipolar line.   If we can recover
-  small subgraphs, those can help too.  But will false joints break things? (this would
-  be a good experiment)  Maybe just linear sections with interior keypoint nodes.
-  This should at least improve fine-scale matching later.&lt;/p&gt;
-
-&lt;p&gt;  2D gives us lateral branch candidates, but are ambiguous.  Can resolve them in 3D?&lt;/p&gt;
-
-&lt;p&gt;  Idea: branch points have higher geodesic distance?&lt;/p&gt;
-
-&lt;p&gt;  Simpler problem: Camera repair for volumetric reconstruction.&lt;/p&gt;
-
-&lt;p&gt;  Sift keypoint matching
-    nonlinear distortion fix
-    ransac matching keypoints + distortion correction&lt;/p&gt;
-</description>
-				<pubDate>Thu, 01 Jan 2015 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/01/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/01/work-log</guid>
 			</item>
 		
 	</channel>

@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>KLS Research Blog &larr; Kyle Simek</title>
+   <title>Work Log - fitting progress &larr; </title>
    <meta name="author" content="Kyle Simek" />
 
    <link rel="start" href="/ksimek/research/" />
@@ -78,144 +78,145 @@
 
 
   
-
-<div id="page">
+<div id="page" class="article">
 	
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/06/20/rethinking-likelihood">
-      <li class="title">
-            [Work log] Rethinking Likelihood
-        </li>
-      </a>
-      <div class="date emphnext">June 20, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/06/17/work-log">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">June 17, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/06/14/log-entry">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">June 14, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/06/13/log">
-      <li class="title">
-            [Work log] 
-            (No Title)
-        
-        </li>
-      </a>
-      <div class="date emphnext">June 13, 2013</div>
-</ul>
-
-        
-        
-    
-    
-        
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/06/12/visualizingdebugging-bg-ml">
-      <li class="title">
-            [Work log] Visualizing/Debugging BG ML
-        </li>
-      </a>
-      <div class="date emphnext">June 12, 2013</div>
-</ul>
-
-        
-        
-    
-    
-
-<ul class="firehose-post article">
-    <a href=""></a>
-    
-    
-    
-      <a class="title-link" href="/ksimek/research/2013/06/10/index-set-bug">
-      <li class="title">Index set bug fixed, marginal likelihood curves improved</li>
-      </a>
-      <div class="date emphnext">June 10, 2013</div>
-</ul>
-
-
-<!-- Pagination links -->
-<div class="pagination">
-  
-    <a href="/ksimek/research//page21" class="previous">&lt;&lt; Read Newer Posts</a>
   
   
+    
+
+
+  <h1 class="title">
+        [Work Log] Work Log - fitting progress
+    </h1>
+
+  <div class="date emphnext">
+    January 18, 2015
+      
+ 
+  </div>
+    
+
+
   
+    
+
+<div class="meta-info">
+<table>
+    <tr>
+        <th>Project</th>
+        <td><a href="/ksimek/research/projects/fire.html">FIRE</a></td>
+    </tr>
+    <tr>
+        <th>Subproject</th>
+        <td>Piecewise Linear Clustering (tests)</td>
+    </tr>
+    <tr>
+        <th>Working path</th>
+        <td>projects/&#8203;fire/&#8203;trunk/&#8203;src/&#8203;piecewise_linear/&#8203;test</td>
+    </tr>
+
+    <tr>
+        <th>SVN Revision</th>
+        <td>unknown (see text)</td>
+    </tr>
+
+
+</table>
+
+    Unless otherwise noted, all filesystem paths are relative to the "Working path" named above.
 </div>
 
 
+<p>Implemented a image-pyramid-based likelihood and results are much better!  Also relaxed the prior, which appears to be overfit.</p>
+
+<h2>Run 1:</h2>
+
+<ul>
+<li><em>parameterization</em>: eigenspace, scaled by sqrt of eigenvalues</li>
+<li><em>Eigenvectors:</em> 30</li>
+<li><em>Prior scaling:</em> 36</li>
+<li><em>Algorithm</em>: pattern-search in two passes
+<strong> <em>termination criteria</em>: mesh size &lt; 0.5 (roughly 1/2 pixel change)
+</strong> <em>First pass</em>: Ran until convergence at pyramid level 3 (i.e. 1/4th original size)
+<em><em> </em>Second pass</em>: Ran until convergence at pyramid level 1</li>
+</ul>
+
+
+<p>After first pass, the global maximum seemed to have been found.  The second pass quickly refined it.</p>
+
+<p>This wasn't happening with the prior I trained, which suggests overfitting.</p>
+
+<h2>Possible changes to consider</h2>
+
+<p>Try using fewer eigenvectors.</p>
+
+<p>Use likelihood mixture rather than product.  Should be smoother and allow more non-optimal results.</p>
+
+<p>Consider scaling by inverse of eigenvector dynamic range, so moving by 1 guarantees at least one pixel changing.</p>
+
+<p>Consider using hyperpriors during training.</p>
+
+<p>Train cubic spline covariance model.</p>
+
+<h2>Next steps</h2>
+
+<ul>
+<li><p>Extend the track
+<strong> Pass 1: reproject to initialize sampler, run
+</strong> Pass 2: Use reprojected model as prior</p></li>
+<li><p>Get full dataset results
+** run all pairwise on all datasets</p></li>
+<li><p>Run on detected data</p></li>
+</ul>
+
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2015/01/20/reference" class="next" title="Articulated Gaussian Processes">Articulated Gaussian Processes &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2015/01/14/reference" class="prev" title="Prior, visualized">&larr; Prior, visualized</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
 </div><!-- End Page -->
+
 
 
   
