@@ -72,15 +72,15 @@ x_i = x_{p(i)} + d(v_i, v_{p(i)})  \text{  (1)}
 
 &lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-20-neuron_skeleton.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;We want to generalize the Branching gaussian process to handle graphs with loops.  The basic idea is to model linear chains using the traditional 1D covariance based on curve-distance, and model loops using a 2D covariance based on euclidean position (e.g. 2D squared exponential covariance).  The result is an articulated set of plate-like subgraphs connected by  chain-like subgraphs.  We could call this an &quot;articulated Gaussian process&quot; as a generalization to &quot;branching Gaussian processes&quot;.&lt;/p&gt;
+&lt;p&gt;We want to generalize the Branching gaussian process to handle graphs with loops.  The basic idea is to model linear chains using the traditional 1D covariance based on curve-distance, and model loops using a 2D covariance based on euclidean position (e.g. 2D squared exponential covariance).  The result is an articulated set of plate-like subgraphs connected by  chain-like subgraphs.  We could call this an &quot;articulated Gaussian process&quot; as a generalization to &quot;branching Gaussian processes.&quot;&lt;/p&gt;
 
-&lt;p&gt;First, we&#39;ll show how to separate the graph into chain-like and plate-like regions.  Then we&#39;ll show how to embed the graph in a high-dimensional Euclidean space wuch that traditional covariance functions over this space have nice properties, like conditional independence and piecewise smooth regions.&lt;/p&gt;
+&lt;p&gt;First, we&#39;ll show how to separate the graph into chain-like and plate-like regions.  Then we&#39;ll show how to embed the graph in a high-dimensional Euclidean space such that traditional covariance functions over this space have nice properties, like conditional independence and piecewise smooth regions.&lt;/p&gt;
 
 &lt;h2&gt;Partitioning into &quot;Plates&quot; and &quot;Chains&quot;&lt;/h2&gt;
 
 &lt;p&gt;We first partition the graph into subgraphs we call &quot;chains&quot; and &quot;plates.&quot;  First, find &lt;a href=&quot;http://en.wikipedia.org/wiki/Biconnected_component&quot;&gt;biconnected components&lt;/a&gt; in the graph using Tarjan&#39;s algorithm.  Biconnected components of size greater than 2 become &quot;plates.&quot;  Biconnected components of size two are chain-links; maximal subgraphs of connected chain links are &quot;chains.&quot;  Any vertex shared by two subgraphs is an &quot;articulation point.&quot;  Let \(G^c = \{G^c_i\}\) be the set of chain subgraphs, \(G^p = \{G^p_j\}\) be the set of plate subgraphs.&lt;/p&gt;
 
-&lt;p&gt;Below is such a partition, with chains and plates identified:&lt;/p&gt;
+&lt;p&gt;Below is such a partition, with two trivial chains and two plates identified:&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-20-biconnected_components_reprise.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
