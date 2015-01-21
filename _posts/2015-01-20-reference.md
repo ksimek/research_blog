@@ -11,25 +11,36 @@ Consider an arbitrary undirected graph embedded in \\(\mathbb{R}^2\\), for examp
 
 ![]({{site.baseurl}}/img/2015-01-20-articulated_graph_1.png)
 
-We want to generalize the branching gaussian process to handle graphs with loops.  The basic idea is to model linear chains using a geodesic distance model and loops using 2D euclidean distance.  The result is an articulated structure of plate-like regions connected by  wire-like regions.  We call this an "articulated Gaussian process"; if a cubic-spline covariance model is used, this could be called an "articulated thin plate spline".   
+We want to generalize the Branching gaussian process to handle graphs with loops.  The basic idea is to model linear chains using a geodesic distance model and loops using 2D euclidean distance.  The result is an articulated set of plate-like subgraphs connected by  chain-like subgraphs.  We could call this an "articulated Gaussian process"; if a cubic-spline covariance model is used, this could be called an "articulated thin plate spline".   
 
-We construct the model as follows.  Find biconnected components in the graph.  Any biconnected component of size greater 2 becomes a link in a chain.  Biconnected components of size greater than 2 become "plates".  For each vertex, we assign an index of dimension 2P+C, where P is the number of plates, and C is the number of chains.    Perform a depth-first search of the graph.  Each point's index is given by
+First, we'll show how to identify chain-like and plate-like regions.  Then we'll show how to embed the graph in a high-dimensional Euclidean space such that each articulated region lies in an orthogonal hyperplane, while preserving some important distance properties.  Covariance functions over this space have nice properties, like conditional independence and piecewise smooth regions.
 
-x_i = x\_{p(i)} + 
+Partitioning into "Plates" and "Chains"
+-------------------------------------
 
-Each chain occupies a 1D Euclidean space, where the coordinate of each vertex un the subspace is defined as its geodesic displacement from an origin vertex on the chain (to be defined later).  Each plate occupies a 2D Euclidean space, where the coordinate of each vertex is defined as the Euclidean displacement from an origin vertex on the plate.  The entire graph occupies the cartesian product of all of these spaces, which has dimension C + 2P, where C is the number of chains, and P is the number of plates. Each vertex \\(v_i\\) has a coordinate \\(x_i \in \\mathbb{R}^{C+2P}\\), defined as follows.
+We first partition the graph into subgraphs we call "chains" and "plates."  Find biconnected components in the graph.  Biconnected components of size greater than 2 become "plates."  Biconnected components of size two are chain-links; maximal subgraphs of connected chain links are "chains."  Any vertex shared by two subgraphs is an "articulation point." By definition of biconnected components, at most one articulation point exists between two subgraphs.  Let \\(G^c = \\{G^c_i\\}\\) be the set of chain subgraphs and \\(G^p = \\{G^p_j\\}\\) be the set of plate subgraphs in the full graph, \\(G\\).
 
-Take an arbitrary vertex \\(v_0\\) as the root of the graph, and let \\(x_0 = mathbf{0}\\).  Then for each vertex \\(v \in V \\ v\_0\\), we defined its predecesor \\(p(v)\\) using depth-first search.  The index \\(x_i\\) for vertex \\(v_i\\) is defined in terms of its predecessor index \\(x\_p(i)\\) as follows:
+Constructing a Gaussian process
+--------------------------------
+
+Let \\(Z = \\{z_i\\}\\) be an embedding of vertices \\(V\\) in the Euclidean plane. We seek a Gaussian process over \\(Z\\) that satisfies three properties:  (a) the covariance between points on a chain is a function of their geodesic position (i.e. distance along the chain), (b) the covariance between points on a plate is a function of their Euclidean positions, and (c) points in different subgraphs (chains or plates) are independent conditioned on any articulation point on the path between them.  Naturally, we require that the covariance function be positive definite.
+
+To guarantee positive definiteness, we will embed the graph in a high-dimensional Hilbert space and then use a standard covariance function in this space.  This allows our model to be agnostic to choice of covariance function, a hoice which we will not discuss further.  It what remains, we descibe how to construct such a space.  Briefly, to satisfy constraints (a) and (b), we embed vertices such that within subgraphs, relative vertex positions (geodesic or euclidean) are preserved.  To satisfy (c), subgraphs will lie in mutually orthogonal hyperplanes, connected only at articulation points.  
+
+Constructing the index-space
+==============================
+
+For each plate-type subgraph \\(G\^p\_i \in G\^p \\), we define a displacement function \\(d\^p\_i : V\^2 \rightarrow \mathbb{R}\^2 \\) as the displacement \\(\boldsymbol{z}\_i - \boldsymbol{z}\_j)\\ between vertices \\(v\_i, v\_j\\) if they both are in \\(G\^p\_i\\), or \\((0,0)\\) otherwise.  Similarly, for each chain-type subgraph \\(G\^c\_i \in G\^c\\), we define a displacement \(d\^c\_i : V\^2 \rightarrow \mathbb{R} \\) as the geodesic displacement between vertices if they are both in \\(G\^c\_i\\), or zero otherwise.  We will use these pairwise subgraph displacements to construct a Hilbert space over vertices of the full graph.
+
+For each vertex \\(v\_i \in V\\), we assign an index \\(x\_i \in \mathbb{R}\^{|G\^c| + 2\,|G\^p|} \\). We arbitrarilly pick a vertex \\(v\_0\\) to be the graph's root, and set its index to \\(x\_0 = \mathbf{0}\\).  For each vertex \\(v\_i \in V \\ v\_0\\), let \\(p(i)\\) be the index of its predecessor, using depth-first search ordering.  We define the index of \\(v\_i\\)  as
 
 <div>
 \[
-  x_i = x_{p(i)} + d(v_i, p(v_i))
+x_i = x_{p(i)} + d(v_i, v_{p(i)}
 \]
 </div>
 
-For any two adjacent vertices v,v', the edge (v,v') occupies exactly one of the plate or chain subspaces above.  We define d(v,v') as the displacement vector within that subspace, and zero in all other dimensions.
-Here, d(v, v') is function a displacement vector between vertices in their corresponding subspace (chain or plate).  
+where \\(d : V\^2 \rightarrow \mathbb{R}\^{|G\^c| + 2\,|G\^p|}\\) is the concatenation of displacement functions, i.e. d(v,v') = \right ( d\^c\_1(v,v'), \dots, d\^p\_1(v,v'), \dots \right) \\).  Note that since every edge (v,v') can lie in exactly one subgraph, all but one of \\(d\_i\\) are zero in \\(d(v,v')\\).
 
-Each edge in the graph is either a chain edge or a plate edge.  
+Under this transformation, index displacement between two vertices is equal to the sum of pairwise displacements along the depth-first search path connecting them.  For vertices with a subgraph, this summation takes a very simple form.  The biconnected property implies that for any two vertices within a subgraph, the search path connecting them lies entirely within the subgraph.  Thus, for any two vertices \\((v,v')\\) in subgraph \(G_i\), their indices \\((x,x'\\)) differ only by \\(d_i(v,v')\\).   As a result, each subgraph lies on an axis-aligned hyperplane (2D for plates, 1D for chains) corresponding to its individual displacement function.  Furthermore, all such hyperplanes are mutually orthogonal and touch only at articulation points.  Also, within subgraphs, this index space preserves relative (Euclidean or geodesic) position from the original 2D embedding.
 
-x_
