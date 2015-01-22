@@ -71,6 +71,6 @@ Below are results for training a deformation model for a 10 degree rotation.
            linear_variance: 0
             const_variance: 1.1533e-21
 
-            ll: -2087.07 (?? evaluated after the fact)
+            ll: -2087.07 
 
 I suspect overfitting here.  Fitting works best when scaling prior variance by 36.

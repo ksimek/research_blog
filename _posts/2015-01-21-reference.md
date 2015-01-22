@@ -31,11 +31,13 @@ Fitting the deformation model:
     prior_temperature = 36; 
 
     % optional: use only first N eigenvectors
-    ndims = 30; 
-    U = U(:, 1:ndims);
-    D = D(1:ndims);
+    ndims = 60;
+    likelihood_scale = 3; % Third pyramid level, i.e. 1/2^(3-1) = 0.25
 
-    [x_final] = test_optim(trained_prior, trained_lik_bg, trained_lik_fg, tree_curves, parents, branch_distance, widths, F, fg_prob_map, max_iterations, temperature, mu, Kc, U, D*prior_temperature, 1, x_initial);
+    [x_final] = test_optim(trained_prior, trained_lik_bg, trained_lik_fg, tree_curves, parents, branch_distance, widths, F, fg_prob_map, max_iterations, temperature, mu, Kc, U, D*prior_temperature, ndims, likelihood_scale, x_initial);
+
+    likelihood_scale = 1; % full resolution
+    [x_final] = test_optim(trained_prior, trained_lik_bg, trained_lik_fg, tree_curves, parents, branch_distance, widths, F, fg_prob_map, max_iterations, temperature, mu, Kc, U, D*prior_temperature, ndims, likelihood_scale, x_initial);
 
     plot_curves(mat2cell(reshape(mu + U*x_final', 2, []), 2, lengths))
 {% endhighlight %}
