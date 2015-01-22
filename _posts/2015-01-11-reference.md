@@ -37,7 +37,6 @@ Training full model (local prior and epipolar prior) w/ noise variance fixed at 
      branch_const_variance: 7.0217
            linear_variance: 0.1016
             const_variance: 2.4123e+03
-
   Notice significantly larger geodesic variance, and much longer scale length (48 vs 22 pixels).  All other variances increased too.  This is probably because we've treated the two priors as independent, but they aren't, so multiplying them results in too little overall variance.
 
 By comparison, below is a nearby local minimum, obtained by training all 9 parameters from scratch.
@@ -71,5 +70,7 @@ Below are results for training a deformation model for a 10 degree rotation.
      branch_const_variance: 0.6186
            linear_variance: 0
             const_variance: 1.1533e-21
+
+            ll: -2087.07 (?? evaluated after the fact)
 
 I suspect overfitting here.  Fitting works best when scaling prior variance by 36.
