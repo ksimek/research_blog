@@ -46,7 +46,7 @@ Step 3
 ---------
 
 For this section, let \\(\mu = \mu\_{2D}\\) as derived above, let \\(A = Q A\_{3D} Q^\top\\)  and let \\(x' = \pi(x)\\) be the projected point.
-Let \\(p(y\_n | x'\_n) = \mathcal{N}([R^{-1} \; 0]^\top \mu\_L, \, [R^{-1} \;  0]^\top L^{-1} [R^{-1} \; 0] )\\) be the image likelihood in 3D space, where \\(\mu\_L\\) is \\((x'\_1, x'\_2)^\top\\), and \\(L\\) is a 2x2 precision matrix.  Let \\(L' = R^{-\top} L R^{-1}\\) and \\(\mu'\_L = R^{-1} \mu\_L\\) Running warping in step 2 gives us the hessian \\(H\\) of the marginal in-plane posterior.  This is the negative marginal posterior covariance for the (u,v) space.  Since the likelihood is uninformative in the dpeth directiom, the deriving the full posterior covariance, \(Z\), is straightforward:
+Let \\(p(y\_n | x'\_n) = \mathcal{N}([R^{-1} \; 0]^\top \mu\_L, \, [R^{-1} \;  0]^\top L^{-1} [R^{-1} \; 0] )\\) be the image likelihood in 3D space, where \\(\mu\_L\\) is \\((x'\_1, x'\_2)^\top\\), and \\(L\\) is a 2x2 precision matrix.  Let \\(L' = R^{-\top} L R^{-1}\\) and \\(\mu'\_L = R^{-1} \mu\_L\\) Running warping in step 2 gives us the hessian \\(H\\) of the marginal in-plane posterior.  This is the negative marginal posterior covariance for the (u,v) space.  Since the likelihood is uninformative in the dpeth direction, the deriving the full posterior covariance, \(Z\), is straightforward:
 
 <div>
 \begin{align}
