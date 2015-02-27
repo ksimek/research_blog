@@ -68,7 +68,7 @@ Let \\(A = (\mathbf{a_1}  \mathbf{a_2} \mathbf{a_3} )^\top \\) be the rows of A.
 <div>
 \begin{align}
       z_{31} \pi_x + z_{32} \pi_y + z_{33} \pi_z &= \mathbf{a_3^\top} \mu \\
-        \pi_z &= (a^\top_3 \mu - \pi_x z_{31} - \pi_y z_{32}) / z_{33} 
+        \pi_z &= (\mathbf{a}^\top_3 \mu - \pi_x z_{31} - \pi_y z_{32}) / z_{33} 
 \end{align}
 </div>
 
