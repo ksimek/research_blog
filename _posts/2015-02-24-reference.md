@@ -55,7 +55,7 @@ Let \\(p(y\_n | x'\_n) = \mathcal{N}([R^{-1} \; 0]^\top \mu\_L, \, [R^{-1} \;  0
 \end{align}
 </div>
 
-Warping also gives us the marginal posterior mean \\(\pi\_x, \pi\_y\\), in the image space.  Let \\(\pi'\_x = \pi(\mu) + R^{-1} \pi\_x\\) and \\(\pi'_y = R^{-1} \pi_y\\) be the marginal posterior interse-transformed by the lineariezed projection function.  Deriving \\(\pi'_z\\) takes a few steps  (primes are omitted below, all quantities are assumed to be in rotated 3D space)
+Warping also gives us the marginal posterior mean \\(\pi\_x, \pi\_y\\), in the image space.  Let \\(\pi'\_x = \pi(\mu) + R^{-1} \pi\_x\\) and \\(\pi'\_y = R^{-1} \pi\_y\\) be the marginal posterior mean in camera space.  Deriving \\(\pi'\_z\\) takes a few steps  (primes are omitted below, all quantities are assumed to be in camera space)
 
 <div>
 \begin{align}
@@ -64,7 +64,7 @@ Warping also gives us the marginal posterior mean \\(\pi\_x, \pi\_y\\), in the i
       Z \mathbb{\pi} &= \left [ A \mu + \left ( \begin{array}{c}L \mu_L \\ 0\end{array} \right ) \right ]  \\
 \end{align}
 </div>
-Let \\(A = (\mathbb{a_1}  \mathbb{a_2} \mathbb{a_3} )^\top \\) be the rows of A.   Omitting all but the third row gives:
+Let \\(A = (\mathbf{a_1}  \mathbf{a_2} \mathbf{a_3} )^\top \\) be the rows of A.   Omitting all but the third row gives:
 <div>
 \begin{align}
       \mathbb{z_31} \pi_x + \mathbb{z_32} \pi_y + \mathbb{z_33} \pi_z &= \mathbb{a_3^\top} \mu \\
