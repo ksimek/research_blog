@@ -67,12 +67,12 @@ Warping also gives us the marginal posterior mean \\(\pi\_x, \pi\_y\\), in the i
 Let \\(A = (\mathbf{a_1}  \mathbf{a_2} \mathbf{a_3} )^\top \\) be the rows of A.   Omitting all but the third row gives:
 <div>
 \begin{align}
-      \mathbb{z_31} \pi_x + \mathbb{z_32} \pi_y + \mathbb{z_33} \pi_z &= \mathbb{a_3^\top} \mu \\
+      \mathbf{z_31} \pi_x + \mathbf{z_32} \pi_y + \mathbf{z_33} \pi_z &= \mathbf{a_3^\top} \mu \\
         \pi_z &= (a^\top_3 \mu - \pi_x z_{31} - \pi_y z_{32}) / z_{33} 
 \end{align}
 </div>
 
-Observing that \\(z_3i = a_3i\\), 
+Observing that \\(z_{3i} = a_{3i}\\), 
 
 <div>
 \begin{align}
