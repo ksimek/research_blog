@@ -77,7 +77,7 @@ Observing that \\(z\_{3i} = a\_{3i}\\),
 <div>
 \[
 \begin{align}
-        \pi_z &= a_{33}^{-1} \left ( \mathbf{a}^\top_3 \left (\mu - \left ( \begin{array}{c} \pi_x \\ \pi_y\end{array}\right)\right)\right)
+        \pi_z &= a_{33}^{-1} \left ( \mathbf{a}^\top_3 \left (\mu - \left ( \begin{array}{c} \pi_x \\ \pi_y \\ 0\end{array}\right)\right)\right)
 \end{align}
 \]
 </div>
