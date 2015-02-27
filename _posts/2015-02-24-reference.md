@@ -55,7 +55,7 @@ Let \\(p(y\_n | x'\_n) = \mathcal{N}([R^{-1} \; 0]^\top \mu\_L, \, [R^{-1} \;  0
 \end{align}
 </div>
 
-Warping also gives us the marginal posterior mean \\(\pi_x, \pi_y\\), in the \\((u,v)\\) subspace.  Let \\(\pi'_x = \pi(\mu) + R^{-1} \pi_x\\) and \\(\pi'_y = R^{-1} \pi_y\\) be the marginal posterior interse-transformed by the lineariezed projection function.  Deriving \\(\pi'_z\\) takes a few steps  (primes are omitted below, all quantities are assumed to be in rotated 3D space)
+Warping also gives us the marginal posterior mean \\(\pi\_x, \pi\_y\\), in the image space.  Let \\(\pi'\_x = \pi(\mu) + R^{-1} \pi\_x\\) and \\(\pi'_y = R^{-1} \pi_y\\) be the marginal posterior interse-transformed by the lineariezed projection function.  Deriving \\(\pi'_z\\) takes a few steps  (primes are omitted below, all quantities are assumed to be in rotated 3D space)
 
 <div>
 \begin{align}
