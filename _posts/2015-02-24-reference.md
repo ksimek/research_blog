@@ -59,9 +59,9 @@ Warping also gives us the marginal posterior mean \\(\pi\_x, \pi\_y\\), in the i
 
 <div>
 \begin{align}
-      \mathbb{\pi} &= \left[ A + \left( \begin{array}{cc}L & 0 \\ 0 & 0\end{array} \right)\right]^{-1} \left [ A \mu + \left ( \begin{array}{c}L \mu_L \\ 0\end{array} \right ) \right ]  \\
-      \mathbb{\pi} &= Z^{-1} \left [ A \mu + \left ( \begin{array}{c}L \mu_L \\ 0\end{array} \right ) \right ]  \\
-      Z \mathbb{\pi} &= \left [ A \mu + \left ( \begin{array}{c}L \mu_L \\ 0\end{array} \right ) \right ]  \\
+      \mathbf{\pi} &= \left[ A + \left( \begin{array}{cc}L & 0 \\ 0 & 0\end{array} \right)\right]^{-1} \left [ A \mu + \left ( \begin{array}{c}L \mu_L \\ 0\end{array} \right ) \right ]  \\
+      \mathbf{\pi} &= Z^{-1} \left [ A \mu + \left ( \begin{array}{c}L \mu_L \\ 0\end{array} \right ) \right ]  \\
+      Z \mathbf{\pi} &= \left [ A \mu + \left ( \begin{array}{c}L \mu_L \\ 0\end{array} \right ) \right ]  \\
 \end{align}
 </div>
 Let \\(A = (\mathbf{a_1}  \mathbf{a_2} \mathbf{a_3} )^\top \\) be the rows of A.   Omitting all but the third row gives:
@@ -77,7 +77,7 @@ Observing that \\(z\_{3i} = a\_{3i}\\),
 <div>
 \[
 \begin{align}
-        \pi_z &= a_{33}^{-1} \left ( \mathbb{a}^\top_3 \left (\mu - \left ( \begin{align}{c} \pi_x \\ \pi_y\end{align}\right)\right)\right)
+        \pi_z &= a_{33}^{-1} \left ( \mathbf{a}^\top_3 \left (\mu - \left ( \begin{array}{c} \pi_x \\ \pi_y\end{array}\right)\right)\right)
 \end{align}
 \]
 </div>
@@ -92,18 +92,18 @@ Written compactly:
 
 Testing in matlab:
     
-  A = rand(3,3); A = A * A';
-  L = rand(2,2); L = L * L';
-  mu = randn(3,1);
-  mu_L = randn(2,1);
-  pi = inv(A + [L zeros(2,1);0 0 0]) * (A * mu + [L*mu_L; 0]);
-  true_pi_z = pi(3);
-  test_pi_z = mu(3) + A(3,1:2)*(mu(1:2) - pi(1:2))/A(3,3);
-  err = test_pi_z - true_pi_z
+    A = rand(3,3); A = A * A';
+    L = rand(2,2); L = L * L';
+    mu = randn(3,1);
+    mu_L = randn(2,1);
+    pi = inv(A + [L zeros(2,1);0 0 0]) * (A * mu + [L*mu_L; 0]);
+    true_pi_z = pi(3);
+    test_pi_z = mu(3) + A(3,1:2)*(mu(1:2) - pi(1:2))/A(3,3);
+    err = test_pi_z - true_pi_z
 
-  err =
+    err =
 
-    -2.2204e-16
+      -2.2204e-16
 
-It remains to rotate \\(\mathbb{\pi}\\) and \\(A\\)  by \\(Q^\top\\) to convert back to world space.
+It remains to rotate \\(\mathbf{\pi}\\) and \\(A\\)  by \\(Q^\top\\) to convert back to world space.
 
