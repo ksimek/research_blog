@@ -36,7 +36,7 @@ We can project the 3D prior to 2D using this transformation:
   
 <div>
 \[
-  \mathcal{N}(\mu_{2D}, A^{-1}_{2D}) = \mathcal{N}(\pi(\mu_{3D}), (R\,|\, 0) (Q A_{3D} Q^\top)^{-1} (R \, | \, 0)^\top)
+  \mathcal{N}(\mu_{2D}, A^{-1}_{2D}) = \mathcal{N}(\pi(\mu_{3D}), J A_{3D}^{-1} J^\top)
   \]
 </div>
 
