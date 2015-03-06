@@ -7,350 +7,196 @@
 		<atom:link href="http://vision.sista.arizona.edu/ksimek/research/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
-				<title>Articulated gaussian processes (part 2)</title>
-				<description>&lt;p&gt;Continued from &lt;a href=&quot;/ksimek/research/2015/01/20/reference/&quot;&gt;part 1&lt;/a&gt;.&lt;/p&gt;
+				<title>Camera refinement</title>
+				<description>&lt;p&gt;To implement efficient camera refinement, I need to derive the Jacobian of the residial vector w.r.t. camera parameters.&lt;/p&gt;
 
-&lt;h2&gt;Covariance functions&lt;/h2&gt;
+&lt;p&gt;The parameterization of camera orientation deserves special discussion.  We prefer a parameterization that is free of constraints, so quaternions and rotation matrices aren&#39;t an option, leaving euler angles or an axis/angle vector. Both parameterizations have singularities, but we can avoid them by centering the parameterization at the camera&#39;s current orientation.  If we don&#39;t expect to drift too far from the current orientation, this should be okay; otherwise we can reparameterize after every step.  We follow Hartley and Zisserman&#39;s approach and use axis-angle parameterization.  For all other parameters, we will use no transformation.&lt;/p&gt;
 
-&lt;p&gt;Recall the 1D cubic-spline covariance:&lt;/p&gt;
+&lt;p&gt;Let the vector \(\mathbf{t}_r\) represent a rotation of angle \(\|\mathbf{r}_r\|\) around axis \(\hat{\mathbf{t}}_r\), and let \(R_{\mathbf{t}_r}\) be the corresponding rotation matrix.  Let \(K\) be the intrinsic matrix, and let \(\mathbf{t}_0\) be the translation vector.&lt;/p&gt;
 
-&lt;div&gt;
-\[
-k(x,x&#39;) = |x-x&#39;| \min(x,x&#39;)^2 / 2 + \min(x,x&#39;)^3/3.
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;We can generalize this to ND indices as&lt;/p&gt;
+&lt;p&gt;The transformation of a point from from world coordinates to homogeneous image coordinates is using the camera \(P\)&lt;/p&gt;
 
 &lt;div&gt;
 \[
-k(\boldsymbol(x),\boldsymbol(x)&#39;) = \sum_i |x_i-x_i&#39;| min(x_i,x_i&#39;)^2 / 2 + min(x_i,x_i&#39;)^3/3.
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;When using a cubic-spline covariance function, the only dimensions that are nonzero are those corresponding to shared ancestors.  The position along the curve only matters when comparing points on the same subgraph.  For trees, this exactly corresponds to the branching Gaussian process covariance I derived in my dissertation proposal.  Plate regions act like thin-plate splines.&lt;/p&gt;
-
-&lt;p&gt;When using a radial-basis covariance function like squared exponential, the squared L2 distance has a nice interpretation.  Take any path between two nodes, and split it at articulation points into a sequence of subpaths.  The squared L2 distance is the sum of the squared local distances between articulation points, plus the squared distance between the endpoints and their nearest articulation points.  This is similar to the squared geodesic distance between the points, but modified to restart the distance measurement from zero at each articulation point.&lt;/p&gt;
-
-&lt;h2&gt;Generalizations&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-20-plate_in_chain_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;It may be interesting to model plates as being superimposed on an underlying chain. For example, in the image above,  1,2,3,4 is probably well modelled by a smooth curve (i.e. a single chain), but 2,3,5 is also clearly a plate.   We might want to let point 5&#39;s position influence points 2 and 3, without violating smoothness of 1,2,3,4.  To handle this, we relax the requirement that the plate and chain must lie in orthogonal hyperplanes.  We modify equation (1) so instead of vertex 5 inheriting the index of its predecessor (e.g. vertex 3), we replace the first term with the linear interpolation between indexes 3 and 4.  This lets subgraph 2,3,5 act a little bit like a chain and a little bit like a plate.  How to implement this linear interpolation is up for debate, but two possibilities are: (a) relative euclidean distance, or (b) relative geodesic distance.&lt;/p&gt;
-
-&lt;h2&gt;Altnerative definition&lt;/h2&gt;
-
-&lt;p&gt;The definition of the index-space below is equivalent to the one above, but requires some extra proofs to explain (like proving all DFS paths between vertices within a subgraph are fully contained within the subgraph).  It was just too cumbersome, rhetorically, but quite convenient to implmement. I&#39;m including it here so I remember it during implementation.&lt;/p&gt;
-
-&lt;p&gt;...&lt;/p&gt;
-
-&lt;p&gt;For each vertex \(v_i \in V\), we assign an index \(x_i \in \mathbb{R}^{|G^c| + 2\,|G^p|} \). We arbitrarilly pick a vertex \(v_0\) to be the graph&#39;s root, and set its index to \(x_0 = \mathbf{0}\).  For each vertex \(v_i \in V \setminus v_0\), let \(p(i)\) be the index of its predecessor in a depth-first search.  We then define the index of \(v_i\) to be&lt;/p&gt;
-
-&lt;div&gt;
-\[
-x_i = x_{p(i)} + d(v_i, v_{p(i)})  \text{  (1)}
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;where \(d : V^2 \rightarrow \mathbb{R}^{|G^c| + 2\,|G^p|}\) is the concatenation of displacement functions, i.e. \(d(v,v&#39;) = \left( d^c_1(v,v&#39;), d^c_2(v,v&#39;), \dots, d^p_1(v,v&#39;), d^p_2(v,v&#39;), \dots \right) \).&lt;/p&gt;
-</description>
-				<pubDate>Tue, 20 Jan 2015 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/20/reference2</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/20/reference2</guid>
-			</item>
-		
-			<item>
-				<title>Articulated Gaussian Processes</title>
-				<description>&lt;p&gt;Consider an arbitrary undirected graph embedded in \(\mathbb{R}^2\), for example:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-20-articulated_graph_1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Another example is the skeletonization of a binary image, in which each skeleton pixel is a vertex, and adjacent skeleton pixels have an edge between them.  Below is an example of a skeletonized neuron image:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-20-neuron_skeleton.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;We want to generalize the Branching gaussian process to handle graphs with loops.  The basic idea is to model linear chains using the traditional 1D covariance based on curve-distance, and model loops using a 2D covariance based on euclidean position (e.g. 2D squared exponential covariance).  The result is an articulated set of plate-like subgraphs connected by  chain-like subgraphs.  We could call this an &quot;articulated Gaussian process&quot; as a generalization to &quot;branching Gaussian processes.&quot;&lt;/p&gt;
-
-&lt;p&gt;First, we&#39;ll show how to separate the graph into chain-like and plate-like regions.  Then we&#39;ll show how to embed the graph in a high-dimensional Euclidean space such that traditional covariance functions over this space have nice properties, like conditional independence and piecewise smooth regions.&lt;/p&gt;
-
-&lt;h2&gt;Partitioning into &quot;Plates&quot; and &quot;Chains&quot;&lt;/h2&gt;
-
-&lt;p&gt;We first partition the graph into subgraphs we call &quot;chains&quot; and &quot;plates.&quot;  First, find &lt;a href=&quot;http://en.wikipedia.org/wiki/Biconnected_component&quot;&gt;biconnected components&lt;/a&gt; in the graph using Tarjan&#39;s algorithm.  Biconnected components of size greater than 2 become &quot;plates.&quot;  Biconnected components of size two are chain-links; maximal subgraphs of connected chain links are &quot;chains.&quot;  Any vertex shared by two subgraphs is an &quot;articulation point.&quot;  Let \(G^c = \{G^c_i\}\) be the set of chain subgraphs, \(G^p = \{G^p_j\}\) be the set of plate subgraphs.&lt;/p&gt;
-
-&lt;p&gt;Below is such a partition, with two trivial chains and two plates identified:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-20-biconnected_components_reprise.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2&gt;Constructing a Gaussian process&lt;/h2&gt;
-
-&lt;p&gt;Let \(Z = \{z_i\}\) be the 2D position of vertices \(V = \{v_i\}\) embedded in the Euclidean plane. We seek a Gaussian process over \(Z\) that satisfies three properties:  (a) the covariance between points on a chain must be a function of their geodesic position (i.e. distance along the chain), (b) the covariance between points on a plate must be a function of their Euclidean positions, and (c) points in different subgraphs must be independent conditioned on any articulation point on the path connecting them.  Naturally, we require that the covariance function be positive definite.&lt;/p&gt;
-
-&lt;p&gt;To guarantee positive definiteness, we will embed the graph in a high-dimensional Hilbert space and then use a standard covariance function on this space.  This allows our model to be agnostic to choice of covariance function.  In what follows, we descibe how to construct such a space, which we call the graph&#39;s &lt;em&gt;index space&lt;/em&gt;.  Briefly, we satisfy constraints (a) and (b) by embedding vertices such that relative positions within subgraphs are preserved.  To satisfy (c), subgraphs will be embedded in mutually orthogonal hyperplanes, connected only at articulation points.&lt;/p&gt;
-
-&lt;h1&gt;Constructing the index-space&lt;/h1&gt;
-
-&lt;p&gt;For each plate-type subgraph \(G^p_i \in G^p \), we define a local displacement function \(d^p_i : V^2 \rightarrow \mathbb{R}^2 \):&lt;/p&gt;
-
-&lt;div&gt;\[
-d^p_i(v,v&#39;) = \begin{cases}
-    z - z&#39; &amp; \text{ if } v,v&#39; \in G^p_i \\
-      0 &amp; \text{ otherwise,}
-      \end{cases}
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;where \((z,z&#39;)\) are the 2D Euclidean position of vertices \((v,v&#39;)\). Similarly, for each chain-type subgraph \(G^c_i \in G^c\), we define a local displacement \(d^c_i : V^2 \rightarrow \mathbb{R} \).  For any two vertices \(v,v&#39;\) connected by path \(\mathcal{P}\), we define the local displacement by the geodesic distance between the points:&lt;/p&gt;
-
-&lt;div&gt;\[
-  d^c_i(v,v&#39;) = \begin{cases}
-    \sum_{(j,k) \in \mathcal{P}} ||z_j - z_k|| &amp; \text{ if } v,v&#39; \in G^c_i \\
-      0 &amp; \text{ otherwise}
-      \end{cases}
+    \mathbf{x}_h(P) = K \, R_{\mathbf{t}_r} , R \, (\mathbf{X} - \mathbf{t}_0) .
   \]
-  &lt;/div&gt;
+&lt;/div&gt;
 
 
-&lt;p&gt;Note that for chains, exactly one such path exists, making the above expression well-defined.&lt;/p&gt;
-
-&lt;p&gt;We define the full displacement \(d : V^2 \rightarrow \mathbb{R}^{|G^c| + 2|G^p|}\) as the concatenated outputs of all local displacements, i.e. \(d(v,v&#39;) = (d^c_1(v,v&#39;), d^c_2(v,v&#39;), \dots, d^p_1(v,v&#39;), d^p_2(v,v&#39;), \dots)\).  The full displacement will be central to defining the index-space.&lt;/p&gt;
-
-&lt;p&gt;We arbitrarilly pick a vertex \(v_0\) to be the graph&#39;s root and use depth-first search to impose a tree topology over the other vertices.  Because the subgraphs are biconnected, this also defines a tree-topology over subgraphs.  We define the &quot;local origin&quot; of a subgraph as the vertex first encountered in a depth-first search.    For all non-root vertices \(v_i\), we introduce the concept of a &quot;predecessor&quot; vertex \(v_{\pi(i)}\).  The predecessor of a local origin is the the parent subgraph&#39;s local origin; the predecessor of all other vertices is the local origin of the subgraph that contains it.&lt;/p&gt;
-
-&lt;p&gt;For each vertex \(v_i \in V\), we assign an index \(x_i \in \mathbb{R}^{|G^c| + 2\,|G^p|} \).  Let the root vertex \(v_0\) have index \(x_0 = \mathbf{0}\).  For all other vertices, we define the index recursively:&lt;/p&gt;
+&lt;p&gt;We seek the Jacobian of this transformation centered on the current camera, \(P\):&lt;/p&gt;
 
 &lt;div&gt;
 \[
-  x_i = x_{\pi(i)} + d(v_i, v_{\pi(i)})
+    \begin{align}
+    J_h(P) &amp;= \frac{\partial x_h(P)}{\partial (f_x, f_y, s, x_0, y_0, \mathbf{t}_r, \mathbf{t}_0) } = \left ( J_K J_{\mathbf{t}_r} J_{\mathbf{t}_0} \right) \text{ , where} \\
+      J_K &amp;= \frac{\partial x_h(P)}{\partial (f_x, f_y, s, x_0, y_0 ) } \\
+      J_{\mathbf{t}_r} &amp;= \frac{\partial x_h(P)}{\partial (\mathbf{t}_r, \mathbf{t}_0) } \\
+      J_{\mathbf{t}_0} &amp;= \frac{\partial x_h(P)}{\partial (\mathbf{t}_0) }
+    \end{align}
+  \]
+&lt;/div&gt;
+
+
+&lt;h2&gt;Deriving \(J_{\mathbf{t}_r}\)&lt;/h2&gt;
+
+&lt;p&gt;When centered at the current camera, the rotation vector is zero, \(\mathbf{t}_r = (0,0,0)\).  For small \(\mathbf{t}_r\),  the rotation matrix is approximated by \( R_{\mathbf{t}_r} = I + [\mathbf{t}_r]_\times \).  The Jacobian of rotation \( R_{\mathbf{t}_r} \mathbf{X}\)  is then \( -[\mathbf{X}]_\times \), and the jacobian of \(x_h\) is&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    J_{\mathbf{t}_r} = -K [\mathbf{X}_c]_\times
+  \]
+&lt;/div&gt;
+
+
+&lt;p&gt;where  \(\mathbf{X}_c = R (\mathbf{X} - \mathbf{t}_0)\) is the point in camera coordinates.&lt;/p&gt;
+
+&lt;h2&gt;Deriving \(J_{\mathbf{t}_0}\) and \(J_K\)&lt;/h2&gt;
+
+&lt;p&gt;The other derivatives are straightforward to derive.&lt;/p&gt;
+
+&lt;p&gt;The Jacobian w.r.t. translation is:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    J_{\mathbf{t}_0} = -K R 
 \]
 &lt;/div&gt;
 
 
-&lt;p&gt;Because vertices within a subgraph differ only by their local displacement, each subgraph lies on an axis-aligned hyperplane (2D for plates, 1D for chains).  All such hyperplanes are mutually orthogonal and touch only at articulation points.  Also, within hyperplanes corresponding to plates (resp. chains), relative Euclidean (geodesic) position is preserved from the original 2D embedding.&lt;/p&gt;
-</description>
-				<pubDate>Tue, 20 Jan 2015 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/20/reference</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/20/reference</guid>
-			</item>
-		
-			<item>
-				<title>Work Log - fitting progress</title>
-				<description>
+&lt;p&gt;The Jacobian w.r.t. intrinsic parameters is&lt;/p&gt;
 
-&lt;div class=&quot;meta-info&quot;&gt;
-&lt;table&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Project&lt;/th&gt;
-        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Subproject&lt;/th&gt;
-        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-        &lt;th&gt;Working path&lt;/th&gt;
-        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
-    &lt;/tr&gt;
-
-    &lt;tr&gt;
-        &lt;th&gt;SVN Revision&lt;/th&gt;
-        &lt;td&gt;unknown (see text)&lt;/td&gt;
-    &lt;/tr&gt;
-
-
-&lt;/table&gt;
-
-    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;div&gt;
+\[
+    J_K = \frac{\partial x_h}{\partial (f_x, f_y, s, x_0, y_0 ) } = \left ( \begin{array}{ccccc}
+        X_{c,1} &amp; 0 &amp; X_{c,2} &amp; X_{c,3} &amp; 0 \\
+        0 &amp; X_{c,2} &amp; 0 &amp; 0 &amp; X_{c,3}  \\
+        0 &amp; 0 &amp; 0 &amp; 0 &amp; 0
+        \end{array}\right )
+  \]
 &lt;/div&gt;
 
 
-&lt;p&gt;Implemented a image-pyramid-based likelihood and results are much better!  Also relaxed the prior, which appears to be overfit.&lt;/p&gt;
+&lt;h2&gt;Jacobian of residuals&lt;/h2&gt;
 
-&lt;h2&gt;Run 1:&lt;/h2&gt;
+&lt;p&gt;We&#39;ve derived the jacobian of the transformation from world to homogeneous image coordinates w.r.t. each camera parameter.  To get the Jacobian of the residuals, it remains to transform to nonhomogeneous screen coordinates.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;em&gt;parameterization&lt;/em&gt;: eigenspace, scaled by sqrt of eigenvalues&lt;/li&gt;
-&lt;li&gt;&lt;em&gt;Eigenvectors:&lt;/em&gt; 30&lt;/li&gt;
-&lt;li&gt;&lt;em&gt;Prior scaling:&lt;/em&gt; 36&lt;/li&gt;
-&lt;li&gt;&lt;em&gt;Algorithm&lt;/em&gt;: pattern-search in two passes
-&lt;strong&gt; &lt;em&gt;termination criteria&lt;/em&gt;: mesh size &amp;lt; 0.5 (roughly 1/2 pixel change)
-&lt;/strong&gt; &lt;em&gt;First pass&lt;/em&gt;: Ran until convergence at pyramid level 3 (i.e. 1/4th original size)
-&lt;em&gt;&lt;em&gt; &lt;/em&gt;Second pass&lt;/em&gt;: Ran until convergence at pyramid level 1&lt;/li&gt;
-&lt;/ul&gt;
+&lt;div&gt;
+\[
+    \mathbf{x} = (x_{h,1} / x_{h,3}, x_{h,2} / x_{h,3})
+  \]
+&lt;/div&gt;
 
 
-&lt;p&gt;After first pass, the global maximum seemed to have been found.  The second pass quickly refined it.&lt;/p&gt;
+&lt;p&gt;The Jacobian of this is&lt;/p&gt;
 
-&lt;p&gt;This wasn&#39;t happening with the prior I trained, which suggests overfitting.&lt;/p&gt;
+&lt;div&gt;
+\[
+\begin{align}
+    J_\mathbf{x}(\mathbf{x_h}) &amp;= 
+    \left ( 
+        \begin{array}{ccc}
+        \frac{1}{x_{h,3}} &amp; 0 &amp; - \frac{x_{h,1}}{x_{h,3}^2} \\
+        0 &amp; \frac{1}{x_{h,3}} &amp; - \frac{x_{h,2}}{x_{h,3}^2}
+        \end{array}
+    \right ) \\
+      &amp;=
+      \frac{1}{x_{c,3}} 
+    \left ( 
+        \begin{array}{ccc}
+        1 &amp; 0 &amp; - x_1 \\
+        0 &amp; 1 &amp; - x_2
+        \end{array}
+    \right )
+\end{align}
+  \]
+&lt;/div&gt;
 
-&lt;h2&gt;Possible changes to consider&lt;/h2&gt;
 
-&lt;p&gt;Try using fewer eigenvectors.&lt;/p&gt;
+&lt;p&gt;where \(x_{c,3}\) is the point&#39;s depth in camera coordinates, and \((x_1, x_2)\) is the point in nonhomogeneous image coordinates.&lt;/p&gt;
 
-&lt;p&gt;Use likelihood mixture rather than product.  Should be smoother and allow more non-optimal results.&lt;/p&gt;
+&lt;p&gt;The Jacobian of the residuals w.r.t. camera parameters is then&lt;/p&gt;
 
-&lt;p&gt;Consider scaling by inverse of eigenvector dynamic range, so moving by 1 guarantees at least one pixel changing.&lt;/p&gt;
+&lt;div&gt;
+\[
+\begin{align}
+    J &amp;= J_\mathbf{x} J_h \\
+      &amp;= J_\mathbf{x} [ J_K J_{\mathbf{t}_r} J_{\mathbf{t}_0} ]
+\end{align}
+\]
+&lt;/div&gt;
 
-&lt;p&gt;Consider using hyperpriors during training.&lt;/p&gt;
 
-&lt;p&gt;Train cubic spline covariance model.&lt;/p&gt;
+&lt;p&gt;In what follows, we&#39;ll drop the \(J_\mathbf{x}\) and use \(J_K\) to refer to the Jacobian of the residuals (and likewise for \(J_{\mathbf{t}_r}\) and \(J_{\mathbf{t}_0}\)).  In other words, let \(J_K \leftarrow J_\mathbf{x} J_K\).&lt;/p&gt;
 
-&lt;h2&gt;Next steps&lt;/h2&gt;
+&lt;h2&gt;Full Jacobian with Shared Intrinsics&lt;/h2&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;Extend the track
-&lt;strong&gt; Pass 1: reproject to initialize sampler, run
-&lt;/strong&gt; Pass 2: Use reprojected model as prior&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Get full dataset results
-** run all pairwise on all datasets&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Run on detected data&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;We now derive the Jacobian of all residuals in all views, where cameras share the same intrinsic parameters.&lt;/p&gt;
+
+&lt;p&gt;Let \(J_{K_{ij}}\) be the Jacobian of residuals the \(j\)th point in view \(i\) w.r.t. intrinsic parameters, and let \(J_\mathbf{R_{i,j}}\) be the same w.r.t. rotation.  Let \(J_{\mathbf{t}_i}\) be the Jacobian w.r.t. translation in view \(i\).&lt;/p&gt;
+
+&lt;p&gt;The full Jacobian  is a block matrix with form:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+J = 
+\left (
+    \begin{array}{c|c|c|c}
+    \overbrace{
+      \begin{array}{c}
+        J_{K_{11}}  \\
+        J_{K_{12}}  \\
+        J_{K_{13}}  \\
+           \cdots   \\
+           \hline
+        J_{K_{11}} \\
+        J_{K_{12}} \\
+        J_{K_{13}} \\
+           \cdots \\
+      \end{array}}^\text{All} &amp; 
+    \overbrace{
+      \begin{array}{cc}
+         J_{R_{11}} &amp; J_{\mathbf{t}_1} \\
+         J_{R_{12}} &amp; J_{\mathbf{t}_1} \\
+         J_{R_{13}} &amp; J_{\mathbf{t}_1} \\
+           \cdots &amp; \cdots  \\
+           \hline
+         \mathbf{0} &amp; \mathbf{0}       \\
+         \mathbf{0} &amp; \mathbf{0}       \\
+         \mathbf{0} &amp; \mathbf{0}       \\
+           \cdots &amp; \cdots  \\
+      \end{array}}^\text{Camera 1} &amp; 
+      \overbrace{
+      \begin{array}{cc}
+          \mathbf{0} &amp; \mathbf{0}  \\
+          \mathbf{0} &amp; \mathbf{0}  \\
+          \mathbf{0} &amp; \mathbf{0}  \\
+           \cdots &amp; \cdots  \\
+           \hline
+           J_{R_{11}} &amp; J_{\mathbf{t}_1}  \\
+           J_{R_{12}} &amp; J_{\mathbf{t}_1}  \\
+           J_{R_{13}} &amp; J_{\mathbf{t}_1}  \\
+           \cdots &amp; \cdots 
+       \end{array}}^\text{Camera 2} &amp;
+      \begin{array}{cc}
+       \mathbf{0} &amp; \cdots \\
+       \mathbf{0} &amp; \cdots \\
+       \mathbf{0} &amp; \cdots \\
+           \cdots &amp; \cdots &amp; \cdots  \\
+           \hline
+       \mathbf{0} &amp; \cdots \\
+       \mathbf{0} &amp; \cdots \\
+       \mathbf{0} &amp; \cdots \\
+           \cdots &amp; \cdots &amp; \cdots  \\
+      \end{array}
+    \end{array}
+    \right )
+\]
+&lt;/div&gt;
 
 </description>
-				<pubDate>Sun, 18 Jan 2015 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/18/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/18/work-log</guid>
-			</item>
-		
-			<item>
-				<title>Prior, visualized</title>
-				<description>&lt;p&gt;Input tree.  (Mean of the local prior)&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-input_tree.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Training tree.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-training_tree.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Sample from the locality prior only:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-local_prior_sample.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-local_sample_2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-smooth_sampled_tree.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Samples from full prior (including epipolar constraints)&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-12-full_prior_samples.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-full_prior_samples.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Notice how all corresponding points lie on the same epipolar line.&lt;/p&gt;
-
-&lt;p&gt;The plot of eigenvalues of the prior covariance matrix suggest a very low-dimensional embedding:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-full_prior_eigs.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Plotting log-sqrt eigenvalues compresses the dynamic range, making it easier to read:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-log_sqrt_prior_eigs.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-</description>
-				<pubDate>Wed, 14 Jan 2015 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/14/reference</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/14/reference</guid>
-			</item>
-		
-			<item>
-				<title>Work Log</title>
-				<description>&lt;p&gt;Spent morning considering covariance over loopy graphs.  Implemented and example of &quot;shortest geodesic distance&quot;, modified to be minimum sum of squared distances between junctions over all paths.  This is a generalization of our metric over tree-structured graphs.  As anticipated, with loopy graphs, this results in non-positive-definite covariance matrices.&lt;/p&gt;
-
-&lt;p&gt;Consider this example, with two paths between nodes (1) and (4), one twice as long as the other.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-13-exmple_graph.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;The shortest squared-distance matrix is&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt; 0     1     4     9     4    13
- 1     0     1     4     5     8
- 4     1     0     1     8     5
- 9     4     1     0    13     4
- 4     5     8    13     0     4
-13     8     5     4     4     0
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The code for this is:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;d1 = 0:3; % route 1 distances
-d2 = 0:2:6; % route 2 distances
-D1 = pdist2(d1&#39;, d1&#39;, &#39;euclidean&#39;).^2;
-D2 = pdist2(d2&#39;, d2&#39;, &#39;euclidean&#39;).^2;
-G  = sparse(size(D));
-% top-left block is simply a straight path
-G(1:length(d1),1:length(d1)) = D1;
-% for bottom-left, compute shortest path between nodes through
-% junctions
-for i = 1:(length(d2)-2)
-  i_ = length(d1)+i;
-  for j = 1:length(D)
-    j_ = j;
-    if i_ == j_, G(i_,j_) = 0; G(j_,i_) = 0; continue, end
-    G2 = sparse(4,4);
-    G2(1,2) = D(i_, 1);
-    G2(1,3) = D(i_, length(d1));
-    G2(2,3) = D(1,length(d1));
-    G2(1,4) = D(i_, j_);
-    G2(2,4) = D(1,j_);
-    G2(3,4) = D(length(d1),j_);
-    d = graphshortestpath(G2&#39;, 1,4, &#39;directed&#39;, false);
-    G(i_, j_) = d;
-    G(j_, i_) = d;
-  end
-end
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;At large enough scales, the squared-exponential covariance matrix has negative eigenvalues:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;scale = 10;
-min(eig(exp(-full(G)/(scale^2*2))))
-
-    ans =
-
-       -0.0134
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Thus, this covariance function is not positive definite.&lt;/p&gt;
-
-&lt;h2&gt;A loopy graph strategy&lt;/h2&gt;
-
-&lt;p&gt;We need to be able to embed the graph into a Euclidean space that preserves most of the interesting properties.&lt;/p&gt;
-
-&lt;p&gt;Here&#39;s a simple approach: construct a graph with junctions as vertices and geodesic distance as edge weight.  Find the graph&#39;s minimum spanning tree, and transform the tree into curve-tree coordinates.  For unclaimed curve segments, linearly interpolate between the coordinates of the endpoints.&lt;/p&gt;
-
-&lt;p&gt;This is nice, but if an unclaimed curve segment&#39;s length is perticularly long, it should act differently than a short (straight) line between the points.  To handle this, we introduce a new dimension for each unclaimed curve segment, and allow the transformed segment to have longer length by dipping into this dimension to some extent (with a limit of none for straight lines).&lt;/p&gt;
-
-&lt;p&gt;Ideally, all pairs of points on the transformed segment will have the same distance as their geodesic distance in untransformed space.  However, this is not possible, because it would contradict the fact that the endpoint distance is defined by the graph distance in the minimum spanning tree.  At least we can try to preserve local distances, and a parabolic arc is a reasonable choice for this.   How to derive a parabola equation of an appropriate length?&lt;/p&gt;
-
-&lt;p&gt;Given the distance between the end-points and the length of the desired curve, we seek a symmetric parabola with an appropriate arc length.   Given arc length and end-points, we can compute the focus the parabola (f), and from that we can compute the parabolic equation y = x&lt;sup&gt;2&lt;/sup&gt;/(4f).&lt;/p&gt;
-
-&lt;h2&gt;Training foreground likelihood&lt;/h2&gt;
-
-&lt;p&gt;First, reproject curve into second image.&lt;/p&gt;
-
-&lt;p&gt;Draw as medial axis w/ width.&lt;/p&gt;
-
-&lt;p&gt;Compute inverse medial axis.&lt;/p&gt;
-
-&lt;p&gt;Grab all foreground/background pixels in probability map.&lt;/p&gt;
-
-&lt;p&gt;create histogram.  Try smoothing and/or annealing.&lt;/p&gt;
-
-&lt;p&gt;Done.&lt;/p&gt;
-
-&lt;p&gt;Foreground model:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-lik_fg.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Background model:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-14-lik_bg.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-</description>
-				<pubDate>Tue, 13 Jan 2015 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/13/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/13/work-log</guid>
+				<pubDate>Fri, 06 Mar 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/03/06/reference</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/03/06/reference</guid>
 			</item>
 		
 			<item>
@@ -384,563 +230,440 @@ min(eig(exp(-full(G)/(scale^2*2))))
 &lt;/div&gt;
 
 
-&lt;p&gt;Training epipolar prior.&lt;/p&gt;
 
-&lt;p&gt;Fixing local prior using parameters learned yesterday.  The computing the epipolar and full prior is more computationally intensive, since it involves twice as many dimensions.  To mitigate, I eliminated every other point from the data.&lt;/p&gt;
-
-&lt;p&gt;Without the epipolar prior, the data likelihood is:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Log-likelihood (baseline) =  -2471.12 
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Fixing euclidean scale and variance to zero, I trained the epipolar variance:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Log-likelihood =  -2395.05
-training_result = 
-
-    epipolar_variance: 4.39
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;By allowing some euclidean-correlated variance, the iid variance should be able to drop a bit.  Fixing euclidean scale to 1/100&lt;sup&gt;2&lt;/sup&gt;, I trained epipolar_variance and euclidean_variance jointly:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Log-likelihood = -2394.88
-training_result =
-
-    epipolar_variance: 4.3214
-      euclidean_scale: 1.0000e-04
-   euclidean_variance: 0.0335
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now training all three:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Log-likelihood = -2394.57
-training_result = 
-
-     epipolar_variance: 4.2877
-    euclidean_variance: 0.0458
-       euclidean_scale: 2.1581e-06
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now training all 10 parameters together:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Log-likelihood = -1294.59
-training_result = 
-
-     epipolar_variance: 4.2877
-    euclidean_variance: 0.0458
-       euclidean_scale: 2.1581e-06
-        noise_variance: 0.0821
-     geodesic_variance: 193.9141
-        geodesic_scale: 0.0031
-branch_linear_variance: 0.0800
- branch_const_variance: 6.1725
-       linear_variance: 0.1561
-        const_variance: 685.7670
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;...but we actually want noise_variance to be fixed to 1.  Repeating previous run with noise_variance=1 results in:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Log-likelihood = -2381.29
-training_result = 
-
-     epipolar_variance: 4.2877
-    euclidean_variance: 0.0458
-       euclidean_scale: 2.1581e-06
-        noise_variance: 1
-     geodesic_variance: 33.6972
-        geodesic_scale: 0.0011
-branch_linear_variance: 0.1028
- branch_const_variance: 6.9943
-       linear_variance: 0.0737
-        const_variance: 1.8641e+03
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;running for 30 more iterations:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;ll = 2376.76
-     epipolar_variance: 4.2877
-    euclidean_variance: 0.0458
-       euclidean_scale: 2.1581e-06
-        noise_variance: 1
-     geodesic_variance: 160.7604
-        geodesic_scale: 5.3712e-04
-branch_linear_variance: 0.1028
- branch_const_variance: 6.9943
-       linear_variance: 0.0835
-        const_variance: 2.1123e+03
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;The fullly trained model is then:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;     epipolar_variance: 4.2877
-    euclidean_variance: 0.0458
-       euclidean_scale: 2.1581e-06
-        noise_variance: 1
-     geodesic_variance: 15.9174
-        geodesic_scale: 0.0019
-branch_linear_variance: 0.0485
- branch_const_variance: 3.7438
-       linear_variance: 0.0348
-        const_variance: 685.7670
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The samples from this prior look very nice:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-12-full_prior_samples.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Motion is restricted to be near the epipolar lines, and the resulting curves remain smooth.&lt;/p&gt;
-
-&lt;p&gt;Matlab says only 314 out of 3766 are nonnegligible.&lt;/p&gt;
 </description>
-				<pubDate>Mon, 12 Jan 2015 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/12/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/12/work-log</guid>
+				<pubDate>Thu, 26 Feb 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/02/26/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/02/26/work-log</guid>
 			</item>
 		
 			<item>
 				<title>Work Log</title>
-				<description>&lt;p&gt;Finished training.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;training_result = 
-
-         final_const_variance: 1.1669e-04
-  final_branch_const_variance: 1.7636e+03
-        final_linear_variance: 1.4425e+03
-      final_geodesic_variance: 195.4912
-         final_geodesic_scale: 0.0065
-                  final_noise: 0.0776
-
-training_result.initial
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;  ans =&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;         const_variance: 831.7886
-  branch_const_variance: 0.8552
-        linear_variance: 0.1183
-     euclidean_variance: 1.7367
-        euclidean_scale: 1.0000
-      geodesic_variance: 225.8247
-         geodesic_scale: 1.0000
-      epipolar_variance: 1.7367
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;These just don&#39;t make sense.  It allows for almost zero total translation, but lots of pert-curve translation (const_variance vs. branch_const_variance).  Linear variance allows for way too much scaling.  Geodesic variance seems sensible, but the (inverse-squared) geodesic scale is way too low... Basically this becomes a stand-in for const_variance.  Perhaps this is just a local minimum, we could try fixing const_variance to some large number and forcing geodesic variance to serve its intended purpose.&lt;/p&gt;
-
-&lt;p&gt;But the strangest thing is that&lt;/p&gt;
-
-&lt;p&gt;I sampled some curves from this prior, and they are about what I&#39;d expect: rotated and scaled with very little nonrigid deformation.   Below is a sample, along with the mean tree barely visible in the center:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-tree_sample.png&quot; alt=&quot;tree sample&quot; /&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Branches remain connected to tree, despite large per-curve offset variance.&lt;/li&gt;
-&lt;li&gt;covariance matrix is singular&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Ruled-out causes of error:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;badly implemented logmvnpdf.  Tested against reference implementation.&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;h2&gt;Training observations&lt;/h2&gt;
-
-&lt;p&gt;The simulated annealing algorithm is very sensitive to our local minima.  It can sometimes find a good result in less than 500 iterations, but other times it gets stuck after less than 100 and never improves.  I can probably tweak the annealing schedule to increase temperature earlier(is &quot;reannealing&quot; the right value to tweak?&quot;).&lt;/p&gt;
-
-&lt;p&gt;The patternsearch algorithm beats simulated annealing after only 16 iterations (vs. 5k or more).   Annealing really struggles to get out of that minimum.&lt;/p&gt;
-
-&lt;p&gt;Surprisingly, after adding a seventh parameter (for branch-specific affine deformation), patternsearch totally fails to find a good minimum starting from default parameters.  Initializing it with the result of the six-parameter model gives much better results.  This suggests a coarse-to-fine strategy for training might work well in general.  However, this is a very specific case:  the six-parameter model was flexible enough to explain the data quite well, but was overly permissive -- it allowed too many nonsensical solutions.  Adding the seventh parameter introduced an alternative explanation of the data, one requiring less nonrigid deformation.&lt;/p&gt;
-
-&lt;p&gt;To try: genetic algorithm;  particle swarm; simplex method; start pattern search from SA result; globalsearch; grid search with multistart&lt;/p&gt;
-
-&lt;p&gt;Globalsearch &amp;amp; multistart w/
-  simplex
-  fminunc&lt;/p&gt;
-
-&lt;h2&gt;Misc results&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-tree_sample2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;log-likleihood = -3.1787e+03
-training_result = 
-
-         final_const_variance: 6.0197e+06
-  final_branch_const_variance: 1.5774e-09
-        final_linear_variance: 1.6250
-      final_geodesic_variance: 238.6891
-         final_geodesic_scale: 0.0039
-         final_noise_variance: 0.1487
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Not bad.  Lots of geodesic variance to account for distortion.  Why is const variance so high?  Linear variance seems a bit high, but reasonable.&lt;/p&gt;
-
-&lt;p&gt;It might be a good idea to allow each branch to have a linear distortion relative to its initial point.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;pre&gt;&lt;code&gt;log-likelihood = -2.5318e+03
-training_result = 
-
-       final_const_variance: 2.3156e+09
-final_branch_const_variance: 2.4988
-      final_linear_variance: 33.8221
-    final_geodesic_variance: 1.7165e+03
-       final_geodesic_scale: 0.0029
-       final_noise_variance: 0.0880
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Much smaller noise variance, much higher for all other variances.  const variance is astronomical... is the optimizer exploiting numerical error arising from a poorly-conditioned matrix?&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-tree_sample6.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;log-likelihood = -2.4848e+03
-training_result =
-
-       final_const_variance: 0.1383
-final_branch_const_variance: 1.7466
-      final_linear_variance: 5.4218e-04
-    final_geodesic_variance: 378.6715
-       final_geodesic_scale: 0.0048
-       final_noise_variance: 0.0832
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is close to what I would hope for -- small constant and linear variance, most variance coming from deformation.  Still, the scale is fairly short (~14 pixels), allowing for quite a bit of deformation.&lt;/p&gt;
-
-&lt;p&gt;Ran for several thousand more iterations.  Seem to be converging.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;log-likelihood = -2.4799e+03
-training_result =
-
-       const_variance: 0.0717
-branch_const_variance: 3.2826
-      linear_variance: 0.0028
-    geodesic_variance: 401.4291
-       geodesic_scale: 0.0047
-       noise_variance: 0.0831
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Running from scratch with the &quot;pattern_search&quot; algorithm, I got excellent results very quickly:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;log-likelihood = -2.4256e+03
-training_result =
-
-         const_variance: 261.7339
-branch_const_variance: 3.0796
-      linear_variance: 0.0035
-    geodesic_variance: 165.2169
-       geodesic_scale: 0.0063
-       noise_variance: 0.0821
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;These are the most sensible results yet!  Moderately large constant variance , small but nonnegligible branch constant variance.  A touch of linear variance to rotations.  Smaller deformation variance in response to larger const variance.  Yes!&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Adding a new parameter assigning independent affine deformation variance to each branch.  This should allow less variance to be allotted to geodesic_variance, which should improve marginal-likelihood.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-sampled_tree9.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Initial training pass failed to find the old local minimum.  Restarting it using the previous optimum resulted in very nice parameters:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;log-likelihood = -2.3107e+03
-training_result = 
-
-        const_variance: 291.9853
- branch_const_variance: 2.0196
-       linear_variance: 0.0366
-branch_linear_variance: 0.0516
-     geodesic_variance: 12.7402
-        geodesic_scale: 0.0136
-        noise_variance: 0.0796
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Note the dramatic drop in geodesic variance and increase in marginal likelihood.  On the other hand, the (corrected) geodesic scale dropped from(~12 to ~8), meaning slightly higher effective dimension.  The resulting tree looks much closer to the original shape than previous models.&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Previous model had a problem: allowing each curve to affine-transform independently results in parents drifting away from children, which in reality isn&#39;t possible.  We need each child to inherit the covariance of the parent, which we accomplish by simply taking the dot-product of the &quot;geodesic&quot; index.&lt;/p&gt;
-
-&lt;p&gt;The pattern_search algorithm is having a hard time finding a better set of&lt;/p&gt;
-
-&lt;p&gt;Starting from the same position as previous starting point, results in a worse log-likelihood:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;log-likelihood = -2.3131e+03
-training_result = 
-
-        const_variance: 3.1017e-25
- branch_const_variance: 2.9157
-       linear_variance: 0.0326
-branch_linear_variance: 0.0575
-     geodesic_variance: 12.5426
-        geodesic_scale: 0.0137
-        noise_variance: 0.0796
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Zero const variance is troubling.  Other parameters are mostly unchanged, except slightly higher branch_const_variance.  It seems the translation component was mostly used to align curves affected by parallax.&lt;/p&gt;
-
-&lt;p&gt;Actually, zero const variance isn&#39;t so surprising, because our now model alls branches to pivot around their starting point, and the root of the tree hardly moves between views.  What movement there is could be solved by pivoting the whole tree around it&#39;s center, using the global affine transformation.&lt;/p&gt;
-
-&lt;p&gt;It seems we have a redundant representation here.  The branch affine transformations subsume the global affine transformation, unless there&#39;s evidence that a multi-level type of model is reasonable (which it might be).&lt;/p&gt;
-
-&lt;p&gt;Starting from the result of the previous run gives slightly better results, but still not better than the &quot;bad&quot; model used previously.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;log-likelihood = -2.3122e+03
-training_result = 
-
-        const_variance: 498.3842
- branch_const_variance: 2.9623
-       linear_variance: 0.0400
-branch_linear_variance: 0.0523
-     geodesic_variance: 12.0562
-        geodesic_scale: 0.0138
-        noise_variance: 0.0799
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Now optimization approach, adding one dimension at a time and reoptimizing. Results are almost identical to second-to-last run:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;log-likelihood:  -2.3131e+03
-training_result = 
-
-        noise_variance: 0.0800
-     geodesic_variance: 12.3965
-        geodesic_scale: 0.0136
-branch_linear_variance: 0.0576
- branch_const_variance: 2.9157
-       linear_variance: 0.0327
-        const_variance: 8.3205e-09
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Again, low const_variance, but we manually can do 1D optimization to improve it:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-ml_vs_const_variance.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;training_result = 
-
-        noise_variance: 0.0800
-     geodesic_variance: 12.3965
-        geodesic_scale: 0.0136
-branch_linear_variance: 0.0576
- branch_const_variance: 2.9157
-       linear_variance: 0.0327
-        const_variance: 435.8995
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2&gt;Some plots showed that at low const_variance, the terrain become rocky, making search difficult.&lt;/h2&gt;
-
-&lt;p&gt;Forcing noise variance to be 1.0 results in much smoother priors:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-11-smooth_sampled_tree.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;training_result = 
-
-        noise_variance: 1
-     geodesic_variance: 15.9174
-        geodesic_scale: 0.0019
-branch_linear_variance: 0.0485
- branch_const_variance: 3.7438
-       linear_variance: 0.0348
-        const_variance: 685.7670
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This kind of makes sense, since our point-correspondence algorithm has mean error of 0.5, even if correspondences are perfect.  In many cases, correspondences aren&#39;t perfect, because the triangulation metric used to find correspondences isn&#39;t sufficiently informative to infer the true correspondence.  So forcing i.i.d. noise variance to some minimum value prevents the prior from taking up that noise.&lt;/p&gt;
-
-&lt;h2&gt;misc notes&lt;/h2&gt;
-
-&lt;p&gt;Try different deformation model - cubic spline?&lt;/p&gt;
-
-&lt;p&gt;euclidean affine transform&lt;/p&gt;
-
-&lt;p&gt;next:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;train epipolar likelihood&lt;/li&gt;
-&lt;li&gt;MCMC
-
-&lt;ul&gt;
-&lt;li&gt;from sample to raster&lt;/li&gt;
-&lt;li&gt;train bernoulli likelihood&lt;/li&gt;
-&lt;li&gt;adaptive MH (or test with just simulated annealing)&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;Dangling tasks:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;train on multiple different view-pairs&lt;/li&gt;
-&lt;li&gt;ground-truth and train on neighboring views (rather than four-separated)&lt;/li&gt;
-&lt;/ul&gt;
-
+				<description>&lt;p&gt;Current search method is ridiculous, because it doesn&#39;t search in the directions of greatest variation.&lt;/p&gt;
 </description>
-				<pubDate>Sun, 11 Jan 2015 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/11/work-log</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/11/work-log</guid>
+				<pubDate>Wed, 25 Feb 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/02/25/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/02/25/work-log</guid>
 			</item>
 		
 			<item>
-				<title>Trained prior parameters</title>
-				<description>&lt;p&gt;Training only local prior w/ noise_variance fixed at 1.0:&lt;/p&gt;
+				<title>Projecting Prior and Backprojecting Posterior</title>
+				<description>&lt;p&gt;We have existing machinery that lets us find the optimal (maximum a-posteriori) 2D curve tree, given a 2D Gaussian prior and a foreground probability map.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;        noise_variance: 1
-     geodesic_variance: 15.9174
-        geodesic_scale: 0.0019
-branch_linear_variance: 0.0485
- branch_const_variance: 3.7438
-       linear_variance: 0.0348
-        const_variance: 685.7670
-&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We&#39;d like to use that to perform tracking when we know a 3D Gaussian distribution over the tree position, given previous evidence.&lt;/p&gt;
 
-&lt;p&gt;Training full model (local prior and epipolar prior) w/ noise variance fixed at 1.0&lt;/p&gt;
+&lt;p&gt;Given: \(p(x_n | y_{1:n-1}) \)&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;log-likelihood = -2368.62
+&lt;p&gt;Estimate: \(p(x_n | y_{1:n}) \)&lt;/p&gt;
 
-     epipolar_variance: 4.5465
-    euclidean_variance: 0.0422
-       euclidean_scale: 4.2001e-07
-        noise_variance: 1
-     geodesic_variance: 233.9050
-        geodesic_scale: 4.3327e-04
-branch_linear_variance: 0.1079
- branch_const_variance: 7.0217
-       linear_variance: 0.1016
-        const_variance: 2.4123e+03
-&lt;/code&gt;&lt;/pre&gt;
+&lt;ol&gt;
+&lt;li&gt;Rotate/scale the 3D prior to be aligned with the image plane in pixel coordinates, i.e. u,v, and depth&lt;/li&gt;
+&lt;li&gt;Estimate the marginal posterior in (u,v) coordinates using our warping code&lt;/li&gt;
+&lt;li&gt;Estimate the depth terms of the posterior analytically&lt;/li&gt;
+&lt;li&gt;Un-rotate and unscale the posterior into world space.&lt;/li&gt;
+&lt;/ol&gt;
 
-&lt;p&gt;  Notice significantly larger geodesic variance, and much longer scale length (48 vs 22 pixels).  All other variances increased too.  This is probably because we&#39;ve treated the two priors as independent, but they aren&#39;t, so multiplying them results in too little overall variance.&lt;/p&gt;
 
-&lt;p&gt;By comparison, below is a nearby local minimum, obtained by training all 9 parameters from scratch.&lt;/p&gt;
+&lt;h2&gt;Step 1&lt;/h2&gt;
 
-&lt;p&gt;  log-likelihood:  -2370.05&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;       epipolar_variance: 4.6435
-      euclidean_variance: 3.1113e-35
-         euclidean_scale: 7.4415e+152
-          noise_variance: 1
-       geodesic_variance: 283.5387
-          geodesic_scale: 3.9692e-04
-  branch_linear_variance: 0.1236
-   branch_const_variance: 6.5436
-         linear_variance: 0.0746
-          const_variance: 5.4990e-109
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This model moves all epipolar prior variance into the iid epipolar_variance variables. Also the local prior&#39;s offset variance has been moved into the deformation variance, geodesic_variance, while shortening the scale.&lt;/p&gt;
-</description>
-				<pubDate>Sun, 11 Jan 2015 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/11/reference</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/11/reference</guid>
-			</item>
-		
-			<item>
-				<title>Projection of point onto line using distance from two reference points</title>
-				<description>&lt;p&gt;Consider two known points A, and B, an unknown point C. If we know the distances between C and the other two points, we can recover \(\pi_{AB}(C)\), the projection of C onto the line AB.&lt;/p&gt;
-
-&lt;p&gt;The distance between \(\pi_{AB}(C)\) and A is&lt;/p&gt;
+&lt;p&gt;Let \(p(x_n | y_1, ..., y_{n-1})\) be the prior of \(x_n)\), conditioned on all previous data.  At the current prior mean, \(\mu\), the projection function \(\pi(x)\) has Jacobian, \(J(\mu)\), which can be decomposed using RQ decomposition into \(J = (R 0) Q\), where Q is a rotation and R is square, upper triangular, and nonsingular.  This corresponds to rotating to face the camera, followed by scaling and/or shearing corresponding to foreshortening at the given depth.  The projection function can be then approximated using taylor series expansion:&lt;/p&gt;
 
 &lt;div&gt;
 \[
-\begin{align}
-d(A, \pi_{AB}(C)) = d(A,B) (1+g) / 2 \text{, where} \\
-g &amp;= \left ( d(A,C)^2 - d(B,C)^2 \right ) / d(A,B)^2
-\end{align}
-\]
-&lt;/div&gt;
-
-
-&lt;p&gt;This can be derived using the pythagorean theorem and fact triangles AC\pi(C) and BC\pi(C) share a side.&lt;/p&gt;
-
-&lt;p&gt;This can be used to derive an expression for \(\pi_{AB}(C)\) using a weighted sum of A and B:&lt;/p&gt;
-
-&lt;div&gt;
-\[
-\begin{align}
-\pi_{AB}(C) &amp;= (A(1-g) + B(1+g) ) / 2
-\end{align}
-\]
-&lt;/div&gt;
-
-
-
-</description>
-				<pubDate>Fri, 09 Jan 2015 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/09/reference</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/09/reference</guid>
-			</item>
-		
-			<item>
-				<title>Geodesic distance kernel and BGP kernel -- simplified representation</title>
-				<description>&lt;p&gt;With a nod to Mercer&#39;s theorem, we can represent gaussian processes over graph-structured points in a very simple way.  We may transform our input space over graph nodes into a new eucliean space.&lt;/p&gt;
-
-&lt;p&gt;For trees with N branches, we denote a point a distance x along the i-th branch by the ordered pair \(i, x\).  For each branch i, its parent is denoted by p(i), and its branch point is denoted by b(i).  If branch i has not parent, we define p(i) = b(i) = 0.  We can define a transformation \(\phi : \mathbb{N}\times\mathbb{R} \rightarrow \mathbb{R}^N\), whose k-th dimension is:&lt;/p&gt;
-
-&lt;p&gt;  &lt;div&gt;
-  [
-    \phi_k(i,x) = \begin{cases}
-        x &amp;amp; \text{ if } i == k \
-        0 &amp;amp; \text{ if } i == 0 \
-        \phi_k(p(i), b(i)) &amp;amp; \text{ otherwise.}
-        \end{cases}
-  ]
-  &lt;/div&gt;.&lt;/p&gt;
-
-&lt;p&gt;If branch k is the root of a subtree containing (i,x), \(\phi_k\) is the branch position of sub-subtree containing (i,x).&lt;/p&gt;
-
-&lt;p&gt;This formulation makes it easier to define covariance functions over tree structures.  O&lt;/p&gt;
-
-&lt;p&gt;It is often useful to model each tree branch as a squared-exponential curve.  This is sometimes falsely implemented as squared exponential covariance function over geodesic distance instead of Euclidean distance.  However, this covariance function isn&#39;t positive definite (need illustration).  Instead, if we define a distance function \(d(i,x,i&#39;,x&#39;)\) as the sum of squared geodesic distances between adjacent junctions along the path between (i,x) and (i&#39;,x&#39;).  Using this distance metric with a squared-exponential covariance function results in exactly the model we seek.&lt;/p&gt;
-
-&lt;div&gt;
-  k(i,x,i&#39;,x&#39;) = \exp\{-d(i,x,i&#39;,x&#39;)\}
-&lt;/div&gt;
-
-
-&lt;p&gt;We can use our transformation above to represent this more succinctly:&lt;/p&gt;
-
-&lt;div&gt;
-  k(\phi, \phi&#39;) = \exp\{- \| \phi - \phi&#39; \|^2\}
-&lt;/div&gt;
-
-
-&lt;p&gt;Since each dimension in phi corresponds to exactly one branch, \( \phi - \phi \) is a vector of distances between branch points on the each curve corresponding to (i,x) and (i&#39;,x&#39;).  The squared l2 norm of this expression is equivalent to d(i,x,i&#39;,x&#39;).  Note that the fact that we can represent this covariance function using a standard covariance function with transformed inputs shows that it is positive definite.&lt;/p&gt;
-
-&lt;p&gt;A second useful tree model is the one I introduced in my dissertation proposal -- the branching cubic spline model.  The covariance function for this model involved a recursive function that was complicated and wasn&#39;t previously proven to be positive definite.  Using our input transformation, this simplifies to:&lt;/p&gt;
-
-&lt;div&gt;
-\[
-  k(\phi, \phi) = \sum_i k_c(\phi_i, \phi&#39;_i)
+  \pi(x) = \pi(\mu) + (R \,| \,0) Q (x - \mu)
   \]
 &lt;/div&gt;
 
 
-&lt;p&gt;where k_c() is the cubic spline covariance function.  The recursive nature of the definition of \(\phi\) ensures that each curve inherits the covariance of its parent curve.  And because \(k_c(0,x) == 0\), points on different subtrees only receive covariance from their shared ancestors.  Again, this formulation suffices to show that our original covariance function is positive definite.&lt;/p&gt;
+&lt;p&gt;We can project the 3D prior to 2D using this transformation:&lt;/p&gt;
 
-&lt;h2&gt;Loopy graphs&lt;/h2&gt;
+&lt;div&gt;
+\[
+  \mathcal{N}(\mu_{2D}, A^{-1}_{2D}) = \mathcal{N}(\pi(\mu_{3D}), J A_{3D}^{-1} J^\top)
+  \]
+&lt;/div&gt;
 
-&lt;p&gt;Non-tree structured graphs are more difficult, but I have a few possible approaches.&lt;/p&gt;
 
-&lt;p&gt;One way of interpreting a loop is as two separate branches (one at each junction) that gradually blend into one another.  Implementing a transformation \(\phi\) is easy under this interpretation -- just linearly interpolate between the two independent lines in \(\phi\).  Unfortunately, the resulting embedding doesn&#39;t preserve distances between nearby points. I tried a similar approach with cubic Hermite splines instead of linear interpolation, but again, distances aren&#39;t preserved.  This could be solved if we could (a) guarantee that the bridging curve has exactly the right length and (b) the mapping between graph points and the bridging curve in \(\phi\) preserves distance.  Both of these result in equations that can&#39;t be solved analytically, but numerical techniques could work if we cared enough.&lt;/p&gt;
+&lt;p&gt;Here \(A_{2D}\) and \(A_{3D}\) are precision matrices.&lt;/p&gt;
 
-&lt;p&gt;We could try something similar, but use a spherical arc to connect the two branch points in \(\phi\).  This would preserve total length and adjacent distances, but it violates the property that the curve&#39;s endpoint is orthogonal to its parent.&lt;/p&gt;
+&lt;h2&gt;Step 3&lt;/h2&gt;
 
-&lt;p&gt;Both of these bridging techniques also violate the elegant property of the tree-based covariance, namely that the L1 distance between points is equal to thier geodesic distance.&lt;/p&gt;
+&lt;p&gt;For this section, let \(\mu = \mu_{2D}\) as derived above, let \(A = Q A_{3D} Q^\top\)  and let \(x&#39; = \pi(x)\) be the projected point.
+Let \(p(y_n | x&#39;_n) = \mathcal{N}([R^{-1} \; 0]^\top \mu_L, \, [R^{-1} \;  0]^\top L^{-1} [R^{-1} \; 0] )\) be the image likelihood in 3D space, where \(\mu_L\) is \((x&#39;_1, x&#39;_2)^\top\), and \(L\) is a 2x2 precision matrix.  Let \(L&#39; = R^{-\top} L R^{-1}\) and \(\mu&#39;_L = R^{-1} \mu_L\) Running warping in step 2 gives us the hessian \(H\) of the marginal in-plane posterior.  This is the negative marginal posterior covariance for the (u,v) space.  Since the likelihood is uninformative in the dpeth direction, the deriving the full posterior covariance, (Z), is straightforward:&lt;/p&gt;
 
-&lt;p&gt;A third possibility is to simply use the distance function \(d(i,x,i&#39;,x&#39;)\) we introduced before.  The down side of this is I con&#39;t think of a proof for its positive-definiteness.  But if it is PD, it should have the properties we want, and is relatively easy to implement.&lt;/p&gt;
+&lt;div&gt;
+\begin{align}
+      Z &amp;= A + \left( \begin{array}{cc}L&#39; &amp; 0 \\ 0 &amp; 0\end{array} \right)  \\
+       &amp;= \left ( \begin{array}{cc} -H &amp; A_{1:2,3} \\ A_{3,1:2} &amp; A_{3,3} \end{array} \right )
+\end{align}
+&lt;/div&gt;
+
+
+&lt;p&gt;Warping also gives us the marginal posterior mean \(\pi_x, \pi_y\), in the image space.  Let \(\pi&#39;_x = \pi(\mu) + R^{-1} \pi_x\) and \(\pi&#39;_y = R^{-1} \pi_y\) be the marginal posterior mean in camera space.  Deriving \(\pi&#39;_z\) takes a few steps  (primes are omitted below, all quantities are assumed to be in camera space)&lt;/p&gt;
+
+&lt;div&gt;
+\begin{align}
+      \mathbf{\pi} &amp;= \left[ A + \left( \begin{array}{cc}L &amp; 0 \\ 0 &amp; 0\end{array} \right)\right]^{-1} \left [ A \mu + \left ( \begin{array}{c}L \mu_L \\ 0\end{array} \right ) \right ]  \\
+      \mathbf{\pi} &amp;= Z^{-1} \left [ A \mu + \left ( \begin{array}{c}L \mu_L \\ 0\end{array} \right ) \right ]  \\
+      Z \mathbf{\pi} &amp;= \left [ A \mu + \left ( \begin{array}{c}L \mu_L \\ 0\end{array} \right ) \right ]  \\
+\end{align}
+&lt;/div&gt;
+
+
+&lt;p&gt;Let \(A = (\mathbf{a_1}  \mathbf{a_2} \mathbf{a_3} )^\top \) be the rows of A.   Omitting all but the third row gives:&lt;/p&gt;
+
+&lt;div&gt;
+\begin{align}
+      z_{31} \pi_x + z_{32} \pi_y + z_{33} \pi_z &amp;= \mathbf{a_3^\top} \mu \\
+        \pi_z &amp;= (\mathbf{a}^\top_3 \mu - \pi_x z_{31} - \pi_y z_{32}) / z_{33} 
+\end{align}
+&lt;/div&gt;
+
+
+&lt;p&gt;Observing that \(z_{3i} = a_{3i}\),&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+        \pi_z &amp;= a_{33}^{-1} \left ( \mathbf{a}^\top_3 \left (\mu - \left ( \begin{array}{c} \pi_x \\ \pi_y \\ 0\end{array}\right)\right)\right)
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Written compactly:&lt;/p&gt;
+
+&lt;div&gt;
+\begin{align}
+        \pi_z &amp;= \mu_3 + a_{33}^{-1} a_{3,1:2}(\mu_{1:2} - \pi_{1:2});
+\end{align}
+&lt;/div&gt;
+
+
+&lt;p&gt;Testing in matlab:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;A = rand(3,3); A = A * A&#39;;
+L = rand(2,2); L = L * L&#39;;
+mu = randn(3,1);
+mu_L = randn(2,1);
+pi = inv(A + [L zeros(2,1);0 0 0]) * (A * mu + [L*mu_L; 0]);
+true_pi_z = pi(3);
+test_pi_z = mu(3) + A(3,1:2)*(mu(1:2) - pi(1:2))/A(3,3);
+err = test_pi_z - true_pi_z
+
+err =
+
+  -2.2204e-16
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It remains to rotate \(\mathbf{\pi}\) and \(A\)  by \(Q^\top\) to convert back to world space.&lt;/p&gt;
 </description>
-				<pubDate>Thu, 08 Jan 2015 00:00:00 -0700</pubDate>
-				<link>http://vision.sista.arizona.edu/ksimek/research/2015/01/08/reference</link>
-				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/01/08/reference</guid>
+				<pubDate>Tue, 24 Feb 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/02/24/reference</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/02/24/reference</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>&lt;p&gt;Today: continue refactor, pipeline building&lt;/p&gt;
+
+&lt;h2&gt;Queue:&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Investigate 2d curve finding bug&lt;/li&gt;
+&lt;li&gt;2D evaluation&lt;/li&gt;
+&lt;li&gt;investigate &quot;zero covariance&quot; bug&lt;/li&gt;
+&lt;li&gt;Extend to third view&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Later&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Third view
+&lt;strong&gt; Project 3D estimate into 2d
+&lt;/strong&gt; grow/shrink curves
+** add/break branches&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Pipeline tasks&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;move logic from tmp_track_all to a function&lt;/li&gt;
+&lt;li&gt;write pipeline script - all input/output in one directory&lt;/li&gt;
+&lt;li&gt;write intermediate output at each stage
+&lt;strong&gt; curve extraction
+&lt;/strong&gt; branch estimation
+&lt;strong&gt; warping
+&lt;/strong&gt; likelihood estimate
+&lt;strong&gt; pair-wise 3d reconstruction
+&lt;/strong&gt; 3rd-view warping
+&lt;strong&gt; likelihood estimate
+&lt;/strong&gt; 3-view reconstruction
+&lt;strong&gt; ...
+&lt;/strong&gt; nth view warping
+** n-th view reconstruction&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;For each view, keep likelihood estimate&lt;/p&gt;
+</description>
+				<pubDate>Fri, 20 Feb 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/02/20/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/02/20/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>&lt;p&gt;Kalman smoother is tested and appears to be working well.  70% faster than direct method.&lt;/p&gt;
+
+&lt;h2&gt;Queue&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Investigate &quot;zero covariance&quot; bug&lt;/li&gt;
+&lt;li&gt;infer liklihood variance during reconstruction&lt;/li&gt;
+&lt;li&gt;build pipeline, w/ intermediate results&lt;/li&gt;
+&lt;li&gt;project 3D posterior into third view&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Later&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;after projecting into third view:
+&lt;strong&gt; Add-remove curves
+&lt;/strong&gt; grow/shrink curves
+** add/break branches&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Today: Cleaning up and building pipeline&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;move logic from tmp_track_all to a function&lt;/li&gt;
+&lt;li&gt;write pipeline script - all input/output in one directory&lt;/li&gt;
+&lt;li&gt;write intermediate output at each stage
+&lt;strong&gt; curve extraction
+&lt;/strong&gt; branch estimation
+&lt;strong&gt; warping
+&lt;/strong&gt; likelihood estimate
+&lt;strong&gt; pair-wise 3d reconstruction
+&lt;/strong&gt; 3rd-view warping
+&lt;strong&gt; likelihood estimate
+&lt;/strong&gt; 3-view reconstruction
+&lt;strong&gt; ...
+&lt;/strong&gt; nth view warping
+** n-th view reconstruction&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;for each view, keep likelihood estimate&lt;/p&gt;
+</description>
+				<pubDate>Thu, 19 Feb 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/02/19/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/02/19/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Rerunning tracking to get perturbed curves.  Fixed bug in branch estimation causing suboptimal branches to be chosen. Added penalty to avoid branching in the middle of a child curve by penalizing large negative offsets.  Added parameter to adjust only the temperature of the local prior, leaving epipolar prior unchanged.  However, setting it too high causes initial tree to be far from the optimal tree, and the optimal is never found.  I&#39;d really like to get this solved, possibly using a deeper likelihood pyramid and a mixture model rather than product of experts.&lt;/p&gt;
+
+&lt;p&gt;Debugged &quot;mirrored reconstruction&quot; issue -- it turned out to be a plotting mode in Matlab set wrong.  Calling &lt;code&gt;axis xy&lt;/code&gt; fixed it.&lt;/p&gt;
+
+&lt;p&gt;MAP reconstruction now appears to be working:&lt;/p&gt;
+
+&lt;p&gt;View 1&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-18-map_reconstruction_full_prior.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;View 2&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-18-maop2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Compare with maximum likelihood:&lt;/p&gt;
+
+&lt;p&gt;View 1&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-18-ml2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;View 2&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-18-ml1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;If the perturbation sigma is very high, we get some drifting toward the camera&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-18-pert_bad.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Another reconstruction with uncertainty bounds shown:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-18-recons_w_uncertainty.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Testing kalman filter...&lt;/p&gt;
+
+&lt;p&gt;OK Kalman filter works:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-18-klaman_map_w_error.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Results are slightly different; I wonder if this is due to numerical error.  Kalman filter requires more intermediate matrix operations, which could allow error to drift in.  However, most operations involve smaller matrices, whose operations should be more stable.&lt;/p&gt;
+
+&lt;p&gt;Next up: port kalman smoother so we can reconstruct more than just the last curve.&lt;/p&gt;
+
+&lt;p&gt;Next Goal:  project and track in 3rd view.&lt;/p&gt;
+
+&lt;p&gt;Later:  Add/remove curves.  Grow/shrink curves.&lt;/p&gt;
+
+&lt;p&gt;Misc: Kalman filter; deep pyramid likelihood; mixture likelihood&lt;/p&gt;
+
+&lt;h2&gt;Queue:&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Infer branch direction&lt;/li&gt;
+&lt;li&gt;fix &quot;zero covariance&quot; bug&lt;/li&gt;
+&lt;li&gt;infer noise variance from 2d data.&lt;/li&gt;
+&lt;li&gt;implement kalman smoother&lt;/li&gt;
+&lt;li&gt;build pipelline, w/ intermediate results output&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Wed, 18 Feb 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/02/18/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/02/18/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>&lt;p&gt;Upon weaking the likelihood variance, we get this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-17-weak_likelihood.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The bug is now clear: the independent curves (blue, red, yellow, green), are treated as attached at their root point.  This is due to how the offset prior is handled -- the same offset variance is added to all curves, even the cross-covariance between independent trees..  Modified to measure the hamming distance between curves.  If greater than zero, it receives the constant covariance.&lt;/p&gt;
+
+&lt;p&gt;The maximum posterior after fixing:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-17-fixed_const_cov.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Compare to maximum likelihood:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-17-max_posterior.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Notice max posterior is smoother and blue, magenta and cyan curves are attached to the blue parent.  This is with zero temporal perturbation.&lt;/p&gt;
+
+&lt;p&gt;This explains the bad results yesterday; we should now be able to expoeriment with fancier priors.&lt;/p&gt;
+
+&lt;h2&gt;Adding temporal perturbation&lt;/h2&gt;
+
+&lt;p&gt;At temporal scale = 9, we get drift toward camera:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-17-temporal1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;At scale 10, 100, 1000, still bad.  It isn&#39;t until we get to scale=10,000 that we start to approach the results above (which used arbitrarilly large scale = 1e10)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-17-temporal2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;One downside of using a nonstationary covariance is apparent here: large blue curve is reversed in direction; its top is forced to be near-stationary, while the tip can drift quite far.   During inference, we&#39;ll have to try both directions and keep the better.  A stationary covariance function won&#39;t have this problem, should consider.&lt;/p&gt;
+
+&lt;p&gt;Wait -- setting all elements of perturbation covariance to zero should have no affect...  Found bug in constructing prior covariance matrix. Fixed.&lt;/p&gt;
+
+&lt;p&gt;Now, adding the smallest amount of perturbation variance results in something like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-17-smaller_perturb.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The problem here is fundamental to the cubic spline covariance: it can accellerate slowly but constantly until it&#39;s dramatically longer than its undeformed shape.  Possible solution: prevent perturbations toward camera.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Getting reversed triangulation.&lt;/p&gt;
+
+&lt;p&gt;Due to reversed camera direction? (is negating camera valid here?)&lt;/p&gt;
+
+&lt;p&gt;When testing new camera direction, lost curves from view2.  In rebuilding, realized our method for tracking curves was flawed -- it assumed optimization should start from the previous tree, but it should start at the mean of the perturbation prior distribution.&lt;/p&gt;
+
+&lt;p&gt;Also, the pattern-search method seems to be failing to find a good second view.  Implemented quasi-newton method to test against the pattern-search method.&lt;/p&gt;
+
+&lt;p&gt;To test:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;quasi-newton perturbation search&lt;/li&gt;
+&lt;li&gt;new approach to initializing optimization&lt;/li&gt;
+&lt;li&gt;reversed cameras&lt;/li&gt;
+&lt;li&gt;maximum posterior curves (naive method)&lt;/li&gt;
+&lt;li&gt;maximum posterior curves (kalman filter method)&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Tue, 17 Feb 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/02/17/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/02/17/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>&lt;p&gt;Troubleshooting bad Kalman filter results.  Results project correctly, but appear behind camera&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;F (transition matrix) - seems OK&lt;/li&gt;
+&lt;li&gt;Q (system noise) - seems OK (maybe high, could increase time-scale)&lt;/li&gt;
+&lt;li&gt;H (observation matrix) - indentity plus 1e-8 precision noise&lt;/li&gt;
+&lt;li&gt;R (sqrt observation precision) -  seems OK; projects correctly&lt;/li&gt;
+&lt;li&gt;P0 (initial uncertainty) - prior uncertainty (OK)&lt;/li&gt;
+&lt;li&gt;x (initial state) - prior mean (zero; OK)&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Triangulation looks good, but posterior reconstruction is terrible.&lt;/p&gt;
+
+&lt;p&gt;wrong coordinate frame?&lt;/p&gt;
+
+&lt;p&gt;Spent hours troubleshooting math and tweaking parameters to understand the problem.  Softening the prior seems to give better results.  This doesn&#39;t tell us much, except that the data is doing its job correctly (which we already knew by observing the triangulation).  Struggling to find the right combination of prior parameters.&lt;/p&gt;
+
+&lt;p&gt;Is the cubic prior simply not the right model?&lt;/p&gt;
+</description>
+				<pubDate>Mon, 16 Feb 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/02/16/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/02/16/work-log</guid>
+			</item>
+		
+			<item>
+				<title>Work Log</title>
+				<description>&lt;p&gt;Finished porting and testing triangulation.&lt;/p&gt;
+
+&lt;p&gt;Implemented single-view likelihood.  Derived and implemented likelihood graident; used it (and the existing hessian implementation) to fit degenerate Gaussian w/ Newton&#39;s method.&lt;/p&gt;
+
+&lt;p&gt;Finished kalman filter for tracking trees.  Getting weird results; need to debug tomorrow.&lt;/p&gt;
+</description>
+				<pubDate>Sun, 15 Feb 2015 00:00:00 -0700</pubDate>
+				<link>http://vision.sista.arizona.edu/ksimek/research/2015/02/15/work-log</link>
+				<guid isPermaLink="true">http://vision.sista.arizona.edu/ksimek/research/2015/02/15/work-log</guid>
 			</item>
 		
 	</channel>

@@ -4,13 +4,1145 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2015-01-20T23:26:27-07:00</updated>
+ <updated>2015-03-06T13:58:29-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Camera refinement</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/03/06/reference"/>
+   <updated>2015-03-06T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/03/06/reference</id>
+   <content type="html">&lt;p&gt;To implement efficient camera refinement, I need to derive the Jacobian of the residial vector w.r.t. camera parameters.&lt;/p&gt;
+
+&lt;p&gt;The parameterization of camera orientation deserves special discussion.  We prefer a parameterization that is free of constraints, so quaternions and rotation matrices aren&#39;t an option, leaving euler angles or an axis/angle vector. Both parameterizations have singularities, but we can avoid them by centering the parameterization at the camera&#39;s current orientation.  If we don&#39;t expect to drift too far from the current orientation, this should be okay; otherwise we can reparameterize after every step.  We follow Hartley and Zisserman&#39;s approach and use axis-angle parameterization.  For all other parameters, we will use no transformation.&lt;/p&gt;
+
+&lt;p&gt;Let the vector \(\mathbf{t}_r\) represent a rotation of angle \(\|\mathbf{r}_r\|\) around axis \(\hat{\mathbf{t}}_r\), and let \(R_{\mathbf{t}_r}\) be the corresponding rotation matrix.  Let \(K\) be the intrinsic matrix, and let \(\mathbf{t}_0\) be the translation vector.&lt;/p&gt;
+
+&lt;p&gt;The transformation of a point from from world coordinates to homogeneous image coordinates is using the camera \(P\)&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    \mathbf{x}_h(P) = K \, R_{\mathbf{t}_r} , R \, (\mathbf{X} - \mathbf{t}_0) .
+  \]
+&lt;/div&gt;
+
+
+&lt;p&gt;We seek the Jacobian of this transformation centered on the current camera, \(P\):&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    \begin{align}
+    J_h(P) &amp;= \frac{\partial x_h(P)}{\partial (f_x, f_y, s, x_0, y_0, \mathbf{t}_r, \mathbf{t}_0) } = \left ( J_K J_{\mathbf{t}_r} J_{\mathbf{t}_0} \right) \text{ , where} \\
+      J_K &amp;= \frac{\partial x_h(P)}{\partial (f_x, f_y, s, x_0, y_0 ) } \\
+      J_{\mathbf{t}_r} &amp;= \frac{\partial x_h(P)}{\partial (\mathbf{t}_r, \mathbf{t}_0) } \\
+      J_{\mathbf{t}_0} &amp;= \frac{\partial x_h(P)}{\partial (\mathbf{t}_0) }
+    \end{align}
+  \]
+&lt;/div&gt;
+
+
+&lt;h2&gt;Deriving \(J_{\mathbf{t}_r}\)&lt;/h2&gt;
+
+&lt;p&gt;When centered at the current camera, the rotation vector is zero, \(\mathbf{t}_r = (0,0,0)\).  For small \(\mathbf{t}_r\),  the rotation matrix is approximated by \( R_{\mathbf{t}_r} = I + [\mathbf{t}_r]_\times \).  The Jacobian of rotation \( R_{\mathbf{t}_r} \mathbf{X}\)  is then \( -[\mathbf{X}]_\times \), and the jacobian of \(x_h\) is&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    J_{\mathbf{t}_r} = -K [\mathbf{X}_c]_\times
+  \]
+&lt;/div&gt;
+
+
+&lt;p&gt;where  \(\mathbf{X}_c = R (\mathbf{X} - \mathbf{t}_0)\) is the point in camera coordinates.&lt;/p&gt;
+
+&lt;h2&gt;Deriving \(J_{\mathbf{t}_0}\) and \(J_K\)&lt;/h2&gt;
+
+&lt;p&gt;The other derivatives are straightforward to derive.&lt;/p&gt;
+
+&lt;p&gt;The Jacobian w.r.t. translation is:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    J_{\mathbf{t}_0} = -K R 
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;The Jacobian w.r.t. intrinsic parameters is&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    J_K = \frac{\partial x_h}{\partial (f_x, f_y, s, x_0, y_0 ) } = \left ( \begin{array}{ccccc}
+        X_{c,1} &amp; 0 &amp; X_{c,2} &amp; X_{c,3} &amp; 0 \\
+        0 &amp; X_{c,2} &amp; 0 &amp; 0 &amp; X_{c,3}  \\
+        0 &amp; 0 &amp; 0 &amp; 0 &amp; 0
+        \end{array}\right )
+  \]
+&lt;/div&gt;
+
+
+&lt;h2&gt;Jacobian of residuals&lt;/h2&gt;
+
+&lt;p&gt;We&#39;ve derived the jacobian of the transformation from world to homogeneous image coordinates w.r.t. each camera parameter.  To get the Jacobian of the residuals, it remains to transform to nonhomogeneous screen coordinates.&lt;/p&gt;
+
+&lt;div&gt;
+\[
+    \mathbf{x} = (x_{h,1} / x_{h,3}, x_{h,2} / x_{h,3})
+  \]
+&lt;/div&gt;
+
+
+&lt;p&gt;The Jacobian of this is&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    J_\mathbf{x}(\mathbf{x_h}) &amp;= 
+    \left ( 
+        \begin{array}{ccc}
+        \frac{1}{x_{h,3}} &amp; 0 &amp; - \frac{x_{h,1}}{x_{h,3}^2} \\
+        0 &amp; \frac{1}{x_{h,3}} &amp; - \frac{x_{h,2}}{x_{h,3}^2}
+        \end{array}
+    \right ) \\
+      &amp;=
+      \frac{1}{x_{c,3}} 
+    \left ( 
+        \begin{array}{ccc}
+        1 &amp; 0 &amp; - x_1 \\
+        0 &amp; 1 &amp; - x_2
+        \end{array}
+    \right )
+\end{align}
+  \]
+&lt;/div&gt;
+
+
+&lt;p&gt;where \(x_{c,3}\) is the point&#39;s depth in camera coordinates, and \((x_1, x_2)\) is the point in nonhomogeneous image coordinates.&lt;/p&gt;
+
+&lt;p&gt;The Jacobian of the residuals w.r.t. camera parameters is then&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    J &amp;= J_\mathbf{x} J_h \\
+      &amp;= J_\mathbf{x} [ J_K J_{\mathbf{t}_r} J_{\mathbf{t}_0} ]
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;In what follows, we&#39;ll drop the \(J_\mathbf{x}\) and use \(J_K\) to refer to the Jacobian of the residuals (and likewise for \(J_{\mathbf{t}_r}\) and \(J_{\mathbf{t}_0}\)).  In other words, let \(J_K \leftarrow J_\mathbf{x} J_K\).&lt;/p&gt;
+
+&lt;h2&gt;Full Jacobian with Shared Intrinsics&lt;/h2&gt;
+
+&lt;p&gt;We now derive the Jacobian of all residuals in all views, where cameras share the same intrinsic parameters.&lt;/p&gt;
+
+&lt;p&gt;Let \(J_{K_{ij}}\) be the Jacobian of residuals the \(j\)th point in view \(i\) w.r.t. intrinsic parameters, and let \(J_\mathbf{R_{i,j}}\) be the same w.r.t. rotation.  Let \(J_{\mathbf{t}_i}\) be the Jacobian w.r.t. translation in view \(i\).&lt;/p&gt;
+
+&lt;p&gt;The full Jacobian  is a block matrix with form:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+J = 
+\left (
+    \begin{array}{c|c|c|c}
+    \overbrace{
+      \begin{array}{c}
+        J_{K_{11}}  \\
+        J_{K_{12}}  \\
+        J_{K_{13}}  \\
+           \cdots   \\
+           \hline
+        J_{K_{11}} \\
+        J_{K_{12}} \\
+        J_{K_{13}} \\
+           \cdots \\
+      \end{array}}^\text{All} &amp; 
+    \overbrace{
+      \begin{array}{cc}
+         J_{R_{11}} &amp; J_{\mathbf{t}_1} \\
+         J_{R_{12}} &amp; J_{\mathbf{t}_1} \\
+         J_{R_{13}} &amp; J_{\mathbf{t}_1} \\
+           \cdots &amp; \cdots  \\
+           \hline
+         \mathbf{0} &amp; \mathbf{0}       \\
+         \mathbf{0} &amp; \mathbf{0}       \\
+         \mathbf{0} &amp; \mathbf{0}       \\
+           \cdots &amp; \cdots  \\
+      \end{array}}^\text{Camera 1} &amp; 
+      \overbrace{
+      \begin{array}{cc}
+          \mathbf{0} &amp; \mathbf{0}  \\
+          \mathbf{0} &amp; \mathbf{0}  \\
+          \mathbf{0} &amp; \mathbf{0}  \\
+           \cdots &amp; \cdots  \\
+           \hline
+           J_{R_{11}} &amp; J_{\mathbf{t}_1}  \\
+           J_{R_{12}} &amp; J_{\mathbf{t}_1}  \\
+           J_{R_{13}} &amp; J_{\mathbf{t}_1}  \\
+           \cdots &amp; \cdots 
+       \end{array}}^\text{Camera 2} &amp;
+      \begin{array}{cc}
+       \mathbf{0} &amp; \cdots \\
+       \mathbf{0} &amp; \cdots \\
+       \mathbf{0} &amp; \cdots \\
+           \cdots &amp; \cdots &amp; \cdots  \\
+           \hline
+       \mathbf{0} &amp; \cdots \\
+       \mathbf{0} &amp; \cdots \\
+       \mathbf{0} &amp; \cdots \\
+           \cdots &amp; \cdots &amp; \cdots  \\
+      \end{array}
+    \end{array}
+    \right )
+\]
+&lt;/div&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/02/26/work-log"/>
+   <updated>2015-02-26T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/02/26/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/02/25/work-log"/>
+   <updated>2015-02-25T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/02/25/work-log</id>
+   <content type="html">&lt;p&gt;Current search method is ridiculous, because it doesn&#39;t search in the directions of greatest variation.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Projecting Prior and Backprojecting Posterior</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/02/24/reference"/>
+   <updated>2015-02-24T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/02/24/reference</id>
+   <content type="html">&lt;p&gt;We have existing machinery that lets us find the optimal (maximum a-posteriori) 2D curve tree, given a 2D Gaussian prior and a foreground probability map.&lt;/p&gt;
+
+&lt;p&gt;We&#39;d like to use that to perform tracking when we know a 3D Gaussian distribution over the tree position, given previous evidence.&lt;/p&gt;
+
+&lt;p&gt;Given: \(p(x_n | y_{1:n-1}) \)&lt;/p&gt;
+
+&lt;p&gt;Estimate: \(p(x_n | y_{1:n}) \)&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Rotate/scale the 3D prior to be aligned with the image plane in pixel coordinates, i.e. u,v, and depth&lt;/li&gt;
+&lt;li&gt;Estimate the marginal posterior in (u,v) coordinates using our warping code&lt;/li&gt;
+&lt;li&gt;Estimate the depth terms of the posterior analytically&lt;/li&gt;
+&lt;li&gt;Un-rotate and unscale the posterior into world space.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;h2&gt;Step 1&lt;/h2&gt;
+
+&lt;p&gt;Let \(p(x_n | y_1, ..., y_{n-1})\) be the prior of \(x_n)\), conditioned on all previous data.  At the current prior mean, \(\mu\), the projection function \(\pi(x)\) has Jacobian, \(J(\mu)\), which can be decomposed using RQ decomposition into \(J = (R 0) Q\), where Q is a rotation and R is square, upper triangular, and nonsingular.  This corresponds to rotating to face the camera, followed by scaling and/or shearing corresponding to foreshortening at the given depth.  The projection function can be then approximated using taylor series expansion:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+  \pi(x) = \pi(\mu) + (R \,| \,0) Q (x - \mu)
+  \]
+&lt;/div&gt;
+
+
+&lt;p&gt;We can project the 3D prior to 2D using this transformation:&lt;/p&gt;
+
+&lt;div&gt;
+\[
+  \mathcal{N}(\mu_{2D}, A^{-1}_{2D}) = \mathcal{N}(\pi(\mu_{3D}), J A_{3D}^{-1} J^\top)
+  \]
+&lt;/div&gt;
+
+
+&lt;p&gt;Here \(A_{2D}\) and \(A_{3D}\) are precision matrices.&lt;/p&gt;
+
+&lt;h2&gt;Step 3&lt;/h2&gt;
+
+&lt;p&gt;For this section, let \(\mu = \mu_{2D}\) as derived above, let \(A = Q A_{3D} Q^\top\)  and let \(x&#39; = \pi(x)\) be the projected point.
+Let \(p(y_n | x&#39;_n) = \mathcal{N}([R^{-1} \; 0]^\top \mu_L, \, [R^{-1} \;  0]^\top L^{-1} [R^{-1} \; 0] )\) be the image likelihood in 3D space, where \(\mu_L\) is \((x&#39;_1, x&#39;_2)^\top\), and \(L\) is a 2x2 precision matrix.  Let \(L&#39; = R^{-\top} L R^{-1}\) and \(\mu&#39;_L = R^{-1} \mu_L\) Running warping in step 2 gives us the hessian \(H\) of the marginal in-plane posterior.  This is the negative marginal posterior covariance for the (u,v) space.  Since the likelihood is uninformative in the dpeth direction, the deriving the full posterior covariance, (Z), is straightforward:&lt;/p&gt;
+
+&lt;div&gt;
+\begin{align}
+      Z &amp;= A + \left( \begin{array}{cc}L&#39; &amp; 0 \\ 0 &amp; 0\end{array} \right)  \\
+       &amp;= \left ( \begin{array}{cc} -H &amp; A_{1:2,3} \\ A_{3,1:2} &amp; A_{3,3} \end{array} \right )
+\end{align}
+&lt;/div&gt;
+
+
+&lt;p&gt;Warping also gives us the marginal posterior mean \(\pi_x, \pi_y\), in the image space.  Let \(\pi&#39;_x = \pi(\mu) + R^{-1} \pi_x\) and \(\pi&#39;_y = R^{-1} \pi_y\) be the marginal posterior mean in camera space.  Deriving \(\pi&#39;_z\) takes a few steps  (primes are omitted below, all quantities are assumed to be in camera space)&lt;/p&gt;
+
+&lt;div&gt;
+\begin{align}
+      \mathbf{\pi} &amp;= \left[ A + \left( \begin{array}{cc}L &amp; 0 \\ 0 &amp; 0\end{array} \right)\right]^{-1} \left [ A \mu + \left ( \begin{array}{c}L \mu_L \\ 0\end{array} \right ) \right ]  \\
+      \mathbf{\pi} &amp;= Z^{-1} \left [ A \mu + \left ( \begin{array}{c}L \mu_L \\ 0\end{array} \right ) \right ]  \\
+      Z \mathbf{\pi} &amp;= \left [ A \mu + \left ( \begin{array}{c}L \mu_L \\ 0\end{array} \right ) \right ]  \\
+\end{align}
+&lt;/div&gt;
+
+
+&lt;p&gt;Let \(A = (\mathbf{a_1}  \mathbf{a_2} \mathbf{a_3} )^\top \) be the rows of A.   Omitting all but the third row gives:&lt;/p&gt;
+
+&lt;div&gt;
+\begin{align}
+      z_{31} \pi_x + z_{32} \pi_y + z_{33} \pi_z &amp;= \mathbf{a_3^\top} \mu \\
+        \pi_z &amp;= (\mathbf{a}^\top_3 \mu - \pi_x z_{31} - \pi_y z_{32}) / z_{33} 
+\end{align}
+&lt;/div&gt;
+
+
+&lt;p&gt;Observing that \(z_{3i} = a_{3i}\),&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+        \pi_z &amp;= a_{33}^{-1} \left ( \mathbf{a}^\top_3 \left (\mu - \left ( \begin{array}{c} \pi_x \\ \pi_y \\ 0\end{array}\right)\right)\right)
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Written compactly:&lt;/p&gt;
+
+&lt;div&gt;
+\begin{align}
+        \pi_z &amp;= \mu_3 + a_{33}^{-1} a_{3,1:2}(\mu_{1:2} - \pi_{1:2});
+\end{align}
+&lt;/div&gt;
+
+
+&lt;p&gt;Testing in matlab:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;A = rand(3,3); A = A * A&#39;;
+L = rand(2,2); L = L * L&#39;;
+mu = randn(3,1);
+mu_L = randn(2,1);
+pi = inv(A + [L zeros(2,1);0 0 0]) * (A * mu + [L*mu_L; 0]);
+true_pi_z = pi(3);
+test_pi_z = mu(3) + A(3,1:2)*(mu(1:2) - pi(1:2))/A(3,3);
+err = test_pi_z - true_pi_z
+
+err =
+
+  -2.2204e-16
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It remains to rotate \(\mathbf{\pi}\) and \(A\)  by \(Q^\top\) to convert back to world space.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/02/20/work-log"/>
+   <updated>2015-02-20T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/02/20/work-log</id>
+   <content type="html">&lt;p&gt;Today: continue refactor, pipeline building&lt;/p&gt;
+
+&lt;h2&gt;Queue:&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Investigate 2d curve finding bug&lt;/li&gt;
+&lt;li&gt;2D evaluation&lt;/li&gt;
+&lt;li&gt;investigate &quot;zero covariance&quot; bug&lt;/li&gt;
+&lt;li&gt;Extend to third view&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Later&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Third view
+&lt;strong&gt; Project 3D estimate into 2d
+&lt;/strong&gt; grow/shrink curves
+** add/break branches&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Pipeline tasks&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;move logic from tmp_track_all to a function&lt;/li&gt;
+&lt;li&gt;write pipeline script - all input/output in one directory&lt;/li&gt;
+&lt;li&gt;write intermediate output at each stage
+&lt;strong&gt; curve extraction
+&lt;/strong&gt; branch estimation
+&lt;strong&gt; warping
+&lt;/strong&gt; likelihood estimate
+&lt;strong&gt; pair-wise 3d reconstruction
+&lt;/strong&gt; 3rd-view warping
+&lt;strong&gt; likelihood estimate
+&lt;/strong&gt; 3-view reconstruction
+&lt;strong&gt; ...
+&lt;/strong&gt; nth view warping
+** n-th view reconstruction&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;For each view, keep likelihood estimate&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/02/19/work-log"/>
+   <updated>2015-02-19T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/02/19/work-log</id>
+   <content type="html">&lt;p&gt;Kalman smoother is tested and appears to be working well.  70% faster than direct method.&lt;/p&gt;
+
+&lt;h2&gt;Queue&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Investigate &quot;zero covariance&quot; bug&lt;/li&gt;
+&lt;li&gt;infer liklihood variance during reconstruction&lt;/li&gt;
+&lt;li&gt;build pipeline, w/ intermediate results&lt;/li&gt;
+&lt;li&gt;project 3D posterior into third view&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Later&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;after projecting into third view:
+&lt;strong&gt; Add-remove curves
+&lt;/strong&gt; grow/shrink curves
+** add/break branches&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Today: Cleaning up and building pipeline&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;move logic from tmp_track_all to a function&lt;/li&gt;
+&lt;li&gt;write pipeline script - all input/output in one directory&lt;/li&gt;
+&lt;li&gt;write intermediate output at each stage
+&lt;strong&gt; curve extraction
+&lt;/strong&gt; branch estimation
+&lt;strong&gt; warping
+&lt;/strong&gt; likelihood estimate
+&lt;strong&gt; pair-wise 3d reconstruction
+&lt;/strong&gt; 3rd-view warping
+&lt;strong&gt; likelihood estimate
+&lt;/strong&gt; 3-view reconstruction
+&lt;strong&gt; ...
+&lt;/strong&gt; nth view warping
+** n-th view reconstruction&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;for each view, keep likelihood estimate&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/02/18/work-log"/>
+   <updated>2015-02-18T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/02/18/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Rerunning tracking to get perturbed curves.  Fixed bug in branch estimation causing suboptimal branches to be chosen. Added penalty to avoid branching in the middle of a child curve by penalizing large negative offsets.  Added parameter to adjust only the temperature of the local prior, leaving epipolar prior unchanged.  However, setting it too high causes initial tree to be far from the optimal tree, and the optimal is never found.  I&#39;d really like to get this solved, possibly using a deeper likelihood pyramid and a mixture model rather than product of experts.&lt;/p&gt;
+
+&lt;p&gt;Debugged &quot;mirrored reconstruction&quot; issue -- it turned out to be a plotting mode in Matlab set wrong.  Calling &lt;code&gt;axis xy&lt;/code&gt; fixed it.&lt;/p&gt;
+
+&lt;p&gt;MAP reconstruction now appears to be working:&lt;/p&gt;
+
+&lt;p&gt;View 1&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-18-map_reconstruction_full_prior.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;View 2&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-18-maop2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Compare with maximum likelihood:&lt;/p&gt;
+
+&lt;p&gt;View 1&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-18-ml2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;View 2&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-18-ml1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;If the perturbation sigma is very high, we get some drifting toward the camera&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-18-pert_bad.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Another reconstruction with uncertainty bounds shown:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-18-recons_w_uncertainty.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Testing kalman filter...&lt;/p&gt;
+
+&lt;p&gt;OK Kalman filter works:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-18-klaman_map_w_error.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Results are slightly different; I wonder if this is due to numerical error.  Kalman filter requires more intermediate matrix operations, which could allow error to drift in.  However, most operations involve smaller matrices, whose operations should be more stable.&lt;/p&gt;
+
+&lt;p&gt;Next up: port kalman smoother so we can reconstruct more than just the last curve.&lt;/p&gt;
+
+&lt;p&gt;Next Goal:  project and track in 3rd view.&lt;/p&gt;
+
+&lt;p&gt;Later:  Add/remove curves.  Grow/shrink curves.&lt;/p&gt;
+
+&lt;p&gt;Misc: Kalman filter; deep pyramid likelihood; mixture likelihood&lt;/p&gt;
+
+&lt;h2&gt;Queue:&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Infer branch direction&lt;/li&gt;
+&lt;li&gt;fix &quot;zero covariance&quot; bug&lt;/li&gt;
+&lt;li&gt;infer noise variance from 2d data.&lt;/li&gt;
+&lt;li&gt;implement kalman smoother&lt;/li&gt;
+&lt;li&gt;build pipelline, w/ intermediate results output&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/02/17/work-log"/>
+   <updated>2015-02-17T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/02/17/work-log</id>
+   <content type="html">&lt;p&gt;Upon weaking the likelihood variance, we get this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-17-weak_likelihood.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The bug is now clear: the independent curves (blue, red, yellow, green), are treated as attached at their root point.  This is due to how the offset prior is handled -- the same offset variance is added to all curves, even the cross-covariance between independent trees..  Modified to measure the hamming distance between curves.  If greater than zero, it receives the constant covariance.&lt;/p&gt;
+
+&lt;p&gt;The maximum posterior after fixing:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-17-fixed_const_cov.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Compare to maximum likelihood:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-17-max_posterior.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Notice max posterior is smoother and blue, magenta and cyan curves are attached to the blue parent.  This is with zero temporal perturbation.&lt;/p&gt;
+
+&lt;p&gt;This explains the bad results yesterday; we should now be able to expoeriment with fancier priors.&lt;/p&gt;
+
+&lt;h2&gt;Adding temporal perturbation&lt;/h2&gt;
+
+&lt;p&gt;At temporal scale = 9, we get drift toward camera:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-17-temporal1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;At scale 10, 100, 1000, still bad.  It isn&#39;t until we get to scale=10,000 that we start to approach the results above (which used arbitrarilly large scale = 1e10)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-17-temporal2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;One downside of using a nonstationary covariance is apparent here: large blue curve is reversed in direction; its top is forced to be near-stationary, while the tip can drift quite far.   During inference, we&#39;ll have to try both directions and keep the better.  A stationary covariance function won&#39;t have this problem, should consider.&lt;/p&gt;
+
+&lt;p&gt;Wait -- setting all elements of perturbation covariance to zero should have no affect...  Found bug in constructing prior covariance matrix. Fixed.&lt;/p&gt;
+
+&lt;p&gt;Now, adding the smallest amount of perturbation variance results in something like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-02-17-smaller_perturb.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The problem here is fundamental to the cubic spline covariance: it can accellerate slowly but constantly until it&#39;s dramatically longer than its undeformed shape.  Possible solution: prevent perturbations toward camera.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Getting reversed triangulation.&lt;/p&gt;
+
+&lt;p&gt;Due to reversed camera direction? (is negating camera valid here?)&lt;/p&gt;
+
+&lt;p&gt;When testing new camera direction, lost curves from view2.  In rebuilding, realized our method for tracking curves was flawed -- it assumed optimization should start from the previous tree, but it should start at the mean of the perturbation prior distribution.&lt;/p&gt;
+
+&lt;p&gt;Also, the pattern-search method seems to be failing to find a good second view.  Implemented quasi-newton method to test against the pattern-search method.&lt;/p&gt;
+
+&lt;p&gt;To test:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;quasi-newton perturbation search&lt;/li&gt;
+&lt;li&gt;new approach to initializing optimization&lt;/li&gt;
+&lt;li&gt;reversed cameras&lt;/li&gt;
+&lt;li&gt;maximum posterior curves (naive method)&lt;/li&gt;
+&lt;li&gt;maximum posterior curves (kalman filter method)&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/02/16/work-log"/>
+   <updated>2015-02-16T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/02/16/work-log</id>
+   <content type="html">&lt;p&gt;Troubleshooting bad Kalman filter results.  Results project correctly, but appear behind camera&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;F (transition matrix) - seems OK&lt;/li&gt;
+&lt;li&gt;Q (system noise) - seems OK (maybe high, could increase time-scale)&lt;/li&gt;
+&lt;li&gt;H (observation matrix) - indentity plus 1e-8 precision noise&lt;/li&gt;
+&lt;li&gt;R (sqrt observation precision) -  seems OK; projects correctly&lt;/li&gt;
+&lt;li&gt;P0 (initial uncertainty) - prior uncertainty (OK)&lt;/li&gt;
+&lt;li&gt;x (initial state) - prior mean (zero; OK)&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Triangulation looks good, but posterior reconstruction is terrible.&lt;/p&gt;
+
+&lt;p&gt;wrong coordinate frame?&lt;/p&gt;
+
+&lt;p&gt;Spent hours troubleshooting math and tweaking parameters to understand the problem.  Softening the prior seems to give better results.  This doesn&#39;t tell us much, except that the data is doing its job correctly (which we already knew by observing the triangulation).  Struggling to find the right combination of prior parameters.&lt;/p&gt;
+
+&lt;p&gt;Is the cubic prior simply not the right model?&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/02/15/work-log"/>
+   <updated>2015-02-15T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/02/15/work-log</id>
+   <content type="html">&lt;p&gt;Finished porting and testing triangulation.&lt;/p&gt;
+
+&lt;p&gt;Implemented single-view likelihood.  Derived and implemented likelihood graident; used it (and the existing hessian implementation) to fit degenerate Gaussian w/ Newton&#39;s method.&lt;/p&gt;
+
+&lt;p&gt;Finished kalman filter for tracking trees.  Getting weird results; need to debug tomorrow.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/02/13/work-log"/>
+   <updated>2015-02-13T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/02/13/work-log</id>
+   <content type="html">&lt;p&gt;Ported my c++ Kalman filter to Matlab.  Tested, debugged.  Ported gaussian-process-to-kalman routine. Integrated with tree-tracker output.  Ported algebraic and numerical triangulation from earlier project.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/02/12/work-log"/>
+   <updated>2015-02-12T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/02/12/work-log</id>
+   <content type="html">&lt;p&gt;Implemented nonmaximal suppression, background subtraction.&lt;/p&gt;
+
+&lt;p&gt;Derived/implemented expression for cubic covariance function for negative time-points.&lt;/p&gt;
+
+&lt;p&gt;Tested/debugged branch parameter estimation.  Implemented a visualization that revealed several issues during optimization.  Found a bug in gradient, which improved performance.  Also realized that adding a constant perturbation per stem allows much better fitting for touching/crossing curves.  To implement this, I created a &quot;hamming distance&quot; covariance function, which adds a constant offset to each child.    Also, increasing the value on the diagonal improves gradient estimates, making optimization converge faster.&lt;/p&gt;
+
+&lt;p&gt;Incorporated parent estimation into end-to-end fitting routine.&lt;/p&gt;
+
+&lt;h2&gt;Next:&lt;/h2&gt;
+
+&lt;p&gt;Post-tracking tasks:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;triangulate, smooth, etc&lt;/li&gt;
+&lt;li&gt;shrink/grow stems in 3d&lt;/li&gt;
+&lt;li&gt;implement 3rd-view fitting&lt;/li&gt;
+&lt;li&gt;try adding new stems
+** given current fit, run 2d stem finding&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;General procedure for fitting:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;find a stem in 2D&lt;/li&gt;
+&lt;li&gt;estimate a perturbation in 2D&lt;/li&gt;
+&lt;li&gt;triangulate and fit in 3rd view (w/ epipolar constraint)&lt;/li&gt;
+&lt;li&gt;attempt to infer parent&lt;/li&gt;
+&lt;li&gt;accept/reject&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Open issues&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;width fitting&lt;/li&gt;
+&lt;li&gt;nonconstant width?&lt;/li&gt;
+&lt;li&gt;fit independent curves independently?&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/02/09/work-log"/>
+   <updated>2015-02-09T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/02/09/work-log</id>
+   <content type="html">&lt;h2&gt;Goal:&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;infer&lt;/li&gt;
+&lt;li&gt;Tree tracking&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;3D reconstruction from pairwise match&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;bayesian 3D&lt;/li&gt;
+&lt;li&gt;project 2D&lt;/li&gt;
+&lt;li&gt;optimize (3D alone)&lt;/li&gt;
+&lt;li&gt;optimize (w/ 2D information too)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;optimize width&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;hr /&gt;
+
+&lt;p&gt;Ran perturbation fitting to track curves between views.  Results are quite bad.  A few problems:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;several curves are on the background, so don&#39;t follow the epipolar constraint.&lt;/li&gt;
+&lt;li&gt;All curves are independent, increasing the dimensionality of the search space and making local minima worse&lt;/li&gt;
+&lt;li&gt;Several curves are duplicates of existing curves, so don&#39;t match well in the second image.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;Started implementing attachment inference.&lt;/p&gt;
+
+&lt;h2&gt;Inferring curve attachment&lt;/h2&gt;
+
+&lt;p&gt;Goal: infer attachment between curves.  Since the model dimension doesn&#39;t change after adding branching,
+and since the likelihood doesn&#39;t change either, we&#39;ll just use the prior to evaluate branching, rather than the marginal likelihood.  Although the decision to attach two curves isn&#39;t strictly independent of the nearby attachments, we&#39;ll approximate it as such.  That way, when deciding whether a new attachment is valid, we only need the measure the change in prior of the two curves, rather than the entire tree.&lt;/p&gt;
+
+&lt;p&gt;First we need to estimate the optimal branch parameters, which are the position of the branch point on the parent, and the distance between the branch point and the first observed child point.  We&#39;ll call these &lt;code&gt;branch&lt;/code&gt; and &lt;code&gt;offset&lt;/code&gt;, respectively.&lt;/p&gt;
+
+&lt;p&gt;  The branch point is guessed by finding the nearest sampled point on the parent to the initial point on the child.  The offset is guessed be measuring the distance between the branch point and initial point on the child.  Starting with these guesses, we run gradient-based optimization to find the pair of values that minimizes the negative log liikelihood.  The gradient w.r.t. these parameters is given in eq (5.9) in Williams and Rasmussen, we only need to derive the expression for the partial derivative of the covariance matrix.  For this, we use automatic differentialtion, using matlab&#39;s support for complex numbers.  The general form to estimate the derivative is
+  &lt;div&gt;
+  [
+    df/dx = \mathcal{IM}{ f(x + h i) } / h + O(h&lt;sup&gt;2&lt;/sup&gt;)
+    ]
+&lt;/div&gt;
+where \(i\) is the imaginary number and \(\mathcal{IM}\) is the imaginary part of the result.  This is superior to finite differences, because it doesn&#39;t suffer loss of precision as the step size (h) decreases, and error decreases quadratically rather than linearly.&lt;/p&gt;
+
+&lt;p&gt;This seems to work relatively well, except that our curve-detection finds multiple curves for the same true curve.  We need some nonmaximal suppression.&lt;/p&gt;
+
+&lt;h2&gt;Open issues&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;handling curves that start behind the parent curve.  Currently negative offsets aren&#39;t supported, because the cubic spline process is only define over the postive reals.&lt;/li&gt;
+&lt;li&gt;partial overap isn&#39;t explicitly penalized in the likelihood.  An edge-based likelihood could resolve this.&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/02/01/work-log"/>
+   <updated>2015-02-01T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/02/01/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;troubleshooting curve tracing.&lt;/p&gt;
+
+&lt;p&gt;Open issues:
+* penalty for two overlapping curves isn&#39;t working
+* some curves are rendered with gaps&lt;/p&gt;
+
+&lt;p&gt;The overlapping curve penalty is because we&#39;re computing the full likelihod wrongly.&lt;/p&gt;
+
+&lt;p&gt;It isn&#39;t totally clear that maximum marginal likelihood is giving any benefit over maximum posterior.&lt;/p&gt;
+
+&lt;h2&gt;TODO:&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;retrain foreground classifier - train stems and leafs independently&lt;/li&gt;
+&lt;li&gt;convert pyramid from product to mixture&lt;/li&gt;
+&lt;li&gt;after each extension, optimize in second view, too&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;cur_ml: -110656.052753, new_ml: -110601.811488
+new_prior: -31.366151
+new_likelihood: -110579.409726
+hess: -19.128193&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/28/work-log"/>
+   <updated>2015-01-28T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/28/work-log</id>
+   <content type="html">
+
+&lt;div class=&quot;meta-info&quot;&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Project&lt;/th&gt;
+        &lt;td&gt;&lt;a href=&quot;/ksimek/research/projects/fire.html&quot;&gt;FIRE&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Subproject&lt;/th&gt;
+        &lt;td&gt;Piecewise Linear Clustering (tests)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;th&gt;Working path&lt;/th&gt;
+        &lt;td&gt;projects/&amp;#8203;fire/&amp;#8203;trunk/&amp;#8203;src/&amp;#8203;piecewise_linear/&amp;#8203;test&lt;/td&gt;
+    &lt;/tr&gt;
+
+    &lt;tr&gt;
+        &lt;th&gt;SVN Revision&lt;/th&gt;
+        &lt;td&gt;unknown (see text)&lt;/td&gt;
+    &lt;/tr&gt;
+
+
+&lt;/table&gt;
+
+    Unless otherwise noted, all filesystem paths are relative to the &quot;Working path&quot; named above.
+&lt;/div&gt;
+
+
+&lt;p&gt;Finished implementing hessian approximation, and laplace approximation.  Two methods for laplace:&lt;/p&gt;
+
+&lt;h3&gt;Method 1:&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;estimate hessian in reduced model space.  Assume diagonal model (not the case)&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Result:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;![](/ksimek/research/img/2015-01-28-method3_result.png)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;Method 2&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Take hessian from method 1&lt;/li&gt;
+&lt;li&gt;project into observation space.  Keep block diagonals only.&lt;/li&gt;
+&lt;li&gt;project back into reduced model space.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;  &lt;img src=&quot;/ksimek/research/img/2015-01-28-fail_hess_method2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h3&gt;Method 3:&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Take hessian from method 1&lt;/li&gt;
+&lt;li&gt;project into observation space.  Keep &lt;em&gt;first two block diagonals&lt;/em&gt; only.&lt;/li&gt;
+&lt;li&gt;project back into reduced model space.&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;&lt;img src=&quot;/ksimek/research/img/2015-01-28-method1_result.png&quot; alt=&quot;&quot; /&gt;
+&lt;img src=&quot;/ksimek/research/img/2015-01-28-method3_result2.png&quot; alt=&quot;&quot; /&gt;
+&lt;img src=&quot;/ksimek/research/img/2015-01-28-method3_result3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Method 2 is the same as mothod 1, except the first off-block-diagonals are kept in addition to the block diagonal.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/27/work-log"/>
+   <updated>2015-01-27T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/27/work-log</id>
+   <content type="html">&lt;p&gt;Continuing blind curve fitting.&lt;/p&gt;
+
+&lt;p&gt;smoothing proposal. Optimizing proposal.  extending proposal&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Implementing single-view tree fitting</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/26/work-log"/>
+   <updated>2015-01-26T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/26/work-log</id>
+   <content type="html">&lt;p&gt;Implemented generic kernel function&lt;br/&gt;
+Implemented and tested derivative of generic kernel function&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Current: step through blind_tree_fitting.m&lt;/p&gt;
+
+&lt;p&gt;MAP point estimation is failing.  Is this because we&#39;re using the wrong prior?&lt;/p&gt;
+
+&lt;p&gt;Next: Train new prior&lt;/p&gt;
+
+&lt;p&gt;Then: resume stepping through blind_tree_fitting.m&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Current: train new prior&lt;/p&gt;
+
+&lt;p&gt;done.  implemented with analytical gradient; converges in 25 iterations.&lt;/p&gt;
+
+&lt;p&gt;Saved to &#39;training_output/single_view_prior.mat&#39;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Current: step through blind_tree_fitting.m&lt;/p&gt;
+
+&lt;p&gt;MAP point estimation is failing.  Is this because we&#39;re using the wrong prior?&lt;/p&gt;
+
+&lt;p&gt;We had omitted the noise variance.  Also, matrix transpose error.&lt;/p&gt;
+
+&lt;p&gt;TODO: incorporate mean.&lt;/p&gt;
+
+&lt;p&gt;Later:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Test derivative estimation;  normal direction estimation
+    plot each curve, and tangent/normal
+&lt;/code&gt;&lt;/pre&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/25/work-log"/>
+   <updated>2015-01-25T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/25/work-log</id>
+   <content type="html">
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Tree fitting - refactor</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/25/reference"/>
+   <updated>2015-01-25T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/25/reference</id>
+   <content type="html">&lt;pre&gt;&lt;code&gt;% READ INPUT TREE FROM GROUND TRUTH FILE
+gt_fname = &#39;test_input/gt.txt&#39;;
+map1_fname = &#39;test_input/001_med_map.jpg&#39;;
+view1_index = 1;
+% scale and shift transform
+dx = 0.75; 
+dy = 0.25;
+scale = [diag([0.25/0.12, -0.25/0.12]) [dx*0.25/0.12; (-397+dy)*-0.25/0.12]];
+tree1 = construct_tree_from_ground_truth(gt_fname, map1_fname, view1_index, scale);
+
+% initialize search 
+initial_tree = tree1;
+initial_tree.pts = []; % (i.e. use prior mean)
+
+% load training and prior models
+likelihood = load(&#39;training_output/likelihood.mat&#39;)
+prior_params = load(&#39;training_output/prior.mat&#39;);
+pert_prior = construct_tree_perturbation_prior(tree, F, prior_params);
+% soften prior
+pert_prior.D = pert_prior.D * 36;
+% read evidence
+data_map = imread(&#39;test_input/002_med_map.jpg&#39;);
+% run fitting
+ll_temperature = 3000;
+ll_pyramid_levels = 3;
+max_iterations = 30e3;
+init_search_size = [];
+ndims = 60;
+out_tree = fit_tree_perturbation(initial_tree, likelihood, ...
+                                 pert_prior, data_map,  ...
+                                 ndims, ll_temperature,  ...
+                                 ll_pyramid_levels, max_iterations,  ...
+                                 init_search_size);
+&lt;/code&gt;&lt;/pre&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/22/work-log"/>
+   <updated>2015-01-22T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/22/work-log</id>
+   <content type="html">&lt;p&gt;Next up: finding trees in single image.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;User specifies number of branches&lt;/li&gt;
+&lt;li&gt;Prior over branch width in pixels&lt;/li&gt;
+&lt;li&gt;Weak prior over length (with hard bounds)&lt;/li&gt;
+&lt;li&gt;Don&#39;t do anything clever&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Tasks&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Train new likelihood forcing curves to be constant-width.&lt;/li&gt;
+&lt;li&gt;Generate proposals from skeletonized foreground.&lt;/li&gt;
+&lt;li&gt;Optimize likelihood of proposal by extending/shortening.&lt;/li&gt;
+&lt;li&gt;Extend, find MAP, estimate ML
+&lt;strong&gt; Assume isotropic likelihood hessian
+&lt;/strong&gt; Known prior hessian
+** Laplace approximation&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Skeleton to proposal&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;pick long chains (weight by length).  Extend by connecting chains if below angle threshold&lt;/li&gt;
+&lt;li&gt;convert to medial axis form, place in image&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;Evaluate proposal&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;optimize posterior&lt;/li&gt;
+&lt;li&gt;compute ml&lt;/li&gt;
+&lt;li&gt;maximize ml by repeatedly extending, optimizing, computing ml&lt;/li&gt;
+&lt;li&gt;maximize ml by repeatedly shortening, optimizing, computing ml&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;propose branching&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;optimize Laplace-approximated ml over  (a) branch distance; (b) branch position&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Work Log</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/21/work-log"/>
+   <updated>2015-01-21T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/21/work-log</id>
+   <content type="html">&lt;p&gt;Documenting training and fitting process.&lt;/p&gt;
+
+&lt;p&gt;Constructing cubic spline prior model for training.&lt;/p&gt;
+
+&lt;p&gt;Retraining using cubic spline model.  It appears to not be preferable to the squared exponential.  This is probably because the spline minimizes a bending energy, and after projections, significant bends could appear due to foreshortening.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Fitting the Deformation Model</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/21/reference"/>
+   <updated>2015-01-21T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/21/reference</id>
+   <content type="html">&lt;p&gt;Fitting the deformation model:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;matlab&quot;&gt;  
+    &lt;span class=&quot;c&quot;&gt;% pass 1: construct the decomposed prior and initial model&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;trained_prior&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;trained_lik_bg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;trained_lik_fb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prep_training&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;...)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tree_curves&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parents&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;branch_distance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;... % read from ground truth (or hack them out of prep_training)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;widths&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;... % read fg probability map; threshold; construct distance transform, draw curves over it, grab widths (or hack them out of prep_training)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;F&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;... % read two cameras and convert to fundamental matrix (or hack it out of prep_Training)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;fg_prob_map&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;imread&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;...) ; %(data)&lt;/span&gt;
+
+
+    &lt;span class=&quot;n&quot;&gt;max_iterations&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;500&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;temperature&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x_initial&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_optim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;trained_prior&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;trained_lik_bg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;trained_lik_fg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tree_curves&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parents&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;branch_distance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;widths&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fg_prob_map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;max_iterations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;temperature&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[],&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[],[],[],&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;200&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[]);&lt;/span&gt;
+
+    &lt;span class=&quot;c&quot;&gt;% pass 2: do fitting&lt;/span&gt;
+
+    &lt;span class=&quot;c&quot;&gt;% to combat overfitting:&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;prior_temperature&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;36&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 
+
+    &lt;span class=&quot;c&quot;&gt;% optional: use only first N eigenvectors&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;ndims&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;60&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;likelihood_scale&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;% Third pyramid level, i.e. 1/2^(3-1) = 0.25&lt;/span&gt;
+
+    &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x_final&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_optim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;trained_prior&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;trained_lik_bg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;trained_lik_fg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tree_curves&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parents&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;branch_distance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;widths&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fg_prob_map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;max_iterations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;temperature&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Kc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prior_temperature&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ndims&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;likelihood_scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_initial&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;likelihood_scale&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;% full resolution&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x_final&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;test_optim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;trained_prior&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;trained_lik_bg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;trained_lik_fg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tree_curves&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parents&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;branch_distance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;widths&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fg_prob_map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;max_iterations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;temperature&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Kc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prior_temperature&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ndims&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;likelihood_scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x_initial&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;plot_curves&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mat2cell&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;reshape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mu&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;U&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x_final&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[]),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lengths&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;For trained prior parameters, see &lt;a href=&quot;/ksimek/research/2015/01/11/reference/&quot;&gt;Trained Prior Parameters&lt;/a&gt; reference post.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Articulated gaussian processes (part 2)</title>
@@ -800,7 +1932,11 @@ branch_linear_variance: 0.0485
    <link href="http://vision.sista.arizona.edu/ksimek/research/2015/01/11/reference"/>
    <updated>2015-01-11T00:00:00-07:00</updated>
    <id>http://vision.sista.arizona.edu/ksimek/research/2015/01/11/reference</id>
-   <content type="html">&lt;p&gt;Training only local prior w/ noise_variance fixed at 1.0:&lt;/p&gt;
+   <content type="html">&lt;h2&gt;40-degree model&lt;/h2&gt;
+
+&lt;p&gt;Below are results for training a deformation model for a 40 degree rotation.&lt;/p&gt;
+
+&lt;p&gt;Training only local prior w/ noise_variance fixed at 1.0:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;        noise_variance: 1
      geodesic_variance: 15.9174
@@ -846,6 +1982,26 @@ branch_linear_variance: 0.1079
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This model moves all epipolar prior variance into the iid epipolar_variance variables. Also the local prior&#39;s offset variance has been moved into the deformation variance, geodesic_variance, while shortening the scale.&lt;/p&gt;
+
+&lt;h2&gt;10-degree model&lt;/h2&gt;
+
+&lt;p&gt;Below are results for training a deformation model for a 10 degree rotation.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;     epipolar_variance: 4.5465
+    euclidean_variance: 0.0422
+       euclidean_scale: 4.2001e-07
+        noise_variance: 1
+     geodesic_variance: 2.0824
+        geodesic_scale: 5.9410e-04
+branch_linear_variance: 0.0064
+ branch_const_variance: 0.6186
+       linear_variance: 0
+        const_variance: 1.1533e-21
+
+        ll: -2087.07 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I suspect overfitting here.  Fitting works best when scaling prior variance by 36.&lt;/p&gt;
 </content>
  </entry>
  

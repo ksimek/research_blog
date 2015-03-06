@@ -1,0 +1,307 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Projecting Prior and Backprojecting Posterior &larr; </title>
+   <meta name="author" content="Kyle Simek" />
+
+   <link rel="start" href="/ksimek/research/" />
+
+	
+	
+    <link rel="shortcut icon" href="/ksimek/research/favicon.ico">
+
+	
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/syntax.css" type="text/css" />
+
+   <!-- Jquery UI CSS --!>
+   <link media="screen" rel="stylesheet" href="/ksimek/research/css/ui-smoothness/jquery-ui-1.8.22.custom.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link media="screen" rel="stylesheet" href="/ksimek/research/assets/themes/mark-reid/css/screen.css" type="text/css" />
+
+   <!-- Handheld CSS -->
+   <link media="handheld, only screen and (max-width: 480px), only screen and (max-device-width: 480px)" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" type="text/css" rel="stylesheet" />
+
+
+<!--[if IEMobile]>
+<link rel="stylesheet" type="text/css" href="/ksimek/research/assets/themes/mark-reid/css/handheld.css" media="screen" />
+<![endif]-->
+
+   <!-- Mathjax Javascript -->
+   <script type="text/javascript"
+     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+   </script>
+
+   <!-- three.js Javascript -->
+    <script src="/ksimek/research/js/jquery.js"></script>
+    <script src="/ksimek/research/js/jquery-ui-1.8.22.custom.min.js"></script>
+
+    
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+                $('#javascript_error').hide();
+        });
+    </script>
+
+
+
+</head>
+<body id="">
+<div id="site">
+  
+  <div id="header">
+    <h1>
+    	<a href="/ksimek/research/" title="KLS Research Blog">KLS Research Blog</a>
+    	<span class="byline">&larr; <a href="/ksimek/research/">Nothing to see here...</a></span>
+    </h1>
+    <ul class="nav">
+      <li><a class="home" href="/ksimek/research/">Home</a></li>
+      <li><a href="/ksimek/research/about.html">About</a></li>
+      <li><a href="/ksimek/research/contact.html">Contact</a></li>
+      <li><a  href="/ksimek/research/archive.html">Archive</a></li>
+      <li><a  href="/ksimek/research/categories.html">Categories</a></li>
+      <li><a  href="/ksimek/research/projects">Projects</a></li>
+      <li><a  href="/ksimek/research/events">Events</a></li>
+      <li><a  href="/ksimek/research/feeds.html"><img src="/ksimek/research/img/feed-icon.gif" /></a></li> 
+      <li><a  href="/ksimek/research/pomodoro.html"><img src="/ksimek/research/img/pom.png" /></a></li> 
+
+    </ul>
+  </div>
+
+
+  
+<div id="page" class="article">
+	
+  
+  
+    
+
+
+  <h1 class="title">
+        [Reference] Projecting Prior and Backprojecting Posterior
+    </h1>
+
+  <div class="date emphnext">
+    February 24, 2015
+      
+ 
+  </div>
+    
+
+
+  
+    <p>We have existing machinery that lets us find the optimal (maximum a-posteriori) 2D curve tree, given a 2D Gaussian prior and a foreground probability map.</p>
+
+<p>We'd like to use that to perform tracking when we know a 3D Gaussian distribution over the tree position, given previous evidence.</p>
+
+<p>Given: \(p(x_n | y_{1:n-1}) \)</p>
+
+<p>Estimate: \(p(x_n | y_{1:n}) \)</p>
+
+<ol>
+<li>Rotate/scale the 3D prior to be aligned with the image plane in pixel coordinates, i.e. u,v, and depth</li>
+<li>Estimate the marginal posterior in (u,v) coordinates using our warping code</li>
+<li>Estimate the depth terms of the posterior analytically</li>
+<li>Un-rotate and unscale the posterior into world space.</li>
+</ol>
+
+
+<h2>Step 1</h2>
+
+<p>Let \(p(x_n | y_1, ..., y_{n-1})\) be the prior of \(x_n)\), conditioned on all previous data.  At the current prior mean, \(\mu\), the projection function \(\pi(x)\) has Jacobian, \(J(\mu)\), which can be decomposed using RQ decomposition into \(J = (R 0) Q\), where Q is a rotation and R is square, upper triangular, and nonsingular.  This corresponds to rotating to face the camera, followed by scaling and/or shearing corresponding to foreshortening at the given depth.  The projection function can be then approximated using taylor series expansion:</p>
+
+<div>
+\[
+  \pi(x) = \pi(\mu) + (R \,| \,0) Q (x - \mu)
+  \]
+</div>
+
+
+<p>We can project the 3D prior to 2D using this transformation:</p>
+
+<div>
+\[
+  \mathcal{N}(\mu_{2D}, A^{-1}_{2D}) = \mathcal{N}(\pi(\mu_{3D}), J A_{3D}^{-1} J^\top)
+  \]
+</div>
+
+
+<p>Here \(A_{2D}\) and \(A_{3D}\) are precision matrices.</p>
+
+<h2>Step 3</h2>
+
+<p>For this section, let \(\mu = \mu_{2D}\) as derived above, let \(A = Q A_{3D} Q^\top\)  and let \(x' = \pi(x)\) be the projected point.
+Let \(p(y_n | x'_n) = \mathcal{N}([R^{-1} \; 0]^\top \mu_L, \, [R^{-1} \;  0]^\top L^{-1} [R^{-1} \; 0] )\) be the image likelihood in 3D space, where \(\mu_L\) is \((x'_1, x'_2)^\top\), and \(L\) is a 2x2 precision matrix.  Let \(L' = R^{-\top} L R^{-1}\) and \(\mu'_L = R^{-1} \mu_L\) Running warping in step 2 gives us the hessian \(H\) of the marginal in-plane posterior.  This is the negative marginal posterior covariance for the (u,v) space.  Since the likelihood is uninformative in the dpeth direction, the deriving the full posterior covariance, (Z), is straightforward:</p>
+
+<div>
+\begin{align}
+      Z &= A + \left( \begin{array}{cc}L' & 0 \\ 0 & 0\end{array} \right)  \\
+       &= \left ( \begin{array}{cc} -H & A_{1:2,3} \\ A_{3,1:2} & A_{3,3} \end{array} \right )
+\end{align}
+</div>
+
+
+<p>Warping also gives us the marginal posterior mean \(\pi_x, \pi_y\), in the image space.  Let \(\pi'_x = \pi(\mu) + R^{-1} \pi_x\) and \(\pi'_y = R^{-1} \pi_y\) be the marginal posterior mean in camera space.  Deriving \(\pi'_z\) takes a few steps  (primes are omitted below, all quantities are assumed to be in camera space)</p>
+
+<div>
+\begin{align}
+      \mathbf{\pi} &= \left[ A + \left( \begin{array}{cc}L & 0 \\ 0 & 0\end{array} \right)\right]^{-1} \left [ A \mu + \left ( \begin{array}{c}L \mu_L \\ 0\end{array} \right ) \right ]  \\
+      \mathbf{\pi} &= Z^{-1} \left [ A \mu + \left ( \begin{array}{c}L \mu_L \\ 0\end{array} \right ) \right ]  \\
+      Z \mathbf{\pi} &= \left [ A \mu + \left ( \begin{array}{c}L \mu_L \\ 0\end{array} \right ) \right ]  \\
+\end{align}
+</div>
+
+
+<p>Let \(A = (\mathbf{a_1}  \mathbf{a_2} \mathbf{a_3} )^\top \) be the rows of A.   Omitting all but the third row gives:</p>
+
+<div>
+\begin{align}
+      z_{31} \pi_x + z_{32} \pi_y + z_{33} \pi_z &= \mathbf{a_3^\top} \mu \\
+        \pi_z &= (\mathbf{a}^\top_3 \mu - \pi_x z_{31} - \pi_y z_{32}) / z_{33} 
+\end{align}
+</div>
+
+
+<p>Observing that \(z_{3i} = a_{3i}\),</p>
+
+<div>
+\[
+\begin{align}
+        \pi_z &= a_{33}^{-1} \left ( \mathbf{a}^\top_3 \left (\mu - \left ( \begin{array}{c} \pi_x \\ \pi_y \\ 0\end{array}\right)\right)\right)
+\end{align}
+\]
+</div>
+
+
+<p>Written compactly:</p>
+
+<div>
+\begin{align}
+        \pi_z &= \mu_3 + a_{33}^{-1} a_{3,1:2}(\mu_{1:2} - \pi_{1:2});
+\end{align}
+</div>
+
+
+<p>Testing in matlab:</p>
+
+<pre><code>A = rand(3,3); A = A * A';
+L = rand(2,2); L = L * L';
+mu = randn(3,1);
+mu_L = randn(2,1);
+pi = inv(A + [L zeros(2,1);0 0 0]) * (A * mu + [L*mu_L; 0]);
+true_pi_z = pi(3);
+test_pi_z = mu(3) + A(3,1:2)*(mu(1:2) - pi(1:2))/A(3,3);
+err = test_pi_z - true_pi_z
+
+err =
+
+  -2.2204e-16
+</code></pre>
+
+<p>It remains to rotate \(\mathbf{\pi}\) and \(A\)  by \(Q^\top\) to convert back to world space.</p>
+
+      <address class="signature">
+        Posted by
+        <a class="author" href="/ksimek/research/">Kyle Simek</a> 
+      </address>
+  
+
+
+  
+  
+  <div class="prev-next">
+    <a href="/ksimek/research/2015/02/25/work-log" class="next" title="Work Log">Work Log &rarr;</a>
+  
+  
+    <a href="/ksimek/research/2015/02/20/work-log" class="prev" title="Work Log">&larr; Work Log</a>
+  
+  </div>
+  <div class="clearer"> </div>
+
+<div class="post-sharing">
+ 
+
+</div>
+
+
+
+
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_developer = 1;
+    var disqus_shortname = 'klsresearch'; // required: replace example with your forum shortname
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+
+  
+</div><!-- End Page -->
+
+
+
+  
+  <div id="footer">
+  	<address>
+  		<span class="copyright">
+  			Content by <a href="/ksimek/research/about.html">Kyle Simek</a>. Original design by 
+  			<a href="http://mark.reid.name/">Mark Reid</a>
+  			<br/>
+  			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+  		</span>
+  		<span class="engine">
+  			Powered by <a href="http://github.com/mojombo/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+  		</span>
+  	</address>
+  </div>
+  
+</div>
+
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+
+  
+
+
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33692744-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>
+

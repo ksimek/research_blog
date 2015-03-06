@@ -98,7 +98,11 @@
 
 
   
-    <p>Training only local prior w/ noise_variance fixed at 1.0:</p>
+    <h2>40-degree model</h2>
+
+<p>Below are results for training a deformation model for a 40 degree rotation.</p>
+
+<p>Training only local prior w/ noise_variance fixed at 1.0:</p>
 
 <pre><code>        noise_variance: 1
      geodesic_variance: 15.9174
@@ -144,6 +148,26 @@ branch_linear_variance: 0.1079
 </code></pre>
 
 <p>This model moves all epipolar prior variance into the iid epipolar_variance variables. Also the local prior's offset variance has been moved into the deformation variance, geodesic_variance, while shortening the scale.</p>
+
+<h2>10-degree model</h2>
+
+<p>Below are results for training a deformation model for a 10 degree rotation.</p>
+
+<pre><code>     epipolar_variance: 4.5465
+    euclidean_variance: 0.0422
+       euclidean_scale: 4.2001e-07
+        noise_variance: 1
+     geodesic_variance: 2.0824
+        geodesic_scale: 5.9410e-04
+branch_linear_variance: 0.0064
+ branch_const_variance: 0.6186
+       linear_variance: 0
+        const_variance: 1.1533e-21
+
+        ll: -2087.07 
+</code></pre>
+
+<p>I suspect overfitting here.  Fitting works best when scaling prior variance by 36.</p>
 
       <address class="signature">
         Posted by
