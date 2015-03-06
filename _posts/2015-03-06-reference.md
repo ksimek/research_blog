@@ -15,8 +15,13 @@ Let the vector \\(\\mathbf{t}\_r\\) represent a rotation of angle \\(\\|\\mathbf
   
 <div>
 \[
-    x_h = K * R_\mathbf{t}_r * R * (x - t) .
+    \mathbf{x}_h = K * R_\mathbf{t}_r * R * (\mathbf{x} - \mathbf{t}_0) .
   \]
 </div>
 
-Here, \\(dR\\) is 
+We seek the jacobian of this transformation centered on the current camera:
+<div>
+\[
+    \frac{\partial x_h}{\partial (f_x, f_y, s, x_0, y_0, \mathbf{t}_r, \mathbf{t}_0 }x_h = K * R_\mathbf{t}_r * R * (x - t) .
+  \]
+</div>
