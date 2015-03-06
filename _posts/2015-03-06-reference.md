@@ -51,11 +51,13 @@ where  \\(\mathbf{X}\_c = R (\mathbf{X} - \mathbf{t}\_0)\\) is the point in came
 Deriving \\(J\_{\mathbf{t}\_0}\\) and \\(J\_K\\)
 -------------------------------------------------
 
-The Jacobian w.r.t. translation is straightforward:
+The other derivatives are straightforward to derive.
+
+The Jacobian w.r.t. translation is:
 
 <div>
 \[
-    J\_{\mathbf{t}\_0} = -K R \operatorname{diag}(\mathbf{t}_0)
+    J\_{\mathbf{t}\_0} = -K R 
   \]
 </div>
 
