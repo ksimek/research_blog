@@ -4,13 +4,84 @@
  <title>KLS Research Blog</title>
  <link href="http://vision.sista.arizona.edu/ksimek/research/atom.xml" rel="self"/>
  <link href="http://vision.sista.arizona.edu/ksimek/research"/>
- <updated>2015-03-06T13:58:29-07:00</updated>
+ <updated>2015-03-07T19:31:29-07:00</updated>
  <id>http://vision.sista.arizona.edu/ksimek/research</id>
  <author>
    <name>Kyle Simek</name>
    <email>ksimek@email.arizona.edu</email>
  </author>
 
+ 
+ <entry>
+   <title>Deriving likelihood of camera parameters</title>
+   <link href="http://vision.sista.arizona.edu/ksimek/research/2015/03/07/reference"/>
+   <updated>2015-03-07T00:00:00-07:00</updated>
+   <id>http://vision.sista.arizona.edu/ksimek/research/2015/03/07/reference</id>
+   <content type="html">&lt;p&gt;It occurred to me that naively doing camera fitting causes strong correlations between camera pose and reconstruction position.  Originally, I planned on alternating between optimizing the conditional curve density \(p(x_i | y_i, c_i)\)  and the conditional camera density, \(p(c_i | y_i, x_i)\).  The problem here is that the optimal curve \(x_i\) for the current camera will be very close to the evidence \(y_i\), so optimizing the camera will only move the curve slightly.  We get into a situation where we move the camera slightly, which allows us to move the curve slightly, which allows us to move the curve slightly, etc. etc.  This is analogous to the problem in Gibbs sampling with strongly correlated variables, and like there, the solution is to integrate out one of the correlated variables.&lt;/p&gt;
+
+&lt;p&gt;We should be optimizing \(p(c_i | Y)\) instead of \( p(c_i | x_i, Y)\).  For now, we&#39;ll assume the prior over \(c_i\) is flat, so this reduces to optimizing the likelihood function \(p(Y | c_i) \).  Let \(Y_- = y_{1:i-1}\) and let \(Y_+ = y_{i+1:n}\)&lt;/p&gt;
+
+&lt;div&gt;
+\[
+  \begin{align}
+    p(Y | c_i) &amp;= \int p(y_i | x_i, c_i) p(x_i | x_{i-1}, x_{i+1}) p(Y_- | x_{i-1}) p(Y_+ | x_{i+1}) p(x_{i-1}, x_{i+1}) dx_i dx_{i-1} dx_{i+1} \\
+    &amp;\propto \int p(y_i | x_i, c_i) p(x_i | x_{i-1}, x_{i+1}) p(x_{i-1}, x_{i+1} | Y_-, Y_+) dx_i dx_{i-1} dx_{i+1} \\
+    &amp;\approx\int p(y_i | x_i, c_i) p(x_i | x_{i-1}, x_{i+1}) p(x_{i-1}, x_{i+1}| Y)  dx_i dx_{i-1} dx_{i+1} \\
+  \end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Below are the definitions of the terms above.&lt;/p&gt;
+
+&lt;div&gt;
+\[
+\begin{align}
+    p(x_{i-1}, x_{i+1} | Y) &amp;= \mathcal{N}(\mu_*, \Sigma_*) \\
+    p(x_i | x_{i-1}, x_{i+1}) &amp;= \mathcal{N}(\mu_i, \Sigma_i) \\
+    p(y_i | x_i, c_i) &amp;= \mathcal{N}(\mu_y, \Sigma_y) \\
+    \mu_i &amp;= \mu_0 + A x_\pm \\
+    x_\pm &amp;= \left ( \begin{array}{c} x_{i-1} \\ x_{i+1}\end{array} \right ) \\
+    A &amp;= K_* K_{(i-1)(i+1)}^{-1}  \\
+    \Sigma_i &amp;= K_i - A * K_*^\top \\
+    \mu_y &amp;= d + J x_i \\
+    d &amp;= \pi_c(\mu_i) - J \mu_i \\
+\end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Here, \(\mu_0\) is the 3D prior mean, \(\pi_c(X)\) is the projection of 3D point \(X\),  \(J_c\) is the Jacobian of \(\pi_c\) centered at \(\mu_i\), \(\Sigma_*\) is the posterior covariance of \((x_{i-1}, x_{i+1})\), \(\Sigma_y\) is the likelihood covariance, and \(K_*\) is the prior cross covariance between \(x_i\) and \((x_{i-1}, x_{i+1})\).&lt;/p&gt;
+
+&lt;p&gt;The integral above is a convolution that represents the sum of random variables.  We represent this sum below, where \(\epsilon_M \sim \mathcal{N}(0, M) \).&lt;/p&gt;
+
+&lt;div&gt;
+\[
+  \begin{align}
+    Y | c_i &amp;= \mu_y + \epsilon_y \\
+            &amp;= d + J x_i + \epsilon_y \\
+            &amp;= (\pi_c(\mu_i) - J \mu_i) + J (\mu_i + \epsilon_i ) + \epsilon_y \\
+            &amp;= \pi_c(\mu_i) + J\epsilon_i + \epsilon_y \\
+            &amp;= \mathcal{N} \left (\pi_c(\mu_i), J \Sigma_i J^\top + \Sigma_y \right ) \\
+  \end{align}
+\]
+&lt;/div&gt;
+
+
+&lt;p&gt;Both the covariance and prior depend on the camera (because the camera determines \(\Sigma_y\)), but if we assume the covariance is nearly isotropic, maximizing the expression above is equivalent to minimizing the norm of the residuals, \(| Y - \pi_c(\mu_i) |\).&lt;/p&gt;
+
+&lt;p&gt;Recall that we never explicitly have an expression for the data Gaussian, so Y isn&#39;t known.  We could derive this from the posterior and the prior, but a simple approximation is to just use the posterior mean, under the weak assumption that the likelihood is much more peaked than the prior.  The optimization procedure is then:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Find the maximum posterior of the \(x_{i+1}\), \(x_i\) and \(x_{i-1}\) (from Kalman smoother step).&lt;/li&gt;
+&lt;li&gt;Predict the current curve \(x_i\), given the only the adjacent curves.&lt;/li&gt;
+&lt;li&gt;Find the camera that minimizes the residual between the maximum posterior and the predicted curve using nonlinear least squares (derived in yesterday&#39;s post).&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;In practice, isotropism isn&#39;t necessarily a good assumption,  so we can transform the residuals by the square-root inverse covariance before evaluating the error.  The square root and inverse operations will get expensive if performed at each iteration, so we can either only update it every Nth iteration, but my intuitions says the isotropic assumption should be good enough.  It would be nice to have a better argument for this.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Camera refinement</title>
