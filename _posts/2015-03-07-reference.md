@@ -31,14 +31,27 @@ Below are the definitions of the terms above.
     p(x_{i-1}, x_{i+1} | Y) &= \mathcal{N}(\mu_*, \Sigma_*) \\
     p(x_i | x_{i-1}, x_{i+1}) &= \mathcal{N}(\mu_i, \Sigma_i) \\
     p(y_i | x_i, c_i) &= \mathcal{N}(\mu_y, \Sigma_y) \\
-    \mu_i = \mu_0 + A \left ( \begin{align}{c} x_{i-1} & x_{i+1}\end{align} \right ) \\
-    A &= \K_* \Sigma_{(i-1)(i+1)}^{-1}  \\
-    \Sigma_i &= \Sigma_i - A * \K_*^\top \\
+    \mu_i &= \mu_0 + A x_\pm \\
+    x_\pm &= \left ( \begin{align}{c} x_{i-1} & x_{i+1}\end{align} \right ) \\
+    A &= \K_* \K_{(i-1)(i+1)}^{-1}  \\
+    \Sigma_i &= K_i - A * \K_*^\top \\
     \mu_y &= d + J x_i \\
     d &= \pi_c(\mu_i) - J \mu_i \\
 \end{align}
 \]
 </div>
 
-Here, \\(\pi\_c(X)\\) is the projection of 3D point \\(X\\),  \\(J\_c\\) is the Jacobian of \\(\pi\_c\\) centered at \\(\mu\_i\\), \\(\Sigma\_\*\\) is the posterior covariance of \\((x\_{i-1}, x\_{i+1})\\), 
-    \\(\Sigma\_y\\) is the likelihood covariance, and \\(\Sigma\_\*\\) is the cross covariance between \\(x\_i\\) and \\((x\_{i-1}, x\_{i+1})\\).
+Here, \\(\mu_0\\) is the 3D prior mean, \\(\pi\_c(X)\\) is the projection of 3D point \\(X\\),  \\(J\_c\\) is the Jacobian of \\(\pi\_c\\) centered at \\(\mu\_i\\), \\(\Sigma\_\*\\) is the posterior covariance of \\((x\_{i-1}, x\_{i+1})\\), \\(\Sigma\_y\\) is the likelihood covariance, and \\(\K\_\*\\) is the prior cross covariance between \\(x\_i\\) and \\((x\_{i-1}, x\_{i+1})\\).
+
+The integral above is a convolution that represents the sum of random variables.  We represent this sum below, where \\(\epsilon_M \sim \mathcal{N}(0, M) \\).
+
+<div>
+\[
+  \begin{align}
+    Y | c_i &= d + J x_i + \epsilon_Y \\
+            &= (\pi_c(\mu_i) - J \mu_i) + J (\mu_i + \epsilon_i) + \epsilon_Y \\
+            &= (\pi_c(\mu_i) + J\epsilon_i + \epsilon_Y \\
+            = \mathcal{N}(\pi_c(\mu_i), J \Sigma_i J^\top + \Sigma_y)
+  \end{align}
+\]
+</div>
