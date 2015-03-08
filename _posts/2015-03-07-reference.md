@@ -16,8 +16,29 @@ We should be optimizing \\(p(c\_i | Y)\\) instead of \\( p(c\_i | x\_i, Y)\\).  
 <div>
 \[
   \begin{align}
-    p(Y | c_i) &= \int p(y_i | x_i, c_i) p(x_i | x_{i-1} x_{i+1}) p(Y_- | x_{i-1}) p(x_{i-1}) p(Y_+ | x_{i+1}) p(x_{i+1}) dx_i dx_{i-1} dx_{i+1} \\
-    &\propto \int p(y_i | x_i, c_i) p(x_i | x_{i-1} x_{i+1}) p(x_{i-1} | Y_-) p(x_{i+1} | Y_+) dx_i dx_{i-1} dx_{i+1} \\
+    p(Y | c_i) &= \int p(y_i | x_i, c_i) p(x_i | x_{i-1}, x_{i+1}) p(Y_- | x_{i-1}) p(Y_+ | x_{i+1}) p(x_{i-1}, x_{i+1}) dx_i dx_{i-1} dx_{i+1} \\
+    &\propto \int p(y_i | x_i, c_i) p(x_i | x_{i-1}, x_{i+1}) p(x_{i-1}, x_{i+1} | Y_-, Y_+) dx_i dx_{i-1} dx_{i+1} \\
+    &\approx\int p(y_i | x_i, c_i) p(x_i | x_{i-1}, x_{i+1}) p(x_{i-1}, x_{i+1}| Y)  dx_i dx_{i-1} dx_{i+1} \\
   \end{align}
 \]
 </div>
+
+Below are the definitions of the terms above.
+
+<div>
+\[
+\begin{align}
+    p(x_{i-1}, x_{i+1} | Y) &= \mathcal{N}(\mu_*, \Sigma_*) \\
+    p(x_i | x_{i-1}, x_{i+1}) &= \mathcal{N}(\mu_i, \Sigma_i) \\
+    p(y_i | x_i, c_i) &= \mathcal{N}(\mu_y, \Sigma_y) \\
+    \mu_i = \mu_0 + A \left ( \begin{align}{c} x_{i-1} & x_{i+1}\end{align} \right ) \\
+    A &= \K_* \Sigma_{(i-1)(i+1)}^{-1}  \\
+    \Sigma_i &= \Sigma_i - A * \K_*^\top \\
+    \mu_y &= d + J x_i \\
+    d &= \pi_c(\mu_i) - J \mu_i \\
+\end{align}
+\]
+</div>
+
+Here, \\(\pi\_c(X)\\) is the projection of 3D point \\(X\\),  \\(J\_c\\) is the Jacobian of \\(\pi\_c\\) centered at \\(\mu\_i\\), \\(\Sigma\_\*\\) is the posterior covariance of \\((x\_{i-1}, x\_{i+1})\\), 
+    \\(\Sigma\_y\\) is the likelihood covariance, and \\(\Sigma\_\*\\) is the cross covariance between \\(x\_i\\) and \\((x\_{i-1}, x\_{i+1})\\).
